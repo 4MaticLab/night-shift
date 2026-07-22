@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前主计划是 [[plans/0015-full-cycle-and-mobile-proof]]：用无章节跳转的完整五夜和 390×844 关键路径，把“完整可玩、手机可玩”变成浏览器证据。
+当前没有 `in_progress` 主计划。下一轮从北极星体验审计中识别新的不满意点，先创建计划，再继续推进。
 
 ## 计划清单
 
@@ -24,7 +24,7 @@
 | [[plans/0012-city-witness-portraits-and-person-dossiers]] | `completed` | `auto` | P0 | 6/6 | 已发布四张人物肖像、晨报会面与渐进人物档案 |
 | [[plans/0013-foglight-district-atlas]] | `completed` | `auto` | P0 | 6/6 | 已发布三张地区版画与渐进雾灯城分区志 |
 | [[plans/0014-four-act-header-triptych-and-ending-tableau]] | `completed` | `manual` | P0 | 6/6 | 已发布交接、夜行、归来与裁决四幕原创画面 |
-| [[plans/0015-full-cycle-and-mobile-proof]] | `in_progress` | `manual` | P0 | 5/6 | 运行全套验证并完成 Git checkpoint 与第十七版发布 |
+| [[plans/0015-full-cycle-and-mobile-proof]] | `completed` | `manual` | P0 | 6/6 | 已发布完整五夜与 390×844 浏览器验收闭环 |
 
 ## 状态规则
 
