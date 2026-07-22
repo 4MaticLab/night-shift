@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
 import { ArrowRight, Check, FileText, Flower2, KeyRound, Link2, RotateCcw, Search } from "lucide-react";
-import { Background, BackgroundVariant, Controls, ReactFlow, type Edge, type Node } from "@xyflow/react";
+import { Background, BackgroundVariant, Controls, Handle, Position, ReactFlow, useNodesState, type Edge, type Node, type NodeProps } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { nightShiftCase } from "@/src/content/case";
 import { getAsset, getNightSealAsset, getPostcardAsset } from "@/src/content/assets";
@@ -22,33 +22,55 @@ import { evidenceRelations } from "@/src/content/relations";
 import { useGameStore } from "@/src/stores/game-store";
 import { canUnlockTrueEnding, type EndingId } from "@/src/lib/game-engine/ending";
 import { formatSleepDuration } from "@/src/lib/game-engine/sleep-session";
-import type { CorrespondenceRecord, SocietyMemoryRecord } from "@/src/lib/game-engine/schema";
+import type { Clue, CorrespondenceRecord, SocietyMemoryRecord } from "@/src/lib/game-engine/schema";
 import { BotanicalSpecimen, PaperCard, qualityCopy, Seal, SocietyCrest } from "./shared";
 
+type EvidenceNode = Node<{ clue: Clue; selected: boolean; focused: boolean; onSelect: (clueId: string) => void }, "evidence">;
+
+function EvidenceNodeCard({ data }: NodeProps<EvidenceNode>) {
+  const { clue, selected, focused, onSelect } = data;
+  return <div className="board-node-wrap"><Handle className="board-connection-handle" type="target" position={Position.Left} isConnectable={false} /><span className="board-node-drag-handle" title="拖动整理证物"><span className="pin" /></span><div role="button" tabIndex={0} aria-pressed={selected} onClick={() => onSelect(clue.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onSelect(clue.id); } }} className={`board-node ${clue.type} ${selected ? "selected" : ""} ${focused ? "focused" : ""}`}><small>{clue.type.toUpperCase()} · 0{clue.chapter}</small><b>{clue.title}</b><p>{clue.summary}</p></div><Handle className="board-connection-handle" type="source" position={Position.Right} isConnectable={false} /></div>;
+}
+
+const evidenceNodeTypes = { evidence: EvidenceNodeCard };
+
+function defaultBoardPosition(index: number) {
+  return { x: 70 + (index % 4) * 240 + (index % 2) * 20, y: 70 + Math.floor(index / 4) * 180 };
+}
+
 export function CaseBoard() {
-  const { unlockedClueIds, confirmedRelations, connectClues } = useGameStore();
+  const { unlockedClueIds, confirmedRelations, boardPositions, connectClues, setBoardPosition, resetBoardPositions } = useGameStore();
   const [selectedClueIds, setSelectedClueIds] = useState<string[]>([]);
+  const [focusedClueId, setFocusedClueId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ kind: "success" | "error"; text: string } | null>(null);
   const available = nightShiftCase.clues.filter((clue) => unlockedClueIds.includes(clue.id));
-  const nodes = useMemo<Node[]>(() => available.map((clue, index) => ({
-    id: clue.id,
-    position: { x: 70 + (index % 4) * 240 + (index % 2) * 20, y: 70 + Math.floor(index / 4) * 180 },
-    data: { label: <button type="button" aria-pressed={selectedClueIds.includes(clue.id)} className={`board-node ${clue.type} ${selectedClueIds.includes(clue.id) ? "selected" : ""}`}><span className="pin" /><small>{clue.type.toUpperCase()} · 0{clue.chapter}</small><b>{clue.title}</b><p>{clue.summary}</p></button> },
-    style: { background: "transparent", border: 0, padding: 0, width: 190 },
-  })), [available, selectedClueIds]);
-  const edges = useMemo<Edge[]>(() => evidenceRelations.flatMap((relation, index) => {
-    if (!confirmedRelations.includes(relation.id) || !relation.clueIds.every((clueId) => unlockedClueIds.includes(clueId))) return [];
-    return [{ id: relation.id, source: relation.clueIds[0], target: relation.clueIds[1], animated: true, label: `推论 0${index + 1}`, style: { stroke: index === 1 ? "#a86158" : "#698d89", strokeWidth: 3 }, labelStyle: { fill: "#e7dcc5", fontSize: 9 } }];
-  }), [confirmedRelations, unlockedClueIds]);
 
-  const selectEvidence = (clueId: string) => {
+  const selectEvidence = useCallback((clueId: string) => {
+    setFocusedClueId(clueId);
     setFeedback(null);
     setSelectedClueIds((current) => {
       if (current.includes(clueId)) return current.filter((id) => id !== clueId);
       if (current.length === 2) return [clueId];
       return [...current, clueId];
     });
-  };
+  }, []);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState<EvidenceNode>(available.map((clue, index) => ({
+    id: clue.id,
+    type: "evidence",
+    position: boardPositions[clue.id] ?? defaultBoardPosition(index),
+    data: { clue, selected: false, focused: false, onSelect: selectEvidence },
+    dragHandle: ".board-node-drag-handle",
+    style: { background: "transparent", border: 0, padding: 0, width: 190 },
+  })));
+
+  useEffect(() => {
+    setNodes((current) => current.map((node) => ({ ...node, data: { ...node.data, selected: selectedClueIds.includes(node.id), focused: focusedClueId === node.id, onSelect: selectEvidence } })));
+  }, [focusedClueId, selectEvidence, selectedClueIds, setNodes]);
+  const edges = useMemo<Edge[]>(() => evidenceRelations.flatMap((relation, index) => {
+    if (!confirmedRelations.includes(relation.id) || !relation.clueIds.every((clueId) => unlockedClueIds.includes(clueId))) return [];
+    return [{ id: relation.id, source: relation.clueIds[0], target: relation.clueIds[1], animated: true, label: `推论 0${index + 1}`, style: { stroke: index === 1 ? "#a86158" : "#698d89", strokeWidth: 3 }, labelStyle: { fill: "#e7dcc5", fontSize: 9 } }];
+  }), [confirmedRelations, unlockedClueIds]);
 
   const submitConnection = () => {
     if (selectedClueIds.length !== 2) {
@@ -65,9 +87,30 @@ export function CaseBoard() {
     setSelectedClueIds([]);
   };
 
-  const selectedClues = selectedClueIds.map((id) => nightShiftCase.clues.find((clue) => clue.id === id)).filter(Boolean);
+  const restoreBoardLayout = () => {
+    resetBoardPositions();
+    setNodes((current) => current.map((node, index) => ({ ...node, position: defaultBoardPosition(index) })));
+  };
 
-  return <div className="board-page"><div className="page-title"><div><p className="eyebrow">CASE BOARD · 证物关系图</p><h2>把城市说过的谎，<br />一根根连起来。</h2></div><p>从案板上选择两件证物，再尝试建立连接。只有彼此作证的事实，才能成为核心推论。</p></div><div className="board-workspace"><div className="board-shell">{nodes.length ? <ReactFlow nodes={nodes} edges={edges} onNodeClick={(_, node) => selectEvidence(node.id)} fitView minZoom={0.5} maxZoom={1.6} proOptions={{ hideAttribution: true }}><Background color="#988d73" gap={28} size={1} variant={BackgroundVariant.Dots} /><Controls showInteractive={false} /></ReactFlow> : <div className="board-empty"><Search /><h3>案件板还很安静</h3><p>完成第一夜调查，林渡带回的证物会出现在这里。</p></div>}</div><aside className="relation-panel"><small>EVIDENCE LINK · {selectedClueIds.length}/2</small><div className="evidence-selection">{selectedClues.length ? selectedClues.map((clue) => <span key={clue?.id}>{clue?.title}</span>) : <p>点击两张证物卡。再次点击可以取消。</p>}</div><button className="connect-evidence" disabled={selectedClueIds.length !== 2} onClick={submitConnection}><Link2 /> 建立证物连接</button>{feedback && <p className={`relation-feedback ${feedback.kind}`} role="status">{feedback.text}</p>}<div className="relation-ledger"><small>核心推论 · {confirmedRelations.length}/3</small>{evidenceRelations.map((relation, index) => { const confirmed = confirmedRelations.includes(relation.id); return <div className={confirmed ? "relation-entry done" : "relation-entry"} key={relation.id}><span>{confirmed ? <Check /> : `0${index + 1}`}</span><div><small>{confirmed ? "CONFIRMED" : "UNRESOLVED"}</small><b>{confirmed ? relation.statement : "未确认推论"}</b></div></div>; })}</div></aside></div></div>;
+  const selectedClues = selectedClueIds.map((id) => nightShiftCase.clues.find((clue) => clue.id === id)).filter(Boolean);
+  const focusedClue = available.find((clue) => clue.id === focusedClueId);
+  const focusedRelations = focusedClue ? evidenceRelations.filter((relation) => confirmedRelations.includes(relation.id) && relation.clueIds.includes(focusedClue.id)) : [];
+
+  return <div className="board-page">
+    <div className="page-title"><div><p className="eyebrow">CASE BOARD · 证物关系图</p><h2>把城市说过的谎，<br />一根根连起来。</h2></div><p>点击阅档并选择证物，拖动留下你的桌面。只有彼此作证的事实，才能成为核心推论。</p></div>
+    <div className="board-workspace">
+      <div className="board-shell">{nodes.length ? <ReactFlow nodes={nodes} edges={edges} nodeTypes={evidenceNodeTypes} onNodesChange={onNodesChange} onNodeDragStop={(_, node) => setBoardPosition(node.id, node.position)} fitView minZoom={0.5} maxZoom={1.6} proOptions={{ hideAttribution: true }}><Background color="#988d73" gap={28} size={1} variant={BackgroundVariant.Dots} /><Controls showInteractive={false} /></ReactFlow> : <div className="board-empty"><Search /><h3>案件板还很安静</h3><p>完成第一夜调查，林渡带回的证物会出现在这里。</p></div>}</div>
+      <aside className="relation-panel" aria-label="证物档案与关系">
+        <div className="board-panel-heading"><small>OPEN DOSSIER · {focusedClue ? `NIGHT 0${focusedClue.chapter}` : "NO FILE"}</small><button type="button" onClick={restoreBoardLayout}><RotateCcw /> 恢复摆放</button></div>
+        {focusedClue ? <article className="clue-dossier" aria-live="polite"><span>{focusedClue.type}</span><h3>{focusedClue.title}</h3><p>{focusedClue.detail}</p><blockquote><small>城市异议</small>“{focusedClue.cityObjection}”</blockquote><div><small>林渡 · 页边批注</small>{focusedClue.marginNote}</div>{focusedRelations.length > 0 && <footer><small>这份证物已经参与作证</small>{focusedRelations.map((relation) => <b key={relation.id}><Link2 /> {relation.statement}</b>)}</footer>}</article> : <div className="clue-dossier empty"><FileText /><p>点击一张证物，展开完整记录。它也会进入下方的连接槽。</p></div>}
+        <div className="evidence-link-heading"><small>EVIDENCE LINK · {selectedClueIds.length}/2</small><span>再次点击可取消</span></div>
+        <div className="evidence-selection">{selectedClues.length ? selectedClues.map((clue) => <span key={clue?.id}>{clue?.title}</span>) : <p>选择两张证物，让它们互相作证。</p>}</div>
+        <button className="connect-evidence" disabled={selectedClueIds.length !== 2} onClick={submitConnection}><Link2 /> 建立证物连接</button>
+        {feedback && <p className={`relation-feedback ${feedback.kind}`} role="status">{feedback.text}</p>}
+        <div className="relation-ledger"><small>核心推论 · {confirmedRelations.length}/3</small>{evidenceRelations.map((relation, index) => { const confirmed = confirmedRelations.includes(relation.id); return <div className={confirmed ? "relation-entry done" : "relation-entry"} key={relation.id}><span>{confirmed ? <Check /> : `0${index + 1}`}</span><div><small>{confirmed ? "CONFIRMED" : "UNRESOLVED"}</small><b>{confirmed ? relation.statement : "未确认推论"}</b></div></div>; })}</div>
+      </aside>
+    </div>
+  </div>;
 }
 
 export function Collection() {

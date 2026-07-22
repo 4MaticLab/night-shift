@@ -131,11 +131,46 @@ test("builds a core inference by connecting two evidence cards", async ({ page }
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
   await page.getByRole("button", { name: /解锁完整案件板/ }).click();
   await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
+  await expect(page.getByRole("heading", { name: "四十三天" })).toBeVisible();
+  await expect(page.getByText(/某位顾客长期迟到而形成的礼貌习惯/)).toBeVisible();
+  await expect(page.getByText(/有人七年没有忘记按时想念/)).toBeVisible();
   await page.getByRole("button", { name: /^OBJECT · 02 未寄出的明信片/ }).click();
   await page.getByRole("button", { name: /建立证物连接/ }).click();
 
-  await expect(page.getByText("米娜知道伊芙琳仍然活着")).toBeVisible();
+  await expect(page.locator(".relation-ledger").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
   await expect(page.getByText(/共同证明米娜一直替她维持联络/)).toBeVisible();
+  await expect(page.getByText("这份证物已经参与作证")).toBeVisible();
+  await expect(page.locator(".react-flow__edge")).toHaveCount(1);
+});
+
+test("remembers a hand-arranged evidence desk after reload", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /DEMO MODE/ }).click();
+  await page.getByRole("button", { name: /解锁完整案件板/ }).click();
+  await expect(page.locator(".demo-drawer")).toHaveCount(0);
+  const handle = page.locator('.react-flow__node[data-id="ticket-date"] .board-node-drag-handle');
+  const box = await handle.boundingBox();
+  expect(box).not.toBeNull();
+  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box!.x + box!.width / 2 + 130, box!.y + box!.height / 2 + 75, { steps: 8 });
+  await page.mouse.up();
+
+  await expect.poll(async () => page.evaluate(() => {
+    const raw = localStorage.getItem("night-shift-save-v1");
+    return raw ? JSON.parse(raw).state.boardPositions?.["ticket-date"] ?? null : null;
+  })).not.toBeNull();
+
+  const storedBeforeReload = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state.boardPositions["ticket-date"] as { x: number; y: number });
+  expect(storedBeforeReload.x).not.toBe(70);
+  await page.reload();
+  await page.getByRole("button", { name: "案件板" }).click();
+  await expect(page.locator('.react-flow__node[data-id="ticket-date"]')).toBeVisible();
+  const storedAfterReload = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state.boardPositions["ticket-date"] as { x: number; y: number });
+  expect(storedAfterReload).toEqual(storedBeforeReload);
+
+  await page.getByRole("button", { name: /恢复摆放/ }).click();
+  await expect.poll(() => page.evaluate(() => Object.keys(JSON.parse(localStorage.getItem("night-shift-save-v1")!).state.boardPositions).length)).toBe(0);
 });
 
 test("carries the hidden-platform tableau through final choice and ending", async ({ page }) => {
@@ -205,9 +240,11 @@ test.describe("mobile 390x844", () => {
     await page.getByRole("button", { name: /解锁完整案件板/ }).click();
     await expect(page.locator(".demo-drawer")).toHaveCount(0);
     await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
+    await expect(page.getByRole("heading", { name: "四十三天" })).toBeVisible();
+    await expect(page.getByText(/有人七年没有忘记按时想念/)).toBeVisible();
     await page.getByRole("button", { name: /^OBJECT · 02 未寄出的明信片/ }).click();
     await page.getByRole("button", { name: /建立证物连接/ }).click();
-    await expect(page.getByText("米娜知道伊芙琳仍然活着")).toBeVisible();
+    await expect(page.locator(".relation-ledger").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
     await expectNoPageOverflow(page);
   });
 });

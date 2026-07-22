@@ -27,6 +27,14 @@ describe("Night Shift case content", () => {
     expect(nightShiftCase.collectibles).toHaveLength(8);
   });
 
+  it("gives every clue a literary dossier without changing fixed facts", () => {
+    for (const clue of nightShiftCase.clues) {
+      expect(clue.cityObjection.length).toBeGreaterThanOrEqual(20);
+      expect(clue.marginNote.length).toBeGreaterThanOrEqual(12);
+      expect(clue.cityObjection).not.toMatch(/积分|奖励|好感/);
+    }
+  });
+
   it("always advances the main story without punishing short sleep", () => {
     for (let chapter = 1; chapter <= 5; chapter += 1) {
       expect(resolveNight(chapter, "interrupted").clueIds.length).toBeGreaterThan(0);

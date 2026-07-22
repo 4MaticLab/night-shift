@@ -21,11 +21,19 @@ export const clueSchema = z.object({
   title: z.string(),
   summary: z.string(),
   detail: z.string(),
+  cityObjection: z.string().min(20),
+  marginNote: z.string().min(12),
   type: z.enum(["person", "place", "object", "event", "contradiction"]),
   chapter: z.number().int().min(1).max(5),
   relatedIds: z.array(z.string()),
 });
 export type Clue = z.infer<typeof clueSchema>;
+
+export const boardPositionSchema = z.object({
+  x: z.number().finite(),
+  y: z.number().finite(),
+});
+export type BoardPosition = z.infer<typeof boardPositionSchema>;
 
 export const evidenceRelationSchema = z.object({
   id: z.string(),

@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有 `in_progress` 主计划。下一轮从北极星体验审计中识别新的不满意点，先创建计划，再继续推进。
+当前主计划是 [[plans/0016-evidence-dossiers-and-remembered-desk]]：把案件板从可配对的流程图推进为能阅档、能整理、会记住摆放的调查桌。
 
 ## 计划清单
 
@@ -25,6 +25,7 @@
 | [[plans/0013-foglight-district-atlas]] | `completed` | `auto` | P0 | 6/6 | 已发布三张地区版画与渐进雾灯城分区志 |
 | [[plans/0014-four-act-header-triptych-and-ending-tableau]] | `completed` | `manual` | P0 | 6/6 | 已发布交接、夜行、归来与裁决四幕原创画面 |
 | [[plans/0015-full-cycle-and-mobile-proof]] | `completed` | `manual` | P0 | 6/6 | 已发布完整五夜与 390×844 浏览器验收闭环 |
+| [[plans/0016-evidence-dossiers-and-remembered-desk]] | `in_progress` | `auto` | P0 | 5/6 | 运行全套验证并完成 Git checkpoint 与第十八版发布 |
 
 ## 状态规则
 

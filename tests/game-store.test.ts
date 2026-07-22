@@ -136,8 +136,34 @@ describe("Night Shift game store", () => {
     expect(migrated.journeySeed).toBe(DEMO_JOURNEY_SEED);
     expect(migrated.souvenirHistory).toEqual({});
     expect(migrated.opportunityHistory).toEqual({});
+    expect(migrated.boardPositions).toEqual({});
     expect(migrated.nightSealIds).toEqual([]);
     expect(migrated.selectedPreparationId).toBe("");
+  });
+
+  it("persists valid evidence positions and can restore the default desk", () => {
+    const state = storeModule.useGameStore.getState();
+    expect(state.setBoardPosition("ticket-date", { x: 120, y: 90 })).toBe(false);
+
+    state.unlockBoard();
+    expect(storeModule.useGameStore.getState().setBoardPosition("ticket-date", { x: 418.5, y: 207 })).toBe(true);
+    expect(storeModule.useGameStore.getState().setBoardPosition("ticket-date", { x: Number.POSITIVE_INFINITY, y: 0 })).toBe(false);
+    expect(storeModule.useGameStore.getState().boardPositions).toEqual({ "ticket-date": { x: 418.5, y: 207 } });
+    expect(memoryStorage.getItem("night-shift-save-v1")).toContain('"ticket-date"');
+
+    storeModule.useGameStore.getState().resetBoardPositions();
+    expect(storeModule.useGameStore.getState().boardPositions).toEqual({});
+  });
+
+  it("drops malformed board coordinates while migrating older saves", () => {
+    const migrated = storeModule.migrateGameState({
+      boardPositions: {
+        "ticket-date": { x: 240, y: 160 },
+        broken: { x: "left", y: null },
+      },
+    });
+
+    expect(migrated.boardPositions).toEqual({ "ticket-date": { x: 240, y: 160 } });
   });
 
   it("restores prior reports and postcard preparations for demo chapter jumps", () => {

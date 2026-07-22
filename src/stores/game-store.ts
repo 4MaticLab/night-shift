@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { nightGrowthRecordSchema, type CorrespondenceRecord, type NightGrowthRecord, type OpportunityRecord, type SleepMode, type SleepQuality, type SleepSession, type SocietyMemoryRecord, type SouvenirRecord } from "@/src/lib/game-engine/schema";
+import { boardPositionSchema, nightGrowthRecordSchema, type BoardPosition, type CorrespondenceRecord, type NightGrowthRecord, type OpportunityRecord, type SleepMode, type SleepQuality, type SleepSession, type SocietyMemoryRecord, type SouvenirRecord } from "@/src/lib/game-engine/schema";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import type { PreparationId } from "@/src/content/preparations";
 import { finishSleepSession, startSleepSession } from "@/src/lib/game-engine/sleep-session";
@@ -38,6 +38,7 @@ export interface GameState {
   unlockedCollectibleIds: string[];
   completedReports: number[];
   confirmedRelations: string[];
+  boardPositions: Record<string, BoardPosition>;
   nightSealIds: number[];
   endingId?: string;
   begin: () => void;
@@ -49,6 +50,8 @@ export interface GameState {
   dismissOpportunities: () => boolean;
   continueDay: () => void;
   connectClues: (firstClueId: string, secondClueId: string) => string | null;
+  setBoardPosition: (clueId: string, position: BoardPosition) => boolean;
+  resetBoardPositions: () => void;
   jumpToChapter: (chapter: number) => void;
   unlockBoard: (confirmRelations?: boolean) => void;
   chooseEnding: (endingId: EndingId) => void;
@@ -77,6 +80,7 @@ const initial = {
   unlockedCollectibleIds: [] as string[],
   completedReports: [] as number[],
   confirmedRelations: [] as string[],
+  boardPositions: {} as Record<string, BoardPosition>,
   nightSealIds: [] as number[],
 };
 
@@ -192,6 +196,14 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
     set({ confirmedRelations: Array.from(new Set([...state.confirmedRelations, relation.id])) });
     return relation.id;
   },
+  setBoardPosition: (clueId, position) => {
+    const state = get();
+    const parsed = boardPositionSchema.safeParse(position);
+    if (!parsed.success || !state.unlockedClueIds.includes(clueId)) return false;
+    set({ boardPositions: { ...state.boardPositions, [clueId]: parsed.data } });
+    return true;
+  },
+  resetBoardPositions: () => set({ boardPositions: {} }),
   jumpToChapter: (chapter) => {
     const priorChapters = Array.from({ length: Math.max(0, chapter - 1) }, (_, index) => index + 1);
     const preparationHistory = Object.fromEntries(priorChapters.map((number) => [number, "side-lamp" as PreparationId]));
@@ -208,7 +220,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   reset: () => set({ ...initial, endingId: undefined }),
 }), {
   name: "night-shift-save-v1",
-  version: 9,
+  version: 10,
   migrate: migrateGameState,
 }));
 
@@ -232,9 +244,18 @@ export function migrateGameState(persistedState: unknown): GameState {
     journeySeed,
     souvenirHistory: persisted.souvenirHistory ?? createLegacySouvenirHistory(completedReports, preparationHistory, choiceHistory, journeySeed, growthHistory),
     opportunityHistory: persisted.opportunityHistory ?? {},
+    boardPositions: sanitizeBoardPositions(persisted.boardPositions),
     nightSealIds: persisted.nightSealIds ?? [],
     selectedPreparationId: persisted.selectedPreparationId ?? "",
   } as GameState;
+}
+
+function sanitizeBoardPositions(value: unknown): Record<string, BoardPosition> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value).flatMap(([clueId, position]) => {
+    const parsed = boardPositionSchema.safeParse(position);
+    return parsed.success ? [[clueId, parsed.data]] : [];
+  }));
 }
 
 function createLegacyGrowthHistory(completedReports: number[], preparationHistory: Partial<Record<number, PreparationId>>, choiceHistory: Partial<Record<number, string>>): Partial<Record<number, NightGrowthRecord>> {
