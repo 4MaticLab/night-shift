@@ -14,7 +14,12 @@
 | 夜间结算 | `src/lib/game-engine/resolve-night.ts` | 根据章节与睡眠质量选择确定性结果 |
 | 睡眠会话 | `src/lib/game-engine/sleep-session.ts` | 创建、恢复和结束 Demo／真实夜班，按时长生成质量与夜印进度 |
 | 游戏存档 | `src/stores/game-store.ts` | Zustand 状态、阶段转换与浏览器持久化 |
-| 产品界面 | `app/page.tsx` | 首页、交接、夜间、晨报、案件板、收藏和结局 |
+| 产品外壳 | `app/page.tsx` | 阶段判断、视图编排、Demo 抽屉开关与顶层导航 |
+| 落地叙事 | `src/components/game/landing.tsx` | 首页主视觉与三幕开场 |
+| 夜间循环 | `src/components/game/night-cycle.tsx` | 睡前准备、夜班会话、晨报与空晨报状态 |
+| 调查与归档 | `src/components/game/investigation.tsx` | 案件板、收藏柜、档案与结局 |
+| 游戏框架 | `src/components/game/shell.tsx` | 顶栏、底部导航与 Demo 控制台 |
+| 共享游戏 UI | `src/components/game/shared.tsx` | 纸卡、印章、城市路线与睡眠文案 |
 | 视觉系统 | `app/globals.css` | 色板、纸张、地图、雨雾、响应式与动效 |
 | 资产清单 | `src/content/assets.ts` | 主视觉、八件物证与五枚夜印的 manifest 和解析函数 |
 
@@ -32,22 +37,22 @@
 
 ## 当前边界
 
-当前 UI 集中在 `app/page.tsx`，适合快速演示但不利于长期局部迭代；案件板关系确认也仍偏向现场演示。这些问题统一收敛在 [[plans/0003-mvp-quality-hardening]]。
+案件板关系确认仍偏向现场演示：玩家点击预写结论，而不是从两件证物建立关系。该问题与后续自动化覆盖统一收敛在 [[plans/0003-mvp-quality-hardening]]。
 
-## 交互基线与目标组件边界
+## 交互基线与组件边界
 
 0003 开工时冻结以下行为：Demo 仍可在 12 秒内完成一夜；三种睡眠都推进固定主线；随身物只改变环境回响；晨报、夜印和收藏结果保持兼容。
 
-后续拆分遵循以下功能边界：
+当前组件按以下功能边界拆分：
 
-- `GameShell`：阶段与底部导航编排，不拥有章节结算规则。
-- `NightPreparation`：调查方向、随身物、Demo／真实模式选择。
-- `NightSession`：可恢复的真实计时、Demo 压缩动画和夜印显影。
-- `MorningReport`：只读取已结算的睡眠会话与章节结果。
-- `CaseBoard`：证物节点、玩家连线和关系验证。
-- `CollectionCabinet`：夜印与收藏品的持久陈列。
+- `app/page.tsx`：阶段与视图编排，不拥有章节结算或功能域展示细节。
+- `landing.tsx`：落地页与开场，不读取游戏结算规则。
+- `night-cycle.tsx`：调查方向、随身物、Demo／真实模式、夜印显影和晨报。
+- `investigation.tsx`：案件板、夜印收藏、物证档案和三结局。
+- `shell.tsx`：跨视图导航与 Demo 控制台。
+- `shared.tsx`：跨功能域复用的纸张、印章和路线视觉原语。
 
-会话模型已经放进 `src/lib/game-engine`，跨页恢复依赖持久化时间戳而非组件生命周期。下一阶段按上述边界迁移组件，避免把更多规则固化在页面文件中。
+会话模型位于 `src/lib/game-engine`，跨页恢复依赖持久化时间戳而非组件生命周期。`app/page.tsx` 只保留顶层状态与视图编排，后续案件板和等待循环可以在各自功能域内独立演进。
 
 ## 相关文档
 
