@@ -56,6 +56,11 @@ test("keeps returned postcards in the journey album", async ({ page }) => {
   await expect(page.getByText("让错字继续保护地址")).toBeVisible();
   await expect(page.getByRole("heading", { name: "票根灯蕨" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "四十三日夜香" })).toBeVisible();
+  await page.getByRole("button", { name: "档案" }).click();
+  await expect(page.getByText("相关人物")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "米娜·索莱尔" })).toBeVisible();
+  await expect(page.locator(".person-dossier.encountered")).toHaveCount(1);
+  await expect(page.locator(".person-dossier.locked")).toHaveCount(3);
 });
 
 test("returns a prior society answer in a later letter", async ({ page }) => {
@@ -69,6 +74,8 @@ test("returns a prior society answer in a later letter", async ({ page }) => {
   await expect(page.getByText(/上次答复的余波/)).toBeVisible();
   await expect(page.getByText(/不存在的申请如今有了你的署名/)).toBeVisible();
   await expect(page.getByRole("heading", { name: "致「获准误分类者」" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "吉迪恩·韦尔" })).toBeVisible();
+  await expect(page.getByText(/司机不决定乘客为什么离开/)).toBeVisible();
 });
 
 test("files an optional daytime notice and returns its echo after the next night", async ({ page }) => {

@@ -17,6 +17,7 @@
 | 城市问函 | `src/content/correspondence.ts` | 九个问函、十八种答复、三类总体姿态与最近答复回响 |
 | 口袋纪念物 | `src/content/souvenirs.ts` | 九件小物、稳定哈希、方向与随身物亲和、无重复结算 |
 | 机会告示 | `src/content/opportunities.ts` | 十二张午后短章、两种答复、稳定三张候选与未来回响 |
+| 案件人物 | `src/content/characters.ts` | 四位见证人的章节映射、公共传闻、已知事实与证物揭示条件 |
 | 证物关系 | `src/content/relations.ts` | 三条核心推论、对应证物对与成功解释 |
 | 内容契约 | `src/lib/game-engine/schema.ts` | Zod schema、引用与数量约束 |
 | 夜间结算 | `src/lib/game-engine/resolve-night.ts` | 根据章节、睡眠质量、随身物与调查方向选择确定性结果 |
@@ -30,7 +31,7 @@
 | 游戏框架 | `src/components/game/shell.tsx` | 顶栏、底部导航与 Demo 控制台 |
 | 共享游戏 UI | `src/components/game/shared.tsx` | 纸卡、印章、城市路线与睡眠文案 |
 | 视觉系统 | `app/globals.css` | 色板、纸张、地图、雨雾、响应式与动效 |
-| 资产清单 | `src/content/assets.ts` | 主视觉、物证、夜印、明信片、植物、社团纹章与九件纪念物的 manifest 和解析函数 |
+| 资产清单 | `src/content/assets.ts` | 主视觉、物证、夜印、明信片、植物、社团纹章、纪念物与人物肖像的 manifest 和解析函数 |
 
 ## 状态模型
 
@@ -67,6 +68,8 @@
 纪念物同样不参与 `resolveNight` 固定线索、植物成长、社团层级、问函姿态、睡眠质量或任何结局资格；它们没有稀有度、价值、货币、重复碎片或可见掉落表。
 
 机会告示没有行动点、日历登录、抽取按钮或奖励差。`resolveOpportunity` 与 `dismissOpportunities` 只写独立历史，不进入夜间结算、社团层级或结局判断。
+
+人物档案同样是确定性内容视图：第 2–5 夜晨报各映射一位人物；档案页只用 `completedReports` 判断是否见过，用既有 `unlockedClueIds` 判断保留意见是否展开。人物模块不写存档，不进入 `resolveNight`、睡眠质量、奖励或结局判断。
 
 ## 交互基线与组件边界
 

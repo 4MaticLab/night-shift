@@ -17,6 +17,7 @@ import { citySocieties, createSocietyMemory, getCitySociety, getSocietyLetter, g
 import { correspondencePostures, correspondencePrompts, createCorrespondenceRecord, getCorrespondencePrompt, getCorrespondenceReply, getDominantCorrespondenceStance, getLatestSocietyReply } from "@/src/content/correspondence";
 import { createSouvenirRecord, DEMO_JOURNEY_SEED, getSouvenir, selectSouvenir, souvenirs } from "@/src/content/souvenirs";
 import { createOpportunityRecord, getOpportunityCandidates, getOpportunityResponse, opportunityNotices } from "@/src/content/opportunities";
+import { caseCharacters, getChapterCharacter, isCharacterRevealed } from "@/src/content/characters";
 
 describe("Night Shift case content", () => {
   it("contains the complete five-night mystery", () => {
@@ -232,6 +233,22 @@ describe("Night Shift case content", () => {
     expect(getOpportunityResponse(record)?.result).toBe(candidate.responses[1].result);
     expect(getOpportunityResponse(record)?.echo).toBeTruthy();
     expect(createOpportunityRecord(2, 99, { 2: record }, undefined, undefined, "2026-07-13T13:00:00.000Z")).toEqual(record);
+  });
+
+  it("defines four manifest-backed witnesses with clue-gated dossiers", () => {
+    expect(caseCharacters).toHaveLength(4);
+    expect(caseCharacters.map((character) => character.encounterChapter)).toEqual([2, 3, 4, 5]);
+    const clueIds = new Set(nightShiftCase.clues.map((clue) => clue.id));
+
+    for (const character of caseCharacters) {
+      expect(getAsset(character.assetId).category).toBe("character-portrait");
+      expect(character.revealClueIds.every((clueId) => clueIds.has(clueId))).toBe(true);
+      expect(isCharacterRevealed(character, [])).toBe(false);
+      expect(isCharacterRevealed(character, character.revealClueIds)).toBe(true);
+      expect(getChapterCharacter(character.encounterChapter)?.id).toBe(character.id);
+    }
+
+    expect(getChapterCharacter(1)).toBeUndefined();
   });
 
   it("derives four deterministic growth stages from restored progress", () => {

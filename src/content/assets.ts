@@ -2,7 +2,7 @@ export interface GameAsset {
   id: string;
   src: string;
   alt: string;
-  category: "header" | "social" | "collectible" | "night-seal" | "postcard" | "botanical" | "society-crest" | "souvenir";
+  category: "header" | "social" | "collectible" | "night-seal" | "postcard" | "botanical" | "society-crest" | "souvenir" | "character-portrait";
   status: "complete";
 }
 
@@ -265,6 +265,18 @@ export const assets = {
     alt: "内部封存着酒红弯曲旧轨的烟青玻璃珠",
     category: "souvenir",
     status: "complete",
+  },
+  characterMinaSolair: {
+    id: "character.mina-solair", src: "/art/characters/mina-solair-portrait-v1.webp", alt: "手持空白明信片、衣襟别着夜香花的米娜·索莱尔档案肖像", category: "character-portrait", status: "complete",
+  },
+  characterGideonVale: {
+    id: "character.gideon-vale", src: "/art/characters/gideon-vale-portrait-v1.webp", alt: "把旧制服帽压在胸前、手握票钳的吉迪恩·韦尔档案肖像", category: "character-portrait", status: "complete",
+  },
+  characterOrinBell: {
+    id: "character.orin-bell", src: "/art/characters/orin-bell-portrait-v1.webp", alt: "戴圆眼镜、谨慎托着地图卷的奥林·贝尔档案肖像", category: "character-portrait", status: "complete",
+  },
+  characterEvelynQuell: {
+    id: "character.evelyn-quell", src: "/art/characters/evelyn-quell-portrait-v1.webp", alt: "穿深蓝旅行外套、直视前方并持折叠相机的伊芙琳·奎尔档案肖像", category: "character-portrait", status: "complete",
   },
 } as const satisfies Record<string, GameAsset>;
 

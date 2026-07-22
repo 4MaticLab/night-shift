@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有未完成主计划。下一轮从北极星与已发布体验重新审计最明显的不满意点，再创建递增计划。
+当前主计划是 [[plans/0012-city-witness-portraits-and-person-dossiers]]：为四位关键人物补齐原创肖像与渐进档案，让案件重新落到有表情、有保留的人身上。
 
 ## 计划清单
 
@@ -21,6 +21,7 @@
 | [[plans/0009-city-correspondence-and-reply-echoes]] | `completed` | `auto` | P0 | 6/6 | 已发布九封问函、十八种答复、跨夜余波与结局附言 |
 | [[plans/0010-unasked-for-souvenirs-and-pocket-drawer]] | `completed` | `auto` | P0 | 6/6 | 已发布九件纪念物、v8 稳定结算与口袋抽屉 |
 | [[plans/0011-foglight-opportunity-notices-and-daytime-storylets]] | `completed` | `auto` | P0 | 6/6 | 已发布十二张机会告示、v9 历史、次晨回声与城市剪报册 |
+| [[plans/0012-city-witness-portraits-and-person-dossiers]] | `in_progress` | `auto` | P0 | 5/6 | 建立 Git checkpoint 并发布第十四个私密版本 |
 
 ## 状态规则
 

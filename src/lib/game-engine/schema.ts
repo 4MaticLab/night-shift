@@ -185,6 +185,22 @@ export const opportunityRecordSchema = z.object({
 });
 export type OpportunityRecord = z.infer<typeof opportunityRecordSchema>;
 
+export const caseCharacterSchema = z.object({
+  id: z.string(),
+  assetId: z.string(),
+  name: z.string(),
+  archiveName: z.string(),
+  role: z.string(),
+  district: z.string(),
+  encounterChapter: z.number().int().min(2).max(5),
+  publicRumor: z.string(),
+  knownFact: z.string(),
+  withheld: z.string(),
+  quote: z.string(),
+  revealClueIds: z.array(z.string()).min(1),
+});
+export type CaseCharacter = z.infer<typeof caseCharacterSchema>;
+
 export const growthStageSchema = z.enum(["seed", "sprout", "leaf", "bloom"]);
 export type GrowthStage = z.infer<typeof growthStageSchema>;
 

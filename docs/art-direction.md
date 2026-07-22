@@ -10,6 +10,8 @@
 
 地下社团使用 1:1 椭圆档案纹章：单一强轮廓、暖纸底、煤烟黑墨、铜绿、旧酒红与极少金线，缩小到 140 像素仍能辨认。纹章只通过物件关系表达社团规矩，不出现文字、字母、数字、王冠、盾徽或现成作品可识别符号；具体提示词见 [[docs/art-prompts/city-societies]]。
 
+关键人物使用 4:5 编辑蚀刻档案肖像：半身居中、背景留白、琥珀侧光和可在 160 像素辨认的职业道具。人物气质必须克制、有人味、各自有所保留；不得借用现成作品的种族、服装符号、头像边框或标志性构图。具体提示词与源图映射见 [[docs/art-prompts/city-witness-portraits]]。
+
 参考 Fallen London 的文学密度与媒介气质，但不复制其角色、徽章、边框、地图构图或界面布局。原创边界与玩法合成原则见 [[docs/north-star]]。
 
 ## 相关文档
@@ -19,4 +21,5 @@
 - [[docs/art-prompts/city-postcards]]
 - [[docs/art-prompts/night-greenhouse]]
 - [[docs/art-prompts/city-societies]]
+- [[docs/art-prompts/city-witness-portraits]]
 - [[docs/product-overview]]
