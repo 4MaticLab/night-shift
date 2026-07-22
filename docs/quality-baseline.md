@@ -75,6 +75,8 @@ Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：分别覆盖 Demo
 
 第十四个私密版本为米娜、吉迪恩、奥林与伊芙琳加入四张原创编辑蚀刻肖像；第 2–5 夜晨报呈现相关人物，档案页按相遇和既有证物逐层展开固定事实，完成 [[plans/0012-city-witness-portraits-and-person-dossiers]]。
 
+第十五个私密版本为灯港区、旧子午区与玻璃丘加入三张原创城市版画，并在档案页按第 1、3、4 夜进度展开公共说法、城市规矩与固定地标，完成 [[plans/0013-foglight-district-atlas]]。
+
 ## 相关文档
 
 - [[docs/architecture]]
