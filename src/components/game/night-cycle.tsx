@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
-import { ArrowRight, BriefcaseBusiness, Check, ChevronRight, Clock3, Coffee, FileText, Lightbulb, Moon, TramFront, Zap } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, Check, ChevronRight, Clock3, Coffee, FileText, Lightbulb, Moon, Zap } from "lucide-react";
 import { nightShiftCase } from "@/src/content/case";
 import { getAsset, getNightSealAsset, getPostcardAsset } from "@/src/content/assets";
 import { getJourneyPostcard, getPostcardPreparationNote } from "@/src/content/postcards";
@@ -75,6 +75,7 @@ export function NightRun({ onFinish }: { onFinish: () => void }) {
   const direction = result.direction;
   const preparation = getPreparation(selectedPreparationId);
   const nightSeal = getNightSealAsset(chapter);
+  const nightHeader = getAsset("header.night-expedition");
   const [seconds, setSeconds] = useState(12);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -97,6 +98,7 @@ export function NightRun({ onFinish }: { onFinish: () => void }) {
     : `林渡带着${preparation?.shortTitle ?? "笔记本"}出发 · 夜印正在形成 · ${seconds} 秒`;
   return (
     <main className="night-run">
+      <Image className="night-expedition-art" src={nightHeader.src} alt={nightHeader.alt} fill priority sizes="100vw" />
       <div className="night-stars" /><div className="night-header"><div className="brand-mark compact"><span>NS</span><div><b>夜班进行中</b><small>第 {chapter} 夜 · {sleepMode === "real" ? "真实夜班" : qualityCopy[quality].time}</small></div></div><button onClick={onFinish}>{sleepMode === "real" ? "我醒了，拆开报告" : "跳到清晨"} <ArrowRight size={16} /></button></div>
       <div className="night-title"><p>{sleepMode === "real" ? "合上页面也没关系。城市记得交接的时刻。" : "你休息的时候，他会继续。"}</p><h2>{current.title}</h2><span>{sessionLine}</span><div className="route-order"><small>TONIGHT&apos;S DIRECTION</small><b>{direction.dispatchTitle}</b><em>目的地 · {direction.destination}</em></div></div>
       <div className="night-seal-growth" aria-label={`第${chapter}夜的夜印正在形成`}><Image className="seal-ghost" src={nightSeal.src} alt="" width={118} height={118} /><span style={{ height: `${progress}%` }}><Image src={nightSeal.src} alt={nightSeal.alt} width={118} height={118} /></span></div>
@@ -113,6 +115,7 @@ export function MorningReport({ onContinue }: { onContinue: () => void }) {
   const result = resolveNight(chapter, quality, selectedPreparationId, selectedChoice);
   const preparation = getPreparation(selectedPreparationId);
   const nightSeal = getNightSealAsset(chapter);
+  const morningHeader = getAsset("header.morning-report");
   const postcard = getJourneyPostcard(chapter);
   const postcardArt = getPostcardAsset(chapter);
   const postcardPreparationId = selectedPreparationId || "side-lamp";
@@ -137,7 +140,7 @@ export function MorningReport({ onContinue }: { onContinue: () => void }) {
   const foundItems = nightShiftCase.collectibles.filter((item) => result.collectibleIds.includes(item.id));
   return (
     <div className="report-wrap">
-      <section className="report-hero"><div><Seal>调查报告 · 0{chapter}</Seal><p>昨夜调查完成</p><h2>{current.title}</h2><small>记录人：林渡 · 雾灯城 · 05:28</small></div><div className="dawn-window"><span /><TramFront /></div></section>
+      <section className="report-hero"><Image className="report-hero-art" src={morningHeader.src} alt={morningHeader.alt} fill priority sizes="100vw" /><div><Seal>调查报告 · 0{chapter}</Seal><p>昨夜调查完成</p><h2>{current.title}</h2><small>记录人：林渡 · 雾灯城 · 05:28</small></div></section>
       <section className="return-postcard" aria-label={`第${chapter}夜归来明信片`}>
         <div className="postcard-picture"><Image src={postcardArt.src} alt={postcardArt.alt} fill sizes="(max-width: 900px) 100vw, 58vw" /><span>RETURNED · NIGHT 0{chapter}</span></div>
         <PaperCard className="postcard-back"><div className="paper-heading"><small>01 · POSTCARD FROM LAST NIGHT</small><b>{postcard.title}</b></div><small className="postcard-location">{postcard.location}</small><p className="postcard-rumor">“{postcard.cityRumor}”</p><p>{postcard.message}</p><div className="route-letter"><small>ROUTE LETTER · {result.direction.dispatchTitle}</small><b>{result.direction.destination}</b><p>“{result.returnLetter}”</p><span>{result.cityEncounter}</span></div><div className="postcard-preparation-note"><b>{preparation?.shortTitle ?? "随身物"}留下的痕迹</b><span>{postcardPreparationNote}</span></div></PaperCard>

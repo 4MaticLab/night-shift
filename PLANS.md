@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有未完成主计划。下一轮继续对照原始 Tier A 清单和已发布体验审计核心页头与结局展示。
+当前主计划是 [[plans/0014-four-act-header-triptych-and-ending-tableau]]：用交接、夜行、归来、裁决四张原创画面建立核心流程的视觉分幕。
 
 ## 计划清单
 
@@ -23,6 +23,7 @@
 | [[plans/0011-foglight-opportunity-notices-and-daytime-storylets]] | `completed` | `auto` | P0 | 6/6 | 已发布十二张机会告示、v9 历史、次晨回声与城市剪报册 |
 | [[plans/0012-city-witness-portraits-and-person-dossiers]] | `completed` | `auto` | P0 | 6/6 | 已发布四张人物肖像、晨报会面与渐进人物档案 |
 | [[plans/0013-foglight-district-atlas]] | `completed` | `auto` | P0 | 6/6 | 已发布三张地区版画与渐进雾灯城分区志 |
+| [[plans/0014-four-act-header-triptych-and-ending-tableau]] | `in_progress` | `manual` | P0 | 5/6 | 完成全套验证、Git checkpoint 与第十六个私密版本发布 |
 
 ## 状态规则
 

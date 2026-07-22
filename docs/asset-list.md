@@ -2,7 +2,10 @@
 
 | ID | 名称 | 类别 | 文件 | 状态 | 页面 |
 |---|---|---|---|---|---|
-| `header.night-shift.hero` | 林渡与雾灯城 | Header / Character / City | `/public/art/headers/night-shift-hero.png` | 完成 | 首页、睡前、晨报 |
+| `header.night-shift.hero` | 夜班交接 | Header / Character / City | `/public/art/headers/shift-handoff-v2.webp` | 完成 | 首页、睡前 |
+| `header.night-expedition` | 雨夜高架调查 | Header / Character / City | `/public/art/headers/night-expedition-v1.webp` | 完成 | 夜间调查 |
+| `header.morning-report` | 黎明归来 | Header / Character / City | `/public/art/headers/morning-report-v1.webp` | 完成 | 晨报 |
+| `ending.hidden-platform` | 隐藏站台的决定 | Ending tableau | `/public/art/endings/hidden-platform-tableau-v1.webp` | 完成 | 结局选择、结局揭示 |
 | `social.night-shift.og` | 夜班侦探分享封面 | Social | `/public/og.png` | 完成 | 链接预览 |
 | `map.foglight.css` | 雾灯城路线图 | CSS scene | `app/globals.css` | 完成 | 夜间、晨报 |
 | `board.case-001.css` | 纸质案件板 | CSS scene | `app/globals.css` | 完成 | 案件板 |
@@ -58,3 +61,4 @@
 - [[docs/art-prompts/pocket-souvenirs]]
 - [[docs/art-prompts/city-witness-portraits]]
 - [[docs/art-prompts/foglight-districts]]
+- [[docs/art-prompts/four-act-headers]]

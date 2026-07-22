@@ -27,6 +27,7 @@
 - [[docs/art-prompts/pocket-souvenirs]] — 九件口袋纪念物的共用媒介、变体与运行时文件。
 - [[docs/art-prompts/city-witness-portraits]] — 四位城市见证人的原创肖像提示词、源图与运行时映射。
 - [[docs/art-prompts/foglight-districts]] — 灯港区、旧子午区与玻璃丘的城市版画提示词和源图映射。
+- [[docs/art-prompts/four-act-headers]] — 交接、夜行、归来与裁决四幕横幅的构图和源图映射。
 
 ## 维护规则
 

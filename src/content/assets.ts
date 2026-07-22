@@ -2,17 +2,26 @@ export interface GameAsset {
   id: string;
   src: string;
   alt: string;
-  category: "header" | "social" | "collectible" | "night-seal" | "postcard" | "botanical" | "society-crest" | "souvenir" | "character-portrait" | "district-illustration";
+  category: "header" | "ending" | "social" | "collectible" | "night-seal" | "postcard" | "botanical" | "society-crest" | "souvenir" | "character-portrait" | "district-illustration";
   status: "complete";
 }
 
 export const assets = {
   nightShiftHero: {
     id: "header.night-shift.hero",
-    src: "/art/headers/night-shift-hero.png",
-    alt: "林渡站在雨夜窗前，窗外的雾灯城有一辆老电车驶过",
+    src: "/art/headers/shift-handoff-v2.webp",
+    alt: "林渡带着肩包和手电站在夜班事务所窗前，桌上摊着黄铜图钉地图",
     category: "header",
     status: "complete",
+  },
+  nightExpeditionHeader: {
+    id: "header.night-expedition", src: "/art/headers/night-expedition-v1.webp", alt: "林渡提灯穿过雨夜高架维修桥，下方旧电车驶入雾灯城", category: "header", status: "complete",
+  },
+  morningReportHeader: {
+    id: "header.morning-report", src: "/art/headers/morning-report-v1.webp", alt: "黎明时林渡抱着封存报告回到事务所，旧电车沿湿轨远去", category: "header", status: "complete",
+  },
+  endingHiddenPlatform: {
+    id: "ending.hidden-platform", src: "/art/endings/hidden-platform-tableau-v1.webp", alt: "隐藏站台的长椅上放着账册、封蜡信和折叠相机，雾中停着旧电车", category: "ending", status: "complete",
   },
   socialCard: {
     id: "social.night-shift.og",

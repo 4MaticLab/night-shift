@@ -14,6 +14,8 @@
 
 三个城区使用 3:2 横向编辑版画：以道路或旧轨形成前景引线，以制度建筑构成中景，以雨雾保留远景空白。灯港区用水岸、花市与维修门辨认，旧子午区用钟楼、层叠石阶与旅馆辨认，玻璃丘用坡地温室、档案建筑与信号台辨认；具体提示词见 [[docs/art-prompts/foglight-districts]]。
 
+核心流程使用四张 2:1 横幅建立分幕：交接保留左侧深色文案区，夜行保留中央路线叠层区，归来让黎明暖纸天空承载报告标题，裁决用无人站台和等待归还的证据承载选择。四张图保持林渡造型与蚀刻媒介连续，但不让插画替代交互；具体提示词见 [[docs/art-prompts/four-act-headers]]。
+
 参考 Fallen London 的文学密度与媒介气质，但不复制其角色、徽章、边框、地图构图或界面布局。原创边界与玩法合成原则见 [[docs/north-star]]。
 
 ## 相关文档
@@ -25,4 +27,5 @@
 - [[docs/art-prompts/city-societies]]
 - [[docs/art-prompts/city-witness-portraits]]
 - [[docs/art-prompts/foglight-districts]]
+- [[docs/art-prompts/four-act-headers]]
 - [[docs/product-overview]]

@@ -142,6 +142,13 @@ describe("Night Shift case content", () => {
     }
   });
 
+  it("uses three distinct manifest headers and one ending tableau", () => {
+    const headers = [getAsset("header.night-shift.hero"), getAsset("header.night-expedition"), getAsset("header.morning-report")];
+    expect(headers.every((asset) => asset.category === "header")).toBe(true);
+    expect(new Set(headers.map((asset) => asset.src))).toHaveLength(3);
+    expect(getAsset("ending.hidden-platform").category).toBe("ending");
+  });
+
   it("defines one distinct journey postcard and three preparation notes per night", () => {
     expect(journeyPostcards.map((postcard) => postcard.chapter)).toEqual([1, 2, 3, 4, 5]);
     for (let chapter = 1; chapter <= 5; chapter += 1) {
