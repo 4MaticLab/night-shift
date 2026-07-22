@@ -48,6 +48,8 @@ Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：分别覆盖 Demo
 
 第六个私密版本把五夜状态循环、真实存档重载、旧存档迁移和三个结局纳入自动化护栏，正式关闭 [[plans/0003-mvp-quality-hardening]]。
 
+第七个私密版本为五夜加入独立城市明信片、晨报归来仪式、随身物背面附言、可持久解锁的旅程册与 v3 存档迁移，完成 [[plans/0005-city-postcards-and-return-ritual]]。
+
 ## 相关文档
 
 - [[docs/architecture]]

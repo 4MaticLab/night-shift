@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前主计划是 [[plans/0005-city-postcards-and-return-ritual]]：把每夜归来做成一张可收藏、可复述旅程的城市明信片，继续强化异步等待的期待感。
+当前主计划是 [[plans/0006-investigation-directions-and-route-letters]]：让玩家每夜选择的调查方向真正留下可回看的路线差异，同时保护固定案件事实。
 
 ## 计划清单
 
@@ -14,7 +14,8 @@
 | [[plans/0002-docs-and-plans-system]] | `completed` | `manual` | P0 | 6/6 | 按新规范维护后续工作 |
 | [[plans/0003-mvp-quality-hardening]] | `completed` | `auto` | P0 | 6/6 | 已完成结构、真实夜班、证物关系与自动化加固 |
 | [[plans/0004-literary-city-and-waiting-loop]] | `completed` | `auto` | P0 | 8/8 | 已发布第一轮北极星升级 |
-| [[plans/0005-city-postcards-and-return-ritual]] | `in_progress` | `auto` | P0 | 5/6 | 保存 Git checkpoint 并私密发布 |
+| [[plans/0005-city-postcards-and-return-ritual]] | `completed` | `auto` | P0 | 6/6 | 已发布五夜城市明信片与归来仪式 |
+| [[plans/0006-investigation-directions-and-route-letters]] | `in_progress` | `auto` | P0 | 0/6 | 冻结方向分支内容契约与存档字段 |
 
 ## 状态规则
 
