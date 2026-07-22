@@ -18,7 +18,7 @@
 | [[plans/0006-investigation-directions-and-route-letters]] | `completed` | `auto` | P0 | 6/6 | 已发布十五条方向路线、来信与履历 |
 | [[plans/0007-night-greenhouse-and-time-growth]] | `completed` | `auto` | P0 | 6/6 | 已发布五株夜生植物、四阶段成长与雾灯温室 |
 | [[plans/0008-city-societies-and-remembered-favors]] | `completed` | `auto` | P0 | 6/6 | 已发布三个地下社团、跨夜称呼、来函与城市人情簿 |
-| [[plans/0009-city-correspondence-and-reply-echoes]] | `in_progress` | `auto` | P0 | 0/6 | 冻结九封问函、十八种答复与回响契约 |
+| [[plans/0009-city-correspondence-and-reply-echoes]] | `in_progress` | `auto` | P0 | 5/6 | 完整验证、Git checkpoint 与私密发布 |
 
 ## 状态规则
 

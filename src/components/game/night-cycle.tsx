@@ -11,6 +11,7 @@ import { getNightBotanical, growthStageFromProgress } from "@/src/content/botany
 import { getPreparation, preparations, type PreparationId } from "@/src/content/preparations";
 import { getRouteDirection } from "@/src/content/routes";
 import { getCitySociety, getSocietyLetter, getSocietyTitle } from "@/src/content/societies";
+import { getCorrespondencePrompt, getCorrespondenceReply, getLatestSocietyReply } from "@/src/content/correspondence";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import type { SleepMode, SleepQuality } from "@/src/lib/game-engine/schema";
 import { elapsedSessionMinutes, formatSleepDuration, nightSealProgress } from "@/src/lib/game-engine/sleep-session";
@@ -91,7 +92,7 @@ export function NightRun({ onFinish }: { onFinish: () => void }) {
 }
 
 export function MorningReport({ onContinue }: { onContinue: () => void }) {
-  const { chapter, quality, selectedChoice, selectedPreparationId, lastSleepSession, societyHistory } = useGameStore();
+  const { chapter, quality, selectedChoice, selectedPreparationId, lastSleepSession, societyHistory, correspondenceHistory, answerCorrespondence } = useGameStore();
   const current = nightShiftCase.chapters[chapter - 1];
   const result = resolveNight(chapter, quality, selectedPreparationId, selectedChoice);
   const preparation = getPreparation(selectedPreparationId);
@@ -103,6 +104,11 @@ export function MorningReport({ onContinue }: { onContinue: () => void }) {
   const botanical = getNightBotanical(chapter);
   const societyRecord = societyHistory[chapter];
   const society = societyRecord ? getCitySociety(societyRecord.societyId) : null;
+  const correspondencePrompt = societyRecord ? getCorrespondencePrompt(societyRecord) : null;
+  const correspondenceRecord = correspondenceHistory[chapter];
+  const selectedReply = correspondenceRecord ? getCorrespondenceReply(correspondenceRecord) : null;
+  const priorCorrespondence = societyRecord ? getLatestSocietyReply(correspondenceHistory, societyRecord.societyId, chapter) : undefined;
+  const priorReply = priorCorrespondence ? getCorrespondenceReply(priorCorrespondence) : null;
   const foundClues = nightShiftCase.clues.filter((item) => result.clueIds.includes(item.id));
   const foundItems = nightShiftCase.collectibles.filter((item) => result.collectibleIds.includes(item.id));
   return (
@@ -113,7 +119,7 @@ export function MorningReport({ onContinue }: { onContinue: () => void }) {
         <PaperCard className="postcard-back"><div className="paper-heading"><small>01 · POSTCARD FROM LAST NIGHT</small><b>{postcard.title}</b></div><small className="postcard-location">{postcard.location}</small><p className="postcard-rumor">“{postcard.cityRumor}”</p><p>{postcard.message}</p><div className="route-letter"><small>ROUTE LETTER · {result.direction.dispatchTitle}</small><b>{result.direction.destination}</b><p>“{result.returnLetter}”</p><span>{result.cityEncounter}</span></div><div className="postcard-preparation-note"><b>{preparation?.shortTitle ?? "随身物"}留下的痕迹</b><span>{postcardPreparationNote}</span></div></PaperCard>
       </section>
       <section className={`growth-reveal quality-${quality}`} aria-label={`第${chapter}夜时间植物`}><BotanicalSpecimen chapter={chapter} /><PaperCard className="growth-record"><div className="paper-heading"><small>02 · TIME GREW HERE</small><b>雾灯温室新标本</b></div><span className="botanical-archive-name">{botanical.archiveName} · {botanical.district}</span><h3>{botanical.name}</h3><p className="botanical-rumor">“{botanical.cityRumor}”</p><p>{botanical.specimenNote}</p><div className="growth-quality-note"><b>{qualityCopy[quality].label} · 仍然完整</b><span>{botanical.qualityNotes[quality]}</span></div></PaperCard></section>
-      {societyRecord && society && <section className={`society-memory-letter society-${society.id}`} aria-label={`${society.name}来函`}><SocietyCrest societyId={society.id} /><PaperCard><div className="paper-heading"><small>03 · THE CITY REMEMBERS</small><b>{society.name}来函</b></div><span className="society-archive-name">{society.archiveName}</span><h3>致「{getSocietyTitle(societyRecord)}」</h3><p className="society-rumor">“{society.publicRumor}”</p><blockquote>{getSocietyLetter(societyRecord)}</blockquote><div className="society-postscript"><small>本夜被记住的原因</small><p>{result.direction.societyNotice}</p></div><footer>— {society.signoff}</footer></PaperCard></section>}
+      {societyRecord && society && correspondencePrompt && <section className={`society-memory-letter society-${society.id}`} aria-label={`${society.name}来函`}><SocietyCrest societyId={society.id} /><PaperCard><div className="paper-heading"><small>03 · THE CITY REMEMBERS</small><b>{society.name}来函</b></div><span className="society-archive-name">{society.archiveName}</span><h3>致「{getSocietyTitle(societyRecord)}」</h3><p className="society-rumor">“{society.publicRumor}”</p><blockquote>{getSocietyLetter(societyRecord)}</blockquote>{priorReply && <div className="correspondence-echo"><small>YOUR LAST ANSWER RETURNED · 上次答复的余波</small><p>{priorReply.echo}</p></div>}<div className="society-postscript"><small>本夜被记住的原因</small><p>{result.direction.societyNotice}</p></div><div className="correspondence-question"><small>A QUESTION WITH NO CORRECT ANSWER · 城市问函</small><p>{correspondencePrompt.context}</p><h4>{correspondencePrompt.question}</h4><div className="correspondence-replies">{correspondencePrompt.replies.map((reply) => <button key={reply.id} className={selectedReply?.id === reply.id ? "selected" : ""} disabled={Boolean(selectedReply)} onClick={() => answerCorrespondence(chapter, reply.id)}><b>{reply.label}</b><span>{reply.note}</span>{selectedReply?.id === reply.id && <Check size={15} />}</button>)}</div>{selectedReply ? <div className="correspondence-filed"><b>答复已寄出</b><span>{selectedReply.summary}</span></div> : <p className="correspondence-skip">可以不回信，直接整理晨报；沉默不会失去线索、植物或任何后续章节。</p>}</div><footer>— {society.signoff}</footer></PaperCard></section>}
       <div className="report-grid">
         <PaperCard className="sleep-summary"><div className="paper-heading"><small>NIGHT IMPRESSION</small><b>第 {chapter} 枚夜印</b></div><div className="sleep-session-meta"><span>{lastSleepSession?.mode === "real" ? "真实夜班" : "演示夜班"}</span><b>{formatSleepDuration(lastSleepSession?.durationMinutes)}</b></div><div className="earned-seal"><Image src={nightSeal.src} alt={nightSeal.alt} width={150} height={150} /></div><p>{quality === "interrupted" ? "城市的声音有些断续，旅程较短，但这枚夜印仍完整记录了重要发现。" : quality === "regular" ? "一条完整而安静的标准路线，已经压进纸纤维里。" : "雾散得很早，夜印因此多留下一圈稀薄的金线。"}</p></PaperCard>
         <PaperCard className="journal"><div className="paper-heading"><small>LIN DU / FIELD NOTES</small><b>侦探日志</b></div><p>“{current.journal}”</p><span>— 林渡，清晨五点二十八分</span></PaperCard>

@@ -97,6 +97,40 @@ export const societyMemoryRecordSchema = z.object({
 });
 export type SocietyMemoryRecord = z.infer<typeof societyMemoryRecordSchema>;
 
+export const correspondenceStanceSchema = z.enum(["shelter", "restore", "witness"]);
+export type CorrespondenceStance = z.infer<typeof correspondenceStanceSchema>;
+
+export const correspondenceReplySchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  note: z.string(),
+  stance: correspondenceStanceSchema,
+  summary: z.string(),
+  echo: z.string(),
+});
+export type CorrespondenceReply = z.infer<typeof correspondenceReplySchema>;
+
+export const correspondencePromptSchema = z.object({
+  id: z.string(),
+  societyId: societyIdSchema,
+  standing: societyStandingSchema,
+  context: z.string(),
+  question: z.string(),
+  replies: z.tuple([correspondenceReplySchema, correspondenceReplySchema]),
+});
+export type CorrespondencePrompt = z.infer<typeof correspondencePromptSchema>;
+
+export const correspondenceRecordSchema = z.object({
+  chapter: z.number().int().min(1).max(5),
+  promptId: z.string(),
+  societyId: societyIdSchema,
+  standing: societyStandingSchema,
+  replyId: z.string(),
+  stance: correspondenceStanceSchema,
+  repliedAt: z.string().datetime(),
+});
+export type CorrespondenceRecord = z.infer<typeof correspondenceRecordSchema>;
+
 export const growthStageSchema = z.enum(["seed", "sprout", "leaf", "bloom"]);
 export type GrowthStage = z.infer<typeof growthStageSchema>;
 

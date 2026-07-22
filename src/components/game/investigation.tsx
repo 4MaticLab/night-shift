@@ -13,11 +13,12 @@ import { getPreparation } from "@/src/content/preparations";
 import { getRouteDirection } from "@/src/content/routes";
 import { nightBotanicals } from "@/src/content/botany";
 import { citySocieties, getSocietyTitle } from "@/src/content/societies";
+import { correspondencePostures, getCorrespondencePrompt, getCorrespondenceReply, getDominantCorrespondenceStance } from "@/src/content/correspondence";
 import { evidenceRelations } from "@/src/content/relations";
 import { useGameStore } from "@/src/stores/game-store";
 import { canUnlockTrueEnding, type EndingId } from "@/src/lib/game-engine/ending";
 import { formatSleepDuration } from "@/src/lib/game-engine/sleep-session";
-import type { SocietyMemoryRecord } from "@/src/lib/game-engine/schema";
+import type { CorrespondenceRecord, SocietyMemoryRecord } from "@/src/lib/game-engine/schema";
 import { BotanicalSpecimen, PaperCard, qualityCopy, Seal, SocietyCrest } from "./shared";
 
 export function CaseBoard() {
@@ -66,14 +67,16 @@ export function CaseBoard() {
 }
 
 export function Collection() {
-  const { unlockedCollectibleIds, nightSealIds, chapter, completedReports, preparationHistory, choiceHistory, growthHistory, societyHistory } = useGameStore();
+  const { unlockedCollectibleIds, nightSealIds, chapter, completedReports, preparationHistory, choiceHistory, growthHistory, societyHistory, correspondenceHistory } = useGameStore();
   const societyRecords = Object.values(societyHistory).filter((record): record is SocietyMemoryRecord => Boolean(record)).sort((a, b) => a.chapter - b.chapter);
+  const correspondenceRecords = Object.values(correspondenceHistory).filter((record): record is CorrespondenceRecord => Boolean(record));
   return <div className="collection-page">
     <div className="page-title"><div><p className="eyebrow">NIGHT CABINET · 夜间陈列柜</p><h2>时间没有消失。<br />城市也没有忘记。</h2></div><p>每次等待都会形成一枚夜印、长成一株植物、寄回一张明信片，也让某个地下社团记住你的做事方式。这里保存的不是分数，是五段可以重新讲述的时间。</p></div>
     <section className="city-favor-ledger">
       <div className="shelf-heading"><small>CITY REMEMBERS · {societyRecords.length}/5 NIGHTS</small><h3>城市人情簿</h3></div>
       <p className="society-ledger-intro">没有声望点数，也没有最优路线。城市只会依照你反复选择的调查姿态，更换称呼、礼数和愿意交给你的旁话。</p>
-      <div className="society-ledger-grid">{citySocieties.map((society) => { const records = societyRecords.filter((record) => record.societyId === society.id); const latest = records.at(-1); return <article className={latest ? `society-ledger-card touched standing-${latest.standing}` : "society-ledger-card"} key={society.id}><SocietyCrest societyId={society.id} compact /><div className="society-ledger-copy"><small>{society.archiveName}</small><h3>{society.name}</h3><p className="society-concern">关心 · {society.concern}</p><blockquote>“{society.publicRumor}”</blockquote><div className="society-current-address"><small>城里目前怎样称呼你</small><b>{latest ? getSocietyTitle(latest) : "尚未被正式称呼"}</b></div><p className="society-rule">内部规矩 · {society.privateRule}</p></div><div className="society-trace">{records.length ? records.map((record) => { const direction = getRouteDirection(record.chapter, record.choiceId); return <div key={record.chapter}><span>夜 0{record.chapter}</span><b>{direction.dispatchTitle}</b><small>{getSocietyTitle(record)}</small></div>; }) : <p>尚无一条已归来的路线惊动他们。</p>}</div></article>; })}</div>
+      <div className="society-ledger-grid">{citySocieties.map((society) => { const records = societyRecords.filter((record) => record.societyId === society.id); const latest = records.at(-1); return <article className={latest ? `society-ledger-card touched standing-${latest.standing}` : "society-ledger-card"} key={society.id}><SocietyCrest societyId={society.id} compact /><div className="society-ledger-copy"><small>{society.archiveName}</small><h3>{society.name}</h3><p className="society-concern">关心 · {society.concern}</p><blockquote>“{society.publicRumor}”</blockquote><div className="society-current-address"><small>城里目前怎样称呼你</small><b>{latest ? getSocietyTitle(latest) : "尚未被正式称呼"}</b></div><p className="society-rule">内部规矩 · {society.privateRule}</p></div><div className="society-trace">{records.length ? records.map((record) => { const direction = getRouteDirection(record.chapter, record.choiceId); const replyRecord = correspondenceHistory[record.chapter]; return <div key={record.chapter}><span>夜 0{record.chapter}</span><b>{direction.dispatchTitle}</b><small>{replyRecord ? "已回信" : "未回信"}</small></div>; }) : <p>尚无一条已归来的路线惊动他们。</p>}</div></article>; })}</div>
+      {societyRecords.length > 0 && <div className="correspondence-ledger"><div className="correspondence-ledger-heading"><small>RETURNED ANSWERS · {correspondenceRecords.length}/{societyRecords.length}</small><h4>问函与答复履历</h4><p>没有寄出的答复也会保留为空白，不影响任何案件成果。</p></div><div className="correspondence-ledger-grid">{societyRecords.map((memory) => { const society = citySocieties.find((item) => item.id === memory.societyId)!; const prompt = getCorrespondencePrompt(memory); const record = correspondenceHistory[memory.chapter]; const reply = record ? getCorrespondenceReply(record) : null; return <article className={reply ? "correspondence-ledger-entry answered" : "correspondence-ledger-entry"} key={memory.chapter}><small>夜 0{memory.chapter} · {society.name}</small><h5>{prompt.question}</h5>{reply ? <><div><small>你的答复</small><b>{reply.label}</b><p>{reply.summary}</p></div><blockquote><small>留下的余波</small>{reply.echo}</blockquote></> : <div className="unanswered"><small>未寄出的信封</small><b>这一夜没有答复</b><p>故事照常继续，城市没有替你的沉默扣除任何东西。</p></div>}</article>; })}</div></div>}
     </section>
     <section className="night-greenhouse">
       <div className="shelf-heading"><small>FOGLIGHT GREENHOUSE · {Object.keys(growthHistory).length}/5</small><h3>雾灯温室</h3></div>
@@ -92,14 +95,16 @@ export function ArchivePage() {
 }
 
 export function Ending() {
-  const { unlockedClueIds, unlockedCollectibleIds, confirmedRelations, endingId, chooseEnding, reset } = useGameStore();
+  const { unlockedClueIds, unlockedCollectibleIds, confirmedRelations, correspondenceHistory, endingId, chooseEnding, reset } = useGameStore();
   const trueReady = canUnlockTrueEnding({ unlockedClueIds, unlockedCollectibleIds, confirmedRelations });
+  const dominantStance = getDominantCorrespondenceStance(correspondenceHistory);
+  const cityAfterword = dominantStance ? correspondencePostures[dominantStance] : { title: "未寄出的答复", note: "你没有让任何社团替你固定立场。雾灯城把那些空信封也归了档：沉默不是失败，只是一种尚未交出的决定。" };
   const endings: Array<{ id: EndingId; icon: React.ReactNode; title: string; theme: string; result: string; locked?: boolean }> = [
     { id: "public", icon: <FileText />, title: "公开档案", theme: "真相属于所有人。", result: "全部证据被公开，私人收藏机构受到调查，部分资产陆续归还。伊芙琳再次消失。" },
     { id: "protect", icon: <KeyRound />, title: "保护证人", theme: "真相不应以牺牲证人为代价。", result: "证据被交给可信档案机构，伊芙琳的身份暂不公布。一张没有目的地的车票寄到了事务所。" },
     { id: "return", icon: <Flower2 />, title: "让失踪者自己决定", theme: "把证据，也把选择权交还给她。", result: "数周后，伊芙琳亲自署名的调查报告公开。林渡收到第九件藏品：一卷尚未冲洗的胶卷。", locked: !trueReady },
   ];
   const selected = endings.find((item) => item.id === endingId);
-  if (selected) return <main className="ending-reveal"><div className="ending-light" /><div className="ending-tram"><TramFront /></div><Seal>{selected.id === "return" ? "TRUE ENDING" : "CASE CLOSED"}</Seal><h1>{selected.title}</h1><p className="ending-theme">{selected.theme}</p><PaperCard><p>{selected.result}</p><hr /><p>林渡最后一封信：</p><blockquote>“我们总以为破案是替一件事写下句号。后来才明白，有些真相只是把笔还给真正应该写下它的人。”</blockquote></PaperCard><h2>城市里仍有许多灯，<br />只在你睡着以后亮起。</h2><button className="ghost-button" onClick={reset}><RotateCcw /> 重新调查</button></main>;
+  if (selected) return <main className="ending-reveal"><div className="ending-light" /><div className="ending-tram"><TramFront /></div><Seal>{selected.id === "return" ? "TRUE ENDING" : "CASE CLOSED"}</Seal><h1>{selected.title}</h1><p className="ending-theme">{selected.theme}</p><PaperCard><p>{selected.result}</p><hr /><p>林渡最后一封信：</p><blockquote>“我们总以为破案是替一件事写下句号。后来才明白，有些真相只是把笔还给真正应该写下它的人。”</blockquote><div className="city-afterword"><small>CITY POSTSCRIPT · 与结局资格无关</small><b>{cityAfterword.title}</b><p>{cityAfterword.note}</p></div></PaperCard><h2>城市里仍有许多灯，<br />只在你睡着以后亮起。</h2><button className="ghost-button" onClick={reset}><RotateCcw /> 重新调查</button></main>;
   return <main className="ending-choice"><div className="page-title"><div><p className="eyebrow">FINAL DECISION · 05:43</p><h2>最后的决定，<br />由你写进档案。</h2></div><p>伊芙琳把账册留在站台，却没有把决定也留下。三种真相，都有各自的代价。</p></div><div className="ending-cards">{endings.map((ending) => <button key={ending.id} disabled={ending.locked} onClick={() => chooseEnding(ending.id)} className={ending.id === "return" ? "true-ending" : ""}><span>{ending.icon}</span><small>{ending.locked ? `尚需 ${12 - unlockedClueIds.length} 条线索 / ${3 - confirmedRelations.length} 条关系` : "可选择"}</small><h3>{ending.title}</h3><p>{ending.theme}</p><ArrowRight /></button>)}</div></main>;
 }

@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { nightGrowthRecordSchema, type NightGrowthRecord, type SleepMode, type SleepQuality, type SleepSession, type SocietyMemoryRecord } from "@/src/lib/game-engine/schema";
+import { nightGrowthRecordSchema, type CorrespondenceRecord, type NightGrowthRecord, type SleepMode, type SleepQuality, type SleepSession, type SocietyMemoryRecord } from "@/src/lib/game-engine/schema";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import type { PreparationId } from "@/src/content/preparations";
 import { finishSleepSession, startSleepSession } from "@/src/lib/game-engine/sleep-session";
@@ -10,6 +10,7 @@ import { matchEvidenceRelation } from "@/src/content/relations";
 import { canChooseEnding, type EndingId } from "@/src/lib/game-engine/ending";
 import { getDefaultChoiceId } from "@/src/content/routes";
 import { createSocietyMemory } from "@/src/content/societies";
+import { createCorrespondenceRecord, getCorrespondencePrompt } from "@/src/content/correspondence";
 
 export type Phase = "day" | "ready" | "night" | "morning" | "ending";
 
@@ -27,6 +28,7 @@ export interface GameState {
   choiceHistory: Partial<Record<number, string>>;
   growthHistory: Partial<Record<number, NightGrowthRecord>>;
   societyHistory: Partial<Record<number, SocietyMemoryRecord>>;
+  correspondenceHistory: Partial<Record<number, CorrespondenceRecord>>;
   unlockedClueIds: string[];
   unlockedCollectibleIds: string[];
   completedReports: number[];
@@ -37,6 +39,7 @@ export interface GameState {
   selectChoice: (choice: string) => void;
   startNight: (quality: SleepQuality, preparationId: PreparationId, mode: SleepMode) => void;
   finishNight: () => void;
+  answerCorrespondence: (chapter: number, replyId: string) => boolean;
   continueDay: () => void;
   connectClues: (firstClueId: string, secondClueId: string) => string | null;
   jumpToChapter: (chapter: number) => void;
@@ -59,6 +62,7 @@ const initial = {
   choiceHistory: {} as Partial<Record<number, string>>,
   growthHistory: {} as Partial<Record<number, NightGrowthRecord>>,
   societyHistory: {} as Partial<Record<number, SocietyMemoryRecord>>,
+  correspondenceHistory: {} as Partial<Record<number, CorrespondenceRecord>>,
   unlockedClueIds: [] as string[],
   unlockedCollectibleIds: [] as string[],
   completedReports: [] as number[],
@@ -118,6 +122,19 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
       nightSealIds: Array.from(new Set([...state.nightSealIds, state.chapter])),
     });
   },
+  answerCorrespondence: (chapter, replyId) => {
+    const state = get();
+    if (state.correspondenceHistory[chapter]) return false;
+    const memory = state.societyHistory[chapter];
+    if (!memory) return false;
+    try {
+      const record = createCorrespondenceRecord(memory, replyId, new Date().toISOString());
+      set({ correspondenceHistory: { ...state.correspondenceHistory, [chapter]: record } });
+      return true;
+    } catch {
+      return false;
+    }
+  },
   continueDay: () => {
     const state = get();
     if (state.chapter >= 5) set({ phase: "ending" });
@@ -136,7 +153,8 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
     const preparationHistory = Object.fromEntries(priorChapters.map((number) => [number, "side-lamp" as PreparationId]));
     const choiceHistory = Object.fromEntries(priorChapters.map((number) => [number, getDefaultChoiceId(number)]));
     const growthHistory = createLegacyGrowthHistory(priorChapters, preparationHistory, choiceHistory);
-    set({ ...initial, started: true, chapter, phase: "day", nightSealIds: priorChapters, completedReports: priorChapters, preparationHistory, choiceHistory, growthHistory, societyHistory: createLegacySocietyHistory(priorChapters, choiceHistory, growthHistory), unlockedClueIds: chapter === 1 ? [] : Array.from({ length: Math.min(12, (chapter - 1) * 3) }, (_, i) => ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "room-307", "transport-photo", "scratched-map", "museum-tag", "ledger-clasp", "evelyn-message"][i]), unlockedCollectibleIds: Array.from({ length: Math.min(8, (chapter - 1) * 2) }, (_, i) => ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"][i]) });
+    const societyHistory = createLegacySocietyHistory(priorChapters, choiceHistory, growthHistory);
+    set({ ...initial, started: true, chapter, phase: "day", nightSealIds: priorChapters, completedReports: priorChapters, preparationHistory, choiceHistory, growthHistory, societyHistory, correspondenceHistory: createDemoCorrespondenceHistory(priorChapters, societyHistory), unlockedClueIds: chapter === 1 ? [] : Array.from({ length: Math.min(12, (chapter - 1) * 3) }, (_, i) => ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "room-307", "transport-photo", "scratched-map", "museum-tag", "ledger-clasp", "evelyn-message"][i]), unlockedCollectibleIds: Array.from({ length: Math.min(8, (chapter - 1) * 2) }, (_, i) => ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"][i]) });
   },
   unlockBoard: (confirmRelations = false) => set({ unlockedClueIds: ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "scratched-map", "room-307", "transport-photo", "museum-tag", "ledger-clasp", "evelyn-message"], unlockedCollectibleIds: ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"], confirmedRelations: confirmRelations ? ["line-institution", "mina-evelyn", "gideon-escape"] : [] }),
   chooseEnding: (endingId) => {
@@ -146,7 +164,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   reset: () => set({ ...initial, endingId: undefined }),
 }), {
   name: "night-shift-save-v1",
-  version: 6,
+  version: 7,
   migrate: migrateGameState,
 }));
 
@@ -165,6 +183,7 @@ export function migrateGameState(persistedState: unknown): GameState {
     choiceHistory,
     growthHistory,
     societyHistory: persisted.societyHistory ?? createLegacySocietyHistory(completedReports, choiceHistory, growthHistory),
+    correspondenceHistory: persisted.correspondenceHistory ?? {},
     nightSealIds: persisted.nightSealIds ?? [],
     selectedPreparationId: persisted.selectedPreparationId ?? "",
   } as GameState;
@@ -193,4 +212,16 @@ function createLegacySocietyHistory(
     history[chapter] = createSocietyMemory(chapter, choiceId, history, completedAt);
   }
   return history;
+}
+
+function createDemoCorrespondenceHistory(
+  completedReports: number[],
+  societyHistory: Partial<Record<number, SocietyMemoryRecord>>,
+): Partial<Record<number, CorrespondenceRecord>> {
+  return Object.fromEntries(completedReports.flatMap((chapter) => {
+    const memory = societyHistory[chapter];
+    if (!memory) return [];
+    const prompt = getCorrespondencePrompt(memory);
+    return [[chapter, createCorrespondenceRecord(memory, prompt.replies[0].id, `2026-07-${String(10 + chapter).padStart(2, "0")}T06:02:00.000Z`)]];
+  }));
 }

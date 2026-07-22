@@ -25,6 +25,9 @@ test("starts a case and reaches the first morning report", async ({ page }) => {
   await expect(page.getByText("错页登记处来函")).toBeVisible();
   await expect(page.getByRole("heading", { name: "致「待核旁注」" })).toBeVisible();
   await expect(page.getByText(/你让一张作废票据反过来审问了出票制度/)).toBeVisible();
+  await page.getByRole("button", { name: /让错字继续保护地址/ }).click();
+  await expect(page.getByText("答复已寄出")).toBeVisible();
+  await expect(page.getByText(/让空白先保护活人/)).toBeVisible();
   await expect(page.getByText(/断续|普通|安稳/).first()).toBeVisible();
   await expect(page.getByText(/为什么一张已经停运七年的车票/)).toBeVisible();
 });
@@ -43,8 +46,23 @@ test("keeps returned postcards in the journey album", async ({ page }) => {
   await expect(page.getByText("城市人情簿")).toBeVisible();
   await expect(page.getByRole("heading", { name: "错页登记处" })).toBeVisible();
   await expect(page.locator(".society-current-address b", { hasText: "可借阅的旁注" })).toBeVisible();
+  await expect(page.getByText("问函与答复履历")).toBeVisible();
+  await expect(page.getByText("让错字继续保护地址")).toBeVisible();
   await expect(page.getByRole("heading", { name: "票根灯蕨" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "四十三日夜香" })).toBeVisible();
+});
+
+test("returns a prior society answer in a later letter", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /DEMO MODE/ }).click();
+  await page.getByRole("button", { name: /03 没有退房的307/ }).click();
+  await page.getByRole("button", { name: /替307号房完成退房/ }).click();
+  await page.getByRole("button", { name: /今晚交给你了/ }).click();
+  await page.getByRole("button", { name: /跳到清晨/ }).click();
+
+  await expect(page.getByText(/上次答复的余波/)).toBeVisible();
+  await expect(page.getByText(/不存在的申请如今有了你的署名/)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "致「获准误分类者」" })).toBeVisible();
 });
 
 test("restores and settles a real night after reload", async ({ page }) => {

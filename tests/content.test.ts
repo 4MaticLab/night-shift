@@ -14,6 +14,7 @@ import { evidenceRelations, matchEvidenceRelation } from "@/src/content/relation
 import { getDefaultChoiceId, getRouteDirection, routeDirections } from "@/src/content/routes";
 import { getNightBotanical, growthStageFromProgress, nightBotanicals } from "@/src/content/botany";
 import { citySocieties, createSocietyMemory, getCitySociety, getSocietyLetter, getSocietyTitle } from "@/src/content/societies";
+import { correspondencePostures, correspondencePrompts, createCorrespondenceRecord, getCorrespondencePrompt, getCorrespondenceReply, getDominantCorrespondenceStance, getLatestSocietyReply } from "@/src/content/correspondence";
 
 describe("Night Shift case content", () => {
   it("contains the complete five-night mystery", () => {
@@ -90,6 +91,37 @@ describe("Night Shift case content", () => {
     expect(new Set([getSocietyTitle(first), getSocietyTitle(second), getSocietyTitle(third)])).toHaveLength(3);
     expect(new Set([getSocietyLetter(first), getSocietyLetter(second), getSocietyLetter(third)])).toHaveLength(3);
     expect(getCitySociety(first.societyId).name).toBe("错页登记处");
+  });
+
+  it("defines nine society questions and eighteen balanced, non-scoring replies", () => {
+    expect(correspondencePrompts).toHaveLength(9);
+    expect(new Set(correspondencePrompts.map((prompt) => `${prompt.societyId}/${prompt.standing}`))).toHaveLength(9);
+    const replies = correspondencePrompts.flatMap((prompt) => prompt.replies);
+    expect(replies).toHaveLength(18);
+    expect(new Set(replies.map((reply) => reply.id))).toHaveLength(18);
+    expect(replies.filter((reply) => reply.stance === "shelter")).toHaveLength(6);
+    expect(replies.filter((reply) => reply.stance === "restore")).toHaveLength(6);
+    expect(replies.filter((reply) => reply.stance === "witness")).toHaveLength(6);
+    expect(Object.keys(correspondencePostures).sort()).toEqual(["restore", "shelter", "witness"]);
+  });
+
+  it("returns only the latest prior answer from the same society", () => {
+    const firstMemory = createSocietyMemory(1, "source", {}, "2026-07-11T05:28:00.000Z");
+    const secondMemory = createSocietyMemory(2, "mina", { 1: firstMemory }, "2026-07-12T05:28:00.000Z");
+    const otherMemory = createSocietyMemory(3, "gideon", { 1: firstMemory, 2: secondMemory }, "2026-07-13T05:28:00.000Z");
+    const firstPrompt = getCorrespondencePrompt(firstMemory);
+    const secondPrompt = getCorrespondencePrompt(secondMemory);
+    const first = createCorrespondenceRecord(firstMemory, firstPrompt.replies[0].id, "2026-07-11T06:02:00.000Z");
+    const second = createCorrespondenceRecord(secondMemory, secondPrompt.replies[0].id, "2026-07-12T06:02:00.000Z");
+    const otherPrompt = getCorrespondencePrompt(otherMemory);
+    const other = createCorrespondenceRecord(otherMemory, otherPrompt.replies[1].id, "2026-07-13T06:02:00.000Z");
+    const history = { 1: first, 2: second, 3: other };
+
+    expect(getLatestSocietyReply(history, "misfiled-registry", 2)).toEqual(first);
+    expect(getLatestSocietyReply(history, "misfiled-registry", 5)).toEqual(second);
+    expect(getLatestSocietyReply(history, "mislaid-consulate", 3)).toBeUndefined();
+    expect(getCorrespondenceReply(second).echo).toMatch(/申请|抽屉/);
+    expect(getDominantCorrespondenceStance(history)).toBe(other.stance);
   });
 
   it("defaults legacy nights to the first direction and rejects invalid choices", () => {

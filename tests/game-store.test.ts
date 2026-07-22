@@ -1,5 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { nightShiftCase } from "@/src/content/case";
+import { getCorrespondencePrompt } from "@/src/content/correspondence";
 
 type StoreModule = typeof import("@/src/stores/game-store");
 let storeModule: StoreModule;
@@ -53,6 +54,14 @@ describe("Night Shift game store", () => {
         chapter: chapter.number,
         choiceId: chosenDirection,
       });
+      const prompt = getCorrespondencePrompt(state.societyHistory[chapter.number]!);
+      expect(state.answerCorrespondence(chapter.number, prompt.replies[0].id)).toBe(true);
+      expect(storeModule.useGameStore.getState().answerCorrespondence(chapter.number, prompt.replies[1].id)).toBe(false);
+      expect(storeModule.useGameStore.getState().correspondenceHistory[chapter.number]).toMatchObject({
+        chapter: chapter.number,
+        promptId: prompt.id,
+        replyId: prompt.replies[0].id,
+      });
       state.continueDay();
     }
 
@@ -61,6 +70,7 @@ describe("Night Shift game store", () => {
     expect(completed.completedReports).toHaveLength(5);
     expect(completed.nightSealIds).toHaveLength(5);
     expect(Object.keys(completed.societyHistory)).toHaveLength(5);
+    expect(Object.keys(completed.correspondenceHistory)).toHaveLength(5);
     expect(completed.unlockedClueIds).toHaveLength(12);
   });
 
@@ -100,6 +110,7 @@ describe("Night Shift game store", () => {
     expect(migrated.choiceHistory).toEqual({});
     expect(migrated.growthHistory).toEqual({});
     expect(migrated.societyHistory).toEqual({});
+    expect(migrated.correspondenceHistory).toEqual({});
     expect(migrated.nightSealIds).toEqual([]);
     expect(migrated.selectedPreparationId).toBe("");
   });
@@ -114,8 +125,10 @@ describe("Night Shift game store", () => {
     expect(state.choiceHistory).toEqual({ 1: "source", 2: "mina", 3: "hotel" });
     expect(Object.keys(state.growthHistory)).toEqual(["1", "2", "3"]);
     expect(Object.keys(state.societyHistory)).toEqual(["1", "2", "3"]);
+    expect(Object.keys(state.correspondenceHistory)).toEqual(["1", "2", "3"]);
     expect(state.growthHistory[2]).toMatchObject({ chapter: 2, quality: "regular", durationMinutes: 390, choiceId: "mina", preparationId: "side-lamp" });
     expect(state.societyHistory[3]).toMatchObject({ chapter: 3, choiceId: "hotel", societyId: "misfiled-registry", standing: "entrusted" });
+    expect(state.correspondenceHistory[2]).toMatchObject({ chapter: 2, societyId: "misfiled-registry", standing: "known", replyId: "registry-known-witness" });
   });
 
   it("reconstructs complete greenhouse records for pre-v5 completed reports", () => {
@@ -129,6 +142,26 @@ describe("Night Shift game store", () => {
     expect(migrated.growthHistory[2]).toMatchObject({ chapter: 2, choiceId: "mina", preparationId: "side-lamp", quality: "regular" });
     expect(migrated.societyHistory[1]).toMatchObject({ chapter: 1, choiceId: "track", societyId: "afterlight-cartographers", standing: "noticed" });
     expect(migrated.societyHistory[2]).toMatchObject({ chapter: 2, choiceId: "mina", societyId: "misfiled-registry", standing: "noticed" });
+    expect(migrated.correspondenceHistory).toEqual({});
+  });
+
+  it("lets an unanswered letter pass without changing fixed night rewards", () => {
+    const state = storeModule.useGameStore.getState();
+    state.begin();
+    state.selectChoice("source");
+    storeModule.useGameStore.getState().startNight("interrupted", "tram-fare", "demo");
+    storeModule.useGameStore.getState().finishNight();
+    const afterNight = storeModule.useGameStore.getState();
+    const clueIds = [...afterNight.unlockedClueIds];
+    const collectibleIds = [...afterNight.unlockedCollectibleIds];
+
+    expect(afterNight.correspondenceHistory).toEqual({});
+    afterNight.continueDay();
+    const continued = storeModule.useGameStore.getState();
+    expect(continued.chapter).toBe(2);
+    expect(continued.phase).toBe("day");
+    expect(continued.unlockedClueIds).toEqual(clueIds);
+    expect(continued.unlockedCollectibleIds).toEqual(collectibleIds);
   });
 
   it("supports all three endings and protects the true ending gate", () => {
