@@ -62,6 +62,8 @@ Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：分别覆盖 Demo
 
 第十个私密版本加入错页登记处、失物领事馆与熄灯测绘社，十五条方向均匀映射三种调查姿态；交接前会提示可能惊动谁，晨报按跨夜历史更换称呼与来函，收藏页保存城市人情簿。关系只改变礼数和旁支文本，完成 [[plans/0008-city-societies-and-remembered-favors]]。
 
+第十一个私密版本为三个社团的三层关系加入九封问函和十八种答复；玩家可以回信或保持沉默，同社团后续来函只引用最近一次答复。问函履历进入城市人情簿，结局完成后显示非资格型城市附言，完成 [[plans/0009-city-correspondence-and-reply-echoes]]。
+
 ## 相关文档
 
 - [[docs/architecture]]
