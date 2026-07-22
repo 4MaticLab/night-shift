@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前主计划是 [[plans/0010-unasked-for-souvenirs-and-pocket-drawer]]：让林渡每夜带回一件玩家没有精确指定的城市小物，把旅行式等待补上真正可期待的意外成果。
+当前主计划是 [[plans/0011-foglight-opportunity-notices-and-daytime-storylets]]：让雾灯城在主案之外主动递来可跳过、可选择、会留下轻微余波的白天短章。
 
 ## 计划清单
 
@@ -19,7 +19,8 @@
 | [[plans/0007-night-greenhouse-and-time-growth]] | `completed` | `auto` | P0 | 6/6 | 已发布五株夜生植物、四阶段成长与雾灯温室 |
 | [[plans/0008-city-societies-and-remembered-favors]] | `completed` | `auto` | P0 | 6/6 | 已发布三个地下社团、跨夜称呼、来函与城市人情簿 |
 | [[plans/0009-city-correspondence-and-reply-echoes]] | `completed` | `auto` | P0 | 6/6 | 已发布九封问函、十八种答复、跨夜余波与结局附言 |
-| [[plans/0010-unasked-for-souvenirs-and-pocket-drawer]] | `in_progress` | `auto` | P0 | 5/6 | Git checkpoint 后私密发布第十二版 |
+| [[plans/0010-unasked-for-souvenirs-and-pocket-drawer]] | `completed` | `auto` | P0 | 6/6 | 已发布九件纪念物、v8 稳定结算与口袋抽屉 |
+| [[plans/0011-foglight-opportunity-notices-and-daytime-storylets]] | `in_progress` | `auto` | P0 | 0/6 | 审计白天阶段并冻结十二张机会告示内容矩阵 |
 
 ## 状态规则
 
