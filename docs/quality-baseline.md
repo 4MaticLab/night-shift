@@ -39,11 +39,11 @@ npm run test:render
 npm run docs:check
 ```
 
-Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：分别覆盖 Demo 方向事件与植物成长、晨报纪念物揭示与无优势说明、首封问函答复、同社团后续余波、归来明信片、城市人情簿与答复履历、口袋抽屉、雾灯温室、真实交接刷新恢复和两证物核心推论。`tests/game-store.test.ts` 在内存浏览器存储上覆盖五夜方向、随身物、成长、关系、答复与纪念物历史、无答复继续、迁移、恢复与结局。浏览器测试使用本机 Chrome channel，避免依赖额外下载的 Playwright 浏览器。
+Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：除 Demo 方向事件与植物成长、晨报纪念物揭示、跨夜余波、归档、真实交接刷新恢复和两证物核心推论外，还会从新档无章节跳转地连续完成五夜并选择结局。390 × 844 浏览器路径会真实操作首夜闭环、收藏、档案和两证物连接，并在关键页面断言不存在全局横向溢出。`tests/game-store.test.ts` 在内存浏览器存储上覆盖五夜方向、随身物、成长、关系、答复与纪念物历史、无答复继续、迁移、恢复与结局。浏览器测试使用本机 Chrome channel，避免依赖额外下载的 Playwright 浏览器。
 
 ## 已知边界
 
-- 浏览器端视觉回归、完整五夜 E2E 和移动端交互尚未纳入自动验证。
+- 浏览器端尚未建立像素截图基线或多设备／多浏览器矩阵；当前响应式证据聚焦 390 × 844 Chrome 关键路径。
 - 直接运行原生 `tsc --noEmit` 会缺少 Cloudflare Worker 全局类型；项目正式的 Vinext 生产构建不受影响。
 
 完成的工程加固见 [[plans/0003-mvp-quality-hardening]]；当前时间成长升级见 [[plans/0007-night-greenhouse-and-time-growth]]。
@@ -79,6 +79,8 @@ Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：分别覆盖 Demo
 第十五个私密版本为灯港区、旧子午区与玻璃丘加入三张原创城市版画，并在档案页按第 1、3、4 夜进度展开公共说法、城市规矩与固定地标，完成 [[plans/0013-foglight-district-atlas]]。
 
 第十六个私密版本用交接、夜行、归来与裁决四张原创横幅重建核心流程分幕；林渡造型与暖纸蚀刻媒介保持连续，夜间路线、晨报标题和结局交互继续位于图像之上，完成 [[plans/0014-four-act-header-triptych-and-ending-tableau]]。
+
+第十七个私密版本把从新档连续完成五夜并选择结局、390 × 844 首夜闭环、长档案与案件板连接纳入 Playwright；同时把移动案件板的推论面板移到证物画布下方，消除触摸遮挡，完成 [[plans/0015-full-cycle-and-mobile-proof]]。
 
 ## 相关文档
 

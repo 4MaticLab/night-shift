@@ -9,6 +9,10 @@ async function openFirstNight(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: /让纸张先开口/ }).click();
 }
 
+async function expectNoPageOverflow(page: import("@playwright/test").Page) {
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+}
+
 test("starts a case and reaches the first morning report", async ({ page }) => {
   await openFirstNight(page);
   await expect(page.getByText(/可能惊动 · 错页登记处/)).toBeVisible();
@@ -146,4 +150,64 @@ test("carries the hidden-platform tableau through final choice and ending", asyn
   await page.getByRole("button", { name: /公开档案/ }).click();
   await expect(page.getByRole("heading", { name: "公开档案" })).toBeVisible();
   await expect(page.locator(".ending-background")).toHaveAttribute("src", /hidden-platform-tableau-v1/);
+});
+
+test("completes all five nights from a new save without chapter jumps", async ({ page }) => {
+  const reportTitles = ["不存在的车票", "每隔四十三天的花", "没有退房的307", "地图上被刮掉的线", "最后一班车"];
+  await openFirstNight(page);
+
+  for (let chapter = 1; chapter <= 5; chapter += 1) {
+    if (chapter > 1) {
+      await page.getByRole("button", { name: /^今晚$/ }).click();
+      await page.getByRole("button", { name: /全部收起，不拆/ }).click();
+      await page.locator(".choice-list .choice").first().click();
+    }
+
+    await page.getByRole("button", { name: /今晚交给你了/ }).click();
+    await page.getByRole("button", { name: /跳到清晨/ }).click();
+    await expect(page.locator(".report-hero").getByRole("heading", { name: reportTitles[chapter - 1] })).toBeVisible();
+    await expect(page.locator(".sleep-summary").getByText(`第 ${chapter} 枚夜印`)).toBeVisible();
+    await page.getByRole("button", { name: chapter === 5 ? /做出最终决定/ : /整理线索，准备下一夜/ }).click();
+  }
+
+  await expect(page.getByRole("heading", { name: /最后的决定/ })).toBeVisible();
+  await page.getByRole("button", { name: /保护证人/ }).click();
+  await expect(page.getByRole("heading", { name: "保护证人" })).toBeVisible();
+});
+
+test.describe("mobile 390x844", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("keeps the first-night loop touchable without page overflow", async ({ page }) => {
+    await openFirstNight(page);
+    await expectNoPageOverflow(page);
+    await page.getByRole("button", { name: /今晚交给你了/ }).click();
+    await expectNoPageOverflow(page);
+    await page.getByRole("button", { name: /跳到清晨/ }).click();
+    await expect(page.getByText("昨夜调查完成")).toBeVisible();
+    await expectNoPageOverflow(page);
+    await page.getByRole("button", { name: /整理线索，准备下一夜/ }).click();
+    await expect(page.getByRole("button", { name: "案件板" })).toBeVisible();
+  });
+
+  test("opens long collections and connects evidence on a phone", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: /DEMO MODE/ }).click();
+    await page.getByRole("button", { name: /04 地图上被刮掉的线/ }).click();
+    await page.getByRole("button", { name: "收藏", exact: true }).click();
+    await expect(page.getByText("雾灯温室")).toBeVisible();
+    await expectNoPageOverflow(page);
+    await page.getByRole("button", { name: "档案", exact: true }).click();
+    await expect(page.getByText("雾灯城分区志")).toBeVisible();
+    await expectNoPageOverflow(page);
+
+    await page.getByRole("button", { name: /DEMO/ }).click();
+    await page.getByRole("button", { name: /解锁完整案件板/ }).click();
+    await expect(page.locator(".demo-drawer")).toHaveCount(0);
+    await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
+    await page.getByRole("button", { name: /^OBJECT · 02 未寄出的明信片/ }).click();
+    await page.getByRole("button", { name: /建立证物连接/ }).click();
+    await expect(page.getByText("米娜知道伊芙琳仍然活着")).toBeVisible();
+    await expectNoPageOverflow(page);
+  });
 });
