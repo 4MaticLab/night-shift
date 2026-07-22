@@ -32,6 +32,10 @@ Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`，覆盖开始案�
 
 这些边界的候选改进见 [[plans/0003-mvp-quality-hardening]]。
 
+## 最近发布
+
+2026-07-23 的第二个私密版本已包含文学性城市语气、三件随身物、15 段确定性回响、五枚夜印、八件物证插画和新版分享封面。对应完成计划为 [[plans/0004-literary-city-and-waiting-loop]]。
+
 ## 相关文档
 
 - [[docs/architecture]]

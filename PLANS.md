@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前主计划是 [[plans/0004-literary-city-and-waiting-loop]]：把文学性城市叙事、准备—等待—回收循环和新美术资产整合为游戏的长期北极星。
+[[plans/0004-literary-city-and-waiting-loop]] 已完成并发布。下一项可自动开工的主计划回到 [[plans/0003-mvp-quality-hardening]]：优先把真实跨夜等待、本地存档恢复和证物连线做成长期玩法基础。
 
 ## 计划清单
 
@@ -12,8 +12,8 @@
 |---|---|---|---:|---:|---|
 | [[plans/0001-hackathon-mvp]] | `completed` | `manual` | P0 | 7/7 | 已发布首个可玩版本 |
 | [[plans/0002-docs-and-plans-system]] | `completed` | `manual` | P0 | 6/6 | 按新规范维护后续工作 |
-| [[plans/0003-mvp-quality-hardening]] | `approved` | `auto` | P1 | 0/6 | 开工时切换为 `in_progress` |
-| [[plans/0004-literary-city-and-waiting-loop]] | `in_progress` | `auto` | P0 | 7/8 | 更新分享封面并发布第一轮升级 |
+| [[plans/0003-mvp-quality-hardening]] | `approved` | `auto` | P0 | 0/6 | 下一轮切换为 `in_progress` |
+| [[plans/0004-literary-city-and-waiting-loop]] | `completed` | `auto` | P0 | 8/8 | 已发布第一轮北极星升级 |
 
 ## 状态规则
 
