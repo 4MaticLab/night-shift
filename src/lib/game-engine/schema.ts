@@ -18,6 +18,7 @@ export const collectibleSchema = z.object({
   id: z.string(),
   title: z.string(),
   glyph: z.string(),
+  assetId: z.string(),
   surfaceDescription: z.string(),
   revealedDescription: z.string(),
   district: z.string(),
@@ -30,6 +31,7 @@ export const chapterSchema = z.object({
   number: z.number().int().min(1).max(5),
   title: z.string(),
   subtitle: z.string(),
+  cityAside: z.string(),
   question: z.string(),
   choices: z.array(z.object({ id: z.string(), label: z.string(), note: z.string() })).length(3),
   clueIds: z.array(z.string()).min(1),
@@ -60,4 +62,3 @@ export const caseSchema = z.object({
     });
   });
 });
-

@@ -12,7 +12,8 @@ import {
 import { Background, BackgroundVariant, Controls, ReactFlow, type Edge, type Node } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { nightShiftCase } from "@/src/content/case";
-import { assets } from "@/src/content/assets";
+import { assets, getAsset, getNightSealAsset } from "@/src/content/assets";
+import { getPreparation, preparations, type PreparationId } from "@/src/content/preparations";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import type { SleepQuality } from "@/src/lib/game-engine/schema";
 import { useGameStore } from "@/src/stores/game-store";
@@ -95,10 +96,11 @@ function BottomNav({ view, setView }: { view: View; setView: (view: View) => voi
   return <nav className="bottom-nav">{items.map(([id, icon, label]) => <button className={view === id ? "active" : ""} key={id} onClick={() => setView(id)}>{icon}<span>{label}</span></button>)}</nav>;
 }
 
-function Tonight({ onLaunch }: { onLaunch: (quality: SleepQuality) => void }) {
+function Tonight({ onLaunch }: { onLaunch: (quality: SleepQuality, preparationId: PreparationId) => void }) {
   const { chapter, selectedChoice, selectChoice, phase } = useGameStore();
   const current = nightShiftCase.chapters[chapter - 1];
   const [quality, setQuality] = useState<SleepQuality>("regular");
+  const [preparationId, setPreparationId] = useState<PreparationId>("side-lamp");
   return (
     <div className="content-grid tonight-page">
       <section className="desk-scene">
@@ -109,9 +111,11 @@ function Tonight({ onLaunch }: { onLaunch: (quality: SleepQuality) => void }) {
       <section className="plan-panel">
         <div className="section-label"><span>夜 {chapter}</span><small>{current.title}</small></div>
         <h3>{current.question}</h3>
+        <p className="city-aside">“{current.cityAside}”</p>
         <div className="choice-list">{current.choices.map((choice, i) => <button key={choice.id} className={selectedChoice === choice.id ? "choice selected" : "choice"} onClick={() => selectChoice(choice.id)}><span>0{i + 1}</span><div><b>{choice.label}</b><small>{choice.note}</small></div>{selectedChoice === choice.id ? <Check /> : <ChevronRight />}</button>)}</div>
+        <div className="preparation-box"><div className="preparation-heading"><small>PACK ONE THING · 随身物</small><b>准备，然后放手</b></div><div className="preparation-list">{preparations.map((item) => { const Icon = item.icon; return <button key={item.id} className={preparationId === item.id ? "preparation selected" : "preparation"} onClick={() => setPreparationId(item.id)}><span><Icon size={19} /></span><div><b>{item.title}</b><small>{item.promise}</small></div>{preparationId === item.id && <Check size={15} />}</button>; })}</div><p>{getPreparation(preparationId)?.description}</p></div>
         <div className="quality-box"><div><small>DEMO SLEEP</small><b>今晚的旅程长度</b></div><div className="quality-tabs">{(Object.keys(qualityCopy) as SleepQuality[]).map((id) => <button key={id} className={quality === id ? "active" : ""} onClick={() => setQuality(id)} title={qualityCopy[id].note}>{qualityCopy[id].label}</button>)}</div></div>
-        <button disabled={!selectedChoice || phase !== "ready"} className="handoff-button" onClick={() => onLaunch(quality)}>今晚交给你了 <Moon size={18} /></button>
+        <button disabled={!selectedChoice || phase !== "ready"} className="handoff-button" onClick={() => onLaunch(quality, preparationId)}>今晚交给你了 <Moon size={18} /></button>
       </section>
     </div>
   );
@@ -122,8 +126,10 @@ function CityRoute({ progress = 100, compact = false }: { progress?: number; com
 }
 
 function NightRun({ onFinish }: { onFinish: () => void }) {
-  const { chapter, quality } = useGameStore();
+  const { chapter, quality, selectedPreparationId } = useGameStore();
   const current = nightShiftCase.chapters[chapter - 1];
+  const preparation = getPreparation(selectedPreparationId);
+  const nightSeal = getNightSealAsset(chapter);
   const [seconds, setSeconds] = useState(12);
   useEffect(() => {
     const timer = window.setInterval(() => setSeconds((value) => {
@@ -137,7 +143,8 @@ function NightRun({ onFinish }: { onFinish: () => void }) {
   return (
     <main className="night-run">
       <div className="night-stars" /><div className="night-header"><div className="brand-mark compact"><span>NS</span><div><b>夜班进行中</b><small>第 {chapter} 夜 · {qualityCopy[quality].time}</small></div></div><button onClick={onFinish}>跳到清晨 <ArrowRight size={16} /></button></div>
-      <div className="night-title"><p>你休息的时候，他会继续。</p><h2>{current.title}</h2><span>模拟调查将在 {seconds} 秒后完成</span></div>
+      <div className="night-title"><p>你休息的时候，他会继续。</p><h2>{current.title}</h2><span>林渡带着{preparation?.shortTitle ?? "笔记本"}出发 · 夜印正在形成 · {seconds} 秒</span></div>
+      <div className="night-seal-growth" aria-label={`第${chapter}夜的夜印正在形成`}><Image className="seal-ghost" src={nightSeal.src} alt="" width={118} height={118} /><span style={{ height: `${progress}%` }}><Image src={nightSeal.src} alt={nightSeal.alt} width={118} height={118} /></span></div>
       <CityRoute progress={progress} />
       <div className="event-ticker">{current.events.slice(0, eventCount).map((event, index) => <motion.div key={event} initial={{ opacity: 0, x: -10 }} animate={{ opacity: index === eventCount - 1 ? 1 : .45, x: 0 }}><i />{event}</motion.div>)}</div>
       <div className="night-progress"><span style={{ width: `${progress}%` }} /></div>
@@ -146,20 +153,23 @@ function NightRun({ onFinish }: { onFinish: () => void }) {
 }
 
 function MorningReport({ onContinue }: { onContinue: () => void }) {
-  const { chapter, quality } = useGameStore();
+  const { chapter, quality, selectedPreparationId } = useGameStore();
   const current = nightShiftCase.chapters[chapter - 1];
-  const result = resolveNight(chapter, quality);
+  const result = resolveNight(chapter, quality, selectedPreparationId);
+  const preparation = getPreparation(selectedPreparationId);
+  const nightSeal = getNightSealAsset(chapter);
   const foundClues = nightShiftCase.clues.filter((item) => result.clueIds.includes(item.id));
   const foundItems = nightShiftCase.collectibles.filter((item) => result.collectibleIds.includes(item.id));
   return (
     <div className="report-wrap">
       <section className="report-hero"><div><Seal>调查报告 · 0{chapter}</Seal><p>昨夜调查完成</p><h2>{current.title}</h2><small>记录人：林渡 · 雾灯城 · 05:28</small></div><div className="dawn-window"><span /><TramFront /></div></section>
       <div className="report-grid">
-        <PaperCard className="sleep-summary"><div className="paper-heading"><small>SLEEP WINDOW</small><b>昨夜旅程</b></div><div className="sleep-number">{quality === "interrupted" ? "4:08" : quality === "regular" ? "6:32" : "8:04"}<small>小时</small></div><p>{quality === "interrupted" ? "城市的声音有些断续，林渡比预计更早回来，但仍带回了重要发现。" : quality === "regular" ? "一次完整而安静的标准路线。" : "雾散得很早，他因此多看见了一条倒影里的轨道。"}</p></PaperCard>
+        <PaperCard className="sleep-summary"><div className="paper-heading"><small>NIGHT IMPRESSION</small><b>第 {chapter} 枚夜印</b></div><div className="earned-seal"><Image src={nightSeal.src} alt={nightSeal.alt} width={150} height={150} /></div><p>{quality === "interrupted" ? "城市的声音有些断续，旅程较短，但这枚夜印仍完整记录了重要发现。" : quality === "regular" ? "一条完整而安静的标准路线，已经压进纸纤维里。" : "雾散得很早，夜印因此多留下一圈稀薄的金线。"}</p></PaperCard>
         <PaperCard className="journal"><div className="paper-heading"><small>LIN DU / FIELD NOTES</small><b>侦探日志</b></div><p>“{current.journal}”</p><span>— 林渡，清晨五点二十八分</span></PaperCard>
       </div>
+      {result.preparationEcho && <PaperCard className="preparation-echo"><div><small>PACKED OBJECT · 随身物回响</small><h3>{preparation?.title}</h3></div><p>“{result.preparationEcho}”</p></PaperCard>}
       <section className="route-report"><div className="dark-heading"><span>02</span><div><small>LAST NIGHT ROUTE</small><h3>昨夜路线</h3></div></div><CityRoute compact /></section>
-      <section className="discoveries"><div className="dark-heading"><span>03</span><div><small>NEW EVIDENCE</small><h3>新发现</h3></div></div><div className="evidence-row">{foundClues.map((clue) => <PaperCard key={clue.id} className="evidence-card"><div className="evidence-icon">{clue.type === "contradiction" ? <Lightbulb /> : <FileText />}</div><Seal>{clue.type === "contradiction" ? "矛盾" : "线索"}</Seal><h4>{clue.title}</h4><p>{clue.detail}</p></PaperCard>)}{foundItems.map((item) => <PaperCard key={item.id} className="evidence-card collectible"><div className="evidence-glyph">{item.glyph}</div><Seal>收藏 · {item.rarity}</Seal><h4>{item.title}</h4><p>{item.surfaceDescription}</p></PaperCard>)}</div></section>
+      <section className="discoveries"><div className="dark-heading"><span>03</span><div><small>NEW EVIDENCE</small><h3>新发现</h3></div></div><div className="evidence-row">{foundClues.map((clue) => <PaperCard key={clue.id} className="evidence-card"><div className="evidence-icon">{clue.type === "contradiction" ? <Lightbulb /> : <FileText />}</div><Seal>{clue.type === "contradiction" ? "矛盾" : "线索"}</Seal><h4>{clue.title}</h4><p>{clue.detail}</p></PaperCard>)}{foundItems.map((item) => { const art = getAsset(item.assetId); return <PaperCard key={item.id} className="evidence-card collectible"><div className="evidence-art"><Image src={art.src} alt={art.alt} width={180} height={180} /></div><Seal>收藏 · {item.rarity}</Seal><h4>{item.title}</h4><p>{item.surfaceDescription}</p></PaperCard>; })}</div></section>
       <PaperCard className="contradiction"><span>NEW QUESTION · 新的矛盾</span><blockquote>“{current.contradiction}”</blockquote><p>把它带回案件板。白天的推理由你完成。</p></PaperCard>
       <div className="report-action"><button className="primary-button" onClick={onContinue}>{chapter === 5 ? "做出最终决定" : "整理线索，准备下一夜"}<ArrowRight size={18} /></button></div>
     </div>
@@ -183,8 +193,8 @@ function CaseBoard() {
 }
 
 function Collection() {
-  const { unlockedCollectibleIds, chapter } = useGameStore();
-  return <div className="collection-page"><div className="page-title"><div><p className="eyebrow">FOUND OBJECTS · {unlockedCollectibleIds.length}/8</p><h2>城市留下的<br />八件小事。</h2></div><p>每件物品都有两层含义。故事推进后，翻开卡片背面，旧物会告诉你更多。</p></div><div className="collection-grid">{nightShiftCase.collectibles.map((item, index) => { const unlocked = unlockedCollectibleIds.includes(item.id); const revealed = unlocked && chapter >= Math.min(5, item.chapter + 2); return <motion.article whileHover={unlocked ? { y: -5, rotate: index % 2 ? .3 : -.3 } : {}} key={item.id} className={`collectible-card ${unlocked ? "unlocked" : "locked"}`}><div className="item-number">0{index + 1}</div><div className="item-art">{unlocked ? item.glyph : "?"}</div><div className="item-meta"><small>{unlocked ? `${item.district} · ${item.rarity}` : "尚未发现"}</small><h3>{unlocked ? item.title : "未归档物品"}</h3><p>{unlocked ? (revealed ? item.revealedDescription : item.surfaceDescription) : "下一次夜间调查，也许会让它出现在林渡的口袋里。"}</p>{revealed && <Seal>隐藏含义已揭示</Seal>}</div></motion.article>; })}</div></div>;
+  const { unlockedCollectibleIds, nightSealIds, chapter } = useGameStore();
+  return <div className="collection-page"><div className="page-title"><div><p className="eyebrow">NIGHT CABINET · 夜间陈列柜</p><h2>时间没有消失。<br />它留下了证物。</h2></div><p>每次等待都会形成一枚夜印；每件旧物也会在故事推进后显露第二层含义。</p></div><section className="night-seal-shelf"><div className="shelf-heading"><small>FIVE NIGHTS · {nightSealIds.length}/5</small><h3>五夜印记</h3></div><div className="night-seal-row">{nightShiftCase.chapters.map((entry) => { const art = getNightSealAsset(entry.number); const unlocked = nightSealIds.includes(entry.number); return <div className={unlocked ? "night-seal unlocked" : "night-seal locked"} key={entry.number}><Image src={art.src} alt={unlocked ? art.alt : "尚未形成的夜印"} width={160} height={160} /><span>夜 0{entry.number}</span><b>{unlocked ? entry.title : "尚未成形"}</b></div>; })}</div></section><div className="collection-grid">{nightShiftCase.collectibles.map((item, index) => { const unlocked = unlockedCollectibleIds.includes(item.id); const revealed = unlocked && chapter >= Math.min(5, item.chapter + 2); const art = getAsset(item.assetId); return <motion.article whileHover={unlocked ? { y: -5, rotate: index % 2 ? .3 : -.3 } : {}} key={item.id} className={`collectible-card ${unlocked ? "unlocked" : "locked"}`}><div className="item-number">0{index + 1}</div><div className="item-art"><Image src={art.src} alt={unlocked ? art.alt : "尚未发现的物品"} width={438} height={438} /></div><div className="item-meta"><small>{unlocked ? `${item.district} · ${item.rarity}` : "尚未发现"}</small><h3>{unlocked ? item.title : "未归档物品"}</h3><p>{unlocked ? (revealed ? item.revealedDescription : item.surfaceDescription) : "下一次夜间调查，也许会让它出现在林渡的口袋里。"}</p>{revealed && <Seal>隐藏含义已揭示</Seal>}</div></motion.article>; })}</div></div>;
 }
 
 function ArchivePage() {

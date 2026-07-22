@@ -6,3 +6,8 @@
 
 林渡安静、克制、观察敏锐，不替玩家下结论。他负责行动，玩家负责推理。
 
+## 相关文档
+
+- [[docs/product-overview]]
+- [[docs/architecture]]
+- [[docs/decision-log#ADR-002：故事事实完全确定性]]

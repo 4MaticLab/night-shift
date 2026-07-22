@@ -13,6 +13,7 @@
     "test:render": "npm run build && node --test tests/rendered-html.test.mjs",
     "test:e2e": "playwright test",
     "validate:content": "vitest run tests/content.test.ts",
+    "docs:check": "node scripts/check-wikilinks.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
   },

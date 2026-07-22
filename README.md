@@ -29,7 +29,10 @@ Playwright Happy Path：`npm run test:e2e`。
 
 存档保存在浏览器 `localStorage` 的 `night-shift-save-v1` 中。
 
+## 项目知识与计划
+
+代理和长期维护从 [[AGENTS]] 开始；稳定知识见 [[docs/index]]，计划、提案与完成进度见 [[PLANS]]。内部双链可通过 `npm run docs:check` 验证。
+
 ## 图像资产
 
 核心主视觉使用内置图像生成能力制作，保存于 `public/art/headers/night-shift-hero.png`。最终 Prompt 见 `docs/art-direction.md` 与 `docs/art-prompts/global-style.md`。
-
