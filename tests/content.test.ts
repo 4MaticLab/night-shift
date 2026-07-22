@@ -15,6 +15,7 @@ import { getDefaultChoiceId, getRouteDirection, routeDirections } from "@/src/co
 import { getNightBotanical, growthStageFromProgress, nightBotanicals } from "@/src/content/botany";
 import { citySocieties, createSocietyMemory, getCitySociety, getSocietyLetter, getSocietyTitle } from "@/src/content/societies";
 import { correspondencePostures, correspondencePrompts, createCorrespondenceRecord, getCorrespondencePrompt, getCorrespondenceReply, getDominantCorrespondenceStance, getLatestSocietyReply } from "@/src/content/correspondence";
+import { createSouvenirRecord, DEMO_JOURNEY_SEED, getSouvenir, selectSouvenir, souvenirs } from "@/src/content/souvenirs";
 
 describe("Night Shift case content", () => {
   it("contains the complete five-night mystery", () => {
@@ -159,6 +160,44 @@ describe("Night Shift case content", () => {
       expect(Object.values(botanical.qualityNotes).every(Boolean)).toBe(true);
       expect(botanical.qualityNotes.interrupted).not.toMatch(/枯死|失败|失去线索/);
     }
+  });
+
+  it("defines nine original, non-scoring souvenirs with complete art", () => {
+    expect(souvenirs).toHaveLength(9);
+    expect(new Set(souvenirs.map((souvenir) => souvenir.id))).toHaveLength(9);
+    for (const society of citySocieties) {
+      expect(souvenirs.filter((souvenir) => souvenir.societyId === society.id)).toHaveLength(3);
+    }
+    for (const preparation of preparations) {
+      expect(souvenirs.filter((souvenir) => souvenir.preparationAffinity === preparation.id)).toHaveLength(3);
+    }
+    for (const souvenir of souvenirs) {
+      expect(getAsset(souvenir.assetId).category).toBe("souvenir");
+      expect(souvenir).not.toHaveProperty("rarity");
+      expect(souvenir).not.toHaveProperty("value");
+    }
+  });
+
+  it("lets direction and preparation shape a deterministic souvenir without exposing rewards", () => {
+    const registry = selectSouvenir(1, "source", "side-lamp", DEMO_JOURNEY_SEED, {});
+    const consulate = selectSouvenir(1, "flower", "side-lamp", DEMO_JOURNEY_SEED, {});
+    const cartographers = selectSouvenir(1, "track", "side-lamp", DEMO_JOURNEY_SEED, {});
+    expect(registry.societyId).toBe("misfiled-registry");
+    expect(consulate.societyId).toBe("mislaid-consulate");
+    expect(cartographers.societyId).toBe("afterlight-cartographers");
+    expect(registry.preparationAffinity).toBe("side-lamp");
+    expect(selectSouvenir(1, "source", "side-lamp", DEMO_JOURNEY_SEED, {}).id).toBe(registry.id);
+  });
+
+  it("settles five stable souvenir records without duplicates", () => {
+    const history = {} as Parameters<typeof createSouvenirRecord>[4];
+    for (let chapter = 1; chapter <= 5; chapter += 1) {
+      const choiceId = getDefaultChoiceId(chapter);
+      history[chapter] = createSouvenirRecord(chapter, choiceId, "side-lamp", DEMO_JOURNEY_SEED, history, `2026-07-${String(10 + chapter).padStart(2, "0")}T05:28:00.000Z`);
+      expect(createSouvenirRecord(chapter, choiceId, "tram-fare", 99, history, "2026-07-23T05:28:00.000Z")).toEqual(history[chapter]);
+      expect(getSouvenir(history[chapter]!.souvenirId)).toBeTruthy();
+    }
+    expect(new Set(Object.values(history).map((record) => record?.souvenirId))).toHaveLength(5);
   });
 
   it("derives four deterministic growth stages from restored progress", () => {

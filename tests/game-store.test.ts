@@ -1,6 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { nightShiftCase } from "@/src/content/case";
 import { getCorrespondencePrompt } from "@/src/content/correspondence";
+import { DEMO_JOURNEY_SEED } from "@/src/content/souvenirs";
 
 type StoreModule = typeof import("@/src/stores/game-store");
 let storeModule: StoreModule;
@@ -54,6 +55,13 @@ describe("Night Shift game store", () => {
         chapter: chapter.number,
         choiceId: chosenDirection,
       });
+      expect(state.journeySeed).toBe(DEMO_JOURNEY_SEED);
+      expect(state.souvenirHistory[chapter.number]).toMatchObject({
+        chapter: chapter.number,
+        choiceId: chosenDirection,
+        preparationId: "side-lamp",
+        journeySeed: DEMO_JOURNEY_SEED,
+      });
       const prompt = getCorrespondencePrompt(state.societyHistory[chapter.number]!);
       expect(state.answerCorrespondence(chapter.number, prompt.replies[0].id)).toBe(true);
       expect(storeModule.useGameStore.getState().answerCorrespondence(chapter.number, prompt.replies[1].id)).toBe(false);
@@ -71,6 +79,8 @@ describe("Night Shift game store", () => {
     expect(completed.nightSealIds).toHaveLength(5);
     expect(Object.keys(completed.societyHistory)).toHaveLength(5);
     expect(Object.keys(completed.correspondenceHistory)).toHaveLength(5);
+    expect(Object.keys(completed.souvenirHistory)).toHaveLength(5);
+    expect(new Set(Object.values(completed.souvenirHistory).map((record) => record?.souvenirId))).toHaveLength(5);
     expect(completed.unlockedClueIds).toHaveLength(12);
   });
 
@@ -80,9 +90,12 @@ describe("Night Shift game store", () => {
     storeModule.useGameStore.getState().selectChoice("source");
     storeModule.useGameStore.getState().startNight("regular", "side-lamp", "real");
     const activeId = storeModule.useGameStore.getState().activeSleepSession?.id;
+    const journeySeed = storeModule.useGameStore.getState().journeySeed;
     const saved = memoryStorage.getItem("night-shift-save-v1");
 
     expect(saved).toContain(activeId);
+    expect(journeySeed).not.toBe(0);
+    expect(journeySeed).not.toBe(DEMO_JOURNEY_SEED);
     storeModule.useGameStore.getState().reset();
     memoryStorage.setItem("night-shift-save-v1", saved!);
     await storeModule.useGameStore.persist.rehydrate();
@@ -92,6 +105,7 @@ describe("Night Shift game store", () => {
     expect(restored.sleepMode).toBe("real");
     expect(restored.selectedChoice).toBe("source");
     expect(restored.activeSleepSession?.id).toBe(activeId);
+    expect(restored.journeySeed).toBe(journeySeed);
   });
 
   it("migrates legacy saves with session defaults", () => {
@@ -111,6 +125,8 @@ describe("Night Shift game store", () => {
     expect(migrated.growthHistory).toEqual({});
     expect(migrated.societyHistory).toEqual({});
     expect(migrated.correspondenceHistory).toEqual({});
+    expect(migrated.journeySeed).toBe(DEMO_JOURNEY_SEED);
+    expect(migrated.souvenirHistory).toEqual({});
     expect(migrated.nightSealIds).toEqual([]);
     expect(migrated.selectedPreparationId).toBe("");
   });
@@ -126,6 +142,9 @@ describe("Night Shift game store", () => {
     expect(Object.keys(state.growthHistory)).toEqual(["1", "2", "3"]);
     expect(Object.keys(state.societyHistory)).toEqual(["1", "2", "3"]);
     expect(Object.keys(state.correspondenceHistory)).toEqual(["1", "2", "3"]);
+    expect(state.journeySeed).toBe(DEMO_JOURNEY_SEED);
+    expect(Object.keys(state.souvenirHistory)).toEqual(["1", "2", "3"]);
+    expect(new Set(Object.values(state.souvenirHistory).map((record) => record?.souvenirId))).toHaveLength(3);
     expect(state.growthHistory[2]).toMatchObject({ chapter: 2, quality: "regular", durationMinutes: 390, choiceId: "mina", preparationId: "side-lamp" });
     expect(state.societyHistory[3]).toMatchObject({ chapter: 3, choiceId: "hotel", societyId: "misfiled-registry", standing: "entrusted" });
     expect(state.correspondenceHistory[2]).toMatchObject({ chapter: 2, societyId: "misfiled-registry", standing: "known", replyId: "registry-known-witness" });
@@ -143,6 +162,8 @@ describe("Night Shift game store", () => {
     expect(migrated.societyHistory[1]).toMatchObject({ chapter: 1, choiceId: "track", societyId: "afterlight-cartographers", standing: "noticed" });
     expect(migrated.societyHistory[2]).toMatchObject({ chapter: 2, choiceId: "mina", societyId: "misfiled-registry", standing: "noticed" });
     expect(migrated.correspondenceHistory).toEqual({});
+    expect(Object.keys(migrated.souvenirHistory)).toEqual(["1", "2"]);
+    expect(migrated.souvenirHistory[1]).toMatchObject({ chapter: 1, choiceId: "track", preparationId: "flower-note", journeySeed: DEMO_JOURNEY_SEED });
   });
 
   it("lets an unanswered letter pass without changing fixed night rewards", () => {

@@ -131,6 +131,29 @@ export const correspondenceRecordSchema = z.object({
 });
 export type CorrespondenceRecord = z.infer<typeof correspondenceRecordSchema>;
 
+export const souvenirSchema = z.object({
+  id: z.string(),
+  assetId: z.string(),
+  name: z.string(),
+  archiveName: z.string(),
+  societyId: societyIdSchema,
+  preparationAffinity: z.enum(["side-lamp", "flower-note", "tram-fare"]),
+  provenance: z.string(),
+  fieldNote: z.string(),
+  cityRumor: z.string(),
+});
+export type Souvenir = z.infer<typeof souvenirSchema>;
+
+export const souvenirRecordSchema = z.object({
+  chapter: z.number().int().min(1).max(5),
+  souvenirId: z.string(),
+  choiceId: z.string(),
+  preparationId: z.enum(["side-lamp", "flower-note", "tram-fare"]),
+  journeySeed: z.number().int().nonnegative(),
+  foundAt: z.string().datetime(),
+});
+export type SouvenirRecord = z.infer<typeof souvenirRecordSchema>;
+
 export const growthStageSchema = z.enum(["seed", "sprout", "leaf", "bloom"]);
 export type GrowthStage = z.infer<typeof growthStageSchema>;
 

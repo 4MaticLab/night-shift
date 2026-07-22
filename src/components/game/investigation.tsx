@@ -14,6 +14,7 @@ import { getRouteDirection } from "@/src/content/routes";
 import { nightBotanicals } from "@/src/content/botany";
 import { citySocieties, getSocietyTitle } from "@/src/content/societies";
 import { correspondencePostures, getCorrespondencePrompt, getCorrespondenceReply, getDominantCorrespondenceStance } from "@/src/content/correspondence";
+import { souvenirs } from "@/src/content/souvenirs";
 import { evidenceRelations } from "@/src/content/relations";
 import { useGameStore } from "@/src/stores/game-store";
 import { canUnlockTrueEnding, type EndingId } from "@/src/lib/game-engine/ending";
@@ -67,7 +68,7 @@ export function CaseBoard() {
 }
 
 export function Collection() {
-  const { unlockedCollectibleIds, nightSealIds, chapter, completedReports, preparationHistory, choiceHistory, growthHistory, societyHistory, correspondenceHistory } = useGameStore();
+  const { unlockedCollectibleIds, nightSealIds, chapter, completedReports, preparationHistory, choiceHistory, growthHistory, societyHistory, correspondenceHistory, souvenirHistory } = useGameStore();
   const societyRecords = Object.values(societyHistory).filter((record): record is SocietyMemoryRecord => Boolean(record)).sort((a, b) => a.chapter - b.chapter);
   const correspondenceRecords = Object.values(correspondenceHistory).filter((record): record is CorrespondenceRecord => Boolean(record));
   return <div className="collection-page">
@@ -77,6 +78,11 @@ export function Collection() {
       <p className="society-ledger-intro">没有声望点数，也没有最优路线。城市只会依照你反复选择的调查姿态，更换称呼、礼数和愿意交给你的旁话。</p>
       <div className="society-ledger-grid">{citySocieties.map((society) => { const records = societyRecords.filter((record) => record.societyId === society.id); const latest = records.at(-1); return <article className={latest ? `society-ledger-card touched standing-${latest.standing}` : "society-ledger-card"} key={society.id}><SocietyCrest societyId={society.id} compact /><div className="society-ledger-copy"><small>{society.archiveName}</small><h3>{society.name}</h3><p className="society-concern">关心 · {society.concern}</p><blockquote>“{society.publicRumor}”</blockquote><div className="society-current-address"><small>城里目前怎样称呼你</small><b>{latest ? getSocietyTitle(latest) : "尚未被正式称呼"}</b></div><p className="society-rule">内部规矩 · {society.privateRule}</p></div><div className="society-trace">{records.length ? records.map((record) => { const direction = getRouteDirection(record.chapter, record.choiceId); const replyRecord = correspondenceHistory[record.chapter]; return <div key={record.chapter}><span>夜 0{record.chapter}</span><b>{direction.dispatchTitle}</b><small>{replyRecord ? "已回信" : "未回信"}</small></div>; }) : <p>尚无一条已归来的路线惊动他们。</p>}</div></article>; })}</div>
       {societyRecords.length > 0 && <div className="correspondence-ledger"><div className="correspondence-ledger-heading"><small>RETURNED ANSWERS · {correspondenceRecords.length}/{societyRecords.length}</small><h4>问函与答复履历</h4><p>没有寄出的答复也会保留为空白，不影响任何案件成果。</p></div><div className="correspondence-ledger-grid">{societyRecords.map((memory) => { const society = citySocieties.find((item) => item.id === memory.societyId)!; const prompt = getCorrespondencePrompt(memory); const record = correspondenceHistory[memory.chapter]; const reply = record ? getCorrespondenceReply(record) : null; return <article className={reply ? "correspondence-ledger-entry answered" : "correspondence-ledger-entry"} key={memory.chapter}><small>夜 0{memory.chapter} · {society.name}</small><h5>{prompt.question}</h5>{reply ? <><div><small>你的答复</small><b>{reply.label}</b><p>{reply.summary}</p></div><blockquote><small>留下的余波</small>{reply.echo}</blockquote></> : <div className="unanswered"><small>未寄出的信封</small><b>这一夜没有答复</b><p>故事照常继续，城市没有替你的沉默扣除任何东西。</p></div>}</article>; })}</div></div>}
+    </section>
+    <section className="pocket-drawer">
+      <div className="shelf-heading"><small>UNASKED-FOR SOUVENIRS · {Object.keys(souvenirHistory).length}/5 NIGHTS</small><h3>口袋抽屉</h3></div>
+      <p className="pocket-drawer-intro">方向与随身物会让林渡经过不同的城市角落，但没有兑换表，也不能靠刷新重抽。五夜里出现的每件小物都只是一段旁证，不会替案件增加优势。</p>
+      <div className="pocket-drawer-grid">{souvenirs.map((souvenir) => { const record = Object.values(souvenirHistory).find((entry) => entry?.souvenirId === souvenir.id); const art = getAsset(souvenir.assetId); const direction = record ? getRouteDirection(record.chapter, record.choiceId) : null; const preparation = record ? getPreparation(record.preparationId) : null; return <article className={record ? "pocket-object unlocked" : "pocket-object locked"} key={souvenir.id}><div className="pocket-object-art">{record ? <Image src={art.src} alt={art.alt} width={1024} height={1024} /> : <div><KeyRound /><span>DRAWER CLOSED</span></div>}</div><div className="pocket-object-copy"><small>{record ? `夜 0${record.chapter} · ${souvenir.archiveName}` : "尚未出现在口袋里"}</small><h4>{record ? souvenir.name : "未归档小物"}</h4><p>{record ? souvenir.provenance : "城市还没有决定把什么留给这一格抽屉。"}</p>{record && <blockquote>“{souvenir.fieldNote}”</blockquote>}{record && <footer><b>{direction?.dispatchTitle}</b><span>{preparation?.shortTitle} · {direction?.destination}</span></footer>}</div></article>; })}</div>
     </section>
     <section className="night-greenhouse">
       <div className="shelf-heading"><small>FOGLIGHT GREENHOUSE · {Object.keys(growthHistory).length}/5</small><h3>雾灯温室</h3></div>

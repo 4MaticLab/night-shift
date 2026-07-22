@@ -2,7 +2,7 @@ export interface GameAsset {
   id: string;
   src: string;
   alt: string;
-  category: "header" | "social" | "collectible" | "night-seal" | "postcard" | "botanical" | "society-crest";
+  category: "header" | "social" | "collectible" | "night-seal" | "postcard" | "botanical" | "society-crest" | "souvenir";
   status: "complete";
 }
 
@@ -201,6 +201,69 @@ export const assets = {
     src: "/art/societies/afterlight-cartographers-crest-v1.webp",
     alt: "熄灯测绘社的暗灯、等高线与弯曲旧轨纹章",
     category: "society-crest",
+    status: "complete",
+  },
+  souvenirRainReceipt: {
+    id: "souvenir.rain-receipt",
+    src: "/art/souvenirs/rain-receipt-v1.webp",
+    alt: "空白印章处盛着一滴雨水的未盖章收据",
+    category: "souvenir",
+    status: "complete",
+  },
+  souvenirOrphanedDrawerPull: {
+    id: "souvenir.orphaned-drawer-pull",
+    src: "/art/souvenirs/orphaned-drawer-pull-v1.webp",
+    alt: "系着酒红档案线的无主黄铜抽屉拉手",
+    category: "souvenir",
+    status: "complete",
+  },
+  souvenirIndexMothWing: {
+    id: "souvenir.index-moth-wing",
+    src: "/art/souvenirs/index-moth-wing-v1.webp",
+    alt: "由深蓝纸与黄铜制成的错页蛾索引翅片",
+    category: "souvenir",
+    status: "complete",
+  },
+  souvenirReturnPunchTicket: {
+    id: "souvenir.return-punch-ticket",
+    src: "/art/souvenirs/return-punch-ticket-v1.webp",
+    alt: "只有一个返程剪孔的深蓝旧电车票",
+    category: "souvenir",
+    status: "complete",
+  },
+  souvenirMistakenCufflink: {
+    id: "souvenir.mistaken-cufflink",
+    src: "/art/souvenirs/mistaken-cufflink-v1.webp",
+    alt: "带酒红指纹纹样的单枚铜绿袖扣",
+    category: "souvenir",
+    status: "complete",
+  },
+  souvenirSeedPostTube: {
+    id: "souvenir.seed-post-tube",
+    src: "/art/souvenirs/seed-post-tube-v1.webp",
+    alt: "没有收件地址却冒出酒红新芽的黄铜花籽邮管",
+    category: "souvenir",
+    status: "complete",
+  },
+  souvenirNightLineChalk: {
+    id: "souvenir.night-line-chalk",
+    src: "/art/souvenirs/night-line-chalk-v1.webp",
+    alt: "断面显出等高线并套着铜绿护套的夜线粉笔头",
+    category: "souvenir",
+    status: "complete",
+  },
+  souvenirAfterlightSignScrew: {
+    id: "souvenir.afterlight-sign-screw",
+    src: "/art/souvenirs/afterlight-sign-screw-v1.webp",
+    alt: "带方形路牌托架与厚重铜绿的熄灯路牌螺丝",
+    category: "souvenir",
+    status: "complete",
+  },
+  souvenirRouteSeekingMarble: {
+    id: "souvenir.route-seeking-marble",
+    src: "/art/souvenirs/route-seeking-marble-v1.webp",
+    alt: "内部封存着酒红弯曲旧轨的烟青玻璃珠",
+    category: "souvenir",
     status: "complete",
   },
 } as const satisfies Record<string, GameAsset>;

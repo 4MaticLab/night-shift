@@ -22,6 +22,9 @@ test("starts a case and reaches the first morning report", async ({ page }) => {
   await expect(page.getByText(/市政厅的否认牌在雨里站了七年/)).toBeVisible();
   await expect(page.getByText(/我先让纸张开口/)).toBeVisible();
   await expect(page.getByText("票根灯蕨").first()).toBeVisible();
+  await expect(page.getByText("口袋里多出来的东西")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "未盖章的雨水收据" })).toBeVisible();
+  await expect(page.getByText(/不提供调查优势、额外奖励或结局资格/)).toBeVisible();
   await expect(page.getByText("错页登记处来函")).toBeVisible();
   await expect(page.getByRole("heading", { name: "致「待核旁注」" })).toBeVisible();
   await expect(page.getByText(/你让一张作废票据反过来审问了出票制度/)).toBeVisible();
@@ -44,6 +47,9 @@ test("keeps returned postcards in the journey album", async ({ page }) => {
   await expect(page.getByText("雾灯城寄回的五个夜晚")).toBeVisible();
   await expect(page.getByText("雾灯温室")).toBeVisible();
   await expect(page.getByText("城市人情簿")).toBeVisible();
+  await expect(page.getByText("口袋抽屉")).toBeVisible();
+  await expect(page.locator(".pocket-object.unlocked")).toHaveCount(2);
+  await expect(page.locator(".pocket-object.locked")).toHaveCount(7);
   await expect(page.getByRole("heading", { name: "错页登记处" })).toBeVisible();
   await expect(page.locator(".society-current-address b", { hasText: "可借阅的旁注" })).toBeVisible();
   await expect(page.getByText("问函与答复履历")).toBeVisible();

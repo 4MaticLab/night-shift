@@ -28,8 +28,17 @@
 | `society.misfiled-registry` | 错页登记处纹章 | Society crest | `/public/art/societies/misfiled-registry-crest-v1.webp` | 完成 | 晨报、城市人情簿 |
 | `society.mislaid-consulate` | 失物领事馆纹章 | Society crest | `/public/art/societies/mislaid-consulate-crest-v1.webp` | 完成 | 晨报、城市人情簿 |
 | `society.afterlight-cartographers` | 熄灯测绘社纹章 | Society crest | `/public/art/societies/afterlight-cartographers-crest-v1.webp` | 完成 | 晨报、城市人情簿 |
+| `souvenir.rain-receipt` | 未盖章的雨水收据 | Pocket souvenir | `/public/art/souvenirs/rain-receipt-v1.webp` | 完成 | 晨报、口袋抽屉 |
+| `souvenir.orphaned-drawer-pull` | 无主抽屉的黄铜拉手 | Pocket souvenir | `/public/art/souvenirs/orphaned-drawer-pull-v1.webp` | 完成 | 晨报、口袋抽屉 |
+| `souvenir.index-moth-wing` | 错页蛾的索引翅片 | Pocket souvenir | `/public/art/souvenirs/index-moth-wing-v1.webp` | 完成 | 晨报、口袋抽屉 |
+| `souvenir.return-punch-ticket` | 只有返程孔的旧车票 | Pocket souvenir | `/public/art/souvenirs/return-punch-ticket-v1.webp` | 完成 | 晨报、口袋抽屉 |
+| `souvenir.mistaken-cufflink` | 认错主人的袖扣 | Pocket souvenir | `/public/art/souvenirs/mistaken-cufflink-v1.webp` | 完成 | 晨报、口袋抽屉 |
+| `souvenir.seed-post-tube` | 没有收件人的花籽邮管 | Pocket souvenir | `/public/art/souvenirs/seed-post-tube-v1.webp` | 完成 | 晨报、口袋抽屉 |
+| `souvenir.night-line-chalk` | 夜线粉笔头 | Pocket souvenir | `/public/art/souvenirs/night-line-chalk-v1.webp` | 完成 | 晨报、口袋抽屉 |
+| `souvenir.afterlight-sign-screw` | 熄灯路牌的铜螺丝 | Pocket souvenir | `/public/art/souvenirs/afterlight-sign-screw-v1.webp` | 完成 | 晨报、口袋抽屉 |
+| `souvenir.route-seeking-marble` | 会朝旧轨滚动的玻璃珠 | Pocket souvenir | `/public/art/souvenirs/route-seeking-marble-v1.webp` | 完成 | 晨报、口袋抽屉 |
 
-核心插画、八件物证、五枚夜印、五张城市明信片、五张植物学标本与三枚社团纹章由内置图像生成能力生成；地图、纸张、图钉、路线、四阶段揭示和档案材质保持代码原生，以便响应式缩放与动效控制。明信片的生成约束与场景差异见 [[docs/art-prompts/city-postcards]]，植物提示词见 [[docs/art-prompts/night-greenhouse]]，纹章提示词见 [[docs/art-prompts/city-societies]]。全部运行时引用通过 `src/content/assets.ts` manifest 解析。
+核心插画、八件物证、五枚夜印、五张城市明信片、五张植物学标本、三枚社团纹章与九件口袋纪念物由内置图像生成能力生成；地图、纸张、图钉、路线、四阶段揭示和档案材质保持代码原生，以便响应式缩放与动效控制。明信片的生成约束与场景差异见 [[docs/art-prompts/city-postcards]]，植物提示词见 [[docs/art-prompts/night-greenhouse]]，纹章提示词见 [[docs/art-prompts/city-societies]]，纪念物提示词见 [[docs/art-prompts/pocket-souvenirs]]。全部运行时引用通过 `src/content/assets.ts` manifest 解析。
 
 ## 相关文档
 
@@ -39,3 +48,4 @@
 - [[docs/art-prompts/city-postcards]]
 - [[docs/art-prompts/night-greenhouse]]
 - [[docs/art-prompts/city-societies]]
+- [[docs/art-prompts/pocket-souvenirs]]

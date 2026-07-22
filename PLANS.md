@@ -19,7 +19,7 @@
 | [[plans/0007-night-greenhouse-and-time-growth]] | `completed` | `auto` | P0 | 6/6 | 已发布五株夜生植物、四阶段成长与雾灯温室 |
 | [[plans/0008-city-societies-and-remembered-favors]] | `completed` | `auto` | P0 | 6/6 | 已发布三个地下社团、跨夜称呼、来函与城市人情簿 |
 | [[plans/0009-city-correspondence-and-reply-echoes]] | `completed` | `auto` | P0 | 6/6 | 已发布九封问函、十八种答复、跨夜余波与结局附言 |
-| [[plans/0010-unasked-for-souvenirs-and-pocket-drawer]] | `in_progress` | `auto` | P0 | 0/6 | 冻结九件城市小物、意外选择规则与美术 brief |
+| [[plans/0010-unasked-for-souvenirs-and-pocket-drawer]] | `in_progress` | `auto` | P0 | 5/6 | Git checkpoint 后私密发布第十二版 |
 
 ## 状态规则
 

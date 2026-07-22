@@ -15,6 +15,7 @@
 | 夜生植物 | `src/content/botany.ts` | 五株植物、四阶段成长文案、睡眠层级说明与进度阶段推导 |
 | 城市社团 | `src/content/societies.ts` | 三个社团、三层称呼与来函、跨夜关注累计和关系快照 |
 | 城市问函 | `src/content/correspondence.ts` | 九个问函、十八种答复、三类总体姿态与最近答复回响 |
+| 口袋纪念物 | `src/content/souvenirs.ts` | 九件小物、稳定哈希、方向与随身物亲和、无重复结算 |
 | 证物关系 | `src/content/relations.ts` | 三条核心推论、对应证物对与成功解释 |
 | 内容契约 | `src/lib/game-engine/schema.ts` | Zod schema、引用与数量约束 |
 | 夜间结算 | `src/lib/game-engine/resolve-night.ts` | 根据章节、睡眠质量、随身物与调查方向选择确定性结果 |
@@ -28,11 +29,11 @@
 | 游戏框架 | `src/components/game/shell.tsx` | 顶栏、底部导航与 Demo 控制台 |
 | 共享游戏 UI | `src/components/game/shared.tsx` | 纸卡、印章、城市路线与睡眠文案 |
 | 视觉系统 | `app/globals.css` | 色板、纸张、地图、雨雾、响应式与动效 |
-| 资产清单 | `src/content/assets.ts` | 主视觉、八件物证、五枚夜印、五张明信片、五张植物学标本与三枚社团纹章的 manifest 和解析函数 |
+| 资产清单 | `src/content/assets.ts` | 主视觉、物证、夜印、明信片、植物、社团纹章与九件纪念物的 manifest 和解析函数 |
 
 ## 状态模型
 
-主要阶段为 `day → ready → night → morning → ending`。章节结算只通过 `resolveNight` 产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 7；迁移会为旧存档补齐睡眠模式、会话、夜印、随身物历史、方向历史、温室成长记录、城市关系历史与问函答复历史。
+主要阶段为 `day → ready → night → morning → ending`。章节结算只通过确定性内容函数产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 8；迁移会为旧存档补齐睡眠模式、会话、夜印、随身物历史、方向历史、温室成长记录、城市关系历史、问函答复历史与口袋纪念物历史。
 
 睡眠质量为 `interrupted`、`regular`、`restful`：三者都至少解锁一条主线线索；差异只体现在路线长度、收藏数量、回声事件和环境观察。`selectedPreparationId` 记录当前随身物，`preparationHistory` 按章节保存已经归来的准备；`selectedChoice` 记录当前方向，`choiceHistory` 按章节保存路线履历。方向决定四个路线节点、五段夜间事件、城市遭遇与归来来信，但同章节三个方向的线索和藏品结果保持一致。完成一夜后，章节编号会加入持久化的 `nightSealIds` 与 `completedReports`，旅程册据此解锁明信片与路线履历。
 
@@ -43,6 +44,8 @@
 每条 `RouteDirection` 只映射一个 `societyId` 和一条可解释的 `societyNotice`。完成夜班时，`societyHistory` 按章节保存社团、方向、完成时间与当时称呼层级；同一社团第一次、第二次、第三次及以后被触及时，依次使用 `noticed`、`known`、`entrusted`。层级只选择称呼与来函，不参与线索、藏品、植物、睡眠质量或结局判断。v6 迁移按已完成章节顺序读取 `choiceHistory`，从旧路线确定性重建同一关系历史。
 
 每个社团层级对应一个固定问函和两种答复。`answerCorrespondence` 只在当前章节存在社团记录、答复 ID 属于对应问函且本夜尚未答复时，才向 `correspondenceHistory` 写入章节、社团、层级、答复与三类姿态快照；未答复的章节不写记录，也不阻断 `continueDay`。后续来信通过 `getLatestSocietyReply` 只检索同一社团、当前章节之前最近一次已答问函。v7 迁移不会为 v6 玩家伪造历史答复；Demo 章节跳转则生成明确、确定性的第一选项履历，方便演示后续回响。
+
+`journeySeed` 在新存档第一次开始夜班时只生成一次：Demo 使用固定值，真实夜班使用本地随机值。`selectSouvenir` 先排除 `souvenirHistory` 已出现的物件，再用种子、章节、方向、随身物与物件 ID 的稳定哈希排序；同社团方向和同随身物亲和只影响排序，不改变主线奖励。首次结算把结果与当夜路线、准备、种子和时间写成快照，此后重复结算直接返回原记录。v8 迁移使用固定旧档种子，按已完成章节顺序重建，确保五夜不重复且刷新不重抽。
 
 ## 内容边界
 
@@ -57,6 +60,8 @@
 社团关注同样属于确定性旁支：十五条方向均有且只有一个主要社团，三个社团各覆盖五条。界面在交接前只提示“可能惊动谁”，不展示累计数字或兑换表；晨报和城市人情簿展示称呼、礼数与路线履历，不提供可刷取的声望货币。
 
 问函答复不参与 `resolveNight`、`canUnlockTrueEnding` 或 `canChooseEnding`。三类总体姿态只在结局完成后选择一段城市附言；没有答复时使用独立的“未寄出的答复”附言，因此沉默同样不是失败状态。
+
+纪念物同样不参与 `resolveNight` 固定线索、植物成长、社团层级、问函姿态、睡眠质量或任何结局资格；它们没有稀有度、价值、货币、重复碎片或可见掉落表。
 
 ## 交互基线与组件边界
 
