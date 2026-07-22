@@ -44,6 +44,8 @@ Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：分别覆盖 Demo
 
 第四个私密版本完成游戏 UI 功能域拆分；第五个私密版本把案件板升级为两证物配对推理，并保留同一线上地址。
 
+第六个私密版本把五夜状态循环、真实存档重载、旧存档迁移和三个结局纳入自动化护栏，正式关闭 [[plans/0003-mvp-quality-hardening]]。
+
 ## 相关文档
 
 - [[docs/architecture]]
