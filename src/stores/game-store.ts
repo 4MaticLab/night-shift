@@ -2,9 +2,10 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { SleepQuality } from "@/src/lib/game-engine/schema";
+import type { SleepMode, SleepQuality, SleepSession } from "@/src/lib/game-engine/schema";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import type { PreparationId } from "@/src/content/preparations";
+import { finishSleepSession, startSleepSession } from "@/src/lib/game-engine/sleep-session";
 
 export type Phase = "day" | "ready" | "night" | "morning" | "ending";
 
@@ -15,6 +16,9 @@ interface GameState {
   selectedChoice: string;
   selectedPreparationId: PreparationId | "";
   quality: SleepQuality;
+  sleepMode: SleepMode;
+  activeSleepSession: SleepSession | null;
+  lastSleepSession: SleepSession | null;
   unlockedClueIds: string[];
   unlockedCollectibleIds: string[];
   completedReports: number[];
@@ -23,7 +27,7 @@ interface GameState {
   endingId?: string;
   begin: () => void;
   selectChoice: (choice: string) => void;
-  startNight: (quality: SleepQuality, preparationId: PreparationId) => void;
+  startNight: (quality: SleepQuality, preparationId: PreparationId, mode: SleepMode) => void;
   finishNight: () => void;
   continueDay: () => void;
   confirmRelation: (relation: string) => void;
@@ -40,6 +44,9 @@ const initial = {
   selectedChoice: "",
   selectedPreparationId: "" as const,
   quality: "regular" as SleepQuality,
+  sleepMode: "demo" as SleepMode,
+  activeSleepSession: null as SleepSession | null,
+  lastSleepSession: null as SleepSession | null,
   unlockedClueIds: [] as string[],
   unlockedCollectibleIds: [] as string[],
   completedReports: [] as number[],
@@ -51,12 +58,23 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   ...initial,
   begin: () => set({ started: true, phase: "day" }),
   selectChoice: (selectedChoice) => set({ selectedChoice, phase: "ready" }),
-  startNight: (quality, selectedPreparationId) => set({ quality, selectedPreparationId, phase: "night" }),
+  startNight: (quality, selectedPreparationId, sleepMode) => set({
+    quality,
+    selectedPreparationId,
+    sleepMode,
+    activeSleepSession: startSleepSession(sleepMode, quality),
+    phase: "night",
+  }),
   finishNight: () => {
     const state = get();
-    const result = resolveNight(state.chapter, state.quality, state.selectedPreparationId);
+    const activeSession = state.activeSleepSession ?? startSleepSession(state.sleepMode, state.quality);
+    const completedSession = finishSleepSession(activeSession);
+    const result = resolveNight(state.chapter, completedSession.quality, state.selectedPreparationId);
     set({
       phase: "morning",
+      quality: completedSession.quality,
+      activeSleepSession: null,
+      lastSleepSession: completedSession,
       unlockedClueIds: Array.from(new Set([...state.unlockedClueIds, ...result.clueIds])),
       unlockedCollectibleIds: Array.from(new Set([...state.unlockedCollectibleIds, ...result.collectibleIds])),
       completedReports: Array.from(new Set([...state.completedReports, state.chapter])),
@@ -73,4 +91,18 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   unlockBoard: () => set({ unlockedClueIds: ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "scratched-map", "room-307", "transport-photo", "museum-tag", "ledger-clasp", "evelyn-message"], unlockedCollectibleIds: ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"], confirmedRelations: ["line-institution", "mina-evelyn", "gideon-escape"] }),
   chooseEnding: (endingId) => set({ endingId, phase: "ending" }),
   reset: () => set({ ...initial, endingId: undefined }),
-}), { name: "night-shift-save-v1" }));
+}), {
+  name: "night-shift-save-v1",
+  version: 2,
+  migrate: (persistedState) => {
+    const persisted = persistedState as Partial<GameState>;
+    return {
+      ...persisted,
+      sleepMode: persisted.sleepMode ?? "demo",
+      activeSleepSession: persisted.activeSleepSession ?? null,
+      lastSleepSession: persisted.lastSleepSession ?? null,
+      nightSealIds: persisted.nightSealIds ?? [],
+      selectedPreparationId: persisted.selectedPreparationId ?? "",
+    } as GameState;
+  },
+}));

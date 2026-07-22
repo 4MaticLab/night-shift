@@ -3,6 +3,19 @@ import { z } from "zod";
 export const sleepQualitySchema = z.enum(["interrupted", "regular", "restful"]);
 export type SleepQuality = z.infer<typeof sleepQualitySchema>;
 
+export const sleepModeSchema = z.enum(["demo", "real"]);
+export type SleepMode = z.infer<typeof sleepModeSchema>;
+
+export const sleepSessionSchema = z.object({
+  id: z.string(),
+  startedAt: z.string().datetime(),
+  endedAt: z.string().datetime().optional(),
+  durationMinutes: z.number().int().nonnegative().optional(),
+  quality: sleepQualitySchema,
+  mode: sleepModeSchema,
+});
+export type SleepSession = z.infer<typeof sleepSessionSchema>;
+
 export const clueSchema = z.object({
   id: z.string(),
   title: z.string(),

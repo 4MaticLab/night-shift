@@ -3,6 +3,12 @@ import { nightShiftCase } from "@/src/content/case";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import { preparations } from "@/src/content/preparations";
 import { getAsset, getNightSealAsset } from "@/src/content/assets";
+import {
+  finishSleepSession,
+  nightSealProgress,
+  qualityFromDuration,
+  startSleepSession,
+} from "@/src/lib/game-engine/sleep-session";
 
 describe("Night Shift case content", () => {
   it("contains the complete five-night mystery", () => {
@@ -42,5 +48,39 @@ describe("Night Shift case content", () => {
     for (let chapter = 1; chapter <= 5; chapter += 1) {
       expect(getNightSealAsset(chapter).category).toBe("night-seal");
     }
+  });
+
+  it("derives real-night quality from explicit duration boundaries", () => {
+    expect(qualityFromDuration(299)).toBe("interrupted");
+    expect(qualityFromDuration(300)).toBe("regular");
+    expect(qualityFromDuration(419)).toBe("regular");
+    expect(qualityFromDuration(420)).toBe("restful");
+  });
+
+  it("settles a real night from its persisted start time", () => {
+    const startedAt = new Date("2026-07-22T22:00:00.000Z");
+    const session = startSleepSession("real", "regular", startedAt);
+    const completed = finishSleepSession(session, new Date("2026-07-23T04:30:00.000Z"));
+
+    expect(completed.durationMinutes).toBe(390);
+    expect(completed.quality).toBe("regular");
+    expect(completed.endedAt).toBe("2026-07-23T04:30:00.000Z");
+    expect(resolveNight(1, completed.quality).clueIds.length).toBeGreaterThan(0);
+  });
+
+  it("keeps demo quality deterministic and compresses seal progress", () => {
+    const session = startSleepSession("demo", "restful", new Date("2026-07-22T22:00:00.000Z"));
+    const completed = finishSleepSession(session, new Date("2026-07-22T22:00:12.000Z"));
+
+    expect(completed.durationMinutes).toBe(484);
+    expect(completed.quality).toBe("restful");
+    expect(nightSealProgress(session, new Date("2026-07-22T22:00:01.000Z"))).toBe(3);
+  });
+
+  it("restores real-night seal progress from elapsed wall time", () => {
+    const session = startSleepSession("real", "regular", new Date("2026-07-22T22:00:00.000Z"));
+
+    expect(nightSealProgress(session, new Date("2026-07-23T02:00:00.000Z"))).toBe(50);
+    expect(nightSealProgress(session, new Date("2026-07-23T08:00:00.000Z"))).toBe(100);
   });
 });

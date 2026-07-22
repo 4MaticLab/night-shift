@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -15,10 +15,13 @@ import { nightShiftCase } from "@/src/content/case";
 import { assets, getAsset, getNightSealAsset } from "@/src/content/assets";
 import { getPreparation, preparations, type PreparationId } from "@/src/content/preparations";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
-import type { SleepQuality } from "@/src/lib/game-engine/schema";
+import type { SleepMode, SleepQuality } from "@/src/lib/game-engine/schema";
+import { elapsedSessionMinutes, formatSleepDuration, nightSealProgress } from "@/src/lib/game-engine/sleep-session";
 import { useGameStore } from "@/src/stores/game-store";
 
 type View = "tonight" | "report" | "board" | "collection" | "archive";
+
+const subscribeToHydration = () => () => undefined;
 
 const qualityCopy: Record<SleepQuality, { label: string; time: string; note: string }> = {
   interrupted: { label: "4小时 · 断续", time: "短程调查", note: "会听见一次特别的城市回声" },
@@ -34,7 +37,7 @@ function PaperCard({ children, className = "" }: { children: React.ReactNode; cl
   return <div className={`paper-card ${className}`}><span className="tape" />{children}</div>;
 }
 
-function Hero({ onStart, onDemo }: { onStart: () => void; onDemo: () => void }) {
+function Hero({ onStart, onDemo, interactive }: { onStart: () => void; onDemo: () => void; interactive: boolean }) {
   return (
     <main className="hero-shell">
       <div className="rain" aria-hidden="true" />
@@ -42,15 +45,15 @@ function Hero({ onStart, onDemo }: { onStart: () => void; onDemo: () => void }) 
       <div className="hero-vignette" />
       <nav className="landing-nav">
         <div className="brand-mark"><span>NS</span><div><b>夜班侦探</b><small>NIGHT SHIFT</small></div></div>
-        <button className="ghost-button" onClick={onDemo}><Zap size={15} /> DEMO MODE</button>
+        <button className="ghost-button" disabled={!interactive} onClick={onDemo}><Zap size={15} /> DEMO MODE</button>
       </nav>
       <section className="hero-copy">
         <p className="eyebrow"><Moon size={14} /> 一款与你轮班生活的异步侦探游戏</p>
         <h1>你睡着以后，<br /><em>他才开始工作。</em></h1>
         <p className="hero-lede">白天分析线索，晚上把调查交给侦探。等你醒来，雾灯城会留下一份新的报告。</p>
         <div className="hero-actions">
-          <button className="primary-button" onClick={onStart}>开始第一宗案件 <ArrowRight size={18} /></button>
-          <button className="text-button" onClick={onDemo}><BookOpen size={17} /> 观看 90 秒演示</button>
+          <button className="primary-button" disabled={!interactive} onClick={onStart}>开始第一宗案件 <ArrowRight size={18} /></button>
+          <button className="text-button" disabled={!interactive} onClick={onDemo}><BookOpen size={17} /> 观看 90 秒演示</button>
         </div>
         <div className="shift-rule"><span>你负责白天推理</span><i /><span>林渡负责夜晚调查</span></div>
       </section>
@@ -96,11 +99,12 @@ function BottomNav({ view, setView }: { view: View; setView: (view: View) => voi
   return <nav className="bottom-nav">{items.map(([id, icon, label]) => <button className={view === id ? "active" : ""} key={id} onClick={() => setView(id)}>{icon}<span>{label}</span></button>)}</nav>;
 }
 
-function Tonight({ onLaunch }: { onLaunch: (quality: SleepQuality, preparationId: PreparationId) => void }) {
+function Tonight({ onLaunch }: { onLaunch: (quality: SleepQuality, preparationId: PreparationId, mode: SleepMode) => void }) {
   const { chapter, selectedChoice, selectChoice, phase } = useGameStore();
   const current = nightShiftCase.chapters[chapter - 1];
   const [quality, setQuality] = useState<SleepQuality>("regular");
   const [preparationId, setPreparationId] = useState<PreparationId>("side-lamp");
+  const [sleepMode, setSleepMode] = useState<SleepMode>("demo");
   return (
     <div className="content-grid tonight-page">
       <section className="desk-scene">
@@ -114,8 +118,15 @@ function Tonight({ onLaunch }: { onLaunch: (quality: SleepQuality, preparationId
         <p className="city-aside">“{current.cityAside}”</p>
         <div className="choice-list">{current.choices.map((choice, i) => <button key={choice.id} className={selectedChoice === choice.id ? "choice selected" : "choice"} onClick={() => selectChoice(choice.id)}><span>0{i + 1}</span><div><b>{choice.label}</b><small>{choice.note}</small></div>{selectedChoice === choice.id ? <Check /> : <ChevronRight />}</button>)}</div>
         <div className="preparation-box"><div className="preparation-heading"><small>PACK ONE THING · 随身物</small><b>准备，然后放手</b></div><div className="preparation-list">{preparations.map((item) => { const Icon = item.icon; return <button key={item.id} className={preparationId === item.id ? "preparation selected" : "preparation"} onClick={() => setPreparationId(item.id)}><span><Icon size={19} /></span><div><b>{item.title}</b><small>{item.promise}</small></div>{preparationId === item.id && <Check size={15} />}</button>; })}</div><p>{getPreparation(preparationId)?.description}</p></div>
-        <div className="quality-box"><div><small>DEMO SLEEP</small><b>今晚的旅程长度</b></div><div className="quality-tabs">{(Object.keys(qualityCopy) as SleepQuality[]).map((id) => <button key={id} className={quality === id ? "active" : ""} onClick={() => setQuality(id)} title={qualityCopy[id].note}>{qualityCopy[id].label}</button>)}</div></div>
-        <button disabled={!selectedChoice || phase !== "ready"} className="handoff-button" onClick={() => onLaunch(quality, preparationId)}>今晚交给你了 <Moon size={18} /></button>
+        <div className="quality-box">
+          <div><small>NIGHT HANDOFF</small><b>选择交接方式</b></div>
+          <div className="mode-toggle" role="group" aria-label="夜班模式">
+            <button className={sleepMode === "demo" ? "active" : ""} onClick={() => setSleepMode("demo")}><Zap size={14} /> 演示旅程</button>
+            <button className={sleepMode === "real" ? "active" : ""} onClick={() => setSleepMode("real")}><Moon size={14} /> 今夜真实交接</button>
+          </div>
+          {sleepMode === "demo" ? <div className="quality-tabs">{(Object.keys(qualityCopy) as SleepQuality[]).map((id) => <button key={id} className={quality === id ? "active" : ""} onClick={() => setQuality(id)} title={qualityCopy[id].note}>{qualityCopy[id].label}</button>)}</div> : <p className="real-mode-note">从交接那一刻起计时。你可以锁屏、关闭页面，醒来后再回来拆晨报；提前醒来也不会失去主线线索。</p>}
+        </div>
+        <button disabled={!selectedChoice || phase !== "ready"} className="handoff-button" onClick={() => onLaunch(quality, preparationId, sleepMode)}>{sleepMode === "real" ? "开始今夜的真实交接" : "今晚交给你了"} <Moon size={18} /></button>
       </section>
     </div>
   );
@@ -126,24 +137,32 @@ function CityRoute({ progress = 100, compact = false }: { progress?: number; com
 }
 
 function NightRun({ onFinish }: { onFinish: () => void }) {
-  const { chapter, quality, selectedPreparationId } = useGameStore();
+  const { chapter, quality, selectedPreparationId, sleepMode, activeSleepSession } = useGameStore();
   const current = nightShiftCase.chapters[chapter - 1];
   const preparation = getPreparation(selectedPreparationId);
   const nightSeal = getNightSealAsset(chapter);
   const [seconds, setSeconds] = useState(12);
+  const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    const timer = window.setInterval(() => setSeconds((value) => {
-      if (value <= 1) { window.clearInterval(timer); window.setTimeout(onFinish, 350); return 0; }
-      return value - 1;
-    }), 1000);
+    const timer = window.setInterval(() => {
+      setNow(Date.now());
+      if (sleepMode === "demo") setSeconds((value) => {
+        if (value <= 1) { window.clearInterval(timer); window.setTimeout(onFinish, 350); return 0; }
+        return value - 1;
+      });
+    }, 1000);
     return () => window.clearInterval(timer);
-  }, [onFinish]);
-  const progress = ((12 - seconds) / 12) * 100;
-  const eventCount = Math.max(1, Math.ceil(progress / 20));
+  }, [onFinish, sleepMode]);
+  const elapsedMinutes = elapsedSessionMinutes(activeSleepSession, new Date(now));
+  const progress = sleepMode === "demo" ? ((12 - seconds) / 12) * 100 : nightSealProgress(activeSleepSession, new Date(now));
+  const eventCount = sleepMode === "demo" ? Math.max(1, Math.ceil(progress / 20)) : Math.min(current.events.length, Math.max(1, Math.floor(elapsedMinutes / 90) + 1));
+  const sessionLine = sleepMode === "real"
+    ? `林渡带着${preparation?.shortTitle ?? "笔记本"}出发 · 已调查 ${formatSleepDuration(elapsedMinutes)}`
+    : `林渡带着${preparation?.shortTitle ?? "笔记本"}出发 · 夜印正在形成 · ${seconds} 秒`;
   return (
     <main className="night-run">
-      <div className="night-stars" /><div className="night-header"><div className="brand-mark compact"><span>NS</span><div><b>夜班进行中</b><small>第 {chapter} 夜 · {qualityCopy[quality].time}</small></div></div><button onClick={onFinish}>跳到清晨 <ArrowRight size={16} /></button></div>
-      <div className="night-title"><p>你休息的时候，他会继续。</p><h2>{current.title}</h2><span>林渡带着{preparation?.shortTitle ?? "笔记本"}出发 · 夜印正在形成 · {seconds} 秒</span></div>
+      <div className="night-stars" /><div className="night-header"><div className="brand-mark compact"><span>NS</span><div><b>夜班进行中</b><small>第 {chapter} 夜 · {sleepMode === "real" ? "真实夜班" : qualityCopy[quality].time}</small></div></div><button onClick={onFinish}>{sleepMode === "real" ? "我醒了，拆开报告" : "跳到清晨"} <ArrowRight size={16} /></button></div>
+      <div className="night-title"><p>{sleepMode === "real" ? "合上页面也没关系。城市记得交接的时刻。" : "你休息的时候，他会继续。"}</p><h2>{current.title}</h2><span>{sessionLine}</span></div>
       <div className="night-seal-growth" aria-label={`第${chapter}夜的夜印正在形成`}><Image className="seal-ghost" src={nightSeal.src} alt="" width={118} height={118} /><span style={{ height: `${progress}%` }}><Image src={nightSeal.src} alt={nightSeal.alt} width={118} height={118} /></span></div>
       <CityRoute progress={progress} />
       <div className="event-ticker">{current.events.slice(0, eventCount).map((event, index) => <motion.div key={event} initial={{ opacity: 0, x: -10 }} animate={{ opacity: index === eventCount - 1 ? 1 : .45, x: 0 }}><i />{event}</motion.div>)}</div>
@@ -153,7 +172,7 @@ function NightRun({ onFinish }: { onFinish: () => void }) {
 }
 
 function MorningReport({ onContinue }: { onContinue: () => void }) {
-  const { chapter, quality, selectedPreparationId } = useGameStore();
+  const { chapter, quality, selectedPreparationId, lastSleepSession } = useGameStore();
   const current = nightShiftCase.chapters[chapter - 1];
   const result = resolveNight(chapter, quality, selectedPreparationId);
   const preparation = getPreparation(selectedPreparationId);
@@ -164,7 +183,7 @@ function MorningReport({ onContinue }: { onContinue: () => void }) {
     <div className="report-wrap">
       <section className="report-hero"><div><Seal>调查报告 · 0{chapter}</Seal><p>昨夜调查完成</p><h2>{current.title}</h2><small>记录人：林渡 · 雾灯城 · 05:28</small></div><div className="dawn-window"><span /><TramFront /></div></section>
       <div className="report-grid">
-        <PaperCard className="sleep-summary"><div className="paper-heading"><small>NIGHT IMPRESSION</small><b>第 {chapter} 枚夜印</b></div><div className="earned-seal"><Image src={nightSeal.src} alt={nightSeal.alt} width={150} height={150} /></div><p>{quality === "interrupted" ? "城市的声音有些断续，旅程较短，但这枚夜印仍完整记录了重要发现。" : quality === "regular" ? "一条完整而安静的标准路线，已经压进纸纤维里。" : "雾散得很早，夜印因此多留下一圈稀薄的金线。"}</p></PaperCard>
+        <PaperCard className="sleep-summary"><div className="paper-heading"><small>NIGHT IMPRESSION</small><b>第 {chapter} 枚夜印</b></div><div className="sleep-session-meta"><span>{lastSleepSession?.mode === "real" ? "真实夜班" : "演示夜班"}</span><b>{formatSleepDuration(lastSleepSession?.durationMinutes)}</b></div><div className="earned-seal"><Image src={nightSeal.src} alt={nightSeal.alt} width={150} height={150} /></div><p>{quality === "interrupted" ? "城市的声音有些断续，旅程较短，但这枚夜印仍完整记录了重要发现。" : quality === "regular" ? "一条完整而安静的标准路线，已经压进纸纤维里。" : "雾散得很早，夜印因此多留下一圈稀薄的金线。"}</p></PaperCard>
         <PaperCard className="journal"><div className="paper-heading"><small>LIN DU / FIELD NOTES</small><b>侦探日志</b></div><p>“{current.journal}”</p><span>— 林渡，清晨五点二十八分</span></PaperCard>
       </div>
       {result.preparationEcho && <PaperCard className="preparation-echo"><div><small>PACKED OBJECT · 随身物回响</small><h3>{preparation?.title}</h3></div><p>“{result.preparationEcho}”</p></PaperCard>}
@@ -227,12 +246,13 @@ function DemoDrawer({ onClose, setView }: { onClose: () => void; setView: (view:
 
 export default function HomePage() {
   const game = useGameStore();
+  const hydrated = useSyncExternalStore(subscribeToHydration, () => true, () => false);
   const [intro, setIntro] = useState(false);
   const [view, setView] = useState<View>("tonight");
   const [demo, setDemo] = useState(false);
   const activeView: View = game.phase === "morning" ? "report" : view;
   useEffect(() => { const key = (event: KeyboardEvent) => { if (event.shiftKey && event.key.toLowerCase() === "d") setDemo((value) => !value); }; window.addEventListener("keydown", key); return () => window.removeEventListener("keydown", key); }, []);
-  if (!game.started && !intro) return <><Hero onStart={() => setIntro(true)} onDemo={() => { game.begin(); setDemo(true); }} /><AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={setView} />}</AnimatePresence></>;
+  if (!game.started && !intro) return <><Hero interactive={hydrated} onStart={() => setIntro(true)} onDemo={() => { game.begin(); setDemo(true); }} /><AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={setView} />}</AnimatePresence></>;
   if (intro && !game.started) return <Intro onDone={() => { game.begin(); setIntro(false); }} />;
   if (game.phase === "night") return <NightRun onFinish={game.finishNight} />;
   if (game.phase === "ending") return <Ending />;
