@@ -71,6 +71,31 @@ test("returns a prior society answer in a later letter", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "致「获准误分类者」" })).toBeVisible();
 });
 
+test("files an optional daytime notice and returns its echo after the next night", async ({ page }) => {
+  await openFirstNight(page);
+  await page.getByRole("button", { name: /今晚交给你了/ }).click();
+  await page.getByRole("button", { name: /跳到清晨/ }).click();
+  await page.getByRole("button", { name: /整理线索，准备下一夜/ }).click();
+  await page.getByRole("button", { name: /^今晚$/ }).click();
+
+  await expect(page.getByText("门缝下的三张纸")).toBeVisible();
+  await expect(page.locator(".daytime-notice-list details")).toHaveCount(3);
+  await page.locator(".daytime-notice-list details").first().locator("summary").click();
+  await page.locator(".daytime-notice-list details").first().getByRole("button").first().click();
+  await expect(page.getByText(/选择已保存/)).toBeVisible();
+
+  await page.locator(".choice-list .choice").first().click();
+  await page.getByRole("button", { name: /今晚交给你了/ }).click();
+  await page.getByRole("button", { name: /跳到清晨/ }).click();
+  await expect(page.locator(".opportunity-echo")).toBeVisible();
+  await expect(page.getByText(/不改变案件成果或结局资格/)).toBeVisible();
+
+  await page.getByRole("button", { name: /整理线索，准备下一夜/ }).click();
+  await page.getByRole("button", { name: /收藏/ }).click();
+  await expect(page.getByText("城市剪报册")).toBeVisible();
+  await expect(page.locator(".city-clipping-book article.filed")).toHaveCount(1);
+});
+
 test("restores and settles a real night after reload", async ({ page }) => {
   await openFirstNight(page);
   await page.getByRole("button", { name: /今夜真实交接/ }).click();

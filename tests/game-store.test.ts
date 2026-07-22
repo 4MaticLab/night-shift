@@ -2,6 +2,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { nightShiftCase } from "@/src/content/case";
 import { getCorrespondencePrompt } from "@/src/content/correspondence";
 import { DEMO_JOURNEY_SEED } from "@/src/content/souvenirs";
+import { getOpportunityCandidates } from "@/src/content/opportunities";
 
 type StoreModule = typeof import("@/src/stores/game-store");
 let storeModule: StoreModule;
@@ -34,6 +35,12 @@ describe("Night Shift game store", () => {
     for (const chapter of nightShiftCase.chapters) {
       let state = storeModule.useGameStore.getState();
       expect(state.chapter).toBe(chapter.number);
+      if (chapter.number >= 2) {
+        const notice = getOpportunityCandidates(chapter.number, state.journeySeed, state.opportunityHistory)[0];
+        expect(state.resolveOpportunity(notice.id, notice.responses[0].id)).toBe(true);
+        expect(storeModule.useGameStore.getState().resolveOpportunity(notice.id, notice.responses[1].id)).toBe(false);
+        state = storeModule.useGameStore.getState();
+      }
       const chosenDirection = chapter.choices[(chapter.number - 1) % chapter.choices.length].id;
       state.selectChoice(chosenDirection);
       state = storeModule.useGameStore.getState();
@@ -80,6 +87,7 @@ describe("Night Shift game store", () => {
     expect(Object.keys(completed.societyHistory)).toHaveLength(5);
     expect(Object.keys(completed.correspondenceHistory)).toHaveLength(5);
     expect(Object.keys(completed.souvenirHistory)).toHaveLength(5);
+    expect(Object.keys(completed.opportunityHistory)).toHaveLength(4);
     expect(new Set(Object.values(completed.souvenirHistory).map((record) => record?.souvenirId))).toHaveLength(5);
     expect(completed.unlockedClueIds).toHaveLength(12);
   });
@@ -127,6 +135,7 @@ describe("Night Shift game store", () => {
     expect(migrated.correspondenceHistory).toEqual({});
     expect(migrated.journeySeed).toBe(DEMO_JOURNEY_SEED);
     expect(migrated.souvenirHistory).toEqual({});
+    expect(migrated.opportunityHistory).toEqual({});
     expect(migrated.nightSealIds).toEqual([]);
     expect(migrated.selectedPreparationId).toBe("");
   });
@@ -145,6 +154,8 @@ describe("Night Shift game store", () => {
     expect(state.journeySeed).toBe(DEMO_JOURNEY_SEED);
     expect(Object.keys(state.souvenirHistory)).toEqual(["1", "2", "3"]);
     expect(new Set(Object.values(state.souvenirHistory).map((record) => record?.souvenirId))).toHaveLength(3);
+    expect(Object.keys(state.opportunityHistory)).toEqual(["2", "3"]);
+    expect(state.opportunityHistory[2]).toMatchObject({ chapter: 2, dismissed: false });
     expect(state.growthHistory[2]).toMatchObject({ chapter: 2, quality: "regular", durationMinutes: 390, choiceId: "mina", preparationId: "side-lamp" });
     expect(state.societyHistory[3]).toMatchObject({ chapter: 3, choiceId: "hotel", societyId: "misfiled-registry", standing: "entrusted" });
     expect(state.correspondenceHistory[2]).toMatchObject({ chapter: 2, societyId: "misfiled-registry", standing: "known", replyId: "registry-known-witness" });
@@ -164,6 +175,7 @@ describe("Night Shift game store", () => {
     expect(migrated.correspondenceHistory).toEqual({});
     expect(Object.keys(migrated.souvenirHistory)).toEqual(["1", "2"]);
     expect(migrated.souvenirHistory[1]).toMatchObject({ chapter: 1, choiceId: "track", preparationId: "flower-note", journeySeed: DEMO_JOURNEY_SEED });
+    expect(migrated.opportunityHistory).toEqual({});
   });
 
   it("lets an unanswered letter pass without changing fixed night rewards", () => {

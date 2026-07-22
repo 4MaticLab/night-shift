@@ -13,6 +13,7 @@ import { getRouteDirection } from "@/src/content/routes";
 import { getCitySociety, getSocietyLetter, getSocietyTitle } from "@/src/content/societies";
 import { getCorrespondencePrompt, getCorrespondenceReply, getLatestSocietyReply } from "@/src/content/correspondence";
 import { getSouvenir } from "@/src/content/souvenirs";
+import { getOpportunityCandidates, getOpportunityNotice, getOpportunityResponse } from "@/src/content/opportunities";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import type { SleepMode, SleepQuality } from "@/src/lib/game-engine/schema";
 import { elapsedSessionMinutes, formatSleepDuration, nightSealProgress } from "@/src/lib/game-engine/sleep-session";
@@ -34,6 +35,7 @@ export function Tonight({ onLaunch }: { onLaunch: (quality: SleepQuality, prepar
         <div className="desk-props"><span className="notebook">FIELD<br />NOTES</span><span className="flashlight" /><span className="cup" /></div>
       </section>
       <section className="plan-panel">
+        {chapter > 1 && <DaytimeNotices />}
         <div className="section-label"><span>夜 {chapter}</span><small>{current.title}</small></div>
         <h3>{current.question}</h3>
         <p className="city-aside">“{current.cityAside}”</p>
@@ -51,6 +53,18 @@ export function Tonight({ onLaunch }: { onLaunch: (quality: SleepQuality, prepar
       </section>
     </div>
   );
+}
+
+function DaytimeNotices() {
+  const { chapter, journeySeed, opportunityHistory, resolveOpportunity, dismissOpportunities } = useGameStore();
+  const record = opportunityHistory[chapter];
+  const notices = record ? record.offeredIds.map(getOpportunityNotice) : getOpportunityCandidates(chapter, journeySeed, opportunityHistory);
+  const chosenNotice = record?.noticeId ? getOpportunityNotice(record.noticeId) : null;
+  const chosenResponse = record ? getOpportunityResponse(record) : null;
+
+  if (record) return <aside className="daytime-notices resolved" aria-label="今日机会告示已归档"><div><small>UNDER THE DOOR · 午后短章</small><b>{record.dismissed ? "三张纸已经收进抽屉" : chosenNotice?.title}</b></div><p>{record.dismissed ? "没有答复也没有损失。城市会把未拆的纸留在这一天。" : chosenResponse?.result}</p>{chosenResponse && <span>选择已保存；它可能在今后的晨报里留下轻微回声。</span>}</aside>;
+
+  return <aside className="daytime-notices" aria-label="门缝下的三张机会告示"><div className="daytime-notices-heading"><div><small>THREE PAPERS UNDER THE DOOR</small><b>门缝下的三张纸</b></div><button onClick={dismissOpportunities}>全部收起，不拆</button></div><p>任选一张回应，也可以全部收起。没有行动点、奖励差或正确答案，不影响今晚的调查。</p><div className="daytime-notice-list">{notices.map((notice) => <details key={notice.id}><summary><span>{notice.location}</span><b>{notice.title}</b><small>{notice.hook}</small></summary><div><p>{notice.detail}</p><small>— {notice.sender}</small><div>{notice.responses.map((response) => <button key={response.id} onClick={() => resolveOpportunity(notice.id, response.id)}><b>{response.label}</b><span>{response.note}</span></button>)}</div></div></details>)}</div></aside>;
 }
 
 export function NightRun({ onFinish }: { onFinish: () => void }) {
@@ -93,7 +107,7 @@ export function NightRun({ onFinish }: { onFinish: () => void }) {
 }
 
 export function MorningReport({ onContinue }: { onContinue: () => void }) {
-  const { chapter, quality, selectedChoice, selectedPreparationId, lastSleepSession, societyHistory, correspondenceHistory, souvenirHistory, answerCorrespondence } = useGameStore();
+  const { chapter, quality, selectedChoice, selectedPreparationId, lastSleepSession, societyHistory, correspondenceHistory, souvenirHistory, opportunityHistory, answerCorrespondence } = useGameStore();
   const current = nightShiftCase.chapters[chapter - 1];
   const result = resolveNight(chapter, quality, selectedPreparationId, selectedChoice);
   const preparation = getPreparation(selectedPreparationId);
@@ -106,6 +120,9 @@ export function MorningReport({ onContinue }: { onContinue: () => void }) {
   const souvenirRecord = souvenirHistory[chapter];
   const souvenir = souvenirRecord ? getSouvenir(souvenirRecord.souvenirId) : null;
   const souvenirArt = souvenir ? getAsset(souvenir.assetId) : null;
+  const opportunityRecord = opportunityHistory[chapter];
+  const opportunityNotice = opportunityRecord?.noticeId ? getOpportunityNotice(opportunityRecord.noticeId) : null;
+  const opportunityResponse = opportunityRecord ? getOpportunityResponse(opportunityRecord) : null;
   const societyRecord = societyHistory[chapter];
   const society = societyRecord ? getCitySociety(societyRecord.societyId) : null;
   const correspondencePrompt = societyRecord ? getCorrespondencePrompt(societyRecord) : null;
@@ -123,6 +140,7 @@ export function MorningReport({ onContinue }: { onContinue: () => void }) {
         <PaperCard className="postcard-back"><div className="paper-heading"><small>01 · POSTCARD FROM LAST NIGHT</small><b>{postcard.title}</b></div><small className="postcard-location">{postcard.location}</small><p className="postcard-rumor">“{postcard.cityRumor}”</p><p>{postcard.message}</p><div className="route-letter"><small>ROUTE LETTER · {result.direction.dispatchTitle}</small><b>{result.direction.destination}</b><p>“{result.returnLetter}”</p><span>{result.cityEncounter}</span></div><div className="postcard-preparation-note"><b>{preparation?.shortTitle ?? "随身物"}留下的痕迹</b><span>{postcardPreparationNote}</span></div></PaperCard>
       </section>
       <section className={`growth-reveal quality-${quality}`} aria-label={`第${chapter}夜时间植物`}><BotanicalSpecimen chapter={chapter} /><PaperCard className="growth-record"><div className="paper-heading"><small>02 · TIME GREW HERE</small><b>雾灯温室新标本</b></div><span className="botanical-archive-name">{botanical.archiveName} · {botanical.district}</span><h3>{botanical.name}</h3><p className="botanical-rumor">“{botanical.cityRumor}”</p><p>{botanical.specimenNote}</p><div className="growth-quality-note"><b>{qualityCopy[quality].label} · 仍然完整</b><span>{botanical.qualityNotes[quality]}</span></div></PaperCard></section>
+      {opportunityNotice && opportunityResponse && <PaperCard className="opportunity-echo"><div><small>DAYLIGHT ANSWER RETURNED · 午后答复的回声</small><h3>{opportunityNotice.title}</h3></div><blockquote>“{opportunityResponse.echo}”</blockquote><span>这段回声不改变案件成果或结局资格。</span></PaperCard>}
       {souvenir && souvenirArt && <section className="souvenir-reveal" aria-label={`口袋里多出来的东西：${souvenir.name}`}><div className="souvenir-reveal-art"><Image src={souvenirArt.src} alt={souvenirArt.alt} width={1024} height={1024} /></div><PaperCard><div className="paper-heading"><small>03 · FOUND IN A POCKET</small><b>口袋里多出来的东西</b></div><span className="souvenir-archive-name">{souvenir.archiveName}</span><h3>{souvenir.name}</h3><p className="souvenir-rumor">“{souvenir.cityRumor}”</p><p>{souvenir.provenance}</p><blockquote>“{souvenir.fieldNote}”</blockquote><div className="souvenir-no-advantage"><b>不是案件线索</b><span>它不提供调查优势、额外奖励或结局资格，只证明这座城在你睡着时有自己的生活。</span></div></PaperCard></section>}
       {societyRecord && society && correspondencePrompt && <section className={`society-memory-letter society-${society.id}`} aria-label={`${society.name}来函`}><SocietyCrest societyId={society.id} /><PaperCard><div className="paper-heading"><small>04 · THE CITY REMEMBERS</small><b>{society.name}来函</b></div><span className="society-archive-name">{society.archiveName}</span><h3>致「{getSocietyTitle(societyRecord)}」</h3><p className="society-rumor">“{society.publicRumor}”</p><blockquote>{getSocietyLetter(societyRecord)}</blockquote>{priorReply && <div className="correspondence-echo"><small>YOUR LAST ANSWER RETURNED · 上次答复的余波</small><p>{priorReply.echo}</p></div>}<div className="society-postscript"><small>本夜被记住的原因</small><p>{result.direction.societyNotice}</p></div><div className="correspondence-question"><small>A QUESTION WITH NO CORRECT ANSWER · 城市问函</small><p>{correspondencePrompt.context}</p><h4>{correspondencePrompt.question}</h4><div className="correspondence-replies">{correspondencePrompt.replies.map((reply) => <button key={reply.id} className={selectedReply?.id === reply.id ? "selected" : ""} disabled={Boolean(selectedReply)} onClick={() => answerCorrespondence(chapter, reply.id)}><b>{reply.label}</b><span>{reply.note}</span>{selectedReply?.id === reply.id && <Check size={15} />}</button>)}</div>{selectedReply ? <div className="correspondence-filed"><b>答复已寄出</b><span>{selectedReply.summary}</span></div> : <p className="correspondence-skip">可以不回信，直接整理晨报；沉默不会失去线索、植物或任何后续章节。</p>}</div><footer>— {society.signoff}</footer></PaperCard></section>}
       <div className="report-grid">

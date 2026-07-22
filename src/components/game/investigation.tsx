@@ -15,6 +15,7 @@ import { nightBotanicals } from "@/src/content/botany";
 import { citySocieties, getSocietyTitle } from "@/src/content/societies";
 import { correspondencePostures, getCorrespondencePrompt, getCorrespondenceReply, getDominantCorrespondenceStance } from "@/src/content/correspondence";
 import { souvenirs } from "@/src/content/souvenirs";
+import { getOpportunityNotice, getOpportunityResponse } from "@/src/content/opportunities";
 import { evidenceRelations } from "@/src/content/relations";
 import { useGameStore } from "@/src/stores/game-store";
 import { canUnlockTrueEnding, type EndingId } from "@/src/lib/game-engine/ending";
@@ -68,7 +69,7 @@ export function CaseBoard() {
 }
 
 export function Collection() {
-  const { unlockedCollectibleIds, nightSealIds, chapter, completedReports, preparationHistory, choiceHistory, growthHistory, societyHistory, correspondenceHistory, souvenirHistory } = useGameStore();
+  const { unlockedCollectibleIds, nightSealIds, chapter, completedReports, preparationHistory, choiceHistory, growthHistory, societyHistory, correspondenceHistory, souvenirHistory, opportunityHistory } = useGameStore();
   const societyRecords = Object.values(societyHistory).filter((record): record is SocietyMemoryRecord => Boolean(record)).sort((a, b) => a.chapter - b.chapter);
   const correspondenceRecords = Object.values(correspondenceHistory).filter((record): record is CorrespondenceRecord => Boolean(record));
   return <div className="collection-page">
@@ -83,6 +84,11 @@ export function Collection() {
       <div className="shelf-heading"><small>UNASKED-FOR SOUVENIRS · {Object.keys(souvenirHistory).length}/5 NIGHTS</small><h3>口袋抽屉</h3></div>
       <p className="pocket-drawer-intro">方向与随身物会让林渡经过不同的城市角落，但没有兑换表，也不能靠刷新重抽。五夜里出现的每件小物都只是一段旁证，不会替案件增加优势。</p>
       <div className="pocket-drawer-grid">{souvenirs.map((souvenir) => { const record = Object.values(souvenirHistory).find((entry) => entry?.souvenirId === souvenir.id); const art = getAsset(souvenir.assetId); const direction = record ? getRouteDirection(record.chapter, record.choiceId) : null; const preparation = record ? getPreparation(record.preparationId) : null; return <article className={record ? "pocket-object unlocked" : "pocket-object locked"} key={souvenir.id}><div className="pocket-object-art">{record ? <Image src={art.src} alt={art.alt} width={1024} height={1024} /> : <div><KeyRound /><span>DRAWER CLOSED</span></div>}</div><div className="pocket-object-copy"><small>{record ? `夜 0${record.chapter} · ${souvenir.archiveName}` : "尚未出现在口袋里"}</small><h4>{record ? souvenir.name : "未归档小物"}</h4><p>{record ? souvenir.provenance : "城市还没有决定把什么留给这一格抽屉。"}</p>{record && <blockquote>“{souvenir.fieldNote}”</blockquote>}{record && <footer><b>{direction?.dispatchTitle}</b><span>{preparation?.shortTitle} · {direction?.destination}</span></footer>}</div></article>; })}</div>
+    </section>
+    <section className="city-clipping-book">
+      <div className="shelf-heading"><small>DAYLIGHT NOTICES · {Object.keys(opportunityHistory).length}/4 DAYS</small><h3>城市剪报册</h3></div>
+      <p>收起的纸也会留在那一天，但不会替你补写选择。这里没有行动点、分数或最优答复。</p>
+      <div>{[2, 3, 4, 5].map((day) => { const record = opportunityHistory[day]; const notice = record?.noticeId ? getOpportunityNotice(record.noticeId) : null; const response = record ? getOpportunityResponse(record) : null; return <article className={record ? "filed" : ""} key={day}><small>DAY 0{day} · {record ? "FILED" : "NOT YET"}</small><h4>{record ? (notice?.title ?? "三张纸没有拆开") : "门缝仍然空着"}</h4><p>{record ? (response?.result ?? "你把三张纸全部收进抽屉。没有人因此失去什么，城市也没有替沉默补写答案。") : "完成前一夜后，城市会递来三张可以回应、也可以收起的纸。"}</p>{response && <blockquote><small>后来传回</small>“{response.echo}”</blockquote>}</article>; })}</div>
     </section>
     <section className="night-greenhouse">
       <div className="shelf-heading"><small>FOGLIGHT GREENHOUSE · {Object.keys(growthHistory).length}/5</small><h3>雾灯温室</h3></div>

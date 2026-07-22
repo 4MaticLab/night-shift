@@ -16,6 +16,7 @@ import { getNightBotanical, growthStageFromProgress, nightBotanicals } from "@/s
 import { citySocieties, createSocietyMemory, getCitySociety, getSocietyLetter, getSocietyTitle } from "@/src/content/societies";
 import { correspondencePostures, correspondencePrompts, createCorrespondenceRecord, getCorrespondencePrompt, getCorrespondenceReply, getDominantCorrespondenceStance, getLatestSocietyReply } from "@/src/content/correspondence";
 import { createSouvenirRecord, DEMO_JOURNEY_SEED, getSouvenir, selectSouvenir, souvenirs } from "@/src/content/souvenirs";
+import { createOpportunityRecord, getOpportunityCandidates, getOpportunityResponse, opportunityNotices } from "@/src/content/opportunities";
 
 describe("Night Shift case content", () => {
   it("contains the complete five-night mystery", () => {
@@ -198,6 +199,39 @@ describe("Night Shift case content", () => {
       expect(getSouvenir(history[chapter]!.souvenirId)).toBeTruthy();
     }
     expect(new Set(Object.values(history).map((record) => record?.souvenirId))).toHaveLength(5);
+  });
+
+  it("defines twelve balanced city notices with two valid responses each", () => {
+    expect(opportunityNotices).toHaveLength(12);
+    expect(new Set(opportunityNotices.map((notice) => notice.id))).toHaveLength(12);
+    for (const category of ["misfiled-registry", "mislaid-consulate", "afterlight-cartographers", "citizen"]) {
+      expect(opportunityNotices.filter((notice) => notice.category === category)).toHaveLength(3);
+    }
+    expect(opportunityNotices.every((notice) => notice.responses.length === 2)).toBe(true);
+    expect(new Set(opportunityNotices.flatMap((notice) => notice.responses.map((response) => response.id)))).toHaveLength(24);
+  });
+
+  it("offers four stable, non-repeating sets of three daytime notices", () => {
+    const history = {} as Parameters<typeof getOpportunityCandidates>[2];
+    const seen = new Set<string>();
+    for (let chapter = 2; chapter <= 5; chapter += 1) {
+      const candidates = getOpportunityCandidates(chapter, DEMO_JOURNEY_SEED, history);
+      expect(getOpportunityCandidates(chapter, DEMO_JOURNEY_SEED, history).map((notice) => notice.id)).toEqual(candidates.map((notice) => notice.id));
+      expect(candidates).toHaveLength(3);
+      expect(candidates.every((notice) => !seen.has(notice.id))).toBe(true);
+      candidates.forEach((notice) => seen.add(notice.id));
+      history[chapter] = createOpportunityRecord(chapter, DEMO_JOURNEY_SEED, history, undefined, undefined, `2026-07-${String(10 + chapter).padStart(2, "0")}T13:00:00.000Z`);
+    }
+    expect(seen).toHaveLength(12);
+  });
+
+  it("settles one offered response once and preserves its later echo", () => {
+    const candidate = getOpportunityCandidates(2, DEMO_JOURNEY_SEED, {})[0];
+    const record = createOpportunityRecord(2, DEMO_JOURNEY_SEED, {}, candidate.id, candidate.responses[1].id, "2026-07-12T13:00:00.000Z");
+    expect(record.dismissed).toBe(false);
+    expect(getOpportunityResponse(record)?.result).toBe(candidate.responses[1].result);
+    expect(getOpportunityResponse(record)?.echo).toBeTruthy();
+    expect(createOpportunityRecord(2, 99, { 2: record }, undefined, undefined, "2026-07-13T13:00:00.000Z")).toEqual(record);
   });
 
   it("derives four deterministic growth stages from restored progress", () => {

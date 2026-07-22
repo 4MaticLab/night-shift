@@ -154,6 +154,37 @@ export const souvenirRecordSchema = z.object({
 });
 export type SouvenirRecord = z.infer<typeof souvenirRecordSchema>;
 
+export const opportunityResponseSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  note: z.string(),
+  result: z.string(),
+  echo: z.string(),
+});
+export type OpportunityResponse = z.infer<typeof opportunityResponseSchema>;
+
+export const opportunityNoticeSchema = z.object({
+  id: z.string(),
+  category: z.enum(["misfiled-registry", "mislaid-consulate", "afterlight-cartographers", "citizen"]),
+  title: z.string(),
+  location: z.string(),
+  sender: z.string(),
+  hook: z.string(),
+  detail: z.string(),
+  responses: z.tuple([opportunityResponseSchema, opportunityResponseSchema]),
+});
+export type OpportunityNotice = z.infer<typeof opportunityNoticeSchema>;
+
+export const opportunityRecordSchema = z.object({
+  chapter: z.number().int().min(2).max(5),
+  offeredIds: z.tuple([z.string(), z.string(), z.string()]),
+  noticeId: z.string().optional(),
+  responseId: z.string().optional(),
+  dismissed: z.boolean(),
+  resolvedAt: z.string().datetime(),
+});
+export type OpportunityRecord = z.infer<typeof opportunityRecordSchema>;
+
 export const growthStageSchema = z.enum(["seed", "sprout", "leaf", "bloom"]);
 export type GrowthStage = z.infer<typeof growthStageSchema>;
 
