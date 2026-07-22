@@ -78,6 +78,8 @@ Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：分别覆盖 Demo
 
 第十五个私密版本为灯港区、旧子午区与玻璃丘加入三张原创城市版画，并在档案页按第 1、3、4 夜进度展开公共说法、城市规矩与固定地标，完成 [[plans/0013-foglight-district-atlas]]。
 
+第十六个私密版本用交接、夜行、归来与裁决四张原创横幅重建核心流程分幕；林渡造型与暖纸蚀刻媒介保持连续，夜间路线、晨报标题和结局交互继续位于图像之上，完成 [[plans/0014-four-act-header-triptych-and-ending-tableau]]。
+
 ## 相关文档
 
 - [[docs/architecture]]
