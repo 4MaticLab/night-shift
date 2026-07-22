@@ -72,6 +72,8 @@ Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：分别覆盖 Demo
 
 第十三个私密版本加入十二张机会告示、二十四种答复、四日稳定三选一、v9 历史、次晨回声与城市剪报册；短章可全部收起且没有行动点或主线门槛，完成 [[plans/0011-foglight-opportunity-notices-and-daytime-storylets]]。
 
+第十四个私密版本为米娜、吉迪恩、奥林与伊芙琳加入四张原创编辑蚀刻肖像；第 2–5 夜晨报呈现相关人物，档案页按相遇和既有证物逐层展开固定事实，完成 [[plans/0012-city-witness-portraits-and-person-dossiers]]。
+
 ## 相关文档
 
 - [[docs/architecture]]
