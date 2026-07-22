@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前主计划是 [[plans/0006-investigation-directions-and-route-letters]]：让玩家每夜选择的调查方向真正留下可回看的路线差异，同时保护固定案件事实。
+当前主计划是 [[plans/0007-night-greenhouse-and-time-growth]]：让每次等待长成一株可收藏的夜生植物，把真实时间转化为可见、无失败惩罚的成果。
 
 ## 计划清单
 
@@ -15,7 +15,8 @@
 | [[plans/0003-mvp-quality-hardening]] | `completed` | `auto` | P0 | 6/6 | 已完成结构、真实夜班、证物关系与自动化加固 |
 | [[plans/0004-literary-city-and-waiting-loop]] | `completed` | `auto` | P0 | 8/8 | 已发布第一轮北极星升级 |
 | [[plans/0005-city-postcards-and-return-ritual]] | `completed` | `auto` | P0 | 6/6 | 已发布五夜城市明信片与归来仪式 |
-| [[plans/0006-investigation-directions-and-route-letters]] | `in_progress` | `auto` | P0 | 5/6 | 完整验证、Git checkpoint 与私密发布 |
+| [[plans/0006-investigation-directions-and-route-letters]] | `completed` | `auto` | P0 | 6/6 | 已发布十五条方向路线、来信与履历 |
+| [[plans/0007-night-greenhouse-and-time-growth]] | `in_progress` | `auto` | P0 | 0/6 | 冻结五株夜生植物与成长记录契约 |
 
 ## 状态规则
 

@@ -51,6 +51,8 @@ Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：分别覆盖 Demo
 
 第七个私密版本为五夜加入独立城市明信片、晨报归来仪式、随身物背面附言、可持久解锁的旅程册与 v3 存档迁移，完成 [[plans/0005-city-postcards-and-return-ritual]]。
 
+第八个私密版本加入五夜十五条调查方向、三种地图坡度、方向专属夜间事件、城市遭遇、归来来信、旅程履历与 v4 方向历史迁移，完成 [[plans/0006-investigation-directions-and-route-letters]]。
+
 ## 相关文档
 
 - [[docs/architecture]]
