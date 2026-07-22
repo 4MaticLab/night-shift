@@ -12,10 +12,13 @@ async function openFirstNight(page: import("@playwright/test").Page) {
 test("starts a case and reaches the first morning report", async ({ page }) => {
   await openFirstNight(page);
   await page.getByRole("button", { name: /今晚交给你了/ }).click();
+  await expect(page.getByText("纸张的证词")).toBeVisible();
+  await expect(page.getByText(/旧票据工坊承认这批纸早已销毁/)).toBeVisible();
   await page.getByRole("button", { name: /跳到清晨/ }).click();
   await expect(page.getByText("昨夜调查完成")).toBeVisible();
   await expect(page.getByText("灯港拒收件")).toBeVisible();
   await expect(page.getByText(/市政厅的否认牌在雨里站了七年/)).toBeVisible();
+  await expect(page.getByText(/我先让纸张开口/)).toBeVisible();
   await expect(page.getByText(/为什么一张已经停运七年的车票/)).toBeVisible();
 });
 
@@ -27,6 +30,7 @@ test("keeps returned postcards in the journey album", async ({ page }) => {
 
   await expect(page.getByText("灯港拒收件")).toBeVisible();
   await expect(page.getByText("寄往无人之处")).toBeVisible();
+  await expect(page.getByText(/第二版回答 · 灯港花店后室/)).toBeVisible();
   await expect(page.getByText("雾灯城寄回的五个夜晚")).toBeVisible();
 });
 

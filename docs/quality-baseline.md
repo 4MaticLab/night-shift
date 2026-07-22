@@ -8,13 +8,14 @@
 - 五枚夜印随完成章节积累并通过本地存档保留。
 - 五张城市明信片分别对应五夜地点；晨报先展示归来旅程，收藏页按完成报告永久解锁旅程册。
 - 三件随身物会为每张明信片留下不同背面附言，章节事实与线索保持不变。
+- 五夜共有十五条确定性调查方向；每条拥有独立路线、五段夜间事件、城市遭遇和归来来信，而同章节固定线索与藏品不分叉。
 - 八件收藏品均使用独立的编辑蚀刻插画，不再以字符作为主要视觉。
 - 首页、三幕开场、睡前交接、12 秒夜间模拟、可恢复的真实夜班、晨报、案件板、收藏和三个结局。
-- Zustand 浏览器本地存档与 v3 迁移、Demo 抽屉和 `Shift + D` 快捷键。
+- Zustand 浏览器本地存档与 v4 迁移；`choiceHistory` 和 `preparationHistory` 分别保留每夜方向与随身物，Demo 抽屉和 `Shift + D` 快捷键可生成可解释的默认履历。
 - 真实夜班以持久化开始时间结算；关闭页面再返回仍能恢复进度，晨报会显示实际时长与派生质量。
 - 产品界面已按落地叙事、夜间循环、调查归档和导航框架拆分；`app/page.tsx` 只负责编排。
 - 案件板要求玩家选择两件证物建立关系；三条核心推论由确定性证物对校验，错误连接不会写入存档。
-- 自动测试已覆盖安稳睡眠的完整五夜循环、真实夜班持久化重载、v1→v2 迁移、三个结局与真结局门槛。
+- 自动测试已覆盖十五条方向完整性与固定奖励护栏、安稳睡眠的完整五夜循环、真实夜班持久化重载、旧存档迁移、三个结局与真结局门槛。
 - 服务端可渲染产品标题与社交分享元数据。
 
 ## 验证命令
@@ -27,14 +28,14 @@ npm run test:render
 npm run docs:check
 ```
 
-Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：分别覆盖 Demo 首份晨报与归来明信片、旅程册、真实交接刷新恢复和两证物核心推论。`tests/game-store.test.ts` 在内存浏览器存储上覆盖五夜、明信片随身物历史、迁移、恢复与结局。浏览器测试使用本机 Chrome channel，避免依赖额外下载的 Playwright 浏览器。
+Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：分别覆盖 Demo 方向事件、首份路线来信与归来明信片、旅程履历、真实交接刷新恢复和两证物核心推论。`tests/game-store.test.ts` 在内存浏览器存储上覆盖五夜方向历史、明信片随身物历史、迁移、恢复与结局。浏览器测试使用本机 Chrome channel，避免依赖额外下载的 Playwright 浏览器。
 
 ## 已知边界
 
 - 浏览器端视觉回归、完整五夜 E2E 和移动端交互尚未纳入自动验证。
 - 直接运行原生 `tsc --noEmit` 会缺少 Cloudflare Worker 全局类型；项目正式的 Vinext 生产构建不受影响。
 
-完成的工程加固见 [[plans/0003-mvp-quality-hardening]]；下一轮体验升级见 [[plans/0005-city-postcards-and-return-ritual]]。
+完成的工程加固见 [[plans/0003-mvp-quality-hardening]]；当前方向分支升级见 [[plans/0006-investigation-directions-and-route-letters]]。
 
 桌面与移动端人工核对项见 [[docs/viewport-checklist]]。
 

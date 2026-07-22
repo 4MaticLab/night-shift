@@ -51,6 +51,21 @@ export const journeyPostcardSchema = z.object({
 });
 export type JourneyPostcard = z.infer<typeof journeyPostcardSchema>;
 
+export const routeDirectionSchema = z.object({
+  id: z.string(),
+  chapter: z.number().int().min(1).max(5),
+  choiceId: z.string(),
+  dispatchTitle: z.string(),
+  departureIntent: z.string(),
+  destination: z.string(),
+  routeNodes: z.array(z.string()).length(4),
+  events: z.array(z.string()).length(5),
+  cityEncounter: z.string(),
+  returnLetter: z.string(),
+  mapVariant: z.enum(["river", "market", "heights"]),
+});
+export type RouteDirection = z.infer<typeof routeDirectionSchema>;
+
 export const collectibleSchema = z.object({
   id: z.string(),
   title: z.string(),

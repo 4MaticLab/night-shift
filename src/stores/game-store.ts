@@ -8,6 +8,7 @@ import type { PreparationId } from "@/src/content/preparations";
 import { finishSleepSession, startSleepSession } from "@/src/lib/game-engine/sleep-session";
 import { matchEvidenceRelation } from "@/src/content/relations";
 import { canChooseEnding, type EndingId } from "@/src/lib/game-engine/ending";
+import { getDefaultChoiceId } from "@/src/content/routes";
 
 export type Phase = "day" | "ready" | "night" | "morning" | "ending";
 
@@ -22,6 +23,7 @@ export interface GameState {
   activeSleepSession: SleepSession | null;
   lastSleepSession: SleepSession | null;
   preparationHistory: Partial<Record<number, PreparationId>>;
+  choiceHistory: Partial<Record<number, string>>;
   unlockedClueIds: string[];
   unlockedCollectibleIds: string[];
   completedReports: number[];
@@ -51,6 +53,7 @@ const initial = {
   activeSleepSession: null as SleepSession | null,
   lastSleepSession: null as SleepSession | null,
   preparationHistory: {} as Partial<Record<number, PreparationId>>,
+  choiceHistory: {} as Partial<Record<number, string>>,
   unlockedClueIds: [] as string[],
   unlockedCollectibleIds: [] as string[],
   completedReports: [] as number[],
@@ -73,7 +76,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
     const state = get();
     const activeSession = state.activeSleepSession ?? startSleepSession(state.sleepMode, state.quality);
     const completedSession = finishSleepSession(activeSession);
-    const result = resolveNight(state.chapter, completedSession.quality, state.selectedPreparationId);
+    const result = resolveNight(state.chapter, completedSession.quality, state.selectedPreparationId, state.selectedChoice);
     set({
       phase: "morning",
       quality: completedSession.quality,
@@ -82,6 +85,10 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
       preparationHistory: {
         ...state.preparationHistory,
         [state.chapter]: state.selectedPreparationId || "side-lamp",
+      },
+      choiceHistory: {
+        ...state.choiceHistory,
+        [state.chapter]: result.choiceId,
       },
       unlockedClueIds: Array.from(new Set([...state.unlockedClueIds, ...result.clueIds])),
       unlockedCollectibleIds: Array.from(new Set([...state.unlockedCollectibleIds, ...result.collectibleIds])),
@@ -104,7 +111,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   },
   jumpToChapter: (chapter) => {
     const priorChapters = Array.from({ length: Math.max(0, chapter - 1) }, (_, index) => index + 1);
-    set({ ...initial, started: true, chapter, phase: "day", nightSealIds: priorChapters, completedReports: priorChapters, preparationHistory: Object.fromEntries(priorChapters.map((number) => [number, "side-lamp" as PreparationId])), unlockedClueIds: chapter === 1 ? [] : Array.from({ length: Math.min(12, (chapter - 1) * 3) }, (_, i) => ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "room-307", "transport-photo", "scratched-map", "museum-tag", "ledger-clasp", "evelyn-message"][i]), unlockedCollectibleIds: Array.from({ length: Math.min(8, (chapter - 1) * 2) }, (_, i) => ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"][i]) });
+    set({ ...initial, started: true, chapter, phase: "day", nightSealIds: priorChapters, completedReports: priorChapters, preparationHistory: Object.fromEntries(priorChapters.map((number) => [number, "side-lamp" as PreparationId])), choiceHistory: Object.fromEntries(priorChapters.map((number) => [number, getDefaultChoiceId(number)])), unlockedClueIds: chapter === 1 ? [] : Array.from({ length: Math.min(12, (chapter - 1) * 3) }, (_, i) => ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "room-307", "transport-photo", "scratched-map", "museum-tag", "ledger-clasp", "evelyn-message"][i]), unlockedCollectibleIds: Array.from({ length: Math.min(8, (chapter - 1) * 2) }, (_, i) => ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"][i]) });
   },
   unlockBoard: (confirmRelations = false) => set({ unlockedClueIds: ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "scratched-map", "room-307", "transport-photo", "museum-tag", "ledger-clasp", "evelyn-message"], unlockedCollectibleIds: ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"], confirmedRelations: confirmRelations ? ["line-institution", "mina-evelyn", "gideon-escape"] : [] }),
   chooseEnding: (endingId) => {
@@ -114,7 +121,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   reset: () => set({ ...initial, endingId: undefined }),
 }), {
   name: "night-shift-save-v1",
-  version: 3,
+  version: 4,
   migrate: migrateGameState,
 }));
 
@@ -126,6 +133,7 @@ export function migrateGameState(persistedState: unknown): GameState {
     activeSleepSession: persisted.activeSleepSession ?? null,
     lastSleepSession: persisted.lastSleepSession ?? null,
     preparationHistory: persisted.preparationHistory ?? {},
+    choiceHistory: persisted.choiceHistory ?? {},
     nightSealIds: persisted.nightSealIds ?? [],
     selectedPreparationId: persisted.selectedPreparationId ?? "",
   } as GameState;

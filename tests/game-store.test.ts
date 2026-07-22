@@ -32,7 +32,8 @@ describe("Night Shift game store", () => {
     for (const chapter of nightShiftCase.chapters) {
       let state = storeModule.useGameStore.getState();
       expect(state.chapter).toBe(chapter.number);
-      state.selectChoice(chapter.choices[0].id);
+      const chosenDirection = chapter.choices[(chapter.number - 1) % chapter.choices.length].id;
+      state.selectChoice(chosenDirection);
       state = storeModule.useGameStore.getState();
       state.startNight("restful", "side-lamp", "demo");
       storeModule.useGameStore.getState().finishNight();
@@ -41,6 +42,7 @@ describe("Night Shift game store", () => {
       expect(state.completedReports).toContain(chapter.number);
       expect(state.nightSealIds).toContain(chapter.number);
       expect(state.preparationHistory[chapter.number]).toBe("side-lamp");
+      expect(state.choiceHistory[chapter.number]).toBe(chosenDirection);
       state.continueDay();
     }
 
@@ -67,6 +69,7 @@ describe("Night Shift game store", () => {
     const restored = storeModule.useGameStore.getState();
     expect(restored.phase).toBe("night");
     expect(restored.sleepMode).toBe("real");
+    expect(restored.selectedChoice).toBe("source");
     expect(restored.activeSleepSession?.id).toBe(activeId);
   });
 
@@ -83,6 +86,7 @@ describe("Night Shift game store", () => {
     expect(migrated.activeSleepSession).toBeNull();
     expect(migrated.lastSleepSession).toBeNull();
     expect(migrated.preparationHistory).toEqual({});
+    expect(migrated.choiceHistory).toEqual({});
     expect(migrated.nightSealIds).toEqual([]);
     expect(migrated.selectedPreparationId).toBe("");
   });
@@ -94,6 +98,7 @@ describe("Night Shift game store", () => {
     expect(state.completedReports).toEqual([1, 2, 3]);
     expect(state.nightSealIds).toEqual([1, 2, 3]);
     expect(state.preparationHistory).toEqual({ 1: "side-lamp", 2: "side-lamp", 3: "side-lamp" });
+    expect(state.choiceHistory).toEqual({ 1: "source", 2: "mina", 3: "hotel" });
   });
 
   it("supports all three endings and protects the true ending gate", () => {

@@ -11,6 +11,7 @@ import {
   startSleepSession,
 } from "@/src/lib/game-engine/sleep-session";
 import { evidenceRelations, matchEvidenceRelation } from "@/src/content/relations";
+import { getDefaultChoiceId, getRouteDirection, routeDirections } from "@/src/content/routes";
 
 describe("Night Shift case content", () => {
   it("contains the complete five-night mystery", () => {
@@ -41,6 +42,33 @@ describe("Night Shift case content", () => {
       results[0].clueIds,
       results[0].clueIds,
     ]);
+  });
+
+  it("defines three complete and distinct route directions for every night", () => {
+    expect(routeDirections).toHaveLength(15);
+    for (const chapter of nightShiftCase.chapters) {
+      const directions = chapter.choices.map((choice) => getRouteDirection(chapter.number, choice.id));
+      expect(directions.map((direction) => direction.choiceId)).toEqual(chapter.choices.map((choice) => choice.id));
+      expect(new Set(directions.map((direction) => direction.returnLetter))).toHaveLength(3);
+      expect(new Set(directions.map((direction) => direction.cityEncounter))).toHaveLength(3);
+      expect(new Set(directions.map((direction) => direction.routeNodes.join(" → ")))).toHaveLength(3);
+      expect(new Set(directions.map((direction) => direction.events.join(" | ")))).toHaveLength(3);
+      expect(directions.every((direction) => direction.events.length === 5 && direction.routeNodes.length === 4)).toBe(true);
+    }
+  });
+
+  it("lets direction change the journey without changing fixed rewards", () => {
+    for (const chapter of nightShiftCase.chapters) {
+      const results = chapter.choices.map((choice) => resolveNight(chapter.number, "regular", "side-lamp", choice.id));
+      expect(results.map((result) => result.clueIds)).toEqual([results[0].clueIds, results[0].clueIds, results[0].clueIds]);
+      expect(results.map((result) => result.collectibleIds)).toEqual([results[0].collectibleIds, results[0].collectibleIds, results[0].collectibleIds]);
+      expect(new Set(results.map((result) => result.returnLetter))).toHaveLength(3);
+    }
+  });
+
+  it("defaults legacy nights to the first direction and rejects invalid choices", () => {
+    expect(resolveNight(1, "regular").choiceId).toBe(getDefaultChoiceId(1));
+    expect(() => resolveNight(1, "regular", "", "not-a-route")).toThrow(/Unknown choice/);
   });
 
   it("resolves every collectible and night seal through the asset manifest", () => {
