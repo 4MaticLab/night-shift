@@ -35,6 +35,22 @@ export const evidenceRelationSchema = z.object({
 });
 export type EvidenceRelation = z.infer<typeof evidenceRelationSchema>;
 
+export const journeyPostcardSchema = z.object({
+  id: z.string(),
+  chapter: z.number().int().min(1).max(5),
+  assetId: z.string(),
+  title: z.string(),
+  location: z.string(),
+  cityRumor: z.string(),
+  message: z.string(),
+  preparationNotes: z.object({
+    "side-lamp": z.string(),
+    "flower-note": z.string(),
+    "tram-fare": z.string(),
+  }),
+});
+export type JourneyPostcard = z.infer<typeof journeyPostcardSchema>;
+
 export const collectibleSchema = z.object({
   id: z.string(),
   title: z.string(),

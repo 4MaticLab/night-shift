@@ -40,6 +40,7 @@ describe("Night Shift game store", () => {
       expect(state.phase).toBe("morning");
       expect(state.completedReports).toContain(chapter.number);
       expect(state.nightSealIds).toContain(chapter.number);
+      expect(state.preparationHistory[chapter.number]).toBe("side-lamp");
       state.continueDay();
     }
 
@@ -81,8 +82,18 @@ describe("Night Shift game store", () => {
     expect(migrated.sleepMode).toBe("demo");
     expect(migrated.activeSleepSession).toBeNull();
     expect(migrated.lastSleepSession).toBeNull();
+    expect(migrated.preparationHistory).toEqual({});
     expect(migrated.nightSealIds).toEqual([]);
     expect(migrated.selectedPreparationId).toBe("");
+  });
+
+  it("restores prior reports and postcard preparations for demo chapter jumps", () => {
+    storeModule.useGameStore.getState().jumpToChapter(4);
+    const state = storeModule.useGameStore.getState();
+
+    expect(state.completedReports).toEqual([1, 2, 3]);
+    expect(state.nightSealIds).toEqual([1, 2, 3]);
+    expect(state.preparationHistory).toEqual({ 1: "side-lamp", 2: "side-lamp", 3: "side-lamp" });
   });
 
   it("supports all three endings and protects the true ending gate", () => {

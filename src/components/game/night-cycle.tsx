@@ -5,7 +5,8 @@ import Image from "next/image";
 import { motion } from "motion/react";
 import { ArrowRight, BriefcaseBusiness, Check, ChevronRight, Clock3, Coffee, FileText, Lightbulb, Moon, TramFront, Zap } from "lucide-react";
 import { nightShiftCase } from "@/src/content/case";
-import { getAsset, getNightSealAsset } from "@/src/content/assets";
+import { getAsset, getNightSealAsset, getPostcardAsset } from "@/src/content/assets";
+import { getJourneyPostcard, getPostcardPreparationNote } from "@/src/content/postcards";
 import { getPreparation, preparations, type PreparationId } from "@/src/content/preparations";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import type { SleepMode, SleepQuality } from "@/src/lib/game-engine/schema";
@@ -88,11 +89,19 @@ export function MorningReport({ onContinue }: { onContinue: () => void }) {
   const result = resolveNight(chapter, quality, selectedPreparationId);
   const preparation = getPreparation(selectedPreparationId);
   const nightSeal = getNightSealAsset(chapter);
+  const postcard = getJourneyPostcard(chapter);
+  const postcardArt = getPostcardAsset(chapter);
+  const postcardPreparationId = selectedPreparationId || "side-lamp";
+  const postcardPreparationNote = getPostcardPreparationNote(chapter, postcardPreparationId);
   const foundClues = nightShiftCase.clues.filter((item) => result.clueIds.includes(item.id));
   const foundItems = nightShiftCase.collectibles.filter((item) => result.collectibleIds.includes(item.id));
   return (
     <div className="report-wrap">
       <section className="report-hero"><div><Seal>调查报告 · 0{chapter}</Seal><p>昨夜调查完成</p><h2>{current.title}</h2><small>记录人：林渡 · 雾灯城 · 05:28</small></div><div className="dawn-window"><span /><TramFront /></div></section>
+      <section className="return-postcard" aria-label={`第${chapter}夜归来明信片`}>
+        <div className="postcard-picture"><Image src={postcardArt.src} alt={postcardArt.alt} fill sizes="(max-width: 900px) 100vw, 58vw" /><span>RETURNED · NIGHT 0{chapter}</span></div>
+        <PaperCard className="postcard-back"><div className="paper-heading"><small>01 · POSTCARD FROM LAST NIGHT</small><b>{postcard.title}</b></div><small className="postcard-location">{postcard.location}</small><p className="postcard-rumor">“{postcard.cityRumor}”</p><p>{postcard.message}</p><div className="postcard-preparation-note"><b>{preparation?.shortTitle ?? "随身物"}留下的痕迹</b><span>{postcardPreparationNote}</span></div></PaperCard>
+      </section>
       <div className="report-grid">
         <PaperCard className="sleep-summary"><div className="paper-heading"><small>NIGHT IMPRESSION</small><b>第 {chapter} 枚夜印</b></div><div className="sleep-session-meta"><span>{lastSleepSession?.mode === "real" ? "真实夜班" : "演示夜班"}</span><b>{formatSleepDuration(lastSleepSession?.durationMinutes)}</b></div><div className="earned-seal"><Image src={nightSeal.src} alt={nightSeal.alt} width={150} height={150} /></div><p>{quality === "interrupted" ? "城市的声音有些断续，旅程较短，但这枚夜印仍完整记录了重要发现。" : quality === "regular" ? "一条完整而安静的标准路线，已经压进纸纤维里。" : "雾散得很早，夜印因此多留下一圈稀薄的金线。"}</p></PaperCard>
         <PaperCard className="journal"><div className="paper-heading"><small>LIN DU / FIELD NOTES</small><b>侦探日志</b></div><p>“{current.journal}”</p><span>— 林渡，清晨五点二十八分</span></PaperCard>

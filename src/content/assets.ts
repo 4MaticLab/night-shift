@@ -2,7 +2,7 @@ export interface GameAsset {
   id: string;
   src: string;
   alt: string;
-  category: "header" | "social" | "collectible" | "night-seal";
+  category: "header" | "social" | "collectible" | "night-seal" | "postcard";
   status: "complete";
 }
 
@@ -112,6 +112,41 @@ export const assets = {
     category: "night-seal",
     status: "complete",
   },
+  postcardNight01: {
+    id: "postcard.night-01",
+    src: "/art/postcards/night-01-lantern-wharf-v1.webp",
+    alt: "雨夜里半开的灯港维修站铁门与一辆旧电车",
+    category: "postcard",
+    status: "complete",
+  },
+  postcardNight02: {
+    id: "postcard.night-02",
+    src: "/art/postcards/night-02-flower-alley-v1.webp",
+    alt: "花店后巷中排队等待寄出的空白信封",
+    category: "postcard",
+    status: "complete",
+  },
+  postcardNight03: {
+    id: "postcard.night-03",
+    src: "/art/postcards/night-03-room-307-v1.webp",
+    alt: "无名旅馆房间与窗外驶过维修桥的电车",
+    category: "postcard",
+    status: "complete",
+  },
+  postcardNight04: {
+    id: "postcard.night-04",
+    src: "/art/postcards/night-04-archive-glasshouse-v1.webp",
+    alt: "档案馆地下室通往铜绿轨道与废弃温室",
+    category: "postcard",
+    status: "complete",
+  },
+  postcardNight05: {
+    id: "postcard.night-05",
+    src: "/art/postcards/night-05-hidden-platform-v1.webp",
+    alt: "多座沉默钟表下驶入隐藏站台的末班电车",
+    category: "postcard",
+    status: "complete",
+  },
 } as const satisfies Record<string, GameAsset>;
 
 export const assetManifest = Object.values(assets);
@@ -124,4 +159,8 @@ export function getAsset(assetId: string): GameAsset {
 
 export function getNightSealAsset(chapter: number): GameAsset {
   return getAsset(`night-seal.0${chapter}`);
+}
+
+export function getPostcardAsset(chapter: number): GameAsset {
+  return getAsset(`postcard.night-0${chapter}`);
 }

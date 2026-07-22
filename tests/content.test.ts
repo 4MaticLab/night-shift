@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { nightShiftCase } from "@/src/content/case";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import { preparations } from "@/src/content/preparations";
-import { getAsset, getNightSealAsset } from "@/src/content/assets";
+import { getAsset, getNightSealAsset, getPostcardAsset } from "@/src/content/assets";
+import { getJourneyPostcard, getPostcardPreparationNote, journeyPostcards } from "@/src/content/postcards";
 import {
   finishSleepSession,
   nightSealProgress,
@@ -48,6 +49,18 @@ describe("Night Shift case content", () => {
     }
     for (let chapter = 1; chapter <= 5; chapter += 1) {
       expect(getNightSealAsset(chapter).category).toBe("night-seal");
+    }
+  });
+
+  it("defines one distinct journey postcard and three preparation notes per night", () => {
+    expect(journeyPostcards.map((postcard) => postcard.chapter)).toEqual([1, 2, 3, 4, 5]);
+    for (let chapter = 1; chapter <= 5; chapter += 1) {
+      const postcard = getJourneyPostcard(chapter);
+      expect(getAsset(postcard.assetId)).toEqual(getPostcardAsset(chapter));
+      expect(getPostcardAsset(chapter).category).toBe("postcard");
+      const notes = preparations.map((preparation) => getPostcardPreparationNote(chapter, preparation.id));
+      expect(notes.every(Boolean)).toBe(true);
+      expect(new Set(notes)).toHaveLength(3);
     }
   });
 

@@ -10,6 +10,7 @@
 |---|---|---|
 | 案件内容 | `src/content/case.ts` | 五夜章节、12 条线索、8 件藏品与固定报告文本 |
 | 随身物内容 | `src/content/preparations.ts` | 三件准备物、五夜各自的确定性环境回响 |
+| 归来明信片 | `src/content/postcards.ts` | 五夜地点、城市传闻、背面短笺与三种随身物附言 |
 | 证物关系 | `src/content/relations.ts` | 三条核心推论、对应证物对与成功解释 |
 | 内容契约 | `src/lib/game-engine/schema.ts` | Zod schema、引用与数量约束 |
 | 夜间结算 | `src/lib/game-engine/resolve-night.ts` | 根据章节与睡眠质量选择确定性结果 |
@@ -23,13 +24,13 @@
 | 游戏框架 | `src/components/game/shell.tsx` | 顶栏、底部导航与 Demo 控制台 |
 | 共享游戏 UI | `src/components/game/shared.tsx` | 纸卡、印章、城市路线与睡眠文案 |
 | 视觉系统 | `app/globals.css` | 色板、纸张、地图、雨雾、响应式与动效 |
-| 资产清单 | `src/content/assets.ts` | 主视觉、八件物证与五枚夜印的 manifest 和解析函数 |
+| 资产清单 | `src/content/assets.ts` | 主视觉、八件物证、五枚夜印与五张明信片的 manifest 和解析函数 |
 
 ## 状态模型
 
-主要阶段为 `day → ready → night → morning → ending`。章节结算只通过 `resolveNight` 产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 2；迁移会为旧存档补齐睡眠模式、会话和夜印字段。
+主要阶段为 `day → ready → night → morning → ending`。章节结算只通过 `resolveNight` 产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 3；迁移会为旧存档补齐睡眠模式、会话、夜印与随身物历史字段。
 
-睡眠质量为 `interrupted`、`regular`、`restful`：三者都至少解锁一条主线线索；差异只体现在路线长度、收藏数量、回声事件和环境观察。`selectedPreparationId` 记录当夜随身物，`resolveNight` 只用它选择环境回响，不改变固定线索。完成一夜后，章节编号会加入持久化的 `nightSealIds`。
+睡眠质量为 `interrupted`、`regular`、`restful`：三者都至少解锁一条主线线索；差异只体现在路线长度、收藏数量、回声事件和环境观察。`selectedPreparationId` 记录当前随身物，`preparationHistory` 按章节保存已经归来的选择；`resolveNight` 与明信片背面只用它选择环境回响，不改变固定线索。完成一夜后，章节编号会加入持久化的 `nightSealIds` 与 `completedReports`，旅程册据此解锁明信片。
 
 `sleepMode` 区分 12 秒压缩演示和真实夜班。开始交接时创建包含 `startedAt` 的 `activeSleepSession`；真实模式不依赖后台定时器，而是在重开页面后由开始时间与当前时间重新计算进度。玩家醒来结束会话时写入 `endedAt`、实际分钟数和按阈值派生的质量，并把会话保存为 `lastSleepSession` 供晨报读取。少于 5 小时为断续，5 小时至不足 7 小时为普通，7 小时及以上为安稳；任一结果都推进主线。
 
@@ -41,10 +42,6 @@
 
 真结局资格由 `canUnlockTrueEnding` 统一判断，界面锁定与存档动作共用同一规则；因此不能通过绕开按钮直接写入未满足条件的真结局。旧存档迁移由可独立测试的 `migrateGameState` 提供。
 
-## 当前边界
-
-完整五夜推进、存档迁移与三结局尚未形成同一套自动回归；移动端与关键桌面视口也尚无正式检查清单。这些问题统一收敛在 [[plans/0003-mvp-quality-hardening]]。
-
 ## 交互基线与组件边界
 
 0003 开工时冻结以下行为：Demo 仍可在 12 秒内完成一夜；三种睡眠都推进固定主线；随身物只改变环境回响；晨报、夜印和收藏结果保持兼容。
@@ -53,8 +50,8 @@
 
 - `app/page.tsx`：阶段与视图编排，不拥有章节结算或功能域展示细节。
 - `landing.tsx`：落地页与开场，不读取游戏结算规则。
-- `night-cycle.tsx`：调查方向、随身物、Demo／真实模式、夜印显影和晨报。
-- `investigation.tsx`：案件板、夜印收藏、物证档案和三结局。
+- `night-cycle.tsx`：调查方向、随身物、Demo／真实模式、夜印显影、归来明信片和晨报。
+- `investigation.tsx`：案件板、明信片旅程册、夜印收藏、物证档案和三结局。
 - `shell.tsx`：跨视图导航与 Demo 控制台。
 - `shared.tsx`：跨功能域复用的纸张、印章和路线视觉原语。
 

@@ -7,10 +7,12 @@ import { ArrowRight, Check, FileText, Flower2, KeyRound, Link2, RotateCcw, Searc
 import { Background, BackgroundVariant, Controls, ReactFlow, type Edge, type Node } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { nightShiftCase } from "@/src/content/case";
-import { getAsset, getNightSealAsset } from "@/src/content/assets";
+import { getAsset, getNightSealAsset, getPostcardAsset } from "@/src/content/assets";
+import { getPostcardPreparationNote, journeyPostcards } from "@/src/content/postcards";
+import { getPreparation } from "@/src/content/preparations";
 import { evidenceRelations } from "@/src/content/relations";
 import { useGameStore } from "@/src/stores/game-store";
-import { canUnlockTrueEnding } from "@/src/lib/game-engine/ending";
+import { canUnlockTrueEnding, type EndingId } from "@/src/lib/game-engine/ending";
 import { PaperCard, Seal } from "./shared";
 
 export function CaseBoard() {
@@ -59,8 +61,8 @@ export function CaseBoard() {
 }
 
 export function Collection() {
-  const { unlockedCollectibleIds, nightSealIds, chapter } = useGameStore();
-  return <div className="collection-page"><div className="page-title"><div><p className="eyebrow">NIGHT CABINET · 夜间陈列柜</p><h2>时间没有消失。<br />它留下了证物。</h2></div><p>每次等待都会形成一枚夜印；每件旧物也会在故事推进后显露第二层含义。</p></div><section className="night-seal-shelf"><div className="shelf-heading"><small>FIVE NIGHTS · {nightSealIds.length}/5</small><h3>五夜印记</h3></div><div className="night-seal-row">{nightShiftCase.chapters.map((entry) => { const art = getNightSealAsset(entry.number); const unlocked = nightSealIds.includes(entry.number); return <div className={unlocked ? "night-seal unlocked" : "night-seal locked"} key={entry.number}><Image src={art.src} alt={unlocked ? art.alt : "尚未形成的夜印"} width={160} height={160} /><span>夜 0{entry.number}</span><b>{unlocked ? entry.title : "尚未成形"}</b></div>; })}</div></section><div className="collection-grid">{nightShiftCase.collectibles.map((item, index) => { const unlocked = unlockedCollectibleIds.includes(item.id); const revealed = unlocked && chapter >= Math.min(5, item.chapter + 2); const art = getAsset(item.assetId); return <motion.article whileHover={unlocked ? { y: -5, rotate: index % 2 ? .3 : -.3 } : {}} key={item.id} className={`collectible-card ${unlocked ? "unlocked" : "locked"}`}><div className="item-number">0{index + 1}</div><div className="item-art"><Image src={art.src} alt={unlocked ? art.alt : "尚未发现的物品"} width={438} height={438} /></div><div className="item-meta"><small>{unlocked ? `${item.district} · ${item.rarity}` : "尚未发现"}</small><h3>{unlocked ? item.title : "未归档物品"}</h3><p>{unlocked ? (revealed ? item.revealedDescription : item.surfaceDescription) : "下一次夜间调查，也许会让它出现在林渡的口袋里。"}</p>{revealed && <Seal>隐藏含义已揭示</Seal>}</div></motion.article>; })}</div></div>;
+  const { unlockedCollectibleIds, nightSealIds, chapter, completedReports, preparationHistory } = useGameStore();
+  return <div className="collection-page"><div className="page-title"><div><p className="eyebrow">NIGHT CABINET · 夜间陈列柜</p><h2>时间没有消失。<br />它留下了证物。</h2></div><p>每次等待都会形成一枚夜印；每次归来也会寄回一张城市明信片，让昨夜去过的地方成为可以翻看的旅程。</p></div><section className="journey-album"><div className="shelf-heading"><small>RETURNED POSTCARDS · {completedReports.length}/5</small><h3>雾灯城寄回的五个夜晚</h3></div><div className="journey-postcard-grid">{journeyPostcards.map((postcard) => { const unlocked = completedReports.includes(postcard.chapter); const preparationId = preparationHistory[postcard.chapter] ?? "side-lamp"; const preparation = getPreparation(preparationId); const art = getPostcardAsset(postcard.chapter); return <article className={unlocked ? "journey-postcard unlocked" : "journey-postcard locked"} key={postcard.id}><div className="journey-postcard-image">{unlocked ? <Image src={art.src} alt={art.alt} width={768} height={512} /> : <div className="postcard-locked"><KeyRound /><span>NIGHT 0{postcard.chapter}</span></div>}</div><div className="journey-postcard-copy"><small>{unlocked ? postcard.location : "ROUTE NOT RETURNED"}</small><h3>{unlocked ? postcard.title : "尚未寄回"}</h3><p>{unlocked ? postcard.message : "完成这一夜的交接，林渡会从城市里寄回一张明信片。"}</p>{unlocked && <span><b>{preparation?.shortTitle ?? "随身物"}</b>{getPostcardPreparationNote(postcard.chapter, preparationId)}</span>}</div></article>; })}</div></section><section className="night-seal-shelf"><div className="shelf-heading"><small>FIVE NIGHTS · {nightSealIds.length}/5</small><h3>五夜印记</h3></div><div className="night-seal-row">{nightShiftCase.chapters.map((entry) => { const art = getNightSealAsset(entry.number); const unlocked = nightSealIds.includes(entry.number); return <div className={unlocked ? "night-seal unlocked" : "night-seal locked"} key={entry.number}><Image src={art.src} alt={unlocked ? art.alt : "尚未形成的夜印"} width={160} height={160} /><span>夜 0{entry.number}</span><b>{unlocked ? entry.title : "尚未成形"}</b></div>; })}</div></section><div className="collection-grid">{nightShiftCase.collectibles.map((item, index) => { const unlocked = unlockedCollectibleIds.includes(item.id); const revealed = unlocked && chapter >= Math.min(5, item.chapter + 2); const art = getAsset(item.assetId); return <motion.article whileHover={unlocked ? { y: -5, rotate: index % 2 ? .3 : -.3 } : {}} key={item.id} className={`collectible-card ${unlocked ? "unlocked" : "locked"}`}><div className="item-number">0{index + 1}</div><div className="item-art"><Image src={art.src} alt={unlocked ? art.alt : "尚未发现的物品"} width={438} height={438} /></div><div className="item-meta"><small>{unlocked ? `${item.district} · ${item.rarity}` : "尚未发现"}</small><h3>{unlocked ? item.title : "未归档物品"}</h3><p>{unlocked ? (revealed ? item.revealedDescription : item.surfaceDescription) : "下一次夜间调查，也许会让它出现在林渡的口袋里。"}</p>{revealed && <Seal>隐藏含义已揭示</Seal>}</div></motion.article>; })}</div></div>;
 }
 
 export function ArchivePage() {
@@ -71,7 +73,7 @@ export function ArchivePage() {
 export function Ending() {
   const { unlockedClueIds, unlockedCollectibleIds, confirmedRelations, endingId, chooseEnding, reset } = useGameStore();
   const trueReady = canUnlockTrueEnding({ unlockedClueIds, unlockedCollectibleIds, confirmedRelations });
-  const endings = [
+  const endings: Array<{ id: EndingId; icon: React.ReactNode; title: string; theme: string; result: string; locked?: boolean }> = [
     { id: "public", icon: <FileText />, title: "公开档案", theme: "真相属于所有人。", result: "全部证据被公开，私人收藏机构受到调查，部分资产陆续归还。伊芙琳再次消失。" },
     { id: "protect", icon: <KeyRound />, title: "保护证人", theme: "真相不应以牺牲证人为代价。", result: "证据被交给可信档案机构，伊芙琳的身份暂不公布。一张没有目的地的车票寄到了事务所。" },
     { id: "return", icon: <Flower2 />, title: "让失踪者自己决定", theme: "把证据，也把选择权交还给她。", result: "数周后，伊芙琳亲自署名的调查报告公开。林渡收到第九件藏品：一卷尚未冲洗的胶卷。", locked: !trueReady },
