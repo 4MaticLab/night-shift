@@ -9,6 +9,7 @@ import {
   qualityFromDuration,
   startSleepSession,
 } from "@/src/lib/game-engine/sleep-session";
+import { evidenceRelations, matchEvidenceRelation } from "@/src/content/relations";
 
 describe("Night Shift case content", () => {
   it("contains the complete five-night mystery", () => {
@@ -82,5 +83,20 @@ describe("Night Shift case content", () => {
 
     expect(nightSealProgress(session, new Date("2026-07-23T02:00:00.000Z"))).toBe(50);
     expect(nightSealProgress(session, new Date("2026-07-23T08:00:00.000Z"))).toBe(100);
+  });
+
+  it("defines three evidence relations using real case clues", () => {
+    const clueIds = new Set(nightShiftCase.clues.map((clue) => clue.id));
+    expect(evidenceRelations).toHaveLength(3);
+    for (const relation of evidenceRelations) {
+      expect(relation.clueIds.every((clueId) => clueIds.has(clueId))).toBe(true);
+    }
+  });
+
+  it("matches evidence pairs in either order and rejects false links", () => {
+    expect(matchEvidenceRelation("flower-cycle", "postcard")?.id).toBe("mina-evelyn");
+    expect(matchEvidenceRelation("postcard", "flower-cycle")?.id).toBe("mina-evelyn");
+    expect(matchEvidenceRelation("ticket-date", "postcard")).toBeUndefined();
+    expect(matchEvidenceRelation("postcard", "postcard")).toBeUndefined();
   });
 });

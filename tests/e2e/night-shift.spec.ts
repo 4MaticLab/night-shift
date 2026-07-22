@@ -29,3 +29,15 @@ test("restores and settles a real night after reload", async ({ page }) => {
   await expect(page.getByText("昨夜调查完成")).toBeVisible();
   await expect(page.getByText("真实夜班")).toBeVisible();
 });
+
+test("builds a core inference by connecting two evidence cards", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /DEMO MODE/ }).click();
+  await page.getByRole("button", { name: /解锁完整案件板/ }).click();
+  await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
+  await page.getByRole("button", { name: /^OBJECT · 02 未寄出的明信片/ }).click();
+  await page.getByRole("button", { name: /建立证物连接/ }).click();
+
+  await expect(page.getByText("米娜知道伊芙琳仍然活着")).toBeVisible();
+  await expect(page.getByText(/共同证明米娜一直替她维持联络/)).toBeVisible();
+});

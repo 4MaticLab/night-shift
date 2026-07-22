@@ -12,7 +12,7 @@
 |---|---|---|---:|---:|---|
 | [[plans/0001-hackathon-mvp]] | `completed` | `manual` | P0 | 7/7 | 已发布首个可玩版本 |
 | [[plans/0002-docs-and-plans-system]] | `completed` | `manual` | P0 | 6/6 | 按新规范维护后续工作 |
-| [[plans/0003-mvp-quality-hardening]] | `in_progress` | `auto` | P0 | 3/6 | 实现证物到证物的关系建立与验证反馈 |
+| [[plans/0003-mvp-quality-hardening]] | `in_progress` | `auto` | P0 | 4/6 | 补齐五夜、存档恢复与三结局自动测试 |
 | [[plans/0004-literary-city-and-waiting-loop]] | `completed` | `auto` | P0 | 8/8 | 已发布第一轮北极星升级 |
 
 ## 状态规则

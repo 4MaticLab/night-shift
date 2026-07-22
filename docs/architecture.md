@@ -10,6 +10,7 @@
 |---|---|---|
 | 案件内容 | `src/content/case.ts` | 五夜章节、12 条线索、8 件藏品与固定报告文本 |
 | 随身物内容 | `src/content/preparations.ts` | 三件准备物、五夜各自的确定性环境回响 |
+| 证物关系 | `src/content/relations.ts` | 三条核心推论、对应证物对与成功解释 |
 | 内容契约 | `src/lib/game-engine/schema.ts` | Zod schema、引用与数量约束 |
 | 夜间结算 | `src/lib/game-engine/resolve-night.ts` | 根据章节与睡眠质量选择确定性结果 |
 | 睡眠会话 | `src/lib/game-engine/sleep-session.ts` | 创建、恢复和结束 Demo／真实夜班，按时长生成质量与夜印进度 |
@@ -35,9 +36,11 @@
 
 生成式能力只用于视觉资产或未来对固定报告事实的文字润色。伊芙琳是否活着、人物动机、线索存在性、核心因果与结局条件必须来自确定性内容，详见 [[docs/story-bible]]。
 
+案件板只接受 `src/content/relations.ts` 中定义的无序证物对。玩家选中两件已解锁证物后，`connectClues` 才能写入对应的 `confirmedRelations`；错误配对不会改变存档。已确认关系会生成持久连线，并继续作为真结局条件的一部分。
+
 ## 当前边界
 
-案件板关系确认仍偏向现场演示：玩家点击预写结论，而不是从两件证物建立关系。该问题与后续自动化覆盖统一收敛在 [[plans/0003-mvp-quality-hardening]]。
+完整五夜推进、存档迁移与三结局尚未形成同一套自动回归；移动端与关键桌面视口也尚无正式检查清单。这些问题统一收敛在 [[plans/0003-mvp-quality-hardening]]。
 
 ## 交互基线与组件边界
 

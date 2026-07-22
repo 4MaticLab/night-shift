@@ -6,6 +6,7 @@ import type { SleepMode, SleepQuality, SleepSession } from "@/src/lib/game-engin
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import type { PreparationId } from "@/src/content/preparations";
 import { finishSleepSession, startSleepSession } from "@/src/lib/game-engine/sleep-session";
+import { matchEvidenceRelation } from "@/src/content/relations";
 
 export type Phase = "day" | "ready" | "night" | "morning" | "ending";
 
@@ -30,9 +31,9 @@ interface GameState {
   startNight: (quality: SleepQuality, preparationId: PreparationId, mode: SleepMode) => void;
   finishNight: () => void;
   continueDay: () => void;
-  confirmRelation: (relation: string) => void;
+  connectClues: (firstClueId: string, secondClueId: string) => string | null;
   jumpToChapter: (chapter: number) => void;
-  unlockBoard: () => void;
+  unlockBoard: (confirmRelations?: boolean) => void;
   chooseEnding: (endingId: string) => void;
   reset: () => void;
 }
@@ -86,9 +87,16 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
     if (state.chapter >= 5) set({ phase: "ending" });
     else set({ chapter: state.chapter + 1, phase: "day", selectedChoice: "", selectedPreparationId: "" });
   },
-  confirmRelation: (relation) => set((state) => ({ confirmedRelations: Array.from(new Set([...state.confirmedRelations, relation])) })),
+  connectClues: (firstClueId, secondClueId) => {
+    const state = get();
+    if (!state.unlockedClueIds.includes(firstClueId) || !state.unlockedClueIds.includes(secondClueId)) return null;
+    const relation = matchEvidenceRelation(firstClueId, secondClueId);
+    if (!relation) return null;
+    set({ confirmedRelations: Array.from(new Set([...state.confirmedRelations, relation.id])) });
+    return relation.id;
+  },
   jumpToChapter: (chapter) => set({ ...initial, started: true, chapter, phase: "day", nightSealIds: Array.from({ length: Math.max(0, chapter - 1) }, (_, index) => index + 1), unlockedClueIds: chapter === 1 ? [] : Array.from({ length: Math.min(12, (chapter - 1) * 3) }, (_, i) => ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "room-307", "transport-photo", "scratched-map", "museum-tag", "ledger-clasp", "evelyn-message"][i]), unlockedCollectibleIds: Array.from({ length: Math.min(8, (chapter - 1) * 2) }, (_, i) => ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"][i]) }),
-  unlockBoard: () => set({ unlockedClueIds: ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "scratched-map", "room-307", "transport-photo", "museum-tag", "ledger-clasp", "evelyn-message"], unlockedCollectibleIds: ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"], confirmedRelations: ["line-institution", "mina-evelyn", "gideon-escape"] }),
+  unlockBoard: (confirmRelations = false) => set({ unlockedClueIds: ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "scratched-map", "room-307", "transport-photo", "museum-tag", "ledger-clasp", "evelyn-message"], unlockedCollectibleIds: ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"], confirmedRelations: confirmRelations ? ["line-institution", "mina-evelyn", "gideon-escape"] : [] }),
   chooseEnding: (endingId) => set({ endingId, phase: "ending" }),
   reset: () => set({ ...initial, endingId: undefined }),
 }), {

@@ -27,6 +27,14 @@ export const clueSchema = z.object({
 });
 export type Clue = z.infer<typeof clueSchema>;
 
+export const evidenceRelationSchema = z.object({
+  id: z.string(),
+  clueIds: z.tuple([z.string(), z.string()]),
+  statement: z.string(),
+  explanation: z.string(),
+});
+export type EvidenceRelation = z.infer<typeof evidenceRelationSchema>;
+
 export const collectibleSchema = z.object({
   id: z.string(),
   title: z.string(),
