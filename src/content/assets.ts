@@ -2,7 +2,7 @@ export interface GameAsset {
   id: string;
   src: string;
   alt: string;
-  category: "header" | "social" | "collectible" | "night-seal" | "postcard";
+  category: "header" | "social" | "collectible" | "night-seal" | "postcard" | "botanical";
   status: "complete";
 }
 
@@ -147,6 +147,41 @@ export const assets = {
     category: "postcard",
     status: "complete",
   },
+  botanicalNight01: {
+    id: "botanical.night-01",
+    src: "/art/botany/night-01-ticketstub-fern-v1.webp",
+    alt: "叶片如打孔旧车票、结着琥珀孢灯的票根灯蕨植物标本",
+    category: "botanical",
+    status: "complete",
+  },
+  botanicalNight02: {
+    id: "botanical.night-02",
+    src: "/art/botany/night-02-forty-third-bloom-v1.webp",
+    alt: "从黄铜邮槽中长出酒红夜花的四十三日夜香植物标本",
+    category: "botanical",
+    status: "complete",
+  },
+  botanicalNight03: {
+    id: "botanical.night-03",
+    src: "/art/botany/night-03-checkout-vine-v1.webp",
+    alt: "深色心叶间垂着黄铜钥匙种荚的退房藤植物标本",
+    category: "botanical",
+    status: "complete",
+  },
+  botanicalNight04: {
+    id: "botanical.night-04",
+    src: "/art/botany/night-04-misfiled-moss-v1.webp",
+    alt: "铜绿叶脉与透明抽屉状孢囊覆盖破玻璃的温室苔植物标本",
+    category: "botanical",
+    status: "complete",
+  },
+  botanicalNight05: {
+    id: "botanical.night-05",
+    src: "/art/botany/night-05-clockflower-v1.webp",
+    alt: "十二片烟蓝花瓣围绕琥珀信号芯的零点四十三分钟花植物标本",
+    category: "botanical",
+    status: "complete",
+  },
 } as const satisfies Record<string, GameAsset>;
 
 export const assetManifest = Object.values(assets);
@@ -163,4 +198,8 @@ export function getNightSealAsset(chapter: number): GameAsset {
 
 export function getPostcardAsset(chapter: number): GameAsset {
   return getAsset(`postcard.night-0${chapter}`);
+}
+
+export function getBotanicalAsset(chapter: number): GameAsset {
+  return getAsset(`botanical.night-0${chapter}`);
 }

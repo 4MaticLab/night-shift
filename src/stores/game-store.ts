@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { SleepMode, SleepQuality, SleepSession } from "@/src/lib/game-engine/schema";
+import { nightGrowthRecordSchema, type NightGrowthRecord, type SleepMode, type SleepQuality, type SleepSession } from "@/src/lib/game-engine/schema";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import type { PreparationId } from "@/src/content/preparations";
 import { finishSleepSession, startSleepSession } from "@/src/lib/game-engine/sleep-session";
@@ -24,6 +24,7 @@ export interface GameState {
   lastSleepSession: SleepSession | null;
   preparationHistory: Partial<Record<number, PreparationId>>;
   choiceHistory: Partial<Record<number, string>>;
+  growthHistory: Partial<Record<number, NightGrowthRecord>>;
   unlockedClueIds: string[];
   unlockedCollectibleIds: string[];
   completedReports: number[];
@@ -54,6 +55,7 @@ const initial = {
   lastSleepSession: null as SleepSession | null,
   preparationHistory: {} as Partial<Record<number, PreparationId>>,
   choiceHistory: {} as Partial<Record<number, string>>,
+  growthHistory: {} as Partial<Record<number, NightGrowthRecord>>,
   unlockedClueIds: [] as string[],
   unlockedCollectibleIds: [] as string[],
   completedReports: [] as number[],
@@ -90,6 +92,17 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
         ...state.choiceHistory,
         [state.chapter]: result.choiceId,
       },
+      growthHistory: {
+        ...state.growthHistory,
+        [state.chapter]: nightGrowthRecordSchema.parse({
+          chapter: state.chapter,
+          quality: completedSession.quality,
+          durationMinutes: completedSession.durationMinutes ?? 0,
+          choiceId: result.choiceId,
+          preparationId: state.selectedPreparationId || "side-lamp",
+          completedAt: completedSession.endedAt,
+        }),
+      },
       unlockedClueIds: Array.from(new Set([...state.unlockedClueIds, ...result.clueIds])),
       unlockedCollectibleIds: Array.from(new Set([...state.unlockedCollectibleIds, ...result.collectibleIds])),
       completedReports: Array.from(new Set([...state.completedReports, state.chapter])),
@@ -111,7 +124,9 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   },
   jumpToChapter: (chapter) => {
     const priorChapters = Array.from({ length: Math.max(0, chapter - 1) }, (_, index) => index + 1);
-    set({ ...initial, started: true, chapter, phase: "day", nightSealIds: priorChapters, completedReports: priorChapters, preparationHistory: Object.fromEntries(priorChapters.map((number) => [number, "side-lamp" as PreparationId])), choiceHistory: Object.fromEntries(priorChapters.map((number) => [number, getDefaultChoiceId(number)])), unlockedClueIds: chapter === 1 ? [] : Array.from({ length: Math.min(12, (chapter - 1) * 3) }, (_, i) => ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "room-307", "transport-photo", "scratched-map", "museum-tag", "ledger-clasp", "evelyn-message"][i]), unlockedCollectibleIds: Array.from({ length: Math.min(8, (chapter - 1) * 2) }, (_, i) => ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"][i]) });
+    const preparationHistory = Object.fromEntries(priorChapters.map((number) => [number, "side-lamp" as PreparationId]));
+    const choiceHistory = Object.fromEntries(priorChapters.map((number) => [number, getDefaultChoiceId(number)]));
+    set({ ...initial, started: true, chapter, phase: "day", nightSealIds: priorChapters, completedReports: priorChapters, preparationHistory, choiceHistory, growthHistory: createLegacyGrowthHistory(priorChapters, preparationHistory, choiceHistory), unlockedClueIds: chapter === 1 ? [] : Array.from({ length: Math.min(12, (chapter - 1) * 3) }, (_, i) => ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "room-307", "transport-photo", "scratched-map", "museum-tag", "ledger-clasp", "evelyn-message"][i]), unlockedCollectibleIds: Array.from({ length: Math.min(8, (chapter - 1) * 2) }, (_, i) => ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"][i]) });
   },
   unlockBoard: (confirmRelations = false) => set({ unlockedClueIds: ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "scratched-map", "room-307", "transport-photo", "museum-tag", "ledger-clasp", "evelyn-message"], unlockedCollectibleIds: ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"], confirmedRelations: confirmRelations ? ["line-institution", "mina-evelyn", "gideon-escape"] : [] }),
   chooseEnding: (endingId) => {
@@ -121,20 +136,34 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   reset: () => set({ ...initial, endingId: undefined }),
 }), {
   name: "night-shift-save-v1",
-  version: 4,
+  version: 5,
   migrate: migrateGameState,
 }));
 
 export function migrateGameState(persistedState: unknown): GameState {
   const persisted = persistedState && typeof persistedState === "object" ? persistedState as Partial<GameState> : {};
+  const preparationHistory = persisted.preparationHistory ?? {};
+  const choiceHistory = persisted.choiceHistory ?? {};
   return {
     ...persisted,
     sleepMode: persisted.sleepMode ?? "demo",
     activeSleepSession: persisted.activeSleepSession ?? null,
     lastSleepSession: persisted.lastSleepSession ?? null,
-    preparationHistory: persisted.preparationHistory ?? {},
-    choiceHistory: persisted.choiceHistory ?? {},
+    preparationHistory,
+    choiceHistory,
+    growthHistory: persisted.growthHistory ?? createLegacyGrowthHistory(persisted.completedReports ?? [], preparationHistory, choiceHistory),
     nightSealIds: persisted.nightSealIds ?? [],
     selectedPreparationId: persisted.selectedPreparationId ?? "",
   } as GameState;
+}
+
+function createLegacyGrowthHistory(completedReports: number[], preparationHistory: Partial<Record<number, PreparationId>>, choiceHistory: Partial<Record<number, string>>): Partial<Record<number, NightGrowthRecord>> {
+  return Object.fromEntries(completedReports.map((chapter) => [chapter, nightGrowthRecordSchema.parse({
+    chapter,
+    quality: "regular",
+    durationMinutes: 390,
+    choiceId: choiceHistory[chapter] ?? getDefaultChoiceId(chapter),
+    preparationId: preparationHistory[chapter] ?? "side-lamp",
+    completedAt: `2026-07-${String(10 + chapter).padStart(2, "0")}T05:28:00.000Z`,
+  })]));
 }

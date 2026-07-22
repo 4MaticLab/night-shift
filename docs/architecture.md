@@ -12,6 +12,7 @@
 | 随身物内容 | `src/content/preparations.ts` | 三件准备物、五夜各自的确定性环境回响 |
 | 归来明信片 | `src/content/postcards.ts` | 五夜地点、城市传闻、背面短笺与三种随身物附言 |
 | 调查方向 | `src/content/routes.ts` | 五夜十五条确定性路线、夜间事件、城市遭遇与归来来信 |
+| 夜生植物 | `src/content/botany.ts` | 五株植物、四阶段成长文案、睡眠层级说明与进度阶段推导 |
 | 证物关系 | `src/content/relations.ts` | 三条核心推论、对应证物对与成功解释 |
 | 内容契约 | `src/lib/game-engine/schema.ts` | Zod schema、引用与数量约束 |
 | 夜间结算 | `src/lib/game-engine/resolve-night.ts` | 根据章节、睡眠质量、随身物与调查方向选择确定性结果 |
@@ -25,15 +26,17 @@
 | 游戏框架 | `src/components/game/shell.tsx` | 顶栏、底部导航与 Demo 控制台 |
 | 共享游戏 UI | `src/components/game/shared.tsx` | 纸卡、印章、城市路线与睡眠文案 |
 | 视觉系统 | `app/globals.css` | 色板、纸张、地图、雨雾、响应式与动效 |
-| 资产清单 | `src/content/assets.ts` | 主视觉、八件物证、五枚夜印与五张明信片的 manifest 和解析函数 |
+| 资产清单 | `src/content/assets.ts` | 主视觉、八件物证、五枚夜印、五张明信片与五张植物学标本的 manifest 和解析函数 |
 
 ## 状态模型
 
-主要阶段为 `day → ready → night → morning → ending`。章节结算只通过 `resolveNight` 产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 4；迁移会为旧存档补齐睡眠模式、会话、夜印、随身物历史与方向历史字段。
+主要阶段为 `day → ready → night → morning → ending`。章节结算只通过 `resolveNight` 产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 5；迁移会为旧存档补齐睡眠模式、会话、夜印、随身物历史、方向历史与温室成长记录。
 
 睡眠质量为 `interrupted`、`regular`、`restful`：三者都至少解锁一条主线线索；差异只体现在路线长度、收藏数量、回声事件和环境观察。`selectedPreparationId` 记录当前随身物，`preparationHistory` 按章节保存已经归来的准备；`selectedChoice` 记录当前方向，`choiceHistory` 按章节保存路线履历。方向决定四个路线节点、五段夜间事件、城市遭遇与归来来信，但同章节三个方向的线索和藏品结果保持一致。完成一夜后，章节编号会加入持久化的 `nightSealIds` 与 `completedReports`，旅程册据此解锁明信片与路线履历。
 
 `sleepMode` 区分 12 秒压缩演示和真实夜班。开始交接时创建包含 `startedAt` 的 `activeSleepSession`；真实模式不依赖后台定时器，而是在重开页面后由开始时间与当前时间重新计算进度。玩家醒来结束会话时写入 `endedAt`、实际分钟数和按阈值派生的质量，并把会话保存为 `lastSleepSession` 供晨报读取。少于 5 小时为断续，5 小时至不足 7 小时为普通，7 小时及以上为安稳；任一结果都推进主线。
+
+植物阶段由同一持久化进度推导：`0–<25%` 种核、`25–<50%` 抽芽、`50–<85%` 展叶、`85–100%` 开花。页面关闭期间无需运行后台计时器，重开后会根据会话时间直接恢复对应阶段。完成夜班时写入 `growthHistory` 快照，包含章节、时长、质量、方向、随身物与完成时间；断续睡眠也保存完整植株，只使用较紧凑的视觉层级。v5 迁移会为旧存档中已经完成的报告建立普通层级标本，避免历史成果丢失。
 
 ## 内容边界
 

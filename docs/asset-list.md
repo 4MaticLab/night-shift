@@ -20,8 +20,13 @@
 | `postcard.night-03` | 替客人留着灯 | City postcard | `/public/art/postcards/night-03-room-307-v1.webp` | 完成 | 第三夜晨报、旅程册 |
 | `postcard.night-04` | 错误分类的春天 | City postcard | `/public/art/postcards/night-04-archive-glasshouse-v1.webp` | 完成 | 第四夜晨报、旅程册 |
 | `postcard.night-05` | 钟表沉默以后 | City postcard | `/public/art/postcards/night-05-hidden-platform-v1.webp` | 完成 | 第五夜晨报、旅程册 |
+| `botanical.night-01` | 票根灯蕨 | Botanical plate | `/public/art/botany/night-01-ticketstub-fern-v1.webp` | 完成 | 第一夜成长、晨报、温室 |
+| `botanical.night-02` | 四十三日夜香 | Botanical plate | `/public/art/botany/night-02-forty-third-bloom-v1.webp` | 完成 | 第二夜成长、晨报、温室 |
+| `botanical.night-03` | 退房藤 | Botanical plate | `/public/art/botany/night-03-checkout-vine-v1.webp` | 完成 | 第三夜成长、晨报、温室 |
+| `botanical.night-04` | 误分类温室苔 | Botanical plate | `/public/art/botany/night-04-misfiled-moss-v1.webp` | 完成 | 第四夜成长、晨报、温室 |
+| `botanical.night-05` | 零点四十三分钟花 | Botanical plate | `/public/art/botany/night-05-clockflower-v1.webp` | 完成 | 第五夜成长、晨报、温室 |
 
-核心插画、八件物证、五枚夜印与五张城市明信片由内置图像生成能力生成；地图、纸张、图钉、路线和档案材质保持代码原生，以便响应式缩放与动效控制。明信片的生成约束与场景差异见 [[docs/art-prompts/city-postcards]]。全部运行时引用通过 `src/content/assets.ts` manifest 解析。
+核心插画、八件物证、五枚夜印、五张城市明信片与五张植物学标本由内置图像生成能力生成；地图、纸张、图钉、路线、四阶段揭示和档案材质保持代码原生，以便响应式缩放与动效控制。明信片的生成约束与场景差异见 [[docs/art-prompts/city-postcards]]，植物提示词见 [[docs/art-prompts/night-greenhouse]]。全部运行时引用通过 `src/content/assets.ts` manifest 解析。
 
 ## 相关文档
 
@@ -29,3 +34,4 @@
 - [[docs/art-prompts/global-style]]
 - [[docs/art-prompts/archive-assets]]
 - [[docs/art-prompts/city-postcards]]
+- [[docs/art-prompts/night-greenhouse]]

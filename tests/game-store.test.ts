@@ -43,6 +43,12 @@ describe("Night Shift game store", () => {
       expect(state.nightSealIds).toContain(chapter.number);
       expect(state.preparationHistory[chapter.number]).toBe("side-lamp");
       expect(state.choiceHistory[chapter.number]).toBe(chosenDirection);
+      expect(state.growthHistory[chapter.number]).toMatchObject({
+        chapter: chapter.number,
+        quality: "restful",
+        choiceId: chosenDirection,
+        preparationId: "side-lamp",
+      });
       state.continueDay();
     }
 
@@ -87,6 +93,7 @@ describe("Night Shift game store", () => {
     expect(migrated.lastSleepSession).toBeNull();
     expect(migrated.preparationHistory).toEqual({});
     expect(migrated.choiceHistory).toEqual({});
+    expect(migrated.growthHistory).toEqual({});
     expect(migrated.nightSealIds).toEqual([]);
     expect(migrated.selectedPreparationId).toBe("");
   });
@@ -99,6 +106,19 @@ describe("Night Shift game store", () => {
     expect(state.nightSealIds).toEqual([1, 2, 3]);
     expect(state.preparationHistory).toEqual({ 1: "side-lamp", 2: "side-lamp", 3: "side-lamp" });
     expect(state.choiceHistory).toEqual({ 1: "source", 2: "mina", 3: "hotel" });
+    expect(Object.keys(state.growthHistory)).toEqual(["1", "2", "3"]);
+    expect(state.growthHistory[2]).toMatchObject({ chapter: 2, quality: "regular", durationMinutes: 390, choiceId: "mina", preparationId: "side-lamp" });
+  });
+
+  it("reconstructs complete greenhouse records for pre-v5 completed reports", () => {
+    const migrated = storeModule.migrateGameState({
+      completedReports: [1, 2],
+      preparationHistory: { 1: "flower-note" },
+      choiceHistory: { 1: "track" },
+    });
+
+    expect(migrated.growthHistory[1]).toMatchObject({ chapter: 1, choiceId: "track", preparationId: "flower-note", quality: "regular" });
+    expect(migrated.growthHistory[2]).toMatchObject({ chapter: 2, choiceId: "mina", preparationId: "side-lamp", quality: "regular" });
   });
 
   it("supports all three endings and protects the true ending gate", () => {

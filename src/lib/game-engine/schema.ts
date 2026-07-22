@@ -66,6 +66,33 @@ export const routeDirectionSchema = z.object({
 });
 export type RouteDirection = z.infer<typeof routeDirectionSchema>;
 
+export const growthStageSchema = z.enum(["seed", "sprout", "leaf", "bloom"]);
+export type GrowthStage = z.infer<typeof growthStageSchema>;
+
+export const nightBotanicalSchema = z.object({
+  id: z.string(),
+  chapter: z.number().int().min(1).max(5),
+  assetId: z.string(),
+  name: z.string(),
+  archiveName: z.string(),
+  district: z.string(),
+  cityRumor: z.string(),
+  specimenNote: z.string(),
+  growthStages: z.object({ seed: z.string(), sprout: z.string(), leaf: z.string(), bloom: z.string() }),
+  qualityNotes: z.object({ interrupted: z.string(), regular: z.string(), restful: z.string() }),
+});
+export type NightBotanical = z.infer<typeof nightBotanicalSchema>;
+
+export const nightGrowthRecordSchema = z.object({
+  chapter: z.number().int().min(1).max(5),
+  quality: sleepQualitySchema,
+  durationMinutes: z.number().int().nonnegative(),
+  choiceId: z.string(),
+  preparationId: z.enum(["side-lamp", "flower-note", "tram-fare"]),
+  completedAt: z.string().datetime(),
+});
+export type NightGrowthRecord = z.infer<typeof nightGrowthRecordSchema>;
+
 export const collectibleSchema = z.object({
   id: z.string(),
   title: z.string(),

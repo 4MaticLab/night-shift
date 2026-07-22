@@ -12,6 +12,7 @@ import {
 } from "@/src/lib/game-engine/sleep-session";
 import { evidenceRelations, matchEvidenceRelation } from "@/src/content/relations";
 import { getDefaultChoiceId, getRouteDirection, routeDirections } from "@/src/content/routes";
+import { getNightBotanical, growthStageFromProgress, nightBotanicals } from "@/src/content/botany";
 
 describe("Night Shift case content", () => {
   it("contains the complete five-night mystery", () => {
@@ -90,6 +91,27 @@ describe("Night Shift case content", () => {
       expect(notes.every(Boolean)).toBe(true);
       expect(new Set(notes)).toHaveLength(3);
     }
+  });
+
+  it("defines five botanical specimens with non-punitive quality notes", () => {
+    expect(nightBotanicals).toHaveLength(5);
+    for (let chapter = 1; chapter <= 5; chapter += 1) {
+      const botanical = getNightBotanical(chapter);
+      expect(getAsset(botanical.assetId).category).toBe("botanical");
+      expect(Object.values(botanical.growthStages).every(Boolean)).toBe(true);
+      expect(Object.values(botanical.qualityNotes).every(Boolean)).toBe(true);
+      expect(botanical.qualityNotes.interrupted).not.toMatch(/枯死|失败|失去线索/);
+    }
+  });
+
+  it("derives four deterministic growth stages from restored progress", () => {
+    expect(growthStageFromProgress(0)).toBe("seed");
+    expect(growthStageFromProgress(24.99)).toBe("seed");
+    expect(growthStageFromProgress(25)).toBe("sprout");
+    expect(growthStageFromProgress(50)).toBe("leaf");
+    expect(growthStageFromProgress(84.99)).toBe("leaf");
+    expect(growthStageFromProgress(85)).toBe("bloom");
+    expect(growthStageFromProgress(999)).toBe("bloom");
   });
 
   it("derives real-night quality from explicit duration boundaries", () => {
