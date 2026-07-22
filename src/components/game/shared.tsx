@@ -4,9 +4,10 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
 import { Footprints } from "lucide-react";
-import type { RouteDirection, SleepQuality } from "@/src/lib/game-engine/schema";
+import type { RouteDirection, SleepQuality, SocietyId } from "@/src/lib/game-engine/schema";
 import { getNightBotanical, growthStageFromProgress } from "@/src/content/botany";
-import { getBotanicalAsset } from "@/src/content/assets";
+import { getAsset, getBotanicalAsset } from "@/src/content/assets";
+import { getCitySociety } from "@/src/content/societies";
 
 export const qualityCopy: Record<SleepQuality, { label: string; time: string; note: string }> = {
   interrupted: { label: "4小时 · 断续", time: "短程调查", note: "会听见一次特别的城市回声" },
@@ -34,4 +35,10 @@ export function BotanicalSpecimen({ chapter, progress = 100, compact = false }: 
   const visibleProgress = Math.max(7, normalizedProgress);
   const stage = growthStageFromProgress(normalizedProgress);
   return <div className={`botanical-specimen ${compact ? "compact" : ""}`} data-stage={stage}><Image className="botanical-ghost" src={art.src} alt="" width={256} height={384} /><span className="botanical-fill" style={{ clipPath: `inset(${100 - visibleProgress}% 0 0)` }}><Image src={art.src} alt={art.alt} width={256} height={384} /></span><div><small>{stage.toUpperCase()} · {Math.round(normalizedProgress)}%</small><b>{botanical.name}</b></div></div>;
+}
+
+export function SocietyCrest({ societyId, compact = false }: { societyId: SocietyId; compact?: boolean }) {
+  const society = getCitySociety(societyId);
+  const art = getAsset(society.assetId);
+  return <div className={`society-crest ${compact ? "compact" : ""}`}><Image src={art.src} alt={art.alt} width={240} height={240} /></div>;
 }

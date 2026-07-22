@@ -63,8 +63,39 @@ export const routeDirectionSchema = z.object({
   cityEncounter: z.string(),
   returnLetter: z.string(),
   mapVariant: z.enum(["river", "market", "heights"]),
+  societyId: z.enum(["misfiled-registry", "mislaid-consulate", "afterlight-cartographers"]),
+  societyNotice: z.string(),
 });
 export type RouteDirection = z.infer<typeof routeDirectionSchema>;
+
+export const societyIdSchema = z.enum(["misfiled-registry", "mislaid-consulate", "afterlight-cartographers"]);
+export type SocietyId = z.infer<typeof societyIdSchema>;
+
+export const societyStandingSchema = z.enum(["noticed", "known", "entrusted"]);
+export type SocietyStanding = z.infer<typeof societyStandingSchema>;
+
+export const citySocietySchema = z.object({
+  id: societyIdSchema,
+  assetId: z.string(),
+  name: z.string(),
+  archiveName: z.string(),
+  concern: z.string(),
+  publicRumor: z.string(),
+  privateRule: z.string(),
+  signoff: z.string(),
+  titles: z.object({ noticed: z.string(), known: z.string(), entrusted: z.string() }),
+  letters: z.object({ noticed: z.string(), known: z.string(), entrusted: z.string() }),
+});
+export type CitySociety = z.infer<typeof citySocietySchema>;
+
+export const societyMemoryRecordSchema = z.object({
+  chapter: z.number().int().min(1).max(5),
+  choiceId: z.string(),
+  societyId: societyIdSchema,
+  standing: societyStandingSchema,
+  completedAt: z.string().datetime(),
+});
+export type SocietyMemoryRecord = z.infer<typeof societyMemoryRecordSchema>;
 
 export const growthStageSchema = z.enum(["seed", "sprout", "leaf", "bloom"]);
 export type GrowthStage = z.infer<typeof growthStageSchema>;

@@ -2,7 +2,7 @@ export interface GameAsset {
   id: string;
   src: string;
   alt: string;
-  category: "header" | "social" | "collectible" | "night-seal" | "postcard" | "botanical";
+  category: "header" | "social" | "collectible" | "night-seal" | "postcard" | "botanical" | "society-crest";
   status: "complete";
 }
 
@@ -180,6 +180,27 @@ export const assets = {
     src: "/art/botany/night-05-clockflower-v1.webp",
     alt: "十二片烟蓝花瓣围绕琥珀信号芯的零点四十三分钟花植物标本",
     category: "botanical",
+    status: "complete",
+  },
+  societyMisfiledRegistry: {
+    id: "society.misfiled-registry",
+    src: "/art/societies/misfiled-registry-crest-v1.webp",
+    alt: "错页登记处的档案蛾、钥匙孔与索引签纹章",
+    category: "society-crest",
+    status: "complete",
+  },
+  societyMislaidConsulate: {
+    id: "society.mislaid-consulate",
+    src: "/art/societies/mislaid-consulate-crest-v1.webp",
+    alt: "失物领事馆的空手套、归还车票与夜香花纹章",
+    category: "society-crest",
+    status: "complete",
+  },
+  societyAfterlightCartographers: {
+    id: "society.afterlight-cartographers",
+    src: "/art/societies/afterlight-cartographers-crest-v1.webp",
+    alt: "熄灯测绘社的暗灯、等高线与弯曲旧轨纹章",
+    category: "society-crest",
     status: "complete",
   },
 } as const satisfies Record<string, GameAsset>;

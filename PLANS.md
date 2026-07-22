@@ -17,7 +17,7 @@
 | [[plans/0005-city-postcards-and-return-ritual]] | `completed` | `auto` | P0 | 6/6 | 已发布五夜城市明信片与归来仪式 |
 | [[plans/0006-investigation-directions-and-route-letters]] | `completed` | `auto` | P0 | 6/6 | 已发布十五条方向路线、来信与履历 |
 | [[plans/0007-night-greenhouse-and-time-growth]] | `completed` | `auto` | P0 | 6/6 | 已发布五株夜生植物、四阶段成长与雾灯温室 |
-| [[plans/0008-city-societies-and-remembered-favors]] | `in_progress` | `auto` | P0 | 0/6 | 冻结三个社团、关系契约与十五条方向映射 |
+| [[plans/0008-city-societies-and-remembered-favors]] | `in_progress` | `auto` | P0 | 5/6 | 完整验证、Git checkpoint 与私密发布 |
 
 ## 状态规则
 

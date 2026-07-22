@@ -12,11 +12,13 @@ import { getPostcardPreparationNote, journeyPostcards } from "@/src/content/post
 import { getPreparation } from "@/src/content/preparations";
 import { getRouteDirection } from "@/src/content/routes";
 import { nightBotanicals } from "@/src/content/botany";
+import { citySocieties, getSocietyTitle } from "@/src/content/societies";
 import { evidenceRelations } from "@/src/content/relations";
 import { useGameStore } from "@/src/stores/game-store";
 import { canUnlockTrueEnding, type EndingId } from "@/src/lib/game-engine/ending";
 import { formatSleepDuration } from "@/src/lib/game-engine/sleep-session";
-import { BotanicalSpecimen, PaperCard, qualityCopy, Seal } from "./shared";
+import type { SocietyMemoryRecord } from "@/src/lib/game-engine/schema";
+import { BotanicalSpecimen, PaperCard, qualityCopy, Seal, SocietyCrest } from "./shared";
 
 export function CaseBoard() {
   const { unlockedClueIds, confirmedRelations, connectClues } = useGameStore();
@@ -64,9 +66,15 @@ export function CaseBoard() {
 }
 
 export function Collection() {
-  const { unlockedCollectibleIds, nightSealIds, chapter, completedReports, preparationHistory, choiceHistory, growthHistory } = useGameStore();
+  const { unlockedCollectibleIds, nightSealIds, chapter, completedReports, preparationHistory, choiceHistory, growthHistory, societyHistory } = useGameStore();
+  const societyRecords = Object.values(societyHistory).filter((record): record is SocietyMemoryRecord => Boolean(record)).sort((a, b) => a.chapter - b.chapter);
   return <div className="collection-page">
-    <div className="page-title"><div><p className="eyebrow">NIGHT CABINET · 夜间陈列柜</p><h2>时间没有消失。<br />它长成了证物。</h2></div><p>每次等待都会形成一枚夜印、长成一株夜生植物，并寄回一张城市明信片。这里保存的不是分数，是五段可以重新讲述的时间。</p></div>
+    <div className="page-title"><div><p className="eyebrow">NIGHT CABINET · 夜间陈列柜</p><h2>时间没有消失。<br />城市也没有忘记。</h2></div><p>每次等待都会形成一枚夜印、长成一株植物、寄回一张明信片，也让某个地下社团记住你的做事方式。这里保存的不是分数，是五段可以重新讲述的时间。</p></div>
+    <section className="city-favor-ledger">
+      <div className="shelf-heading"><small>CITY REMEMBERS · {societyRecords.length}/5 NIGHTS</small><h3>城市人情簿</h3></div>
+      <p className="society-ledger-intro">没有声望点数，也没有最优路线。城市只会依照你反复选择的调查姿态，更换称呼、礼数和愿意交给你的旁话。</p>
+      <div className="society-ledger-grid">{citySocieties.map((society) => { const records = societyRecords.filter((record) => record.societyId === society.id); const latest = records.at(-1); return <article className={latest ? `society-ledger-card touched standing-${latest.standing}` : "society-ledger-card"} key={society.id}><SocietyCrest societyId={society.id} compact /><div className="society-ledger-copy"><small>{society.archiveName}</small><h3>{society.name}</h3><p className="society-concern">关心 · {society.concern}</p><blockquote>“{society.publicRumor}”</blockquote><div className="society-current-address"><small>城里目前怎样称呼你</small><b>{latest ? getSocietyTitle(latest) : "尚未被正式称呼"}</b></div><p className="society-rule">内部规矩 · {society.privateRule}</p></div><div className="society-trace">{records.length ? records.map((record) => { const direction = getRouteDirection(record.chapter, record.choiceId); return <div key={record.chapter}><span>夜 0{record.chapter}</span><b>{direction.dispatchTitle}</b><small>{getSocietyTitle(record)}</small></div>; }) : <p>尚无一条已归来的路线惊动他们。</p>}</div></article>; })}</div>
+    </section>
     <section className="night-greenhouse">
       <div className="shelf-heading"><small>FOGLIGHT GREENHOUSE · {Object.keys(growthHistory).length}/5</small><h3>雾灯温室</h3></div>
       <p className="greenhouse-intro">提前醒来不会让任何植物枯死。它只会以更小、更奇异的形态，完整保存那一夜。</p>

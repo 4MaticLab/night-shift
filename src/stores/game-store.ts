@@ -2,13 +2,14 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { nightGrowthRecordSchema, type NightGrowthRecord, type SleepMode, type SleepQuality, type SleepSession } from "@/src/lib/game-engine/schema";
+import { nightGrowthRecordSchema, type NightGrowthRecord, type SleepMode, type SleepQuality, type SleepSession, type SocietyMemoryRecord } from "@/src/lib/game-engine/schema";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import type { PreparationId } from "@/src/content/preparations";
 import { finishSleepSession, startSleepSession } from "@/src/lib/game-engine/sleep-session";
 import { matchEvidenceRelation } from "@/src/content/relations";
 import { canChooseEnding, type EndingId } from "@/src/lib/game-engine/ending";
 import { getDefaultChoiceId } from "@/src/content/routes";
+import { createSocietyMemory } from "@/src/content/societies";
 
 export type Phase = "day" | "ready" | "night" | "morning" | "ending";
 
@@ -25,6 +26,7 @@ export interface GameState {
   preparationHistory: Partial<Record<number, PreparationId>>;
   choiceHistory: Partial<Record<number, string>>;
   growthHistory: Partial<Record<number, NightGrowthRecord>>;
+  societyHistory: Partial<Record<number, SocietyMemoryRecord>>;
   unlockedClueIds: string[];
   unlockedCollectibleIds: string[];
   completedReports: number[];
@@ -56,6 +58,7 @@ const initial = {
   preparationHistory: {} as Partial<Record<number, PreparationId>>,
   choiceHistory: {} as Partial<Record<number, string>>,
   growthHistory: {} as Partial<Record<number, NightGrowthRecord>>,
+  societyHistory: {} as Partial<Record<number, SocietyMemoryRecord>>,
   unlockedClueIds: [] as string[],
   unlockedCollectibleIds: [] as string[],
   completedReports: [] as number[],
@@ -79,6 +82,8 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
     const activeSession = state.activeSleepSession ?? startSleepSession(state.sleepMode, state.quality);
     const completedSession = finishSleepSession(activeSession);
     const result = resolveNight(state.chapter, completedSession.quality, state.selectedPreparationId, state.selectedChoice);
+    const completedAt = completedSession.endedAt ?? new Date().toISOString();
+    const societyMemory = createSocietyMemory(state.chapter, result.choiceId, state.societyHistory, completedAt);
     set({
       phase: "morning",
       quality: completedSession.quality,
@@ -100,8 +105,12 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
           durationMinutes: completedSession.durationMinutes ?? 0,
           choiceId: result.choiceId,
           preparationId: state.selectedPreparationId || "side-lamp",
-          completedAt: completedSession.endedAt,
+          completedAt,
         }),
+      },
+      societyHistory: {
+        ...state.societyHistory,
+        [state.chapter]: societyMemory,
       },
       unlockedClueIds: Array.from(new Set([...state.unlockedClueIds, ...result.clueIds])),
       unlockedCollectibleIds: Array.from(new Set([...state.unlockedCollectibleIds, ...result.collectibleIds])),
@@ -126,7 +135,8 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
     const priorChapters = Array.from({ length: Math.max(0, chapter - 1) }, (_, index) => index + 1);
     const preparationHistory = Object.fromEntries(priorChapters.map((number) => [number, "side-lamp" as PreparationId]));
     const choiceHistory = Object.fromEntries(priorChapters.map((number) => [number, getDefaultChoiceId(number)]));
-    set({ ...initial, started: true, chapter, phase: "day", nightSealIds: priorChapters, completedReports: priorChapters, preparationHistory, choiceHistory, growthHistory: createLegacyGrowthHistory(priorChapters, preparationHistory, choiceHistory), unlockedClueIds: chapter === 1 ? [] : Array.from({ length: Math.min(12, (chapter - 1) * 3) }, (_, i) => ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "room-307", "transport-photo", "scratched-map", "museum-tag", "ledger-clasp", "evelyn-message"][i]), unlockedCollectibleIds: Array.from({ length: Math.min(8, (chapter - 1) * 2) }, (_, i) => ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"][i]) });
+    const growthHistory = createLegacyGrowthHistory(priorChapters, preparationHistory, choiceHistory);
+    set({ ...initial, started: true, chapter, phase: "day", nightSealIds: priorChapters, completedReports: priorChapters, preparationHistory, choiceHistory, growthHistory, societyHistory: createLegacySocietyHistory(priorChapters, choiceHistory, growthHistory), unlockedClueIds: chapter === 1 ? [] : Array.from({ length: Math.min(12, (chapter - 1) * 3) }, (_, i) => ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "room-307", "transport-photo", "scratched-map", "museum-tag", "ledger-clasp", "evelyn-message"][i]), unlockedCollectibleIds: Array.from({ length: Math.min(8, (chapter - 1) * 2) }, (_, i) => ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"][i]) });
   },
   unlockBoard: (confirmRelations = false) => set({ unlockedClueIds: ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "scratched-map", "room-307", "transport-photo", "museum-tag", "ledger-clasp", "evelyn-message"], unlockedCollectibleIds: ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"], confirmedRelations: confirmRelations ? ["line-institution", "mina-evelyn", "gideon-escape"] : [] }),
   chooseEnding: (endingId) => {
@@ -136,7 +146,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   reset: () => set({ ...initial, endingId: undefined }),
 }), {
   name: "night-shift-save-v1",
-  version: 5,
+  version: 6,
   migrate: migrateGameState,
 }));
 
@@ -144,6 +154,8 @@ export function migrateGameState(persistedState: unknown): GameState {
   const persisted = persistedState && typeof persistedState === "object" ? persistedState as Partial<GameState> : {};
   const preparationHistory = persisted.preparationHistory ?? {};
   const choiceHistory = persisted.choiceHistory ?? {};
+  const completedReports = persisted.completedReports ?? [];
+  const growthHistory = persisted.growthHistory ?? createLegacyGrowthHistory(completedReports, preparationHistory, choiceHistory);
   return {
     ...persisted,
     sleepMode: persisted.sleepMode ?? "demo",
@@ -151,7 +163,8 @@ export function migrateGameState(persistedState: unknown): GameState {
     lastSleepSession: persisted.lastSleepSession ?? null,
     preparationHistory,
     choiceHistory,
-    growthHistory: persisted.growthHistory ?? createLegacyGrowthHistory(persisted.completedReports ?? [], preparationHistory, choiceHistory),
+    growthHistory,
+    societyHistory: persisted.societyHistory ?? createLegacySocietyHistory(completedReports, choiceHistory, growthHistory),
     nightSealIds: persisted.nightSealIds ?? [],
     selectedPreparationId: persisted.selectedPreparationId ?? "",
   } as GameState;
@@ -166,4 +179,18 @@ function createLegacyGrowthHistory(completedReports: number[], preparationHistor
     preparationId: preparationHistory[chapter] ?? "side-lamp",
     completedAt: `2026-07-${String(10 + chapter).padStart(2, "0")}T05:28:00.000Z`,
   })]));
+}
+
+function createLegacySocietyHistory(
+  completedReports: number[],
+  choiceHistory: Partial<Record<number, string>>,
+  growthHistory: Partial<Record<number, NightGrowthRecord>>,
+): Partial<Record<number, SocietyMemoryRecord>> {
+  const history: Partial<Record<number, SocietyMemoryRecord>> = {};
+  for (const chapter of [...completedReports].sort((a, b) => a - b)) {
+    const choiceId = choiceHistory[chapter] ?? getDefaultChoiceId(chapter);
+    const completedAt = growthHistory[chapter]?.completedAt ?? `2026-07-${String(10 + chapter).padStart(2, "0")}T05:28:00.000Z`;
+    history[chapter] = createSocietyMemory(chapter, choiceId, history, completedAt);
+  }
+  return history;
 }

@@ -13,6 +13,7 @@ import {
 import { evidenceRelations, matchEvidenceRelation } from "@/src/content/relations";
 import { getDefaultChoiceId, getRouteDirection, routeDirections } from "@/src/content/routes";
 import { getNightBotanical, growthStageFromProgress, nightBotanicals } from "@/src/content/botany";
+import { citySocieties, createSocietyMemory, getCitySociety, getSocietyLetter, getSocietyTitle } from "@/src/content/societies";
 
 describe("Night Shift case content", () => {
   it("contains the complete five-night mystery", () => {
@@ -65,6 +66,30 @@ describe("Night Shift case content", () => {
       expect(results.map((result) => result.collectibleIds)).toEqual([results[0].collectibleIds, results[0].collectibleIds, results[0].collectibleIds]);
       expect(new Set(results.map((result) => result.returnLetter))).toHaveLength(3);
     }
+  });
+
+  it("maps all fifteen directions evenly to three original city societies", () => {
+    expect(citySocieties).toHaveLength(3);
+    expect(new Set(citySocieties.map((society) => society.name))).toHaveLength(3);
+    for (const society of citySocieties) {
+      const directions = routeDirections.filter((direction) => direction.societyId === society.id);
+      expect(directions).toHaveLength(5);
+      expect(directions.every((direction) => direction.societyNotice.length >= 15)).toBe(true);
+      expect(getAsset(society.assetId).category).toBe("society-crest");
+      expect(society.privateRule).toBeTruthy();
+    }
+  });
+
+  it("turns repeated attention into deterministic names instead of reward gates", () => {
+    const history = {};
+    const first = createSocietyMemory(1, "source", history, "2026-07-11T05:28:00.000Z");
+    const second = createSocietyMemory(2, "mina", { 1: first }, "2026-07-12T05:28:00.000Z");
+    const third = createSocietyMemory(3, "hotel", { 1: first, 2: second }, "2026-07-13T05:28:00.000Z");
+
+    expect([first.standing, second.standing, third.standing]).toEqual(["noticed", "known", "entrusted"]);
+    expect(new Set([getSocietyTitle(first), getSocietyTitle(second), getSocietyTitle(third)])).toHaveLength(3);
+    expect(new Set([getSocietyLetter(first), getSocietyLetter(second), getSocietyLetter(third)])).toHaveLength(3);
+    expect(getCitySociety(first.societyId).name).toBe("错页登记处");
   });
 
   it("defaults legacy nights to the first direction and rejects invalid choices", () => {

@@ -11,6 +11,7 @@ async function openFirstNight(page: import("@playwright/test").Page) {
 
 test("starts a case and reaches the first morning report", async ({ page }) => {
   await openFirstNight(page);
+  await expect(page.getByText(/可能惊动 · 错页登记处/)).toBeVisible();
   await page.getByRole("button", { name: /今晚交给你了/ }).click();
   await expect(page.getByText("纸张的证词")).toBeVisible();
   await expect(page.getByText("GROWING WHILE YOU REST")).toBeVisible();
@@ -21,6 +22,9 @@ test("starts a case and reaches the first morning report", async ({ page }) => {
   await expect(page.getByText(/市政厅的否认牌在雨里站了七年/)).toBeVisible();
   await expect(page.getByText(/我先让纸张开口/)).toBeVisible();
   await expect(page.getByText("票根灯蕨").first()).toBeVisible();
+  await expect(page.getByText("错页登记处来函")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "致「待核旁注」" })).toBeVisible();
+  await expect(page.getByText(/你让一张作废票据反过来审问了出票制度/)).toBeVisible();
   await expect(page.getByText(/断续|普通|安稳/).first()).toBeVisible();
   await expect(page.getByText(/为什么一张已经停运七年的车票/)).toBeVisible();
 });
@@ -36,6 +40,9 @@ test("keeps returned postcards in the journey album", async ({ page }) => {
   await expect(page.getByText(/第二版回答 · 灯港花店后室/)).toBeVisible();
   await expect(page.getByText("雾灯城寄回的五个夜晚")).toBeVisible();
   await expect(page.getByText("雾灯温室")).toBeVisible();
+  await expect(page.getByText("城市人情簿")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "错页登记处" })).toBeVisible();
+  await expect(page.locator(".society-current-address b", { hasText: "可借阅的旁注" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "票根灯蕨" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "四十三日夜香" })).toBeVisible();
 });

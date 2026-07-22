@@ -9,11 +9,13 @@ import { getAsset, getNightSealAsset, getPostcardAsset } from "@/src/content/ass
 import { getJourneyPostcard, getPostcardPreparationNote } from "@/src/content/postcards";
 import { getNightBotanical, growthStageFromProgress } from "@/src/content/botany";
 import { getPreparation, preparations, type PreparationId } from "@/src/content/preparations";
+import { getRouteDirection } from "@/src/content/routes";
+import { getCitySociety, getSocietyLetter, getSocietyTitle } from "@/src/content/societies";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import type { SleepMode, SleepQuality } from "@/src/lib/game-engine/schema";
 import { elapsedSessionMinutes, formatSleepDuration, nightSealProgress } from "@/src/lib/game-engine/sleep-session";
 import { useGameStore } from "@/src/stores/game-store";
-import { BotanicalSpecimen, CityRoute, PaperCard, qualityCopy, Seal } from "./shared";
+import { BotanicalSpecimen, CityRoute, PaperCard, qualityCopy, Seal, SocietyCrest } from "./shared";
 import type { GameView } from "./types";
 
 export function Tonight({ onLaunch }: { onLaunch: (quality: SleepQuality, preparationId: PreparationId, mode: SleepMode) => void }) {
@@ -33,7 +35,7 @@ export function Tonight({ onLaunch }: { onLaunch: (quality: SleepQuality, prepar
         <div className="section-label"><span>夜 {chapter}</span><small>{current.title}</small></div>
         <h3>{current.question}</h3>
         <p className="city-aside">“{current.cityAside}”</p>
-        <div className="choice-list">{current.choices.map((choice, i) => <button key={choice.id} className={selectedChoice === choice.id ? "choice selected" : "choice"} onClick={() => selectChoice(choice.id)}><span>0{i + 1}</span><div><b>{choice.label}</b><small>{choice.note}</small></div>{selectedChoice === choice.id ? <Check /> : <ChevronRight />}</button>)}</div>
+        <div className="choice-list">{current.choices.map((choice, i) => { const direction = getRouteDirection(chapter, choice.id); const society = getCitySociety(direction.societyId); return <button key={choice.id} className={selectedChoice === choice.id ? "choice selected" : "choice"} onClick={() => selectChoice(choice.id)}><span>0{i + 1}</span><div><b>{choice.label}</b><small>{choice.note}</small><em>可能惊动 · {society.name}</em></div>{selectedChoice === choice.id ? <Check /> : <ChevronRight />}</button>; })}</div>
         <div className="preparation-box"><div className="preparation-heading"><small>PACK ONE THING · 随身物</small><b>准备，然后放手</b></div><div className="preparation-list">{preparations.map((item) => { const Icon = item.icon; return <button key={item.id} className={preparationId === item.id ? "preparation selected" : "preparation"} onClick={() => setPreparationId(item.id)}><span><Icon size={19} /></span><div><b>{item.title}</b><small>{item.promise}</small></div>{preparationId === item.id && <Check size={15} />}</button>; })}</div><p>{getPreparation(preparationId)?.description}</p></div>
         <div className="quality-box">
           <div><small>NIGHT HANDOFF</small><b>选择交接方式</b></div>
@@ -89,7 +91,7 @@ export function NightRun({ onFinish }: { onFinish: () => void }) {
 }
 
 export function MorningReport({ onContinue }: { onContinue: () => void }) {
-  const { chapter, quality, selectedChoice, selectedPreparationId, lastSleepSession } = useGameStore();
+  const { chapter, quality, selectedChoice, selectedPreparationId, lastSleepSession, societyHistory } = useGameStore();
   const current = nightShiftCase.chapters[chapter - 1];
   const result = resolveNight(chapter, quality, selectedPreparationId, selectedChoice);
   const preparation = getPreparation(selectedPreparationId);
@@ -99,6 +101,8 @@ export function MorningReport({ onContinue }: { onContinue: () => void }) {
   const postcardPreparationId = selectedPreparationId || "side-lamp";
   const postcardPreparationNote = getPostcardPreparationNote(chapter, postcardPreparationId);
   const botanical = getNightBotanical(chapter);
+  const societyRecord = societyHistory[chapter];
+  const society = societyRecord ? getCitySociety(societyRecord.societyId) : null;
   const foundClues = nightShiftCase.clues.filter((item) => result.clueIds.includes(item.id));
   const foundItems = nightShiftCase.collectibles.filter((item) => result.collectibleIds.includes(item.id));
   return (
@@ -109,13 +113,14 @@ export function MorningReport({ onContinue }: { onContinue: () => void }) {
         <PaperCard className="postcard-back"><div className="paper-heading"><small>01 · POSTCARD FROM LAST NIGHT</small><b>{postcard.title}</b></div><small className="postcard-location">{postcard.location}</small><p className="postcard-rumor">“{postcard.cityRumor}”</p><p>{postcard.message}</p><div className="route-letter"><small>ROUTE LETTER · {result.direction.dispatchTitle}</small><b>{result.direction.destination}</b><p>“{result.returnLetter}”</p><span>{result.cityEncounter}</span></div><div className="postcard-preparation-note"><b>{preparation?.shortTitle ?? "随身物"}留下的痕迹</b><span>{postcardPreparationNote}</span></div></PaperCard>
       </section>
       <section className={`growth-reveal quality-${quality}`} aria-label={`第${chapter}夜时间植物`}><BotanicalSpecimen chapter={chapter} /><PaperCard className="growth-record"><div className="paper-heading"><small>02 · TIME GREW HERE</small><b>雾灯温室新标本</b></div><span className="botanical-archive-name">{botanical.archiveName} · {botanical.district}</span><h3>{botanical.name}</h3><p className="botanical-rumor">“{botanical.cityRumor}”</p><p>{botanical.specimenNote}</p><div className="growth-quality-note"><b>{qualityCopy[quality].label} · 仍然完整</b><span>{botanical.qualityNotes[quality]}</span></div></PaperCard></section>
+      {societyRecord && society && <section className={`society-memory-letter society-${society.id}`} aria-label={`${society.name}来函`}><SocietyCrest societyId={society.id} /><PaperCard><div className="paper-heading"><small>03 · THE CITY REMEMBERS</small><b>{society.name}来函</b></div><span className="society-archive-name">{society.archiveName}</span><h3>致「{getSocietyTitle(societyRecord)}」</h3><p className="society-rumor">“{society.publicRumor}”</p><blockquote>{getSocietyLetter(societyRecord)}</blockquote><div className="society-postscript"><small>本夜被记住的原因</small><p>{result.direction.societyNotice}</p></div><footer>— {society.signoff}</footer></PaperCard></section>}
       <div className="report-grid">
         <PaperCard className="sleep-summary"><div className="paper-heading"><small>NIGHT IMPRESSION</small><b>第 {chapter} 枚夜印</b></div><div className="sleep-session-meta"><span>{lastSleepSession?.mode === "real" ? "真实夜班" : "演示夜班"}</span><b>{formatSleepDuration(lastSleepSession?.durationMinutes)}</b></div><div className="earned-seal"><Image src={nightSeal.src} alt={nightSeal.alt} width={150} height={150} /></div><p>{quality === "interrupted" ? "城市的声音有些断续，旅程较短，但这枚夜印仍完整记录了重要发现。" : quality === "regular" ? "一条完整而安静的标准路线，已经压进纸纤维里。" : "雾散得很早，夜印因此多留下一圈稀薄的金线。"}</p></PaperCard>
         <PaperCard className="journal"><div className="paper-heading"><small>LIN DU / FIELD NOTES</small><b>侦探日志</b></div><p>“{current.journal}”</p><span>— 林渡，清晨五点二十八分</span></PaperCard>
       </div>
       {result.preparationEcho && <PaperCard className="preparation-echo"><div><small>PACKED OBJECT · 随身物回响</small><h3>{preparation?.title}</h3></div><p>“{result.preparationEcho}”</p></PaperCard>}
-      <section className="route-report"><div className="dark-heading"><span>03</span><div><small>LAST NIGHT ROUTE · {result.direction.dispatchTitle}</small><h3>昨夜路线</h3></div></div><CityRoute compact routeNodes={result.direction.routeNodes} variant={result.direction.mapVariant} /></section>
-      <section className="discoveries"><div className="dark-heading"><span>04</span><div><small>NEW EVIDENCE</small><h3>新发现</h3></div></div><div className="evidence-row">{foundClues.map((clue) => <PaperCard key={clue.id} className="evidence-card"><div className="evidence-icon">{clue.type === "contradiction" ? <Lightbulb /> : <FileText />}</div><Seal>{clue.type === "contradiction" ? "矛盾" : "线索"}</Seal><h4>{clue.title}</h4><p>{clue.detail}</p></PaperCard>)}{foundItems.map((item) => { const art = getAsset(item.assetId); return <PaperCard key={item.id} className="evidence-card collectible"><div className="evidence-art"><Image src={art.src} alt={art.alt} width={180} height={180} /></div><Seal>收藏 · {item.rarity}</Seal><h4>{item.title}</h4><p>{item.surfaceDescription}</p></PaperCard>; })}</div></section>
+      <section className="route-report"><div className="dark-heading"><span>04</span><div><small>LAST NIGHT ROUTE · {result.direction.dispatchTitle}</small><h3>昨夜路线</h3></div></div><CityRoute compact routeNodes={result.direction.routeNodes} variant={result.direction.mapVariant} /></section>
+      <section className="discoveries"><div className="dark-heading"><span>05</span><div><small>NEW EVIDENCE</small><h3>新发现</h3></div></div><div className="evidence-row">{foundClues.map((clue) => <PaperCard key={clue.id} className="evidence-card"><div className="evidence-icon">{clue.type === "contradiction" ? <Lightbulb /> : <FileText />}</div><Seal>{clue.type === "contradiction" ? "矛盾" : "线索"}</Seal><h4>{clue.title}</h4><p>{clue.detail}</p></PaperCard>)}{foundItems.map((item) => { const art = getAsset(item.assetId); return <PaperCard key={item.id} className="evidence-card collectible"><div className="evidence-art"><Image src={art.src} alt={art.alt} width={180} height={180} /></div><Seal>收藏 · {item.rarity}</Seal><h4>{item.title}</h4><p>{item.surfaceDescription}</p></PaperCard>; })}</div></section>
       <PaperCard className="contradiction"><span>NEW QUESTION · 新的矛盾</span><blockquote>“{current.contradiction}”</blockquote><p>把它带回案件板。白天的推理由你完成。</p></PaperCard>
       <div className="report-action"><button className="primary-button" onClick={onContinue}>{chapter === 5 ? "做出最终决定" : "整理线索，准备下一夜"}<ArrowRight size={18} /></button></div>
     </div>

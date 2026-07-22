@@ -49,6 +49,10 @@ describe("Night Shift game store", () => {
         choiceId: chosenDirection,
         preparationId: "side-lamp",
       });
+      expect(state.societyHistory[chapter.number]).toMatchObject({
+        chapter: chapter.number,
+        choiceId: chosenDirection,
+      });
       state.continueDay();
     }
 
@@ -56,6 +60,7 @@ describe("Night Shift game store", () => {
     expect(completed.phase).toBe("ending");
     expect(completed.completedReports).toHaveLength(5);
     expect(completed.nightSealIds).toHaveLength(5);
+    expect(Object.keys(completed.societyHistory)).toHaveLength(5);
     expect(completed.unlockedClueIds).toHaveLength(12);
   });
 
@@ -94,6 +99,7 @@ describe("Night Shift game store", () => {
     expect(migrated.preparationHistory).toEqual({});
     expect(migrated.choiceHistory).toEqual({});
     expect(migrated.growthHistory).toEqual({});
+    expect(migrated.societyHistory).toEqual({});
     expect(migrated.nightSealIds).toEqual([]);
     expect(migrated.selectedPreparationId).toBe("");
   });
@@ -107,7 +113,9 @@ describe("Night Shift game store", () => {
     expect(state.preparationHistory).toEqual({ 1: "side-lamp", 2: "side-lamp", 3: "side-lamp" });
     expect(state.choiceHistory).toEqual({ 1: "source", 2: "mina", 3: "hotel" });
     expect(Object.keys(state.growthHistory)).toEqual(["1", "2", "3"]);
+    expect(Object.keys(state.societyHistory)).toEqual(["1", "2", "3"]);
     expect(state.growthHistory[2]).toMatchObject({ chapter: 2, quality: "regular", durationMinutes: 390, choiceId: "mina", preparationId: "side-lamp" });
+    expect(state.societyHistory[3]).toMatchObject({ chapter: 3, choiceId: "hotel", societyId: "misfiled-registry", standing: "entrusted" });
   });
 
   it("reconstructs complete greenhouse records for pre-v5 completed reports", () => {
@@ -119,6 +127,8 @@ describe("Night Shift game store", () => {
 
     expect(migrated.growthHistory[1]).toMatchObject({ chapter: 1, choiceId: "track", preparationId: "flower-note", quality: "regular" });
     expect(migrated.growthHistory[2]).toMatchObject({ chapter: 2, choiceId: "mina", preparationId: "side-lamp", quality: "regular" });
+    expect(migrated.societyHistory[1]).toMatchObject({ chapter: 1, choiceId: "track", societyId: "afterlight-cartographers", standing: "noticed" });
+    expect(migrated.societyHistory[2]).toMatchObject({ chapter: 2, choiceId: "mina", societyId: "misfiled-registry", standing: "noticed" });
   });
 
   it("supports all three endings and protects the true ending gate", () => {

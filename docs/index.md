@@ -23,6 +23,7 @@
 - [[docs/asset-list]] — 资产清单与使用位置。
 - [[docs/art-prompts/global-style]] — 图像生成的全局风格约束。
 - [[docs/art-prompts/archive-assets]] — 物证、夜印与分享封面的资产生成规范。
+- [[docs/art-prompts/city-societies]] — 三个地下社团的原创纹章提示词与运行时规则。
 
 ## 维护规则
 
