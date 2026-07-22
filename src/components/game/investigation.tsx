@@ -10,6 +10,7 @@ import { nightShiftCase } from "@/src/content/case";
 import { getAsset, getNightSealAsset } from "@/src/content/assets";
 import { evidenceRelations } from "@/src/content/relations";
 import { useGameStore } from "@/src/stores/game-store";
+import { canUnlockTrueEnding } from "@/src/lib/game-engine/ending";
 import { PaperCard, Seal } from "./shared";
 
 export function CaseBoard() {
@@ -69,7 +70,7 @@ export function ArchivePage() {
 
 export function Ending() {
   const { unlockedClueIds, unlockedCollectibleIds, confirmedRelations, endingId, chooseEnding, reset } = useGameStore();
-  const trueReady = unlockedClueIds.length === 12 && unlockedCollectibleIds.length >= 7 && confirmedRelations.length >= 3;
+  const trueReady = canUnlockTrueEnding({ unlockedClueIds, unlockedCollectibleIds, confirmedRelations });
   const endings = [
     { id: "public", icon: <FileText />, title: "公开档案", theme: "真相属于所有人。", result: "全部证据被公开，私人收藏机构受到调查，部分资产陆续归还。伊芙琳再次消失。" },
     { id: "protect", icon: <KeyRound />, title: "保护证人", theme: "真相不应以牺牲证人为代价。", result: "证据被交给可信档案机构，伊芙琳的身份暂不公布。一张没有目的地的车票寄到了事务所。" },

@@ -7,10 +7,11 @@ import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import type { PreparationId } from "@/src/content/preparations";
 import { finishSleepSession, startSleepSession } from "@/src/lib/game-engine/sleep-session";
 import { matchEvidenceRelation } from "@/src/content/relations";
+import { canChooseEnding, type EndingId } from "@/src/lib/game-engine/ending";
 
 export type Phase = "day" | "ready" | "night" | "morning" | "ending";
 
-interface GameState {
+export interface GameState {
   started: boolean;
   chapter: number;
   phase: Phase;
@@ -34,7 +35,7 @@ interface GameState {
   connectClues: (firstClueId: string, secondClueId: string) => string | null;
   jumpToChapter: (chapter: number) => void;
   unlockBoard: (confirmRelations?: boolean) => void;
-  chooseEnding: (endingId: string) => void;
+  chooseEnding: (endingId: EndingId) => void;
   reset: () => void;
 }
 
@@ -97,20 +98,25 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   },
   jumpToChapter: (chapter) => set({ ...initial, started: true, chapter, phase: "day", nightSealIds: Array.from({ length: Math.max(0, chapter - 1) }, (_, index) => index + 1), unlockedClueIds: chapter === 1 ? [] : Array.from({ length: Math.min(12, (chapter - 1) * 3) }, (_, i) => ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "room-307", "transport-photo", "scratched-map", "museum-tag", "ledger-clasp", "evelyn-message"][i]), unlockedCollectibleIds: Array.from({ length: Math.min(8, (chapter - 1) * 2) }, (_, i) => ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"][i]) }),
   unlockBoard: (confirmRelations = false) => set({ unlockedClueIds: ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "scratched-map", "room-307", "transport-photo", "museum-tag", "ledger-clasp", "evelyn-message"], unlockedCollectibleIds: ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"], confirmedRelations: confirmRelations ? ["line-institution", "mina-evelyn", "gideon-escape"] : [] }),
-  chooseEnding: (endingId) => set({ endingId, phase: "ending" }),
+  chooseEnding: (endingId) => {
+    const state = get();
+    if (canChooseEnding(endingId, state)) set({ endingId, phase: "ending" });
+  },
   reset: () => set({ ...initial, endingId: undefined }),
 }), {
   name: "night-shift-save-v1",
   version: 2,
-  migrate: (persistedState) => {
-    const persisted = persistedState as Partial<GameState>;
-    return {
-      ...persisted,
-      sleepMode: persisted.sleepMode ?? "demo",
-      activeSleepSession: persisted.activeSleepSession ?? null,
-      lastSleepSession: persisted.lastSleepSession ?? null,
-      nightSealIds: persisted.nightSealIds ?? [],
-      selectedPreparationId: persisted.selectedPreparationId ?? "",
-    } as GameState;
-  },
+  migrate: migrateGameState,
 }));
+
+export function migrateGameState(persistedState: unknown): GameState {
+  const persisted = persistedState && typeof persistedState === "object" ? persistedState as Partial<GameState> : {};
+  return {
+    ...persisted,
+    sleepMode: persisted.sleepMode ?? "demo",
+    activeSleepSession: persisted.activeSleepSession ?? null,
+    lastSleepSession: persisted.lastSleepSession ?? null,
+    nightSealIds: persisted.nightSealIds ?? [],
+    selectedPreparationId: persisted.selectedPreparationId ?? "",
+  } as GameState;
+}

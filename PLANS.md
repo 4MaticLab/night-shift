@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前主计划是 [[plans/0003-mvp-quality-hardening]]：优先把真实跨夜等待、本地存档恢复和证物连线做成长期玩法基础。
+当前主计划是 [[plans/0005-city-postcards-and-return-ritual]]：把每夜归来做成一张可收藏、可复述旅程的城市明信片，继续强化异步等待的期待感。
 
 ## 计划清单
 
@@ -12,8 +12,9 @@
 |---|---|---|---:|---:|---|
 | [[plans/0001-hackathon-mvp]] | `completed` | `manual` | P0 | 7/7 | 已发布首个可玩版本 |
 | [[plans/0002-docs-and-plans-system]] | `completed` | `manual` | P0 | 6/6 | 按新规范维护后续工作 |
-| [[plans/0003-mvp-quality-hardening]] | `in_progress` | `auto` | P0 | 4/6 | 补齐五夜、存档恢复与三结局自动测试 |
+| [[plans/0003-mvp-quality-hardening]] | `completed` | `auto` | P0 | 6/6 | 已完成结构、真实夜班、证物关系与自动化加固 |
 | [[plans/0004-literary-city-and-waiting-loop]] | `completed` | `auto` | P0 | 8/8 | 已发布第一轮北极星升级 |
+| [[plans/0005-city-postcards-and-return-ritual]] | `in_progress` | `auto` | P0 | 1/6 | 生成并接入五张城市明信片资产 |
 
 ## 状态规则
 

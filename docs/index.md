@@ -9,6 +9,7 @@
 - [[docs/story-bible]] — 首案真相、人物关系和不可被动态改写的事实。
 - [[docs/demo-script]] — 90 秒现场演示路径。
 - [[docs/quality-baseline]] — 当前版本的质量基线、验证命令和已知边界。
+- [[docs/viewport-checklist]] — 桌面与移动端关键页面的交互检查清单。
 
 ## 工程
 

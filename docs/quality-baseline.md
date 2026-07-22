@@ -12,6 +12,7 @@
 - 真实夜班以持久化开始时间结算；关闭页面再返回仍能恢复进度，晨报会显示实际时长与派生质量。
 - 产品界面已按落地叙事、夜间循环、调查归档和导航框架拆分；`app/page.tsx` 只负责编排。
 - 案件板要求玩家选择两件证物建立关系；三条核心推论由确定性证物对校验，错误连接不会写入存档。
+- 自动测试已覆盖安稳睡眠的完整五夜循环、真实夜班持久化重载、v1→v2 迁移、三个结局与真结局门槛。
 - 服务端可渲染产品标题与社交分享元数据。
 
 ## 验证命令
@@ -24,20 +25,24 @@ npm run test:render
 npm run docs:check
 ```
 
-Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：一条覆盖开始案件、选择方向、模拟睡眠和查看首份晨报；另一条覆盖真实交接、刷新恢复与醒来结算。测试使用本机 Chrome channel，避免依赖额外下载的 Playwright 浏览器。
+Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：分别覆盖 Demo 首份晨报、真实交接刷新恢复和两证物核心推论。`tests/game-store.test.ts` 在内存浏览器存储上覆盖五夜、迁移、恢复与结局。浏览器测试使用本机 Chrome channel，避免依赖额外下载的 Playwright 浏览器。
 
 ## 已知边界
 
 - 浏览器端视觉回归、完整五夜 E2E 和移动端交互尚未纳入自动验证。
 - 直接运行原生 `tsc --noEmit` 会缺少 Cloudflare Worker 全局类型；项目正式的 Vinext 生产构建不受影响。
 
-这些边界的候选改进见 [[plans/0003-mvp-quality-hardening]]。
+完成的工程加固见 [[plans/0003-mvp-quality-hardening]]；下一轮体验升级见 [[plans/0005-city-postcards-and-return-ritual]]。
+
+桌面与移动端人工核对项见 [[docs/viewport-checklist]]。
 
 ## 最近发布
 
 2026-07-23 的第二个私密版本包含文学性城市语气、三件随身物、15 段确定性回响、五枚夜印、八件物证插画和新版分享封面。对应完成计划为 [[plans/0004-literary-city-and-waiting-loop]]。
 
 同日发布的第三个私密版本加入真实夜班时间戳恢复、实际时长结算、晨报会话摘要和 v2 存档迁移，并修复本地静态图片回退与首屏水合竞态。线上地址为 `https://night-shift.ryuko233.chatgpt.site`。
+
+第四个私密版本完成游戏 UI 功能域拆分；第五个私密版本把案件板升级为两证物配对推理，并保留同一线上地址。
 
 ## 相关文档
 

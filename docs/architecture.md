@@ -14,6 +14,7 @@
 | 内容契约 | `src/lib/game-engine/schema.ts` | Zod schema、引用与数量约束 |
 | 夜间结算 | `src/lib/game-engine/resolve-night.ts` | 根据章节与睡眠质量选择确定性结果 |
 | 睡眠会话 | `src/lib/game-engine/sleep-session.ts` | 创建、恢复和结束 Demo／真实夜班，按时长生成质量与夜印进度 |
+| 结局资格 | `src/lib/game-engine/ending.ts` | 三结局白名单与真结局的线索、藏品、关系门槛 |
 | 游戏存档 | `src/stores/game-store.ts` | Zustand 状态、阶段转换与浏览器持久化 |
 | 产品外壳 | `app/page.tsx` | 阶段判断、视图编排、Demo 抽屉开关与顶层导航 |
 | 落地叙事 | `src/components/game/landing.tsx` | 首页主视觉与三幕开场 |
@@ -37,6 +38,8 @@
 生成式能力只用于视觉资产或未来对固定报告事实的文字润色。伊芙琳是否活着、人物动机、线索存在性、核心因果与结局条件必须来自确定性内容，详见 [[docs/story-bible]]。
 
 案件板只接受 `src/content/relations.ts` 中定义的无序证物对。玩家选中两件已解锁证物后，`connectClues` 才能写入对应的 `confirmedRelations`；错误配对不会改变存档。已确认关系会生成持久连线，并继续作为真结局条件的一部分。
+
+真结局资格由 `canUnlockTrueEnding` 统一判断，界面锁定与存档动作共用同一规则；因此不能通过绕开按钮直接写入未满足条件的真结局。旧存档迁移由可独立测试的 `migrateGameState` 提供。
 
 ## 当前边界
 
