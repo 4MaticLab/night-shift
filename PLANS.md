@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有未完成主计划。下一轮从原始施工单与已发布体验重新审计最明显的不满意点，再创建递增计划。
+当前主计划是 [[plans/0013-foglight-district-atlas]]：补齐三张原创地区插画，并让灯港区、旧子午区与玻璃丘作为可逐步认识的城市领地进入档案。
 
 ## 计划清单
 
@@ -22,6 +22,7 @@
 | [[plans/0010-unasked-for-souvenirs-and-pocket-drawer]] | `completed` | `auto` | P0 | 6/6 | 已发布九件纪念物、v8 稳定结算与口袋抽屉 |
 | [[plans/0011-foglight-opportunity-notices-and-daytime-storylets]] | `completed` | `auto` | P0 | 6/6 | 已发布十二张机会告示、v9 历史、次晨回声与城市剪报册 |
 | [[plans/0012-city-witness-portraits-and-person-dossiers]] | `completed` | `auto` | P0 | 6/6 | 已发布四张人物肖像、晨报会面与渐进人物档案 |
+| [[plans/0013-foglight-district-atlas]] | `in_progress` | `auto` | P0 | 5/6 | 完成全套验证、Git checkpoint 与第十五个私密版本发布 |
 
 ## 状态规则
 

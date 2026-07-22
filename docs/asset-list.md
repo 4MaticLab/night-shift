@@ -41,8 +41,11 @@
 | `character.gideon-vale` | 吉迪恩·韦尔档案肖像 | Character portrait | `/public/art/characters/gideon-vale-portrait-v1.webp` | 完成 | 第三夜晨报、人物档案 |
 | `character.orin-bell` | 奥林·贝尔档案肖像 | Character portrait | `/public/art/characters/orin-bell-portrait-v1.webp` | 完成 | 第四夜晨报、人物档案 |
 | `character.evelyn-quell` | 伊芙琳·奎尔档案肖像 | Character portrait | `/public/art/characters/evelyn-quell-portrait-v1.webp` | 完成 | 第五夜晨报、人物档案 |
+| `district.lantern-wharf` | 灯港区 | District illustration | `/public/art/districts/lantern-wharf-v1.webp` | 完成 | 雾灯城分区志 |
+| `district.old-meridian` | 旧子午区 | District illustration | `/public/art/districts/old-meridian-v1.webp` | 完成 | 雾灯城分区志 |
+| `district.glass-hill` | 玻璃丘 | District illustration | `/public/art/districts/glass-hill-v1.webp` | 完成 | 雾灯城分区志 |
 
-核心插画、八件物证、五枚夜印、五张城市明信片、五张植物学标本、三枚社团纹章、九件口袋纪念物与四张人物肖像由内置图像生成能力生成；地图、纸张、图钉、路线、四阶段揭示和档案材质保持代码原生，以便响应式缩放与动效控制。明信片的生成约束与场景差异见 [[docs/art-prompts/city-postcards]]，植物提示词见 [[docs/art-prompts/night-greenhouse]]，纹章提示词见 [[docs/art-prompts/city-societies]]，纪念物提示词见 [[docs/art-prompts/pocket-souvenirs]]，人物提示词与源图映射见 [[docs/art-prompts/city-witness-portraits]]。全部运行时引用通过 `src/content/assets.ts` manifest 解析。
+核心插画、八件物证、五枚夜印、五张城市明信片、五张植物学标本、三枚社团纹章、九件口袋纪念物、四张人物肖像与三张地区版画由内置图像生成能力生成；地图、纸张、图钉、路线、四阶段揭示和档案材质保持代码原生，以便响应式缩放与动效控制。明信片的生成约束与场景差异见 [[docs/art-prompts/city-postcards]]，植物提示词见 [[docs/art-prompts/night-greenhouse]]，纹章提示词见 [[docs/art-prompts/city-societies]]，纪念物提示词见 [[docs/art-prompts/pocket-souvenirs]]，人物提示词与源图映射见 [[docs/art-prompts/city-witness-portraits]]，地区提示词见 [[docs/art-prompts/foglight-districts]]。全部运行时引用通过 `src/content/assets.ts` manifest 解析。
 
 ## 相关文档
 
@@ -54,3 +57,4 @@
 - [[docs/art-prompts/city-societies]]
 - [[docs/art-prompts/pocket-souvenirs]]
 - [[docs/art-prompts/city-witness-portraits]]
+- [[docs/art-prompts/foglight-districts]]

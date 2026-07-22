@@ -18,6 +18,7 @@
 | 口袋纪念物 | `src/content/souvenirs.ts` | 九件小物、稳定哈希、方向与随身物亲和、无重复结算 |
 | 机会告示 | `src/content/opportunities.ts` | 十二张午后短章、两种答复、稳定三张候选与未来回响 |
 | 案件人物 | `src/content/characters.ts` | 四位见证人的章节映射、公共传闻、已知事实与证物揭示条件 |
+| 城市地区 | `src/content/districts.ts` | 三个城区的首次章节、公共说法、生活规矩与固定地标 |
 | 证物关系 | `src/content/relations.ts` | 三条核心推论、对应证物对与成功解释 |
 | 内容契约 | `src/lib/game-engine/schema.ts` | Zod schema、引用与数量约束 |
 | 夜间结算 | `src/lib/game-engine/resolve-night.ts` | 根据章节、睡眠质量、随身物与调查方向选择确定性结果 |
@@ -70,6 +71,8 @@
 机会告示没有行动点、日历登录、抽取按钮或奖励差。`resolveOpportunity` 与 `dismissOpportunities` 只写独立历史，不进入夜间结算、社团层级或结局判断。
 
 人物档案同样是确定性内容视图：第 2–5 夜晨报各映射一位人物；档案页只用 `completedReports` 判断是否见过，用既有 `unlockedClueIds` 判断保留意见是否展开。人物模块不写存档，不进入 `resolveNight`、睡眠质量、奖励或结局判断。
+
+分区志只用 `completedReports` 判断地区是否已经被走过：第 1、3、4 夜分别展开灯港区、旧子午区与玻璃丘。地区内容不写存档，不替换路线图，也不进入任何结算或资格判断。
 
 ## 交互基线与组件边界
 

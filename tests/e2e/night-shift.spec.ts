@@ -57,6 +57,10 @@ test("keeps returned postcards in the journey album", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "票根灯蕨" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "四十三日夜香" })).toBeVisible();
   await page.getByRole("button", { name: "档案" }).click();
+  await expect(page.getByText("雾灯城分区志")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "灯港区" })).toBeVisible();
+  await expect(page.locator(".district-entry.unlocked")).toHaveCount(1);
+  await expect(page.locator(".district-entry.locked")).toHaveCount(2);
   await expect(page.getByText("相关人物")).toBeVisible();
   await expect(page.getByRole("heading", { name: "米娜·索莱尔" })).toBeVisible();
   await expect(page.locator(".person-dossier.encountered")).toHaveCount(1);

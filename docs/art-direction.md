@@ -12,6 +12,8 @@
 
 关键人物使用 4:5 编辑蚀刻档案肖像：半身居中、背景留白、琥珀侧光和可在 160 像素辨认的职业道具。人物气质必须克制、有人味、各自有所保留；不得借用现成作品的种族、服装符号、头像边框或标志性构图。具体提示词与源图映射见 [[docs/art-prompts/city-witness-portraits]]。
 
+三个城区使用 3:2 横向编辑版画：以道路或旧轨形成前景引线，以制度建筑构成中景，以雨雾保留远景空白。灯港区用水岸、花市与维修门辨认，旧子午区用钟楼、层叠石阶与旅馆辨认，玻璃丘用坡地温室、档案建筑与信号台辨认；具体提示词见 [[docs/art-prompts/foglight-districts]]。
+
 参考 Fallen London 的文学密度与媒介气质，但不复制其角色、徽章、边框、地图构图或界面布局。原创边界与玩法合成原则见 [[docs/north-star]]。
 
 ## 相关文档
@@ -22,4 +24,5 @@
 - [[docs/art-prompts/night-greenhouse]]
 - [[docs/art-prompts/city-societies]]
 - [[docs/art-prompts/city-witness-portraits]]
+- [[docs/art-prompts/foglight-districts]]
 - [[docs/product-overview]]

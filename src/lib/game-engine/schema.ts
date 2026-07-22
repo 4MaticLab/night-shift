@@ -201,6 +201,19 @@ export const caseCharacterSchema = z.object({
 });
 export type CaseCharacter = z.infer<typeof caseCharacterSchema>;
 
+export const cityDistrictSchema = z.object({
+  id: z.string(),
+  assetId: z.string(),
+  name: z.string(),
+  archiveName: z.string(),
+  subtitle: z.string(),
+  introducedChapter: z.number().int().min(1).max(5),
+  publicVersion: z.string(),
+  cityRule: z.string(),
+  landmarks: z.array(z.string()).length(3),
+});
+export type CityDistrict = z.infer<typeof cityDistrictSchema>;
+
 export const growthStageSchema = z.enum(["seed", "sprout", "leaf", "bloom"]);
 export type GrowthStage = z.infer<typeof growthStageSchema>;
 

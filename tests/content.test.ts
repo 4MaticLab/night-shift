@@ -18,6 +18,7 @@ import { correspondencePostures, correspondencePrompts, createCorrespondenceReco
 import { createSouvenirRecord, DEMO_JOURNEY_SEED, getSouvenir, selectSouvenir, souvenirs } from "@/src/content/souvenirs";
 import { createOpportunityRecord, getOpportunityCandidates, getOpportunityResponse, opportunityNotices } from "@/src/content/opportunities";
 import { caseCharacters, getChapterCharacter, isCharacterRevealed } from "@/src/content/characters";
+import { cityDistricts, getCityDistrict } from "@/src/content/districts";
 
 describe("Night Shift case content", () => {
   it("contains the complete five-night mystery", () => {
@@ -249,6 +250,16 @@ describe("Night Shift case content", () => {
     }
 
     expect(getChapterCharacter(1)).toBeUndefined();
+  });
+
+  it("defines three manifest-backed districts with stable atlas entries", () => {
+    expect(cityDistricts).toHaveLength(3);
+    expect(cityDistricts.map((district) => district.introducedChapter)).toEqual([1, 3, 4]);
+    for (const district of cityDistricts) {
+      expect(getAsset(district.assetId).category).toBe("district-illustration");
+      expect(district.landmarks).toHaveLength(3);
+      expect(getCityDistrict(district.id)).toEqual(district);
+    }
   });
 
   it("derives four deterministic growth stages from restored progress", () => {

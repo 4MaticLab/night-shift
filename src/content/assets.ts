@@ -2,7 +2,7 @@ export interface GameAsset {
   id: string;
   src: string;
   alt: string;
-  category: "header" | "social" | "collectible" | "night-seal" | "postcard" | "botanical" | "society-crest" | "souvenir" | "character-portrait";
+  category: "header" | "social" | "collectible" | "night-seal" | "postcard" | "botanical" | "society-crest" | "souvenir" | "character-portrait" | "district-illustration";
   status: "complete";
 }
 
@@ -277,6 +277,15 @@ export const assets = {
   },
   characterEvelynQuell: {
     id: "character.evelyn-quell", src: "/art/characters/evelyn-quell-portrait-v1.webp", alt: "穿深蓝旅行外套、直视前方并持折叠相机的伊芙琳·奎尔档案肖像", category: "character-portrait", status: "complete",
+  },
+  districtLanternWharf: {
+    id: "district.lantern-wharf", src: "/art/districts/lantern-wharf-v1.webp", alt: "雨夜灯港区的弯曲旧轨、花市棚屋、封闭维修门与河桥", category: "district-illustration", status: "complete",
+  },
+  districtOldMeridian: {
+    id: "district.old-meridian", src: "/art/districts/old-meridian-v1.webp", alt: "旧子午区层叠街巷、空白钟塔、无名旅馆与维修车库", category: "district-illustration", status: "complete",
+  },
+  districtGlassHill: {
+    id: "district.glass-hill", src: "/art/districts/glass-hill-v1.webp", alt: "玻璃丘层层上升的温室、档案建筑、旧轨与信号台", category: "district-illustration", status: "complete",
   },
 } as const satisfies Record<string, GameAsset>;
 
