@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前主计划是 [[plans/0008-city-societies-and-remembered-favors]]：让雾灯城的三个地下社团记住玩家反复选择的调查姿态，并在后续夜晚以确定性回信和关系档案作出回应。
+当前主计划是 [[plans/0009-city-correspondence-and-reply-echoes]]：把社团来函从被动阅读推进成可回应的小型故事抉择，并让答复在后续来信中留下可追溯余波。
 
 ## 计划清单
 
@@ -17,7 +17,8 @@
 | [[plans/0005-city-postcards-and-return-ritual]] | `completed` | `auto` | P0 | 6/6 | 已发布五夜城市明信片与归来仪式 |
 | [[plans/0006-investigation-directions-and-route-letters]] | `completed` | `auto` | P0 | 6/6 | 已发布十五条方向路线、来信与履历 |
 | [[plans/0007-night-greenhouse-and-time-growth]] | `completed` | `auto` | P0 | 6/6 | 已发布五株夜生植物、四阶段成长与雾灯温室 |
-| [[plans/0008-city-societies-and-remembered-favors]] | `in_progress` | `auto` | P0 | 5/6 | 完整验证、Git checkpoint 与私密发布 |
+| [[plans/0008-city-societies-and-remembered-favors]] | `completed` | `auto` | P0 | 6/6 | 已发布三个地下社团、跨夜称呼、来函与城市人情簿 |
+| [[plans/0009-city-correspondence-and-reply-echoes]] | `in_progress` | `auto` | P0 | 0/6 | 冻结九封问函、十八种答复与回响契约 |
 
 ## 状态规则
 

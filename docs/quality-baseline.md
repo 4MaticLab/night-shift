@@ -58,6 +58,8 @@ Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：分别覆盖 Demo
 
 第九个私密版本加入五株章节专属夜生植物、夜班四阶段生长、晨报成果揭示、雾灯温室、v5 成长历史与旧存档重建；断续睡眠仍会留下完整植物，不引入枯死或失败惩罚，完成 [[plans/0007-night-greenhouse-and-time-growth]]。
 
+第十个私密版本加入错页登记处、失物领事馆与熄灯测绘社，十五条方向均匀映射三种调查姿态；交接前会提示可能惊动谁，晨报按跨夜历史更换称呼与来函，收藏页保存城市人情簿。关系只改变礼数和旁支文本，完成 [[plans/0008-city-societies-and-remembered-favors]]。
+
 ## 相关文档
 
 - [[docs/architecture]]
