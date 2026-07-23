@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有进行中的主计划。最近完成的 [[plans/0035-rain-radio-signal-lab]] 已把通用密文台扩展到第二案，交付雨滴调频、沉默来电与摩尔斯尾音三段信号解密。
+当前没有进行中的主计划。最近完成的 [[plans/0036-cipher-relay-sequencing]] 已让前两案的三段密文汇入可点击排序的最终接线拼图，恢复隐藏路线与公共频率。
 
 ## 计划清单
 
@@ -45,6 +45,7 @@
 | [[plans/0033-hackathon-submission-kit]] | `completed` | `manual` | P0 | 4/4 | 已完成提交作战卡、演示节拍与真实边界 |
 | [[plans/0034-night-cipher-desk]] | `completed` | `manual` | P0 | 6/6 | 已完成三段密文、v16 存档、中英文与移动端验收 |
 | [[plans/0035-rain-radio-signal-lab]] | `completed` | `manual` | P0 | 6/6 | 已完成第二案三段信号谜题、全关回执与移动端验收 |
+| [[plans/0036-cipher-relay-sequencing]] | `completed` | `manual` | P0 | 6/6 | 已完成两案最终接线、v16 持久化、英文与移动端验收 |
 
 ## 状态规则
 
