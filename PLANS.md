@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有 `in_progress` 计划。下一项工作从已批准计划或新提案中选择。
+当前主计划是 [[plans/0044-ephemeral-plan-lifecycle]]：把永久编号计划改为多人并行友好的临时分支计划，并用本次变更演示完整生命周期。
 
 ## 计划清单
 
@@ -53,6 +53,7 @@
 | [[plans/0041-restored-main-integration-regressions]] | `completed` | `auto` | P0 | 4/4 | 已完成恢复主线后的兼容修复与全量验收 |
 | [[plans/0042-ipad-case-board-layout]] | `completed` | `auto` | P0 | 5/5 | 已完成平板竖屏案件板触控文档流与回归验收 |
 | [[plans/0043-case-library-unstarted-entry]] | `completed` | `auto` | P0 | 4/4 | 已修复卷宗库未开封案件入口并完成跨案件回归 |
+| [[plans/0044-ephemeral-plan-lifecycle]] | `in_progress` | `manual` | P0 | 1/5 | 已提交开工计划，开始改写协作规范 |
 
 ## 状态规则
 
