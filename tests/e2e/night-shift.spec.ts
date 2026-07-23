@@ -210,8 +210,11 @@ test("builds a core inference by connecting two evidence cards", async ({ page }
   await expect(page.getByRole("heading", { name: "四十三天" })).toBeVisible();
   await expect(page.getByText(/某位顾客长期迟到而形成的礼貌习惯/)).toBeVisible();
   await expect(page.getByText(/有人七年没有忘记按时想念/)).toBeVisible();
+  await expect(page.getByRole("region", { name: "联合推理操作台" })).toContainText("再点一张");
   await page.getByRole("button", { name: /^OBJECT · 02 未寄出的明信片/ }).click();
-  await page.getByRole("button", { name: /建立证物连接/ }).click();
+  await expect(page.getByRole("button", { name: /移除证物 A：四十三天/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /移除证物 B：未寄出的明信片/ })).toBeVisible();
+  await page.getByRole("button", { name: /核对这两件证物/ }).click();
 
   await expect(page.locator(".relation-ledger").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
   await expect(page.getByText(/共同证明米娜一直替她维持联络/)).toBeVisible();
@@ -331,11 +334,23 @@ test.describe("mobile 390x844", () => {
     await page.getByRole("button", { name: /DEMO/ }).click();
     await page.getByRole("button", { name: /解锁完整案件板/ }).click();
     await expect(page.locator(".demo-drawer")).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "联合推理操作台" })).toContainText("上下滑动可以离开案板");
+    await expect(page.locator(".board-node-drag-handle").first()).toBeHidden();
+    await expect(page.locator(".board-flow .react-flow__pane")).toHaveCSS("touch-action", "pan-y");
+    const boardFlow = page.locator(".board-flow");
+    await boardFlow.scrollIntoViewIfNeeded();
+    const boardFlowBox = await boardFlow.boundingBox();
+    expect(boardFlowBox).not.toBeNull();
+    const scrollBeforeBoardGesture = await page.evaluate(() => window.scrollY);
+    await page.mouse.move(boardFlowBox!.x + boardFlowBox!.width / 2, Math.min(boardFlowBox!.y + boardFlowBox!.height / 2, 760));
+    await page.mouse.wheel(0, 360);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(scrollBeforeBoardGesture);
     await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
     await expect(page.getByRole("heading", { name: "四十三天" })).toBeVisible();
     await expect(page.getByText(/有人七年没有忘记按时想念/)).toBeVisible();
+    await expect(page.getByRole("region", { name: "联合推理操作台" })).toContainText("再点一张");
     await page.getByRole("button", { name: /^OBJECT · 02 未寄出的明信片/ }).click();
-    await page.getByRole("button", { name: /建立证物连接/ }).click();
+    await page.getByRole("button", { name: /核对这两件证物/ }).click();
     await expect(page.locator(".relation-ledger").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
     await expectNoPageOverflow(page);
   });

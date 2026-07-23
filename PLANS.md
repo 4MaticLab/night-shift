@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有 `in_progress` 主计划。下一轮继续从真实游玩与线上反馈中审计新的体验缺口，先建立计划再推进。
+当前主计划是 [[plans/0023-mobile-case-board-inference]]：修复移动端案件板吞手势的问题，并把联合推理重构为可见、可撤销的三步流程。
 
 ## 计划清单
 
@@ -32,6 +32,8 @@
 | [[plans/0020-sleep-gap-echoes-and-gentle-wake-check-in]] | `completed` | `auto` | P0 | 6/6 | 已发布五条睡隙回声、一次醒转记录与 v12 存档 |
 | [[plans/0021-cross-device-interaction-pass]] | `completed` | `manual` | P0 | 6/6 | 已发布桌面／移动端交互整修与浏览器实测版本 |
 | [[plans/0022-vercel-dual-target-deployment]] | `completed` | `manual` | P0 | 5/5 | Vercel 生产部署成功，Sites 双目标保留 |
+| [[plans/0023-mobile-case-board-inference]] | `in_progress` | `manual` | P0 | 4/5 | 提交、推送并确认最新 Vercel 生产部署 |
+| [[plans/0024-friend-clue-sharing]] | `approved` | `manual` | P0 | 0/5 | 等待 0023 完成后进入好友线索深链实现 |
 
 ## 状态规则
 
