@@ -27,7 +27,7 @@
 | 存档 epoch | `src/stores/save-epoch.ts` | 不兼容版本定点清空 Night Shift 进度，保留语言和无关站点数据 |
 | 沙盒案件界面 | `src/components/game/sandbox-case.tsx` | 身份开场、地点图、夜班交接／等待／晨报、档案与收场 |
 | 首案核心内容 | `src/content/case.ts` | 首案五夜章节、12 条线索、8 件藏品与固定报告文本 |
-| 随身物内容 | `src/content/preparations.ts` | 三件准备物、五夜各自的确定性环境回响 |
+| 随身物内容 | `src/content/preparations.tsx` | 退役线性模块的三件准备物与确定性环境回响 |
 | 归来明信片 | `src/content/postcards.ts` | 五夜地点、城市传闻、背面短笺与三种随身物附言 |
 | 调查方向 | `src/content/routes.ts` | 五夜十五条确定性路线、夜间事件、城市遭遇与归来来信 |
 | 夜生植物 | `src/content/botany.ts` | 五株植物、四阶段成长文案、睡眠层级说明与进度阶段推导 |
@@ -42,7 +42,7 @@
 | 结局终函 | `src/content/endings.ts` | 三种结局的独立结果、林渡终函、档案标签与结案语 |
 | 证物关系 | `src/content/relations.ts` | 三条核心推论、对应证物对与成功解释 |
 | 好友线索链接 | `src/lib/game-engine/clue-sharing.ts` | 白名单线索查询、深链接生成与 query 清理 |
-| 夜班密文内容 | `src/content/ciphers.ts` | 按案件注册的确定性关卡、开放条件、答案归一化、提示与回执 |
+| 夜班密文内容 | `src/content/ciphers.ts` | 退役线性模块按案件注册的确定性关卡、输入器、提示与回执 |
 | 内容契约 | `src/lib/game-engine/schema.ts` | Zod schema、引用与数量约束 |
 | 夜间结算 | `src/lib/game-engine/resolve-night.ts` | 根据章节、睡眠质量、随身物与调查方向选择确定性结果 |
 | 睡眠会话 | `src/lib/game-engine/sleep-session.ts` | 创建、恢复和结束 Demo／真实夜班，按时长生成质量与夜印进度 |
@@ -59,7 +59,7 @@
 | 夜间循环 | `src/components/game/night-cycle.tsx` | 睡前准备、夜班会话、晨报与空晨报状态 |
 | 调查与归档 | `src/components/game/investigation.tsx` | 案件板、收藏柜、档案与结局 |
 | 好友线索界面 | `src/components/game/clue-sharing.tsx` | 二维码、复制链接与接收反馈 |
-| 夜班密文台 | `src/components/game/cipher-desk.tsx` | 逐段开放、答案输入、无惩罚提示与已解密回执 |
+| 夜班密文台 | `src/components/game/cipher-desk.tsx` | 退役线性模块的逐段开放、刻度盘、接线与已解密回执 |
 | 游戏框架 | `src/components/game/shell.tsx` | 顶栏、底部导航与 Demo 控制台 |
 | 共享游戏 UI | `src/components/game/shared.tsx` | 纸卡、印章、城市路线与睡眠文案 |
 | 视觉系统 | `app/globals.css` | 色板、纸张、地图、雨雾、响应式与动效 |
@@ -117,7 +117,7 @@ React Flow 使用本地受控节点承接拖动过程，只在桌面端从图钉
 
 好友线索使用 `?case=<案件 ID>&clue=<稳定线索 ID>` 的 local-first 深链接。分享端只从当前案件白名单生成链接和二维码；接收端在 hydration 后先验证案件，再验证该案线索，切换到对应存档后才经 `receiveSharedClue` 写入 `unlockedClueIds` 与 `receivedClueIds`，随后从地址栏移除两个 query。跨案件组合与未知 ID 不创建或污染存档，旧的仅含 `clue` 链接继续默认解释为 `case-001`。重复链接保持幂等，不传送其他进度，也不会确认关系或推进章节。赠送线索可参与普通阅档与联合推理，但真结局只计算非 `receivedClueIds` 的亲自取得线索；玩家后来完成对应夜班时，该 ID 会从好友来源表移除，转为亲自取得。
 
-密文关卡使用独立的 `solvedCipherIds` 保存已经核对的稳定 ID。开放条件只读取当前案件已解锁线索；答案经 NFKC、大小写和常见分隔符归一化后与作者白名单精确匹配，不使用模糊判断或生成模型。`solveCipher` 只写解密 ID，不写线索、关系或奖励；迁移会按当前案件的密文注册表过滤未知与跨案件 ID。未注册密文的案件不显示空面板。
+密文关卡使用独立的 `solvedCipherIds` 保存已经核对的稳定 ID。每个案件注册一份 `CipherDeskDefinition`，同时提供标题、说明、三段关卡、最终接线与全关完成回执；单个关卡可选 `CipherDial`，声明范围、步长、初始值、目标、精度和显示模式。刻度盘值先按范围与步长对齐并按精度截断，再格式化为时刻或 MHz 文本，最终仍通过同一答案白名单进入 `solveCipher`，避免浮点漂移或绕过作者答案。文本答案经 NFKC、大小写和常见分隔符归一化后精确匹配，最终接线则要求碎片 ID 数量、唯一性与顺序完全一致，全部不使用模糊判断或生成模型。只有成功关卡和接线 ID 持久化；未提交刻度与临时排序只存在组件状态。迁移会按当前案件的三关与接线 ID 合集过滤未知和跨案件值。未注册密文的案件不显示空面板。
 
 退役线性模块中的真结局资格仍由 `canUnlockTrueEnding` 统一判断；公开 story thread 则由各自 `SandboxEnding.requires` 判断，不共用固定五夜门槛。
 

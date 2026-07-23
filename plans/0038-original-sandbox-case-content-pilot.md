@@ -1,4 +1,4 @@
-# 0035 — 原创沙盒案件《潮汐不肯归档》
+# 0038 — 原创沙盒案件《潮汐不肯归档》
 
 - 状态：`completed`
 - 优先级：P1
@@ -187,7 +187,7 @@
 - 2026-07-23：用户明确回复“来把开工吧，交给你了”，计划从 `proposed` 批准并进入 `in_progress`。
 - 2026-07-23：首批七张美术全部由 Night Shift 自有素材作为风格锚点生成，逐张检查后以 WebP 接入；地图和行动信息保持无图可用。
 - 2026-07-23：内容测试实际跑通家属返程与市政重绘母图两条路径；CASE 003 的展示文案改由同一 presentation 契约提供，旧署名与结算不变。
-- 2026-07-23：完整 Playwright 中 CASE 004 桌面／移动路径及其余 27 条路径通过；既有 React Flow 图钉拖动路径在当前 Chrome 下单独复跑仍未落盘，未混入未经验证的修复，迁移到 [[plans/0036-evidence-board-drag-e2e-reliability]]。
+- 2026-07-23：完整 Playwright 中 CASE 004 桌面／移动路径及其余 27 条路径通过；既有 React Flow 图钉拖动路径在当前 Chrome 下单独复跑仍未落盘，未混入未经验证的修复，迁移到 [[plans/0039-evidence-board-drag-e2e-reliability]]。
 - 2026-07-23：提交 `fcd2fcb` 推送到 `codex/blackwater-inspired-content`，Draft PR #14 已创建；九项任务完成，计划关闭。
 
 ## 验证结果

@@ -69,4 +69,4 @@
 - [[plans/0018-lin-du-handoff-portrait]]
 - [[plans/0019-city-watches-and-real-time-echoes]]
 - [[plans/0020-sleep-gap-echoes-and-gentle-wake-check-in]]
-- [[plans/0037-primary-case-city-storylines]]
+- [[plans/0040-primary-case-city-storylines]]

@@ -628,7 +628,7 @@ blockquote {
   z-index: 5;
   left: 7%;
   top: 8%;
-  max-width: min(330px, 40%);
+  max-width: min(460px, 52%);
 }
 
 .scene-copy h2 {
@@ -1001,34 +1001,42 @@ blockquote {
 .preparation-list {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 7px;
+  gap: 16px;
 }
 
 .preparation {
-  min-height: 84px;
-  padding: 10px 8px;
+  min-height: 120px;
+  max-width: 110px;
+  margin: 0 auto;
+  padding: 14px 8px 10px;
   border: 1px solid #303b50;
   color: #788493;
   background: #10192b;
   cursor: pointer;
-  text-align: left;
+  text-align: center;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
 .preparation>span {
-  width: 28px;
-  height: 28px;
+  width: 84px;
+  height: 84px;
   display: grid;
   place-items: center;
-  margin-bottom: 7px;
   border: 1px solid #465267;
   color: var(--amber);
+  flex-shrink: 0;
 }
 
 .preparation div {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  text-align: center;
+  align-items: center;
 }
 
 .preparation b {
@@ -2610,6 +2618,174 @@ blockquote {
   color: #a5acb5 !important;
 }
 
+.cipher-dial {
+  margin: 10px 0 0;
+  padding: 13px;
+  border: 1px solid #465267;
+  background: radial-gradient(circle at 50% 0, #24354b, #0b1421 68%);
+  box-shadow: inset 0 0 24px #0007;
+}
+
+.cipher-dial header {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+}
+
+.cipher-dial header>svg {
+  width: 32px;
+  height: 32px;
+  padding: 7px;
+  border: 1px solid #536175;
+  color: var(--amber);
+}
+
+.cipher-dial header>div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cipher-dial header small {
+  color: #8290a0;
+  font: 7px monospace;
+  letter-spacing: .1em;
+}
+
+.cipher-dial header b {
+  color: #e3d8c1;
+  font: 22px var(--font-newsreader);
+  line-height: 1;
+}
+
+.cipher-dial header>span {
+  padding: 5px 7px;
+  border: 1px solid #3f4c5d;
+  color: #768493;
+  font: 7px monospace;
+  white-space: nowrap;
+}
+
+.cipher-dial.signal-faint header>span {
+  border-color: #806d4f;
+  color: #a6906c;
+}
+
+.cipher-dial.signal-clear header>span,
+.cipher-dial.signal-locked header>span {
+  border-color: #5e8780;
+  color: #8db0aa;
+  background: #183036;
+}
+
+.cipher-dial-scale {
+  height: 32px;
+  margin: 13px 8px 3px;
+  position: relative;
+  border-bottom: 2px solid #536175;
+  background: linear-gradient(90deg, transparent, #688a8512, transparent);
+}
+
+.cipher-dial-scale>span {
+  width: 1px;
+  height: 9px;
+  position: absolute;
+  bottom: -2px;
+  background: #657286;
+}
+
+.cipher-dial-scale>i {
+  width: 3px;
+  height: 27px;
+  position: absolute;
+  z-index: 2;
+  bottom: -2px;
+  transform: translateX(-50%);
+  background: var(--amber);
+  box-shadow: 0 0 12px #c59a5a88;
+  transition: left .16s ease, background-color .16s ease;
+}
+
+.cipher-dial.signal-clear .cipher-dial-scale>i,
+.cipher-dial.signal-locked .cipher-dial-scale>i {
+  background: #7eaaa2;
+  box-shadow: 0 0 15px #7eaaa2aa;
+}
+
+.cipher-dial-controls {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 8px;
+}
+
+.cipher-dial-controls button,
+.cipher-dial-lock {
+  min-height: 44px;
+  border: 1px solid #4b586b;
+  color: #aeb9c3;
+  background: #192537;
+  cursor: pointer;
+}
+
+.cipher-dial-controls button {
+  display: grid;
+  place-items: center;
+}
+
+.cipher-dial-controls button:disabled {
+  opacity: .34;
+}
+
+.cipher-dial-controls button svg {
+  width: 16px;
+}
+
+.cipher-dial-controls input[type="range"] {
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  accent-color: var(--amber);
+  cursor: pointer;
+}
+
+.cipher-dial.signal-clear .cipher-dial-controls input,
+.cipher-dial.signal-locked .cipher-dial-controls input {
+  accent-color: var(--teal);
+}
+
+.cipher-dial-lock {
+  width: 100%;
+  margin-top: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #ddd2bb;
+  background: #27364a;
+  font-size: 9px;
+}
+
+.cipher-dial.signal-clear .cipher-dial-lock,
+.cipher-dial.signal-locked .cipher-dial-lock {
+  border-color: #608981;
+  background: #1c383c;
+}
+
+.cipher-dial-lock svg {
+  width: 15px;
+}
+
+.cipher-dial>p {
+  min-height: 0 !important;
+  margin: 7px 0 0 !important;
+  color: #657383 !important;
+  font-size: 7px !important;
+  text-align: center;
+}
+
 .cipher-answer label {
   display: block;
   margin-bottom: 7px;
@@ -2747,6 +2923,280 @@ blockquote {
   font: 7px monospace;
 }
 
+.cipher-relay {
+  margin-top: 18px;
+  padding: 22px;
+  border: 1px solid #806b4c;
+  color: #a9b3be;
+  background: linear-gradient(145deg, #171d27, #111b29);
+  box-shadow: inset 0 0 34px #0004, 0 18px 34px #0003;
+}
+
+.cipher-relay>header {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 13px;
+  align-items: start;
+}
+
+.cipher-relay>header>svg {
+  width: 40px;
+  height: 40px;
+  padding: 9px;
+  border: 1px solid #806b4c;
+  color: var(--amber);
+}
+
+.cipher-relay header small {
+  color: var(--amber);
+  font: 7px monospace;
+  letter-spacing: .13em;
+}
+
+.cipher-relay header h4 {
+  margin: 5px 0 4px;
+  color: var(--paper);
+  font-size: 25px;
+}
+
+.cipher-relay header p,
+.cipher-relay-instruction {
+  margin: 0;
+  color: #8e99a6;
+  font-size: 9px;
+  line-height: 1.65;
+}
+
+.cipher-relay-instruction {
+  margin: 14px 0 11px;
+  padding: 10px 12px;
+  border-left: 2px solid var(--teal);
+  background: #0e1724;
+}
+
+.cipher-relay-palette {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.cipher-relay-palette button {
+  min-width: 0;
+  min-height: 62px;
+  padding: 9px 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 16px;
+  grid-template-rows: auto auto;
+  column-gap: 6px;
+  border: 1px solid #465267;
+  color: #b4bdc7;
+  background: #172335;
+  cursor: pointer;
+  text-align: left;
+}
+
+.cipher-relay-palette button:disabled {
+  opacity: .34;
+}
+
+.cipher-relay-palette b {
+  overflow-wrap: anywhere;
+  color: #e0d6c1;
+  font: 11px monospace;
+}
+
+.cipher-relay-palette span {
+  grid-column: 1;
+  color: #788695;
+  font-size: 7px;
+  line-height: 1.45;
+}
+
+.cipher-relay-palette svg {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: center;
+  width: 15px;
+  color: var(--amber);
+}
+
+.cipher-relay-sequence {
+  margin: 12px 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  list-style: none;
+}
+
+.cipher-relay-sequence li {
+  min-width: 0;
+  min-height: 78px;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  border: 1px dashed #455164;
+  background: #0c1522;
+}
+
+.cipher-relay-sequence li>span {
+  display: grid;
+  place-items: center;
+  border-right: 1px solid #394659;
+  color: #677587;
+  font: 9px monospace;
+}
+
+.cipher-relay-sequence li>div,
+.cipher-relay-sequence li>button {
+  min-width: 0;
+  padding: 9px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  border: 0;
+  color: #697686;
+  background: transparent;
+  text-align: left;
+}
+
+.cipher-relay-sequence li>button {
+  min-height: 76px;
+  position: relative;
+  padding-right: 28px;
+  color: #bcc9c5;
+  background: #173036;
+  cursor: pointer;
+}
+
+.cipher-relay-sequence b {
+  overflow-wrap: anywhere;
+  color: #ded4c0;
+  font: 10px monospace;
+}
+
+.cipher-relay-sequence small {
+  color: #748290;
+  font-size: 7px;
+  line-height: 1.4;
+}
+
+.cipher-relay-sequence button svg {
+  position: absolute;
+  top: 8px;
+  right: 7px;
+  width: 13px;
+  color: #84a09a;
+}
+
+.cipher-relay-feedback {
+  margin: 0 0 10px;
+  padding: 9px 11px;
+  border-left: 2px solid var(--red);
+  color: #c29189;
+  background: #2a1820;
+  font-size: 8px;
+  line-height: 1.55;
+}
+
+.cipher-relay-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.cipher-relay-actions button {
+  min-height: 44px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid #465267;
+  color: #99a5b2;
+  background: #182334;
+  cursor: pointer;
+  font-size: 8px;
+}
+
+.cipher-relay-actions button.primary {
+  border-color: #668b85;
+  color: #bfd0cb;
+  background: #1b3438;
+}
+
+.cipher-relay-actions button:disabled {
+  opacity: .4;
+}
+
+.cipher-relay-actions svg {
+  width: 14px;
+}
+
+.cipher-relay-hints {
+  margin-top: 8px;
+}
+
+.cipher-completion {
+  margin-top: 18px;
+  padding: 20px 22px;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #658b84;
+  color: #bcd1cb;
+  background: linear-gradient(110deg, #10282b, #172a36 62%, #22333c);
+  box-shadow: inset 0 0 32px #6ba09912, 0 16px 30px #0003;
+}
+
+.cipher-completion>svg {
+  width: 42px;
+  height: 42px;
+  padding: 9px;
+  border: 1px solid #638982;
+  color: #8eb0aa;
+}
+
+.cipher-completion>div {
+  min-width: 0;
+}
+
+.cipher-completion small {
+  color: #77a19a;
+  font: 7px monospace;
+  letter-spacing: .13em;
+}
+
+.cipher-completion h4 {
+  margin: 5px 0 4px;
+  color: #e2dac8;
+  font-size: 24px;
+}
+
+.cipher-completion p {
+  margin: 0;
+  color: #a8bbb7;
+  font-size: 9px;
+  line-height: 1.65;
+}
+
+.cipher-completion>span {
+  min-height: 44px;
+  padding: 8px 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #587c76;
+  color: #a9c5bf;
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+.cipher-completion>span svg {
+  width: 14px;
+}
+
 .cipher-desk>footer {
   margin-top: 13px;
   color: #667383;
@@ -2807,6 +3257,27 @@ blockquote {
     grid-template-columns: 1fr;
   }
 
+  .cipher-dial {
+    padding: 11px 9px;
+  }
+
+  .cipher-dial header {
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+
+  .cipher-dial header>svg {
+    width: 29px;
+    height: 29px;
+    padding: 6px;
+  }
+
+  .cipher-dial header>span {
+    grid-column: 1 / -1;
+    min-height: 30px;
+    display: grid;
+    place-items: center;
+  }
+
   .cipher-answer button {
     justify-content: center;
   }
@@ -2814,6 +3285,62 @@ blockquote {
   .cipher-answer>div>input {
     min-height: 44px;
     padding-block: 10px;
+  }
+
+  .cipher-completion {
+    padding: 17px 13px;
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 11px;
+  }
+
+  .cipher-completion>svg {
+    width: 36px;
+    height: 36px;
+    padding: 7px;
+  }
+
+  .cipher-completion h4 {
+    font-size: 20px;
+  }
+
+  .cipher-completion>span {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+
+  .cipher-relay {
+    padding: 17px 12px;
+  }
+
+  .cipher-relay>header {
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .cipher-relay>header>svg {
+    width: 34px;
+    height: 34px;
+    padding: 7px;
+  }
+
+  .cipher-relay header h4 {
+    font-size: 21px;
+  }
+
+  .cipher-relay-palette,
+  .cipher-relay-sequence {
+    grid-template-columns: 1fr;
+  }
+
+  .cipher-relay-palette button,
+  .cipher-relay-sequence li,
+  .cipher-relay-sequence li>button {
+    min-height: 54px;
+  }
+
+  .cipher-relay-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 
   .cipher-desk>footer {

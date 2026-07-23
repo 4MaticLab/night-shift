@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有 `in_progress` 主计划。[[plans/0037-primary-case-city-storylines]] 已完成：公开产品改为一座可持续更新的雾灯城、可并发且各自完结的主／支线、破坏性存档 epoch 与唯一《黑水溪》结构样板；实现已推送到 Draft PR #14。
+当前没有 `in_progress` 主计划。最近完成的 [[plans/0040-primary-case-city-storylines]] 把公开产品改为一座可持续更新的雾灯城、可并发且各自完结的主／支线、破坏性存档 epoch 与唯一《黑水溪》结构样板；主分支此前完成的密文刻度盘保留为退役线性源模块。
 
 ## 计划清单
 
@@ -44,9 +44,12 @@
 | [[plans/0032-ai-rest-intention-ritual]] | `completed` | `manual` | P0 | 6/6 | 已完成 AI 休息仪式、v15 存档与全量回归 |
 | [[plans/0033-hackathon-submission-kit]] | `completed` | `manual` | P0 | 4/4 | 已完成提交作战卡、演示节拍与真实边界 |
 | [[plans/0034-night-cipher-desk]] | `completed` | `manual` | P0 | 6/6 | 已完成三段密文、v16 存档、中英文与移动端验收 |
-| [[plans/0035-original-sandbox-case-content-pilot]] | `completed` | `manual` | P1 | 9/9 | Draft PR #14 等待评审 |
-| [[plans/0036-evidence-board-drag-e2e-reliability]] | `cancelled` | `auto` | P1 | 0/4 | 旧五夜案件板已退出公开产品，不再修复其专属回归 |
-| [[plans/0037-primary-case-city-storylines]] | `completed` | `manual` | P0 | 8/8 | Draft PR #14 等待评审 |
+| [[plans/0035-rain-radio-signal-lab]] | `completed` | `manual` | P0 | 6/6 | 已完成第二案三段信号谜题、全关回执与移动端验收 |
+| [[plans/0036-cipher-relay-sequencing]] | `completed` | `manual` | P0 | 6/6 | 已完成两案最终接线、v16 持久化、英文与移动端验收 |
+| [[plans/0037-interactive-cipher-dials]] | `completed` | `manual` | P0 | 6/6 | 已完成通用刻度盘、两案配置、英文与移动端验收 |
+| [[plans/0038-original-sandbox-case-content-pilot]] | `completed` | `manual` | P1 | 9/9 | 已由计划 0040 并入首案河下区支线 |
+| [[plans/0039-evidence-board-drag-e2e-reliability]] | `cancelled` | `auto` | P1 | 0/4 | 旧五夜案件板已退出公开产品，不再修复其专属回归 |
+| [[plans/0040-primary-case-city-storylines]] | `completed` | `manual` | P0 | 8/8 | Draft PR #14 等待评审 |
 
 ## 状态规则
 

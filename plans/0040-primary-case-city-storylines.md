@@ -1,11 +1,11 @@
-# 0037 — 主案城市地图与河下区支线
+# 0040 — 主案城市地图与河下区支线
 
 - 状态：`completed`
 - 优先级：P0
 - 创建：2026-07-24
 - 更新：2026-07-24
 - 负责人：Codex
-- 依赖：[[plans/0035-original-sandbox-case-content-pilot]]
+- 依赖：[[plans/0038-original-sandbox-case-content-pilot]]
 - 推进模式：`manual`
 
 ## 动机
@@ -85,4 +85,4 @@
 - [[docs/architecture]]
 - [[docs/campaign-authoring]]
 - [[docs/decision-log]]
-- [[plans/0035-original-sandbox-case-content-pilot]]
+- [[plans/0038-original-sandbox-case-content-pilot]]

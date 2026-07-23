@@ -16,7 +16,7 @@ import { DEFAULT_CAMPAIGN_ID, getCampaign, isCampaignId, type CampaignId } from 
 import { getCampaignRouteDirection, getCampaignWakeEcho, matchCampaignEvidenceRelation, type CampaignManifest } from "@/src/content/campaigns/types";
 import { useSleepHardwareStore } from "@/src/stores/sleep-hardware-store";
 import { createRestRitualRecord, restReflectionResponseSchema, restRitualRecordSchema, type RestReflectionReason, type RestReflectionSource, type RestRitualInput, type RestRitualRecord } from "@/src/lib/rest-ritual";
-import { getCampaignCipherChallenge, getCampaignCipherChallenges, isCipherUnlocked, matchesCipherAnswer } from "@/src/content/ciphers";
+import { getCampaignCipherChallenge, getCampaignCipherProgressIds, getCampaignCipherRelay, isCipherRelayUnlocked, isCipherUnlocked, matchesCipherAnswer, matchesCipherRelay } from "@/src/content/ciphers";
 
 export type Phase = "day" | "ready" | "night" | "morning" | "ending";
 
@@ -62,6 +62,7 @@ export interface GameState {
   continueDay: () => void;
   connectClues: (firstClueId: string, secondClueId: string) => string | null;
   solveCipher: (challengeId: string, answer: string) => "solved" | "already-solved" | "locked" | "incorrect" | "invalid";
+  solveCipherRelay: (relayId: string, fragmentIds: string[]) => "solved" | "already-solved" | "locked" | "incorrect" | "invalid";
   receiveSharedClue: (clueId: string) => "received" | "already-received" | "already-owned" | "invalid";
   switchCampaign: (campaignId: CampaignId) => boolean;
   setBoardPosition: (clueId: string, position: BoardPosition) => boolean;
@@ -344,6 +345,16 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
     set({ solvedCipherIds: [...state.solvedCipherIds, challenge.id] });
     return "solved";
   },
+  solveCipherRelay: (relayId, fragmentIds) => {
+    const state = get();
+    const relay = getCampaignCipherRelay(state.campaignId, relayId);
+    if (!relay) return "invalid";
+    if (state.solvedCipherIds.includes(relay.id)) return "already-solved";
+    if (!isCipherRelayUnlocked(state.campaignId, state.solvedCipherIds)) return "locked";
+    if (!matchesCipherRelay(relay, fragmentIds)) return "incorrect";
+    set({ solvedCipherIds: [...state.solvedCipherIds, relay.id] });
+    return "solved";
+  },
   receiveSharedClue: (clueId) => {
     const clue = getCampaign(get().campaignId).case.clues.find((item) => item.id === clueId);
     if (!clue) return "invalid";
@@ -552,7 +563,7 @@ function sanitizeReceivedClueIds(value: unknown, campaign: CampaignManifest): st
 
 function sanitizeSolvedCipherIds(value: unknown, campaign: CampaignManifest): string[] {
   if (!Array.isArray(value)) return [];
-  const validIds = new Set(getCampaignCipherChallenges(campaign.id).map((challenge) => challenge.id));
+  const validIds = new Set(getCampaignCipherProgressIds(campaign.id));
   return Array.from(new Set(value.filter((challengeId): challengeId is string => typeof challengeId === "string" && validIds.has(challengeId))));
 }
 

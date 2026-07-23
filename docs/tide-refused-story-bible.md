@@ -68,5 +68,5 @@
 - [[docs/architecture]]
 - [[docs/art-direction]]
 - [[docs/art-prompts/tide-refused-assets]]
-- [[plans/0035-original-sandbox-case-content-pilot]]
-- [[plans/0037-primary-case-city-storylines]]
+- [[plans/0038-original-sandbox-case-content-pilot]]
+- [[plans/0040-primary-case-city-storylines]]
