@@ -157,7 +157,7 @@ export function CaseBoard() {
     </div>
     <details className="board-cipher-disclosure">
       <summary>
-        <span><small>OPTIONAL ARCHIVE · {t("可选解密")}</small><b>{t("打开夜班密文台")}</b><p>{t("密文只展开补充旁注，不增加奖励、不替代联合推理，也不改变任何结局资格。")}</p></span>
+        <span><small>OPTIONAL ARCHIVE · {locale === "en" ? "OPTIONAL CIPHERS" : "可选解密"}</small><b>{locale === "en" ? "Open the night cipher desk" : "打开夜班密文台"}</b><p>{locale === "en" ? "Ciphers reveal extra archive notes. They add no reward, replace no inference, and change no ending condition." : "密文只展开补充旁注，不增加奖励、不替代联合推理，也不改变任何结局资格。"}</p></span>
         <ChevronRight />
       </summary>
       <CipherDesk />

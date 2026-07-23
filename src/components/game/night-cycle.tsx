@@ -300,7 +300,7 @@ export function MorningReport({ onContinue, onHardware }: { onContinue: () => vo
       <section className="report-hero"><Image className="report-hero-art" src={morningHeader.src} alt={morningHeader.alt} fill priority sizes="100vw" /><div><Seal>{t("调查报告")} · 0{chapter}</Seal><p>{t("昨夜调查完成")}</p><h2>{current.title}</h2><small>{t("记录人：")}{campaign.presentation.detectiveName} · {campaign.presentation.cityName} · {reportClock}</small></div></section>
       <details className="report-archive-details" open={reportArchiveOpen} onToggle={(event) => setReportArchiveOpen(event.currentTarget.open)}>
         <summary>
-          <span><small>FULL NIGHT ARCHIVE · {t("可选详读")}</small><b>{locale === "en" ? "Open the full route, city echoes, and keepsakes" : "展开昨夜完整行程、城市回声与纪念物"}</b><p>{locale === "en" ? "The core report and next action remain below. Reading every side record is optional." : "核心发现与下一步仍在下方；不展开也不会漏掉线索或阻断主线。"}</p></span>
+          <span><small>FULL NIGHT ARCHIVE · {locale === "en" ? "OPTIONAL READING" : "可选详读"}</small><b>{locale === "en" ? "Open the full route, city echoes, and keepsakes" : "展开昨夜完整行程、城市回声与纪念物"}</b><p>{locale === "en" ? "The core report and next action remain below. Reading every side record is optional." : "核心发现与下一步仍在下方；不展开也不会漏掉线索或阻断主线。"}</p></span>
           <ChevronRight />
         </summary>
       <div className="sleep-receipt-wrap"><SleepHardwareMorningReceipt sessionId={lastSleepSession?.id} /><button type="button" onClick={onHardware}>{t("管理睡眠硬件")} <ChevronRight /></button></div>
