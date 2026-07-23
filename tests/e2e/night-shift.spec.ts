@@ -37,6 +37,21 @@ async function expectNoVisibleHan(page: import("@playwright/test").Page) {
   expect(visibleText).not.toMatch(/\p{Script=Han}/u);
 }
 
+test("holds the first interaction behind a real hero-art loading screen", async ({ page }) => {
+  await page.route("**/art/headers/shift-handoff-v2.webp", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 900));
+    await route.continue();
+  });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const loadingScreen = page.locator(".app-boot-screen").last();
+  await expect(loadingScreen).toBeVisible();
+  await expect(loadingScreen).toContainText("夜班事务所正在亮灯");
+  await expect(page.locator(".app-boot-content")).toHaveAttribute("inert", "");
+  await expect(loadingScreen).toBeHidden({ timeout: 10_000 });
+  await expect(page.locator(".app-boot-content")).not.toHaveAttribute("inert", "");
+  await expect(page.getByRole("button", { name: /开始第 001 宗案件/ })).toBeEnabled();
+});
+
 test("plays the first case in English and preserves the language preference", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /ENGLISH/ }).click();
@@ -250,6 +265,7 @@ test("anchors the desktop handoff and resets long-view scroll positions", async 
   await expect.poll(() => page.evaluate(() => getComputedStyle(document.activeElement!).outlineStyle)).toBe("solid");
 
   await page.getByRole("button", { name: "收藏", exact: true }).click();
+  await expect(page.locator(".collection-page")).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, 1200));
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1000);
   await page.getByRole("button", { name: "收藏", exact: true }).click();

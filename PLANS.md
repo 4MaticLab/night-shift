@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有进行中的主计划。最近完成的 [[plans/0037-interactive-cipher-dials]] 已为前两案第一关加入可亲手调准的时刻轮与雨中调频仪。
+当前没有进行中的主计划；最近完成 [[plans/0038-first-load-experience]]，为慢网与冷缓存增加首屏加载幕，并拆分首页不需要的重型游戏模块。
 
 ## 计划清单
 
@@ -47,6 +47,7 @@
 | [[plans/0035-rain-radio-signal-lab]] | `completed` | `manual` | P0 | 6/6 | 已完成第二案三段信号谜题、全关回执与移动端验收 |
 | [[plans/0036-cipher-relay-sequencing]] | `completed` | `manual` | P0 | 6/6 | 已完成两案最终接线、v16 持久化、英文与移动端验收 |
 | [[plans/0037-interactive-cipher-dials]] | `completed` | `manual` | P0 | 6/6 | 已完成通用刻度盘、两案配置、英文与移动端验收 |
+| [[plans/0038-first-load-experience]] | `completed` | `auto` | P0 | 5/5 | 已完成真实加载幕、非首屏按需加载与慢网回归 |
 
 ## 状态规则
 

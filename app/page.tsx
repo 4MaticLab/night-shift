@@ -1,25 +1,38 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
+import dynamic from "next/dynamic";
 import { AnimatePresence } from "motion/react";
 import { Hero, Intro } from "@/src/components/game/landing";
-import { ArchivePage, CaseBoard, Collection, Ending } from "@/src/components/game/investigation";
-import { EmptyReport, MorningReport, NightRun, Tonight } from "@/src/components/game/night-cycle";
 import { BottomNav, DemoDrawer, TopBar } from "@/src/components/game/shell";
 import type { GameView } from "@/src/components/game/types";
 import { useGameStore } from "@/src/stores/game-store";
 import { ClueGiftNotice, type ClueGiftNoticeData } from "@/src/components/game/clue-sharing";
 import { readSharedClueQuery, removeSharedClueQuery } from "@/src/lib/game-engine/clue-sharing";
 import { getCampaign } from "@/src/content/campaigns/registry";
-import { SandboxCase } from "@/src/components/game/sandbox-case";
-import { SleepHardwarePanel } from "@/src/components/game/sleep-hardware";
+import { getAsset } from "@/src/content/assets";
 import { I18nProvider, useI18n } from "@/src/i18n/provider";
+import { AppBootBoundary, GameSectionLoading } from "@/src/components/game/loading-screen";
 
 const subscribeToHydration = () => () => undefined;
+const dynamicLoading = () => <GameSectionLoading />;
+
+const ArchivePage = dynamic(() => import("@/src/components/game/investigation").then((module) => module.ArchivePage), { loading: dynamicLoading });
+const CaseBoard = dynamic(() => import("@/src/components/game/investigation").then((module) => module.CaseBoard), { loading: dynamicLoading });
+const Collection = dynamic(() => import("@/src/components/game/investigation").then((module) => module.Collection), { loading: dynamicLoading });
+const Ending = dynamic(() => import("@/src/components/game/investigation").then((module) => module.Ending), { loading: dynamicLoading });
+const EmptyReport = dynamic(() => import("@/src/components/game/night-cycle").then((module) => module.EmptyReport), { loading: dynamicLoading });
+const MorningReport = dynamic(() => import("@/src/components/game/night-cycle").then((module) => module.MorningReport), { loading: dynamicLoading });
+const NightRun = dynamic(() => import("@/src/components/game/night-cycle").then((module) => module.NightRun), { loading: dynamicLoading });
+const Tonight = dynamic(() => import("@/src/components/game/night-cycle").then((module) => module.Tonight), { loading: dynamicLoading });
+const SandboxCase = dynamic(() => import("@/src/components/game/sandbox-case").then((module) => module.SandboxCase), { loading: dynamicLoading });
+const SleepHardwarePanel = dynamic(() => import("@/src/components/game/sleep-hardware").then((module) => module.SleepHardwarePanel));
 
 export default function HomePage() {
   const campaignId = useGameStore((state) => state.campaignId);
-  return <I18nProvider campaignId={campaignId}><GamePage /></I18nProvider>;
+  const campaign = getCampaign(campaignId);
+  const heroSrc = getAsset(campaign.presentation.heroAssetId).src;
+  return <I18nProvider campaignId={campaignId}><AppBootBoundary heroSrc={heroSrc}><GamePage /></AppBootBoundary></I18nProvider>;
 }
 
 function GamePage() {

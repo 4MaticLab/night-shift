@@ -403,4 +403,5 @@ export const englishOverrides: Record<string, string> = {
   "排序后的字母依次是 H、I、D、D、E、N。": "The ordered letters are H, I, D, D, E, N.",
   "HIDDEN PLATFORM · 隐藏站台": "HIDDEN PLATFORM",
   "地图上的刮痕不是删除失败，而是一条保护路线。六枚时钟印章共同指向河下那座没有编号的隐藏站台。": "The scratch on the map is not a failed erasure but a protective route. The six clock stamps point together to an unnumbered hidden platform beneath the river.",
+  "正在展开下一页…": "Opening the next page…",
 };

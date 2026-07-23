@@ -37,7 +37,8 @@ import { elapsedSessionMinutes, formatSleepDuration, nightSealProgress } from "@
 import type { SleepMode, SleepQuality } from "@/src/lib/game-engine/schema";
 import { getCityWatch } from "@/src/content/watches";
 import { CityRoute, qualityCopy } from "./shared";
-import { SleepHardwareHandoff, SleepHardwareMorningReceipt, SleepHardwareNightTelemetry, SleepHardwareStatus } from "./sleep-hardware";
+import { SleepHardwareHandoff, SleepHardwareMorningReceipt, SleepHardwareNightTelemetry } from "./sleep-hardware";
+import { SleepHardwareStatus } from "./sleep-hardware-status";
 
 type SandboxView = "map" | "evidence" | "people" | "ending";
 
