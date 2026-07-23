@@ -5,23 +5,41 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, BookOpen, ChevronRight, Languages, Moon, TramFront, Zap } from "lucide-react";
 import { getAsset } from "@/src/content/assets";
-import { campaignRegistry } from "@/src/content/campaigns/registry";
+import { campaignRegistry, DEFAULT_CAMPAIGN_ID } from "@/src/content/campaigns/registry";
 import { useGameStore } from "@/src/stores/game-store";
 import { campaignSupportsLocale, localizeCampaign } from "@/src/i18n/core";
 import { useI18n } from "@/src/i18n/provider";
 
 export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; onDemo: () => void; interactive: boolean }) {
-  const { campaignId, started, switchCampaign } = useGameStore();
+  const { campaignId, campaignSaves, chapter, completedReports, started, switchCampaign } = useGameStore();
   const { campaign, locale, preferredLocale, setLocale, t } = useI18n();
   const isSandbox = campaign.format === "sandbox-expedition";
   const heroAsset = getAsset(campaign.presentation.heroAssetId);
+  const otherCampaigns = campaignRegistry.filter((item) => item.id !== campaignId);
+  const progressLabel = isSandbox
+    ? started ? t("异地卷宗调查中") : t("独立沙盒卷宗")
+    : started
+      ? locale === "en"
+        ? `Night ${Math.min(chapter, campaign.case.chapters.length)} of ${campaign.case.chapters.length}`
+        : `第 ${Math.min(chapter, campaign.case.chapters.length)} / ${campaign.case.chapters.length} 夜`
+      : locale === "en"
+        ? `${campaign.case.chapters.length}-night complete case`
+        : `${campaign.case.chapters.length} 夜完整案件`;
+  const primaryLabel = started
+    ? locale === "en" ? `Continue ${campaign.case.title}` : `继续《${campaign.case.title}》`
+    : locale === "en" ? `Begin ${campaign.case.title}` : `开始《${campaign.case.title}》`;
   return (
     <main className="hero-shell">
       <div className="rain" aria-hidden="true" />
-      <Image className="hero-art" src={heroAsset.src} alt={heroAsset.alt} fill priority sizes="100vw" />
+      <AnimatePresence initial={false}>
+        <motion.div className="hero-art-layer" style={{ position: "absolute", inset: 0 }} key={campaign.id} initial={{ opacity: 0, scale: 1.015 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: .55, ease: "easeOut" }}>
+          <Image className="hero-art" src={heroAsset.src} alt={heroAsset.alt} fill priority sizes="100vw" />
+        </motion.div>
+      </AnimatePresence>
       <div className="hero-vignette" />
       <nav className="landing-nav">
         <div className="brand-mark"><span aria-hidden="true" /><div><b>{t("夜班侦探")}</b><small>NIGHT SHIFT</small></div></div>
+        <div className="landing-watch" aria-hidden="true"><i /><span>AGENCY WATCH</span><b>00:43</b></div>
         <div className="landing-nav-actions">
           <button className="ghost-button language-button" disabled={!interactive} onClick={() => setLocale(preferredLocale === "en" ? "zh-CN" : "en")}><Languages size={15} /> {preferredLocale === "en" ? "中文" : "ENGLISH"}</button>
           <button className="ghost-button" disabled={!interactive} onClick={onDemo}><Zap size={15} /> {isSandbox ? "CASE FILE" : "DEMO MODE"}</button>
@@ -32,21 +50,49 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
         <h1>{locale === "en" ? <>When you fall asleep,<br /><em>his work begins.</em></> : <>你睡着以后，<br /><em>他才开始工作。</em></>}</h1>
         <p className="hero-lede">{t("白天分析线索，晚上把调查交给侦探。等你醒来，雾灯城会留下一份新的报告。")}</p>
         <div className="hero-actions">
-          <button className="primary-button" disabled={!interactive} onClick={onStart}>{started ? t("继续当前案件") : locale === "en" ? `Begin Case ${campaign.presentation.archiveNumber}` : `开始第 ${campaign.presentation.archiveNumber} 宗案件`} <ArrowRight size={18} /></button>
+          <button
+            className="primary-button"
+            aria-label={started ? t("继续当前案件") : locale === "en" ? `Begin Case ${campaign.presentation.archiveNumber}` : `开始第 ${campaign.presentation.archiveNumber} 宗案件`}
+            disabled={!interactive}
+            onClick={onStart}
+          >{primaryLabel} <ArrowRight size={18} /></button>
           <button className="text-button" disabled={!interactive} onClick={onDemo}><BookOpen size={17} /> {isSandbox ? t("查看案件说明") : t("观看 90 秒演示")}</button>
         </div>
         <div className="shift-rule"><span>{isSandbox ? t("你负责调度调查小队") : t("你负责白天推理")}</span><i /><span>{isSandbox ? t("山谷按行动改变") : t("林渡负责夜晚调查")}</span></div>
       </section>
       <section className="campaign-shelf" aria-label={t("案件剧本选择")}>
-        <small>CASE LIBRARY · {t("选择剧本")}</small>
-        <div>{campaignRegistry.map((source) => {
+        <header>
+          <div><small>CASE LIBRARY · 03 FILES</small><h2>{t("今晚从哪一宗开始？")}</h2></div>
+          <span>{t("本地独立存档")}</span>
+        </header>
+        <motion.article className="featured-case" key={campaign.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} aria-live="polite">
+          <div className="featured-case-index">
+            <span>CASE {campaign.presentation.archiveNumber}</span>
+            <div>
+              {campaign.id === DEFAULT_CAMPAIGN_ID && <i>{t("推荐起点")}</i>}
+              <b>{started ? t("继续调查") : t("尚未开封")}</b>
+            </div>
+          </div>
+          <h3>{campaign.case.title}</h3>
+          <p>{campaign.presentation.teaser}</p>
+          <footer>
+            <span>{progressLabel}</span>
+            <span>{completedReports.length > 0 ? `${completedReports.length} REPORTS` : campaign.id === DEFAULT_CAMPAIGN_ID ? "ZH · EN" : "ZH"}</span>
+          </footer>
+        </motion.article>
+        <div className="campaign-alternates"><small>{t("其他卷宗")}</small>{otherCampaigns.map((source) => {
           const supported = campaignSupportsLocale(source.id, preferredLocale);
           const item = localizeCampaign(source, supported ? preferredLocale : "zh-CN");
-          return <button type="button" aria-pressed={item.id === campaignId} className={item.id === campaignId ? "active" : ""} key={item.id} onClick={() => switchCampaign(source.id)}><span>CASE {item.presentation.archiveNumber}{preferredLocale === "en" && !supported ? " · 中文版" : ""}</span><b>{item.case.title}</b><p>{item.presentation.teaser}</p></button>;
+          const saved = campaignSaves[source.id];
+          return <button type="button" aria-pressed="false" key={item.id} onClick={() => switchCampaign(source.id)}>
+            <span><small>CASE {item.presentation.archiveNumber}{preferredLocale === "en" && !supported ? " · 中文版" : ""}</small><b>{item.case.title}</b><em>{saved?.started ? t("已有进度") : item.id === DEFAULT_CAMPAIGN_ID ? t("推荐起点") : t("新卷宗")}</em></span>
+            <ChevronRight />
+          </button>;
         })}</div>
+        <p className="campaign-save-note">{t("切换案件不会覆盖各自的调查进度。")}</p>
         {preferredLocale === "en" && <p className="locale-availability">English edition available for Case 001. Other cases remain in Chinese.</p>}
       </section>
-      <div className="case-teaser"><span className="case-index">CASE {campaign.presentation.archiveNumber}</span><b>{campaign.case.title}</b><small>{campaign.presentation.teaser}</small></div>
+      <div className="landing-footnote" aria-hidden="true"><span>LOCAL-FIRST</span><i /><span>NO ACCOUNT</span><i /><span>SAVE ON THIS DEVICE</span></div>
     </main>
   );
 }

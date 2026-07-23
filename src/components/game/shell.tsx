@@ -6,7 +6,7 @@ import { Archive, ChevronRight, Coffee, Gift, Moon, RotateCcw, Search, Sparkles,
 import { useGameStore } from "@/src/stores/game-store";
 import { useI18n } from "@/src/i18n/provider";
 import type { GameView } from "./types";
-import { SleepHardwareStatus } from "./sleep-hardware";
+import { SleepHardwareStatus } from "./sleep-hardware-status";
 
 export function TopBar({ chapter, onDemo, onHome, onHardware }: { chapter: number; onDemo: () => void; onHome: () => void; onHardware: () => void }) {
   useGameStore((state) => state.campaignId);

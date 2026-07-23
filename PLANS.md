@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有进行中的主计划。最近完成的 [[plans/0037-interactive-cipher-dials]] 已为前两案第一关加入可亲手调准的时刻轮与雨中调频仪。
+当前没有进行中的主计划；最近完成 [[plans/0041-restored-main-integration-regressions]]，已修复恢复主线后的准备物本地化、AI 请求契约、案板拖动与桌面交接布局回归。
 
 ## 计划清单
 
@@ -47,6 +47,10 @@
 | [[plans/0035-rain-radio-signal-lab]] | `completed` | `manual` | P0 | 6/6 | 已完成第二案三段信号谜题、全关回执与移动端验收 |
 | [[plans/0036-cipher-relay-sequencing]] | `completed` | `manual` | P0 | 6/6 | 已完成两案最终接线、v16 持久化、英文与移动端验收 |
 | [[plans/0037-interactive-cipher-dials]] | `completed` | `manual` | P0 | 6/6 | 已完成通用刻度盘、两案配置、英文与移动端验收 |
+| [[plans/0038-first-load-experience]] | `completed` | `auto` | P0 | 5/5 | 已完成真实加载幕、非首屏按需加载与慢网回归 |
+| [[plans/0039-default-case-home-art-pass]] | `completed` | `auto` | P0 | 6/6 | 已完成首案默认、首页双焦点卷宗与跨设备验收 |
+| [[plans/0040-browser-locale-negotiation]] | `completed` | `auto` | P0 | 6/6 | 已完成服务端语言协商、偏好迁移与跨设备验收 |
+| [[plans/0041-restored-main-integration-regressions]] | `completed` | `auto` | P0 | 4/4 | 已完成恢复主线后的兼容修复与全量验收 |
 
 ## 状态规则
 

@@ -17,7 +17,10 @@ async function expectNoOverlap(first: import("@playwright/test").Locator, second
   const [a, b] = await Promise.all([first.boundingBox(), second.boundingBox()]);
   expect(a).not.toBeNull();
   expect(b).not.toBeNull();
-  expect(a!.x + a!.width <= b!.x || b!.x + b!.width <= a!.x || a!.y + a!.height <= b!.y || b!.y + b!.height <= a!.y).toBe(true);
+  expect(
+    a!.x + a!.width <= b!.x || b!.x + b!.width <= a!.x || a!.y + a!.height <= b!.y || b!.y + b!.height <= a!.y,
+    `Expected boxes not to overlap: ${JSON.stringify({ a, b })}`,
+  ).toBe(true);
 }
 
 async function expectMinimumTapTargets(locator: import("@playwright/test").Locator, minimum = 44) {
@@ -37,7 +40,57 @@ async function expectNoVisibleHan(page: import("@playwright/test").Page) {
   expect(visibleText).not.toMatch(/\p{Script=Han}/u);
 }
 
-test("plays the first case in English and preserves the language preference", async ({ page }) => {
+test("holds the first interaction behind a real hero-art loading screen", async ({ page }) => {
+  await page.route("**/art/headers/shift-handoff-v2.webp", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 900));
+    await route.continue();
+  });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const loadingScreen = page.locator(".app-boot-screen").last();
+  await expect(loadingScreen).toBeVisible();
+  await expect(loadingScreen).toContainText("夜班事务所正在亮灯");
+  await expect(page.locator(".app-boot-content")).toHaveAttribute("inert", "");
+  await expect(loadingScreen).toBeHidden({ timeout: 10_000 });
+  await expect(page.locator(".app-boot-content")).not.toHaveAttribute("inert", "");
+  await expect(page.getByRole("button", { name: /开始第 001 宗案件/ })).toBeEnabled();
+  const caseLibrary = page.getByRole("region", { name: "案件剧本选择" });
+  await expect(caseLibrary.locator(".featured-case")).toContainText("零点四十三分的末班车");
+  await expect(caseLibrary.locator(".featured-case")).toContainText("推荐起点");
+  await expect(page.locator(".case-teaser")).toHaveCount(0);
+});
+
+test.describe("automatic browser locale", () => {
+  test.use({ locale: "en-US" });
+
+  test("renders English on the first response and lets a cookie override it", async ({ page, context }) => {
+    const response = await page.goto("/", { waitUntil: "domcontentloaded" });
+    expect(await response?.text()).toContain('<html lang="en"');
+    await expect(page.getByRole("heading", { name: /When you fall asleep/ })).toBeVisible();
+    await expect(page.locator(".app-boot-screen")).toContainText("The night agency is turning on its lights");
+    expect((await context.cookies()).find((cookie) => cookie.name === "night-shift-locale")).toBeUndefined();
+
+    await page.getByRole("button", { name: /CASE 002/ }).click();
+    await expect(page.getByRole("heading", { name: /你睡着以后/ })).toBeVisible();
+    await page.getByRole("button", { name: /CASE 001/ }).click();
+    await expect(page.getByRole("heading", { name: /When you fall asleep/ })).toBeVisible();
+
+    await page.getByRole("button", { name: "中文", exact: true }).click();
+    await expect(page.getByRole("heading", { name: /你睡着以后/ })).toBeVisible();
+    expect((await context.cookies()).find((cookie) => cookie.name === "night-shift-locale")?.value).toBe("zh-CN");
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("lang", "zh-CN");
+    await expect(page.getByRole("heading", { name: /你睡着以后/ })).toBeVisible();
+  });
+});
+
+test("migrates a legacy local language preference into the cookie", async ({ page, context }) => {
+  await page.addInitScript(() => window.localStorage.setItem("night-shift-locale", "en"));
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: /When you fall asleep/ })).toBeVisible();
+  expect((await context.cookies()).find((cookie) => cookie.name === "night-shift-locale")?.value).toBe("en");
+});
+
+test("plays the first case in English and preserves the language preference", async ({ page, context }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /ENGLISH/ }).click();
   await expect(page.getByRole("button", { name: /Begin Case 001/ })).toBeVisible();
@@ -71,6 +124,7 @@ test("plays the first case in English and preserves the language preference", as
   await expect(page.getByRole("heading", { name: "The Last Tram at 00:43" })).toBeVisible();
   await expectNoVisibleHan(page);
   await expect(page.evaluate(() => localStorage.getItem("night-shift-locale"))).resolves.toBe("en");
+  expect((await context.cookies()).find((cookie) => cookie.name === "night-shift-locale")?.value).toBe("en");
 });
 
 test("keeps the English first-night handoff usable at 390 × 844", async ({ page }) => {
@@ -105,7 +159,7 @@ test("starts a case and reaches the first morning report", async ({ page }) => {
   await openFirstNight(page);
   await expect(page.locator(".handoff-portrait img")).toHaveAttribute("src", /lin-du-handoff-portrait-v1/);
   await expect(page.locator(".handoff-docket")).toContainText("纸张的证词");
-  await expect(page.locator(".handoff-docket")).toContainText("侧照灯 · 灯港旧票据工坊");
+  await expect(page.locator(".handoff-docket")).toContainText("提灯 · 灯港旧票据工坊");
   await expectNoOverlap(page.locator(".scene-copy"), page.locator(".handoff-portrait"));
   await expectNoOverlap(page.locator(".handoff-docket"), page.locator(".handoff-portrait"));
   await expect(page.getByText(/可能惊动 · 错页登记处/)).toBeVisible();
@@ -172,7 +226,7 @@ test("rest intention requests an AI note only after explicit consent", async ({ 
   expect(requestBody).toMatchObject({
     intention,
     destination: "灯港旧票据工坊",
-    preparation: "侧照灯",
+    preparation: "提灯",
     detectiveName: "林渡",
   });
   expect(requestBody).not.toHaveProperty("sleepData");
@@ -250,6 +304,7 @@ test("anchors the desktop handoff and resets long-view scroll positions", async 
   await expect.poll(() => page.evaluate(() => getComputedStyle(document.activeElement!).outlineStyle)).toBe("solid");
 
   await page.getByRole("button", { name: "收藏", exact: true }).click();
+  await expect(page.locator(".collection-page")).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, 1200));
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1000);
   await page.getByRole("button", { name: "收藏", exact: true }).click();
@@ -476,6 +531,7 @@ test("remembers a hand-arranged evidence desk after reload", async ({ page }) =>
   await page.getByRole("button", { name: /解锁完整案件板/ }).click();
   await expect(page.locator(".demo-drawer")).toHaveCount(0);
   const handle = page.locator('.react-flow__node[data-id="ticket-date"] .board-node-drag-handle');
+  await handle.scrollIntoViewIfNeeded();
   const box = await handle.boundingBox();
   expect(box).not.toBeNull();
   await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
@@ -604,6 +660,7 @@ test.describe("mobile 390x844", () => {
   test("switches campaign cards without overflow on the landing page", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator(".campaign-shelf")).toBeVisible();
+    await expect(page.locator(".featured-case")).toContainText("零点四十三分的末班车");
     await expectMinimumTapTargets(page.locator(".campaign-shelf button"));
     await page.getByRole("button", { name: /CASE 002/ }).click();
     await expect(page.getByRole("button", { name: /开始第 002 宗案件/ })).toBeVisible();
