@@ -2,7 +2,7 @@ export interface GameAsset {
   id: string;
   src: string;
   alt: string;
-  category: "header" | "ending" | "social" | "collectible" | "night-seal" | "postcard" | "botanical" | "society-crest" | "souvenir" | "character-portrait" | "district-illustration";
+  category: "header" | "ending" | "social" | "collectible" | "night-seal" | "postcard" | "botanical" | "society-crest" | "souvenir" | "character-portrait" | "district-illustration" | "hardware-illustration";
   status: "complete";
 }
 
@@ -298,6 +298,18 @@ export const assets = {
   },
   districtGlassHill: {
     id: "district.glass-hill", src: "/art/districts/glass-hill-v1.webp", alt: "玻璃丘层层上升的温室、档案建筑、旧轨与信号台", category: "district-illustration", status: "complete",
+  },
+  hardwareVirtualRing: {
+    id: "hardware.virtual-ring", src: "/art/hardware/virtual-ring-v1.webp", alt: "铺在旧档案纸上的深蓝睡眠戒，内圈露出细小传感器", category: "hardware-illustration", status: "complete",
+  },
+  hardwareVirtualWatch: {
+    id: "hardware.virtual-watch", src: "/art/hardware/virtual-watch-v1.webp", alt: "铺在旧档案纸上的黄铜边深蓝睡眠手表", category: "hardware-illustration", status: "complete",
+  },
+  hardwareVirtualMattress: {
+    id: "hardware.virtual-mattress", src: "/art/hardware/virtual-mattress-v1.webp", alt: "卷起的深蓝床垫感应带与黄铜边传感模块", category: "hardware-illustration", status: "complete",
+  },
+  hardwareVirtualPillow: {
+    id: "hardware.virtual-pillow", src: "/art/hardware/virtual-pillow-v1.webp", alt: "带呼吸波纹缝线与传感扣的深蓝智能枕", category: "hardware-illustration", status: "complete",
   },
 } as const satisfies Record<string, GameAsset>;
 

@@ -8,6 +8,7 @@
 - 案件包创作：[[docs/campaign-authoring]]
 - 北极星与参考原则：[[docs/north-star]]
 - 工程与状态模型：[[docs/architecture]]
+- 睡眠硬件与隐私：[[docs/sleep-hardware-bridge]]、[[docs/privacy-and-guardrails]]
 - 视觉与素材：[[docs/art-direction]]、[[docs/asset-list]]、[[docs/art-prompts/global-style]]、[[docs/art-prompts/lin-du-handoff-portrait]]、[[docs/art-prompts/city-witness-portraits]]、[[docs/art-prompts/foglight-districts]]、[[docs/art-prompts/four-act-headers]]
 - 演示与验收：[[docs/demo-script]]、[[docs/quality-baseline]]
 - 文档维护规范：[[docs/documentation-guide]]
@@ -52,5 +53,6 @@
 - 核心故事事实必须是确定性内容；生成能力不得改变人物关系、线索、结局条件或因果。
 - 睡眠时长只能改变内容丰富度，不能让主线失败或惩罚玩家。
 - 默认 local-first；没有环境变量、登录、后端或 API Key 时必须能完成五夜主循环。
+- 健康数据默认最小化且可撤销；设备信号只丰富叙事，不得诊断、惩罚、锁线索或伪装未实现的真实连接，详见 [[docs/privacy-and-guardrails]]。
 - 保持“文学性地下都市 × 温暖异步等待”的原创统一语言，参见 [[docs/north-star]] 与 [[docs/art-direction]]。
 - 提交前至少运行 `npm test`、`npm run lint`、`npm run build` 和 `npm run docs:check`；仅改文档时至少运行 `npm run docs:check`。

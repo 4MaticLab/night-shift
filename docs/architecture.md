@@ -38,6 +38,9 @@
 | 内容契约 | `src/lib/game-engine/schema.ts` | Zod schema、引用与数量约束 |
 | 夜间结算 | `src/lib/game-engine/resolve-night.ts` | 根据章节、睡眠质量、随身物与调查方向选择确定性结果 |
 | 睡眠会话 | `src/lib/game-engine/sleep-session.ts` | 创建、恢复和结束 Demo／真实夜班，按时长生成质量与夜印进度 |
+| 睡眠硬件契约 | `src/lib/sleep-hardware/` | 厂商无关设备／权限模型、确定性虚拟信号和本地摘要 |
+| 睡眠硬件存档 | `src/stores/sleep-hardware-store.ts` | 可撤销授权、活动采集和最近 8 条本地摘要 |
+| 睡眠硬件界面 | `src/components/game/sleep-hardware.tsx` | 硬件中心、交接状态、夜间遥测和晨报回执 |
 | 结局资格 | `src/lib/game-engine/ending.ts` | 三结局白名单与真结局的线索、藏品、关系门槛 |
 | 游戏存档 | `src/stores/game-store.ts` | Zustand 状态、阶段转换与浏览器持久化 |
 | 产品外壳 | `app/page.tsx` | 阶段判断、视图编排、Demo 抽屉开关与顶层导航 |
@@ -65,6 +68,8 @@
 `sleepMode` 区分 12 秒压缩演示和真实夜班。开始交接时创建包含 `startedAt` 与 `watchId` 的 `activeSleepSession`；Demo 始终保存 `midnight`，真实模式按浏览器本地小时冻结掌灯（19:00–22:59）、夜半（23:00–01:59）、末更（02:00–05:59）或白昼小憩（06:00–18:59）。真实模式不依赖后台定时器，而是在重开页面后由开始时间与当前时间重新计算进度；刷新不会因当前时刻改变已经冻结的城市时辰。真实夜班的 `recordWakeEcho` 只在活动会话尚无 `wakeEcho` 时写入一次章节回声和本地时间，不改变 phase；Demo 只为 `interrupted` 质量预置一条确定性回声。玩家最终结束会话时写入 `endedAt`、实际分钟数和按阈值派生的质量，并把会话保存为 `lastSleepSession` 供晨报读取。少于 5 小时为断续，5 小时至不足 7 小时为普通，7 小时及以上为安稳；任一结果都推进主线。
 
 沙盒案件复用同一组 `startSleepSession`、`finishSleepSession`、时辰和持续时间函数。Demo 仍为 12 秒且允许主动跳到清晨；真实模式保存开始时间，页面重开后直接恢复同一夜班。沙盒睡眠质量只选择夜间与晨报的叙事层级，不传入 `resolveSandboxAction`，所以短暂返回不会改变线索、人物、污染或结局。
+
+睡眠硬件使用第三份独立存档 `night-shift-sleep-hardware-v1`。线性和沙盒存档都只在 `SleepSession` 边界通知硬件域开始／结束采集，不保存任何硬件字段。只有经过本地授权的虚拟设备能创建活动采集；真实厂商桥接入口保持预演状态。虚拟模拟器从会话与设备 ID 确定性生成摘要，运行时变化不持久化，晨报最多保留最近 8 条摘要。设备撤销或切换会终止采集但不结束剧情会话，详见 [[docs/sleep-hardware-bridge]]。
 
 植物阶段由同一持久化进度推导：`0–<25%` 种核、`25–<50%` 抽芽、`50–<85%` 展叶、`85–100%` 开花。页面关闭期间无需运行后台计时器，重开后会根据会话时间直接恢复对应阶段。完成夜班时写入 `growthHistory` 快照，包含章节、时长、质量、方向、随身物、城市时辰、可选睡隙回声 ID 与完成时间；断续睡眠也保存完整植株，只使用较紧凑的视觉层级。v5 迁移会为旧存档中已经完成的报告建立普通层级标本，v11 再为旧会话与温室记录补齐安全时辰；v12 校验可选回声记录，旧档没有回声时保留为空白而不伪造醒转。
 
@@ -122,6 +127,7 @@ React Flow 使用本地受控节点承接拖动过程，只在桌面端从图钉
 - `investigation.tsx`：案件板、明信片旅程册、夜印收藏、物证档案与 manifest 驱动的结案卷宗。
 - `clue-sharing.tsx`：单条证物二维码、复制链接与接收结果提示；不拥有存档校验规则。
 - `shell.tsx`：跨视图导航与 Demo 控制台。
+- `sleep-hardware.tsx`：跨线性／沙盒的硬件中心、授权、信号与回执；不拥有剧情结算。
 - `shared.tsx`：跨功能域复用的纸张、印章和路线视觉原语。
 
 会话模型位于 `src/lib/game-engine`，跨页恢复依赖持久化时间戳而非组件生命周期。`app/page.tsx` 只保留顶层状态与视图编排，后续案件板和等待循环可以在各自功能域内独立演进。
@@ -135,4 +141,6 @@ React Flow 使用本地受控节点承接拖动过程，只在桌面端从图钉
 - [[docs/blackwater-creek-adaptation-bible]]
 - [[docs/decision-log]]
 - [[docs/quality-baseline]]
+- [[docs/sleep-hardware-bridge]]
+- [[docs/privacy-and-guardrails]]
 - [[plans/0001-hackathon-mvp]]

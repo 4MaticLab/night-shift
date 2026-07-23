@@ -9654,3 +9654,1084 @@ blockquote {
     justify-content: center;
   }
 }
+
+/* Sleep hardware bridge */
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sleep-hardware-status {
+  min-height: 42px;
+  padding: 6px 9px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #506071;
+  background: #121c2d;
+  color: #929cab;
+  cursor: pointer;
+  text-align: left;
+}
+
+.sleep-hardware-status>svg:first-child {
+  width: 17px;
+  color: #9f8258;
+}
+
+.sleep-hardware-status>svg:last-child {
+  width: 13px;
+  opacity: .55;
+}
+
+.sleep-hardware-status>span {
+  display: flex;
+  flex-direction: column;
+  min-width: 90px;
+}
+
+.sleep-hardware-status small {
+  color: #7c8797;
+  font: 6px monospace;
+  letter-spacing: .1em;
+}
+
+.sleep-hardware-status b {
+  max-width: 145px;
+  overflow: hidden;
+  color: #c9c1b2;
+  font-family: var(--font-newsreader);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sleep-hardware-status.connected {
+  border-color: #6d8d88;
+  background: #142629;
+}
+
+.sleep-hardware-status.connected>svg:first-child {
+  color: #83aaa4;
+}
+
+.sleep-hardware-status.recording>svg:first-child {
+  animation: hardwarePulse 1.7s ease-in-out infinite;
+}
+
+@keyframes hardwarePulse {
+  50% {
+    filter: drop-shadow(0 0 7px #83aaa4);
+    opacity: .55;
+  }
+}
+
+.sleep-hardware-scrim {
+  position: fixed;
+  z-index: 250;
+  inset: 0;
+  border: 0;
+  background: #03060bd9;
+  backdrop-filter: blur(9px);
+  cursor: pointer;
+}
+
+.sleep-hardware-panel {
+  position: fixed;
+  z-index: 251;
+  top: 0;
+  right: 0;
+  width: min(680px, 100%);
+  height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 34px clamp(22px, 4vw, 46px) calc(42px + env(safe-area-inset-bottom));
+  border-left: 1px solid #6c5b43;
+  color: #aab2bc;
+  background:
+    linear-gradient(90deg, transparent 0 31px, #8a694e20 32px, transparent 33px),
+    radial-gradient(circle at 84% 8%, #8e6e3f24, transparent 28%),
+    repeating-linear-gradient(0deg, transparent 0 30px, #ffffff05 31px),
+    #0d1523;
+  box-shadow: -30px 0 100px #000c;
+}
+
+.sleep-hardware-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 130px;
+  background: #b28a52;
+}
+
+.sleep-hardware-panel-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.sleep-hardware-panel-header small {
+  color: #b08a54;
+  font: 7px monospace;
+  letter-spacing: .14em;
+}
+
+.sleep-hardware-panel-header h2 {
+  margin: 12px 0 0;
+  color: #e3d8c2;
+  font-size: clamp(42px, 5vw, 64px);
+  line-height: .98;
+}
+
+.sleep-hardware-panel-header>button {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #4b5869;
+  background: #111b2b;
+  color: #aeb7c0;
+  cursor: pointer;
+}
+
+.sleep-hardware-lede {
+  max-width: 560px;
+  margin: 22px 0;
+  color: #8994a2;
+  font-family: var(--font-newsreader);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.sleep-source-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  margin-bottom: 22px;
+  border-block: 1px solid #3d4858;
+}
+
+.sleep-source-tabs button {
+  min-height: 62px;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  align-items: center;
+  border: 0;
+  border-right: 1px solid #3d4858;
+  background: transparent;
+  color: #7f8a98;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sleep-source-tabs button:last-child {
+  border-right: 0;
+}
+
+.sleep-source-tabs button svg {
+  grid-row: 1 / 3;
+  color: #8c7657;
+}
+
+.sleep-source-tabs button small {
+  font: 6px monospace;
+}
+
+.sleep-source-tabs button[aria-selected="true"] {
+  color: #ddcfb4;
+  background: #b08a5214;
+  box-shadow: inset 0 -2px #b08a52;
+}
+
+.sleep-source-tabs button[aria-selected="true"] svg {
+  color: #c59a5a;
+}
+
+.sleep-device-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.sleep-device-grid>button {
+  position: relative;
+  min-width: 0;
+  min-height: 148px;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid #3e4b5c;
+  background: #111b2b;
+  color: #8e98a5;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.sleep-device-grid>button[aria-pressed="true"] {
+  border-color: #b08a52;
+  background: #26231f;
+  box-shadow: inset 0 3px #b08a52;
+}
+
+.sleep-device-image {
+  position: relative;
+  width: 112px;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid #75684f;
+  background: #cdbd9e;
+}
+
+.sleep-device-image img {
+  object-fit: cover;
+}
+
+.sleep-device-grid>button>span:nth-child(2) {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sleep-device-grid small {
+  color: #aa8551;
+  font: 6px monospace;
+  letter-spacing: .08em;
+}
+
+.sleep-device-grid b {
+  color: #d5c9b4;
+  font-family: var(--font-newsreader);
+  font-size: 17px;
+}
+
+.sleep-device-grid em {
+  color: #7f8996;
+  font-size: 7px;
+  font-style: normal;
+  line-height: 1.5;
+}
+
+.sleep-device-grid>button>i {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 21px;
+  height: 21px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #b08a52;
+  color: #111722;
+}
+
+.sleep-device-grid>button>i svg {
+  width: 13px;
+}
+
+.sleep-device-consent {
+  margin-top: 10px;
+  padding: 22px;
+  border: 1px solid #5b554b;
+  background: #151b25;
+}
+
+.sleep-device-consent>header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.sleep-device-consent>header small,
+.bridge-permission-map>small {
+  color: #aa8450;
+  font: 6px monospace;
+  letter-spacing: .12em;
+}
+
+.sleep-device-consent h3,
+.bridge-permission-map h3 {
+  margin: 5px 0;
+  color: #ddd0b8;
+  font-size: 26px;
+}
+
+.sleep-device-consent header p {
+  margin: 0;
+  color: #838d99;
+  font-family: var(--font-newsreader);
+  font-size: 12px;
+}
+
+.sleep-device-consent header>span {
+  flex: 0 0 auto;
+  height: fit-content;
+  padding: 7px 9px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #5a5f62;
+  color: #8c959d;
+  font-size: 7px;
+}
+
+.sleep-device-consent header>span svg {
+  width: 15px;
+}
+
+.sleep-device-consent header>span.authorized {
+  border-color: #688c87;
+  color: #8fb6af;
+  background: #16302f;
+}
+
+.sleep-permission-list {
+  margin-top: 18px;
+  display: grid;
+  gap: 5px;
+}
+
+.sleep-permission-list button {
+  min-height: 55px;
+  padding: 9px 11px;
+  display: grid;
+  grid-template-columns: 25px 1fr;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid #384555;
+  background: #101925;
+  color: #a6adb4;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sleep-permission-list button:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.sleep-permission-list button>span {
+  width: 21px;
+  height: 21px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #5c6874;
+}
+
+.sleep-permission-list button>span.checked {
+  border-color: #ad8954;
+  background: #ad8954;
+  color: #0d1523;
+}
+
+.sleep-permission-list button>span svg {
+  width: 13px;
+}
+
+.sleep-permission-list button div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sleep-permission-list button b {
+  color: #c9c1b4;
+  font-size: 9px;
+}
+
+.sleep-permission-list button small {
+  color: #77828f;
+  font-size: 7px;
+  line-height: 1.4;
+}
+
+.sleep-consent-notice {
+  margin: 12px 0;
+  padding: 11px;
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 8px;
+  border-left: 2px solid #6c908b;
+  background: #132224;
+  color: #899995;
+}
+
+.sleep-consent-notice svg {
+  width: 17px;
+  color: #7aa09b;
+}
+
+.sleep-consent-notice p {
+  margin: 0;
+  font-size: 7px;
+  line-height: 1.55;
+}
+
+.sleep-authorize-button {
+  width: 100%;
+  min-height: 51px;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid #c0985d;
+  background: #c0985d;
+  color: #10151d;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.sleep-authorize-button svg:last-child {
+  margin-left: auto;
+}
+
+.sleep-consent-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sleep-consent-actions>div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #89aba6;
+}
+
+.sleep-consent-actions>div>svg {
+  width: 18px;
+}
+
+.sleep-consent-actions>div span {
+  display: flex;
+  flex-direction: column;
+}
+
+.sleep-consent-actions small {
+  color: #698a86;
+  font: 6px monospace;
+}
+
+.sleep-consent-actions b {
+  color: #a7bbb5;
+  font-size: 8px;
+}
+
+.sleep-consent-actions>button {
+  min-height: 42px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #775751;
+  background: #2a1c1d;
+  color: #b9847c;
+  cursor: pointer;
+  font-size: 8px;
+}
+
+.sleep-consent-actions>button svg {
+  width: 15px;
+}
+
+.bridge-prototype-stamp {
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 10px;
+  border: 1px dashed #a27d4c;
+  background: #2a241b;
+  color: #9a8e79;
+  transform: rotate(-.3deg);
+}
+
+.bridge-prototype-stamp>svg {
+  color: #bd945a;
+}
+
+.bridge-prototype-stamp small {
+  color: #bd945a;
+  font: 6px monospace;
+  letter-spacing: .14em;
+}
+
+.bridge-prototype-stamp b {
+  display: block;
+  margin-top: 3px;
+  color: #d1c4ab;
+}
+
+.bridge-prototype-stamp p {
+  margin: 5px 0 0;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.sleep-bridge-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.sleep-bridge-list>button {
+  min-height: 86px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 34px 1fr 18px;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid #3e4b5c;
+  background: #111b2b;
+  color: #808b98;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sleep-bridge-list>button[aria-pressed="true"] {
+  border-color: #aa8754;
+  background: #28241e;
+  box-shadow: inset 3px 0 #aa8754;
+}
+
+.sleep-bridge-list>button>span {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #536070;
+  color: #a58252;
+}
+
+.sleep-bridge-list>button>span svg {
+  width: 17px;
+}
+
+.sleep-bridge-list small {
+  color: #8e7655;
+  font: 6px monospace;
+}
+
+.sleep-bridge-list b {
+  display: block;
+  color: #d4c8b4;
+}
+
+.sleep-bridge-list p {
+  margin: 4px 0 0;
+  font-size: 7px;
+  line-height: 1.45;
+}
+
+.sleep-bridge-list>button>svg {
+  width: 15px;
+}
+
+.bridge-permission-map {
+  margin-top: 10px;
+  padding: 20px;
+  border: 1px solid #4c5867;
+  background: #131c29;
+}
+
+.bridge-permission-map>div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.bridge-permission-map>div span {
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #4c5c69;
+  color: #9fa9ad;
+  font-size: 7px;
+}
+
+.bridge-permission-map>div svg {
+  width: 12px;
+  color: #789991;
+}
+
+.bridge-permission-map>button {
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #46505c;
+  background: #1b232e;
+  color: #707b87;
+}
+
+.bridge-permission-map>p {
+  margin-bottom: 0;
+  color: #76808d;
+  font-size: 7px;
+  line-height: 1.55;
+}
+
+.sleep-handoff-card {
+  margin-top: 18px;
+  padding: 15px;
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  gap: 11px;
+  align-items: center;
+  border: 1px solid #4c596a;
+  background: #121d2d;
+  color: #8d98a6;
+}
+
+.sleep-handoff-card.ready {
+  border-color: #668b86;
+  background: #142629;
+}
+
+.sleep-handoff-card.dark {
+  border-color: #46564b;
+  background: #111a15;
+  color: #849086;
+}
+
+.sleep-handoff-card.dark.ready {
+  border-color: #668d78;
+  background: #13241b;
+}
+
+.sleep-handoff-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #786a53;
+  color: #ae8953;
+}
+
+.sleep-handoff-card.ready .sleep-handoff-icon {
+  border-color: #6d928d;
+  color: #83aaa4;
+}
+
+.sleep-handoff-card>div:nth-child(2) {
+  min-width: 0;
+}
+
+.sleep-handoff-card small {
+  color: #a48050;
+  font: 6px monospace;
+  letter-spacing: .1em;
+}
+
+.sleep-handoff-card b {
+  display: block;
+  margin: 3px 0;
+  color: #cfc5b5;
+  font-family: var(--font-newsreader);
+}
+
+.sleep-handoff-card p {
+  margin: 0;
+  color: #7d8896;
+  font-size: 7px;
+  line-height: 1.45;
+}
+
+.sleep-handoff-card.dark p {
+  color: #78847a;
+}
+
+.sleep-handoff-card>button {
+  min-height: 42px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #5a6878;
+  background: transparent;
+  color: #aab2ba;
+  cursor: pointer;
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+.sleep-handoff-card>button svg {
+  width: 13px;
+}
+
+.sleep-live-telemetry {
+  position: relative;
+  z-index: 4;
+  width: min(720px, calc(100% - 28px));
+  margin: 12px auto;
+  padding: 13px 15px;
+  border: 1px solid #59716f;
+  background: #0c1d23e8;
+  color: #8ca39f;
+  box-shadow: 0 12px 35px #0005;
+}
+
+.sleep-live-telemetry.dark {
+  border-color: #4d6655;
+  background: #0d1912e8;
+}
+
+.sleep-live-telemetry>header {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 9px;
+  align-items: center;
+}
+
+.sleep-live-telemetry>header>span {
+  position: relative;
+  color: #80aaa4;
+}
+
+.sleep-live-telemetry>header>span svg {
+  width: 19px;
+}
+
+.sleep-live-telemetry>header>span i {
+  position: absolute;
+  right: 2px;
+  top: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #93b8b0;
+  box-shadow: 0 0 8px #93b8b0;
+  animation: hardwarePulse 1.7s ease-in-out infinite;
+}
+
+.sleep-live-telemetry header small {
+  color: #6f9691;
+  font: 6px monospace;
+  letter-spacing: .12em;
+}
+
+.sleep-live-telemetry header b {
+  display: block;
+  color: #b8c7c2;
+  font-size: 9px;
+}
+
+.sleep-live-telemetry header button {
+  min-height: 34px;
+  padding: 6px 9px;
+  border: 1px solid #506d68;
+  background: transparent;
+  color: #8caaa5;
+  cursor: pointer;
+  font-size: 7px;
+}
+
+.sleep-live-telemetry>div {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.sleep-live-telemetry>div span {
+  padding: 8px;
+  border: 1px solid #35504f;
+  background: #10272a;
+}
+
+.sleep-live-telemetry.dark>div span {
+  border-color: #344c3a;
+  background: #102015;
+}
+
+.sleep-live-telemetry>div small {
+  display: block;
+  color: #668580;
+  font-size: 6px;
+}
+
+.sleep-live-telemetry>div b {
+  color: #b7c9c4;
+  font-family: var(--font-newsreader);
+  font-size: 15px;
+}
+
+.sleep-live-telemetry>p {
+  margin: 8px 0 0;
+  color: #657c79;
+  font-size: 6px;
+}
+
+.sleep-receipt-wrap,
+.sandbox-sleep-receipt {
+  max-width: 1040px;
+  margin: -24px auto 34px;
+  padding-inline: 20px;
+  position: relative;
+  z-index: 3;
+}
+
+.sandbox-sleep-receipt {
+  max-width: 1180px;
+  margin: 16px auto;
+  padding: 0;
+}
+
+.sleep-morning-receipt {
+  padding: 22px;
+  border: 1px solid #8d7857;
+  color: #4c463b;
+  background: linear-gradient(100deg, #e1d6bf, #cec0a4);
+  box-shadow: 0 14px 38px #0004;
+}
+
+.sleep-morning-receipt>header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sleep-morning-receipt header small {
+  color: #7d6039;
+  font: 6px monospace;
+  letter-spacing: .13em;
+}
+
+.sleep-morning-receipt h3 {
+  margin: 5px 0 0;
+  color: #3b3932;
+  font-size: 25px;
+}
+
+.sleep-morning-receipt header>span {
+  height: fit-content;
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #67817b;
+  color: #526d68;
+  font-size: 7px;
+}
+
+.sleep-morning-receipt header>span svg {
+  width: 14px;
+}
+
+.sleep-morning-receipt>div {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 16px 0;
+}
+
+.sleep-morning-receipt>div span {
+  padding: 10px;
+  border: 1px solid #9d8968;
+  background: #f0e6d24d;
+}
+
+.sleep-morning-receipt>div small {
+  display: block;
+  color: #796b55;
+  font-size: 6px;
+}
+
+.sleep-morning-receipt>div b {
+  color: #4c463a;
+  font-family: var(--font-newsreader);
+  font-size: 17px;
+}
+
+.sleep-morning-receipt blockquote {
+  margin: 13px 0 7px;
+  padding-top: 13px;
+  border-top: 1px solid #9d8968;
+  color: #514b40;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.sleep-morning-receipt>p {
+  margin: 0;
+  color: #7d715f;
+  font-size: 6px;
+}
+
+.sleep-receipt-wrap>button,
+.sandbox-sleep-receipt>button {
+  min-height: 38px;
+  margin: 7px 0 0 auto;
+  padding: 7px 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #8c7656;
+  background: #d6cab1;
+  color: #574c3b;
+  cursor: pointer;
+  font-size: 7px;
+}
+
+.sleep-receipt-wrap>button svg,
+.sandbox-sleep-receipt>button svg {
+  width: 12px;
+}
+
+.sandbox-statusbar>.sleep-hardware-status {
+  flex: 0 0 48px;
+  min-width: 48px;
+  justify-content: center;
+  padding: 5px;
+  border-block: 0;
+  border-right: 0;
+}
+
+.sandbox-statusbar>.sleep-hardware-status>svg:last-child {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .topbar-actions {
+    gap: 5px;
+  }
+
+  .topbar-actions .sleep-hardware-status {
+    width: 43px;
+    min-width: 43px;
+    padding: 7px;
+    justify-content: center;
+  }
+
+  .topbar-actions .sleep-hardware-status>span,
+  .topbar-actions .sleep-hardware-status>svg:last-child {
+    display: none;
+  }
+
+  .topbar-actions .demo-pill {
+    width: 43px;
+    overflow: hidden;
+    justify-content: center;
+    padding-inline: 7px;
+    font-size: 0;
+  }
+
+  .sleep-hardware-panel {
+    padding: calc(20px + env(safe-area-inset-top)) 14px calc(28px + env(safe-area-inset-bottom));
+    border-left: 0;
+  }
+
+  .sleep-hardware-panel-header h2 {
+    font-size: 42px;
+  }
+
+  .sleep-hardware-lede {
+    font-size: 12px;
+  }
+
+  .sleep-device-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sleep-device-grid>button {
+    min-height: 0;
+    padding: 6px;
+    grid-template-columns: 1fr;
+    align-content: start;
+  }
+
+  .sleep-device-image {
+    width: 100%;
+  }
+
+  .sleep-device-grid b {
+    font-size: 15px;
+  }
+
+  .sleep-device-grid em {
+    min-height: 32px;
+  }
+
+  .sleep-device-consent {
+    padding: 16px 12px;
+  }
+
+  .sleep-device-consent>header {
+    flex-direction: column;
+  }
+
+  .sleep-device-consent header>span {
+    width: fit-content;
+  }
+
+  .sleep-consent-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .sleep-consent-actions>button {
+    justify-content: center;
+  }
+
+  .sleep-handoff-card {
+    grid-template-columns: 32px 1fr;
+  }
+
+  .sleep-handoff-card>button {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+
+  .sleep-live-telemetry {
+    width: 100%;
+  }
+
+  .sleep-live-telemetry>div b {
+    font-size: 13px;
+  }
+
+  .sleep-receipt-wrap {
+    margin-top: -18px;
+    padding-inline: 12px;
+  }
+
+  .sleep-morning-receipt {
+    padding: 17px 13px;
+  }
+
+  .sleep-morning-receipt>header {
+    flex-direction: column;
+  }
+
+  .sleep-morning-receipt header>span {
+    width: fit-content;
+  }
+
+  .sleep-morning-receipt>div {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sandbox-statusbar .sleep-hardware-status svg:first-child {
+    display: block;
+  }
+
+  .sandbox-handoff .sleep-handoff-card {
+    margin-top: 16px;
+  }
+
+  .sandbox-sleep-receipt {
+    margin-block: 12px;
+  }
+}

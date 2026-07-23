@@ -18,6 +18,8 @@
 
 睡前桌另使用一张 4:5 林渡交接肖像，把横幅中的同一张脸、深蓝外套、灰蓝围巾、肩包、手套、笔记本与黄铜手电拉近到可辨认距离。图像保持无文字的暖纸蚀刻，姓名、方向、随身物与目的地由 HTML/CSS 组成“今晚交接单”；选择只改变灯光和排版状态，不生成换装或好感表情。具体提示词见 [[docs/art-prompts/lin-du-handoff-portrait]]。
 
+睡眠硬件使用四张 1:1 暖纸设备档案画面：戒指、手表、床垫感应带和枕头保持深蓝器物、黄铜测量弧、旧酒红定位点与少量铜绿传感光。画面不使用电商白底、厂商品牌或健康 App 图表；连接状态、权限和指标继续由响应式 HTML/CSS 承担。具体提示词与源图见 [[docs/art-prompts/sleep-hardware-dossiers]]。
+
 参考 Fallen London 的文学密度与媒介气质，但不复制其角色、徽章、边框、地图构图或界面布局。原创边界与玩法合成原则见 [[docs/north-star]]。
 
 ## 相关文档
@@ -31,4 +33,5 @@
 - [[docs/art-prompts/foglight-districts]]
 - [[docs/art-prompts/four-act-headers]]
 - [[docs/art-prompts/lin-du-handoff-portrait]]
+- [[docs/art-prompts/sleep-hardware-dossiers]]
 - [[docs/product-overview]]

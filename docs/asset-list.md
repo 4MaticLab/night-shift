@@ -48,8 +48,12 @@
 | `district.lantern-wharf` | 灯港区 | District illustration | `/public/art/districts/lantern-wharf-v1.webp` | 完成 | 雾灯城分区志 |
 | `district.old-meridian` | 旧子午区 | District illustration | `/public/art/districts/old-meridian-v1.webp` | 完成 | 雾灯城分区志 |
 | `district.glass-hill` | 玻璃丘 | District illustration | `/public/art/districts/glass-hill-v1.webp` | 完成 | 雾灯城分区志 |
+| `hardware.virtual-ring` | 雾灯睡眠戒 | Hardware dossier | `/public/art/hardware/virtual-ring-v1.webp` | 完成 | 睡眠硬件中心 |
+| `hardware.virtual-watch` | 十七号夜表 | Hardware dossier | `/public/art/hardware/virtual-watch-v1.webp` | 完成 | 睡眠硬件中心 |
+| `hardware.virtual-mattress` | 床下潮汐带 | Hardware dossier | `/public/art/hardware/virtual-mattress-v1.webp` | 完成 | 睡眠硬件中心 |
+| `hardware.virtual-pillow` | 静默枕 | Hardware dossier | `/public/art/hardware/virtual-pillow-v1.webp` | 完成 | 睡眠硬件中心 |
 
-核心插画、八件物证、五枚夜印、五张城市明信片、五张植物学标本、三枚社团纹章、九件口袋纪念物、林渡交接肖像、四张人物肖像与三张地区版画由内置图像生成能力生成；地图、纸张、图钉、路线、四阶段揭示、交接标签和档案材质保持代码原生，以便响应式缩放与动效控制。林渡的身份连续性与最终提示词见 [[docs/art-prompts/lin-du-handoff-portrait]]；明信片的生成约束与场景差异见 [[docs/art-prompts/city-postcards]]，植物提示词见 [[docs/art-prompts/night-greenhouse]]，纹章提示词见 [[docs/art-prompts/city-societies]]，纪念物提示词见 [[docs/art-prompts/pocket-souvenirs]]，人物提示词与源图映射见 [[docs/art-prompts/city-witness-portraits]]，地区提示词见 [[docs/art-prompts/foglight-districts]]。全部运行时引用通过 `src/content/assets.ts` manifest 解析。
+核心插画、八件物证、五枚夜印、五张城市明信片、五张植物学标本、三枚社团纹章、九件口袋纪念物、林渡交接肖像、四张人物肖像、三张地区版画与四张睡眠硬件档案由内置图像生成能力生成；地图、纸张、图钉、路线、信号读数、四阶段揭示、交接标签和档案材质保持代码原生，以便响应式缩放与动效控制。林渡的身份连续性与最终提示词见 [[docs/art-prompts/lin-du-handoff-portrait]]；明信片的生成约束与场景差异见 [[docs/art-prompts/city-postcards]]，植物提示词见 [[docs/art-prompts/night-greenhouse]]，纹章提示词见 [[docs/art-prompts/city-societies]]，纪念物提示词见 [[docs/art-prompts/pocket-souvenirs]]，人物提示词与源图映射见 [[docs/art-prompts/city-witness-portraits]]，地区提示词见 [[docs/art-prompts/foglight-districts]]，硬件提示词见 [[docs/art-prompts/sleep-hardware-dossiers]]。全部运行时引用通过 `src/content/assets.ts` manifest 解析。
 
 ## 相关文档
 
@@ -64,3 +68,4 @@
 - [[docs/art-prompts/foglight-districts]]
 - [[docs/art-prompts/four-act-headers]]
 - [[docs/art-prompts/lin-du-handoff-portrait]]
+- [[docs/art-prompts/sleep-hardware-dossiers]]

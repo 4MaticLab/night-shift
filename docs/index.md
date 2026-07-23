@@ -11,7 +11,9 @@
 - [[docs/blackwater-creek-adaptation-bible]] — 第三案双入口、九地点、污染规则、结局矩阵与非商业改编边界。
 - [[docs/demo-script]] — 90 秒现场演示路径。
 - [[docs/quality-baseline]] — 当前版本的质量基线、验证命令和已知边界。
-- [[docs/viewport-checklist]] — 桌面与移动端关键页面的交互检查清单，含案件板右侧推理栏与触摸逃生路径。
+- [[docs/viewport-checklist]] — 桌面与移动端关键页面的交互检查清单。
+- [[docs/sleep-hardware-bridge]] — 虚拟睡眠设备、真实桥接预演与游戏生命周期。
+- [[docs/privacy-and-guardrails]] — 健康数据最小化、授权、撤销和非医疗边界。
 
 ## 工程
 
@@ -32,6 +34,7 @@
 - [[docs/art-prompts/city-witness-portraits]] — 四位城市见证人的原创肖像提示词、源图与运行时映射。
 - [[docs/art-prompts/foglight-districts]] — 灯港区、旧子午区与玻璃丘的城市版画提示词和源图映射。
 - [[docs/art-prompts/four-act-headers]] — 交接、夜行、归来与裁决四幕横幅的构图和源图映射。
+- [[docs/art-prompts/sleep-hardware-dossiers]] — 四类睡眠硬件档案画面与生成源图映射。
 
 ## 维护规则
 

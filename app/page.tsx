@@ -12,6 +12,7 @@ import { ClueGiftNotice, type ClueGiftNoticeData } from "@/src/components/game/c
 import { readSharedClueQuery, removeSharedClueQuery } from "@/src/lib/game-engine/clue-sharing";
 import { getCampaign } from "@/src/content/campaigns/registry";
 import { SandboxCase } from "@/src/components/game/sandbox-case";
+import { SleepHardwarePanel } from "@/src/components/game/sleep-hardware";
 
 const subscribeToHydration = () => () => undefined;
 
@@ -23,6 +24,7 @@ export default function HomePage() {
   const [demo, setDemo] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [clueGiftNotice, setClueGiftNotice] = useState<ClueGiftNoticeData | null>(null);
+  const [hardwareOpen, setHardwareOpen] = useState(false);
   const processedClueQuery = useRef(false);
   const campaign = getCampaign(game.campaignId);
   const sandboxContent = campaign.format === "sandbox-expedition" ? campaign.sandbox : undefined;
@@ -85,27 +87,28 @@ export default function HomePage() {
   }, [hydrated, receiveSharedClue, switchCampaign]);
 
   const clueNotice = <AnimatePresence>{clueGiftNotice && <ClueGiftNotice notice={clueGiftNotice} onClose={() => setClueGiftNotice(null)} />}</AnimatePresence>;
+  const hardwarePanel = <AnimatePresence>{hardwareOpen && <SleepHardwarePanel onClose={() => setHardwareOpen(false)} />}</AnimatePresence>;
 
   if (libraryOpen || (!game.started && !intro)) {
     return <>{clueNotice}<Hero interactive={hydrated} onStart={() => { if (game.started || sandboxContent) { if (!game.started) game.begin(); setLibraryOpen(false); setIntro(false); } else setIntro(true); }} onDemo={() => { game.begin(); setLibraryOpen(false); if (!sandboxContent) setDemo(true); }} /><AnimatePresence>{demo && !sandboxContent && <DemoDrawer onClose={() => setDemo(false)} setView={changeView} />}</AnimatePresence></>;
   }
-  if (sandboxContent) return <>{clueNotice}<SandboxCase campaignId={campaign.id} content={sandboxContent} onHome={() => { setLibraryOpen(true); setIntro(false); }} /></>;
+  if (sandboxContent) return <>{clueNotice}<SandboxCase campaignId={campaign.id} content={sandboxContent} onHome={() => { setLibraryOpen(true); setIntro(false); }} onHardware={() => setHardwareOpen(true)} />{hardwarePanel}</>;
   if (intro && !game.started) return <>{clueNotice}<Intro onDone={() => { game.begin(); setIntro(false); }} /></>;
-  if (game.phase === "night") return <>{clueNotice}<NightRun onFinish={game.finishNight} /></>;
+  if (game.phase === "night") return <>{clueNotice}<NightRun onFinish={game.finishNight} onHardware={() => setHardwareOpen(true)} />{hardwarePanel}</>;
   if (game.phase === "ending") return <>{clueNotice}<Ending onOpenLibrary={() => setLibraryOpen(true)} /></>;
 
   return (
     <><div className="app-shell">
-      <TopBar chapter={game.chapter} onDemo={() => setDemo(true)} onHome={() => { setLibraryOpen(true); setIntro(false); }} />
+      <TopBar chapter={game.chapter} onDemo={() => setDemo(true)} onHome={() => { setLibraryOpen(true); setIntro(false); }} onHardware={() => setHardwareOpen(true)} />
       <main className="app-content">
-        {activeView === "tonight" && <Tonight onLaunch={game.startNight} />}
-        {activeView === "report" && (game.phase === "morning" ? <MorningReport onContinue={() => { game.continueDay(); changeView(game.chapter >= getCampaign(game.campaignId).case.chapters.at(-1)!.number ? "tonight" : "board"); }} /> : <EmptyReport setView={changeView} />)}
+        {activeView === "tonight" && <Tonight onLaunch={game.startNight} onHardware={() => setHardwareOpen(true)} />}
+        {activeView === "report" && (game.phase === "morning" ? <MorningReport onContinue={() => { game.continueDay(); changeView(game.chapter >= getCampaign(game.campaignId).case.chapters.at(-1)!.number ? "tonight" : "board"); }} onHardware={() => setHardwareOpen(true)} /> : <EmptyReport setView={changeView} />)}
         {activeView === "board" && <CaseBoard />}
         {activeView === "collection" && <Collection />}
         {activeView === "archive" && <ArchivePage />}
       </main>
       <BottomNav view={activeView} setView={changeView} />
       <AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={changeView} />}</AnimatePresence>
-    </div>{clueNotice}</>
+    </div>{clueNotice}{hardwarePanel}</>
   );
 }
