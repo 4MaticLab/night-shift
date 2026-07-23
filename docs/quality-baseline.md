@@ -109,6 +109,8 @@ Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：除既有 Demo／
 
 第二十六个公开版本加入“送给好友”线索二维码与复制链接；白名单深链接在好友本地幂等接收单条证物、清理 query 并标记来源，非法 ID 不启动存档，好友线索不直接满足真结局门槛。提交 `ce8e890` 的 Vercel 生产部署状态为 `Ready`，固定地址 `https://night-shift-zeta.vercel.app/?clue=postcard` 返回 HTTP 200，完成 [[plans/0024-friend-clue-sharing]]。
 
+第二十七个公开版本建立 `CampaignManifest` 与编译期案件注册表，加入《只在雨中播出的电台》完整五夜剧本、案件书架、v14 独立存档和案件感知好友线索；首案与第二案均通过完整五夜、结局、切换隔离及 390 × 844 自动化。提交 `25732bb` 的 Vercel 部署状态为 `Deployment has completed`，案件感知固定地址返回 HTTP 200，完成 [[plans/0025-multi-campaign-runtime]]。
+
 ## 相关文档
 
 - [[docs/architecture]]

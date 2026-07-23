@@ -1,6 +1,6 @@
 # 0025 — 多案件包运行时与剧本切换
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P0
 - 创建：2026-07-23
 - 更新：2026-07-23
@@ -37,7 +37,7 @@
 - [x] 实现案件选择、切换与独立存档恢复。
 - [x] 加入第二个五夜可玩案件包并接入注册表。
 - [x] 补齐单元、双案件 E2E、移动端和双构建验证。
-- [ ] 同步架构／创作说明，提交、推送并确认生产部署。
+- [x] 同步架构／创作说明，提交、推送并确认生产部署。
 
 ## 验收标准
 
@@ -78,6 +78,8 @@
 - `npm run test:e2e`：19 条 Chrome 路径通过，包含双案件完整五夜与 390 × 844 案件切换。
 - `npm run docs:check`：53 篇 Markdown 双链全部通过。
 - `git diff --check`：通过。
+- GitHub `main`：功能提交 `25732bb` 已推送。
+- Vercel：功能提交状态为 `Deployment has completed`；`https://night-shift-zeta.vercel.app/?case=case-002&clue=radio-warm-dial` 返回 HTTP 200，服务端 HTML 同时包含两案标题。
 
 ## 相关文档
 
