@@ -261,6 +261,14 @@ test("builds a core inference by connecting two evidence cards", async ({ page }
   expect(board!.x + board!.width).toBeLessThanOrEqual(panel!.x);
   expect(slotA!.y + slotA!.height).toBeLessThanOrEqual(slotB!.y);
   expect(slotB!.y + slotB!.height).toBeLessThanOrEqual(connectAction!.y);
+  const panelLayout = await page.locator(".relation-panel").evaluate((element) => ({
+    position: getComputedStyle(element).position,
+    scrollWidth: element.scrollWidth,
+    clientWidth: element.clientWidth,
+  }));
+  expect(panelLayout.position).toBe("relative");
+  expect(panelLayout.scrollWidth).toBeLessThanOrEqual(panelLayout.clientWidth + 1);
+  await expectNoPageOverflow(page);
   await expect(page.locator(".relation-panel > :last-child")).toHaveClass(/relation-ledger/);
   await page.getByRole("button", { name: /核对这两件证物/ }).click();
 
@@ -604,6 +612,18 @@ test.describe("mobile 390x844", () => {
     expect(connectAction).not.toBeNull();
     expect(slotA!.y + slotA!.height).toBeLessThanOrEqual(slotB!.y);
     expect(slotB!.y + slotB!.height).toBeLessThanOrEqual(connectAction!.y);
+    const [boardShellBox, relationPanelBox] = await Promise.all([
+      page.locator(".board-shell").boundingBox(),
+      page.locator(".relation-panel").boundingBox(),
+    ]);
+    expect(boardShellBox).not.toBeNull();
+    expect(relationPanelBox).not.toBeNull();
+    expect(boardShellBox!.y + boardShellBox!.height).toBeLessThanOrEqual(relationPanelBox!.y);
+    const panelOverflow = await page.locator(".relation-panel").evaluate((element) => ({
+      scrollWidth: element.scrollWidth,
+      clientWidth: element.clientWidth,
+    }));
+    expect(panelOverflow.scrollWidth).toBeLessThanOrEqual(panelOverflow.clientWidth + 1);
     await expect(page.locator(".relation-panel > :last-child")).toHaveClass(/relation-ledger/);
     await page.getByRole("button", { name: /核对这两件证物/ }).click();
     await expect(page.locator(".relation-ledger").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();

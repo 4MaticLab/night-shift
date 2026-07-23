@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有进行中的主计划。最近完成的 [[plans/0028-sleep-hardware-bridge]] 已用虚拟戒指、手表、床垫与枕头完成睡眠信号闭环，并以诚实的桥接预演为 Apple Health、Health Connect、Oura 与 Fitbit 保留真实接入位。
+当前正在推进 [[plans/0031-case-board-contained-right-panel]]，在独立协作分支恢复案件板左画布、右侧普通内容框的真实双栏，消除右栏裁切和横向滚动后提交草稿 PR。
 
 ## 计划清单
 
@@ -38,6 +38,9 @@
 | [[plans/0026-blackwater-creek-sandbox-adaptation]] | `completed` | `manual` | P0 | 12/12 | 已并入公开学习项目并由 Vercel 自动部署 |
 | [[plans/0027-sandbox-delayed-expedition-loop]] | `completed` | `manual` | P0 | 8/8 | 已完成沙盒延迟探索、v2 存档、真实恢复与跨设备验收 |
 | [[plans/0028-sleep-hardware-bridge]] | `completed` | `manual` | P0 | 8/8 | 已完成虚拟硬件闭环、双案件接入与跨设备验收 |
+| [[plans/0029-case-board-inference-layout]] | `completed` | `auto` | P1 | 4/4 | 已重排联合推理操作区并验证桌面与移动端 |
+| [[plans/0030-case-board-right-inference-panel]] | `completed` | `auto` | P1 | 4/4 | 已把选择与匹配移动到右侧推理栏 |
+| [[plans/0031-case-board-contained-right-panel]] | `in_progress` | `manual` | P1 | 4/5 | 修复右栏完整显示并提交协作 PR |
 
 ## 状态规则
 

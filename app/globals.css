@@ -10735,3 +10735,189 @@ blockquote {
     margin-block: 12px;
   }
 }
+
+/* Case board: keep the canvas and dossier in a real, contained two-column layout. */
+.board-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(360px, 29vw, 430px);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  background: #101827;
+}
+
+.board-workspace>.board-shell {
+  width: 100%;
+  min-width: 0;
+  border-right-width: 0;
+}
+
+.board-workspace .board-flow,
+.board-workspace .board-flow>.react-flow {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.board-workspace>.relation-panel {
+  position: relative;
+  inset: auto;
+  z-index: 1;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  height: 760px;
+  max-height: 760px;
+  margin: 0;
+  padding: 0 18px 112px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 0;
+  border-left: 1px solid #344054;
+  background: #111a2c;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.board-workspace>.relation-panel>* {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+.relation-panel>.inference-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  min-height: 0;
+  margin: 0 -18px 17px;
+  padding: 16px 18px 17px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "copy" "steps" "workbench" "feedback";
+  gap: 11px;
+  box-shadow: 0 10px 24px #0008;
+}
+
+.relation-panel .inference-toolbar-copy,
+.relation-panel .inference-steps,
+.relation-panel .inference-workbench,
+.relation-panel .evidence-slot,
+.relation-panel .evidence-slot>div,
+.relation-panel .connect-evidence {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.relation-panel .inference-workbench {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "slot-a" "slot-b" "action";
+  gap: 8px;
+}
+
+.relation-panel .evidence-slot {
+  width: 100%;
+}
+
+.relation-panel .evidence-slot>div {
+  overflow: hidden;
+}
+
+.relation-panel .evidence-slot>div small,
+.relation-panel .evidence-slot>div b,
+.relation-panel .evidence-slot>div p {
+  display: block;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.relation-panel .evidence-slot>div small {
+  margin-bottom: 2px;
+  color: #a89572;
+  font: 6px monospace;
+  letter-spacing: .1em;
+}
+
+.relation-panel .evidence-slot>div b {
+  color: var(--paper);
+  font-family: var(--font-newsreader);
+  font-size: 11px;
+}
+
+.relation-panel .evidence-slot>div p {
+  margin-top: 2px;
+  color: #7d8999;
+  font-size: 7px;
+}
+
+.relation-panel .inference-workbench>.connect-evidence {
+  width: 100%;
+  min-height: 50px;
+}
+
+.relation-panel .clue-dossier,
+.relation-panel .relation-ledger,
+.relation-panel .relation-entry {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.relation-panel>.relation-ledger {
+  margin-top: auto;
+}
+
+@media (max-width: 1000px) {
+  .board-workspace {
+    display: block;
+    overflow: visible;
+  }
+
+  .board-workspace>.board-shell {
+    border-right-width: 16px;
+  }
+
+  .board-workspace>.relation-panel {
+    width: 100%;
+    height: auto;
+    max-height: none;
+    padding-bottom: 112px;
+    overflow: visible;
+    border-left: 0;
+    border-top: 1px solid #344054;
+  }
+
+  .relation-panel>.inference-toolbar {
+    position: relative;
+    top: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .board-workspace>.board-shell {
+    border-right-width: 8px;
+  }
+
+  .board-workspace>.relation-panel {
+    width: 100%;
+    margin: 0;
+    padding: 0 12px 112px;
+  }
+
+  .relation-panel>.inference-toolbar {
+    width: auto;
+    margin: 0 -12px 17px;
+    padding-inline: 12px;
+  }
+
+  .relation-panel .inference-steps li {
+    min-width: 0;
+  }
+}

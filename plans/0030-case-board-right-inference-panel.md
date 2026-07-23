@@ -1,11 +1,11 @@
-# 0027 — 案件板右侧推理栏
+# 0030 — 案件板右侧推理栏
 
 - 状态：`completed`
 - 优先级：P1
 - 创建：2026-07-23
 - 更新：2026-07-23
 - 负责人：Codex
-- 依赖：[[plans/0026-case-board-inference-layout]]
+- 依赖：[[plans/0029-case-board-inference-layout]]
 - 推进模式：`auto`
 
 ## 动机
@@ -73,4 +73,4 @@
 - [[docs/architecture]]
 - [[docs/quality-baseline]]
 - [[docs/viewport-checklist]]
-- [[plans/0026-case-board-inference-layout]]
+- [[plans/0029-case-board-inference-layout]]
