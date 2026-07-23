@@ -2045,6 +2045,72 @@ blockquote {
   padding-bottom: 80px;
 }
 
+.report-archive-details {
+  border-bottom: 1px solid #313d4f;
+}
+
+.report-archive-details>summary {
+  min-height: 76px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  color: #a5b0bd;
+  cursor: pointer;
+  list-style: none;
+}
+
+.report-archive-details>summary::-webkit-details-marker,
+.board-cipher-disclosure>summary::-webkit-details-marker {
+  display: none;
+}
+
+.report-archive-details>summary span {
+  min-width: 0;
+}
+
+.report-archive-details>summary small,
+.board-cipher-disclosure>summary small {
+  display: block;
+  color: var(--amber);
+  font: 8px monospace;
+  letter-spacing: .14em;
+}
+
+.report-archive-details>summary b,
+.board-cipher-disclosure>summary b {
+  display: block;
+  margin-top: 5px;
+  color: var(--paper);
+  font: 22px var(--font-newsreader);
+}
+
+.report-archive-details>summary p,
+.board-cipher-disclosure>summary p {
+  margin: 4px 0 0;
+  color: #7f8b9a;
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.report-archive-details>summary svg,
+.board-cipher-disclosure>summary svg {
+  flex: 0 0 20px;
+  transition: transform .2s ease;
+}
+
+.report-archive-details[open]>summary svg,
+.board-cipher-disclosure[open]>summary svg {
+  transform: rotate(90deg);
+}
+
+.report-archive-details[open]>summary {
+  border-bottom: 1px dashed #344154;
+}
+
 .report-hero {
   min-height: 390px;
   position: relative;
@@ -2845,6 +2911,33 @@ blockquote {
 .board-page {
   min-height: calc(100vh - 145px);
   background: #101827;
+}
+
+.board-cipher-disclosure {
+  border-top: 1px solid #303a49;
+  background: #0d1624;
+}
+
+.board-cipher-disclosure>summary {
+  min-height: 88px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.board-cipher-disclosure>summary span {
+  min-width: 0;
+}
+
+.board-cipher-disclosure .cipher-desk {
+  max-width: none;
+  border-top: 1px dashed #344154;
 }
 
 .cipher-desk {
