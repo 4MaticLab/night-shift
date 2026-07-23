@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有进行中的主计划。最近完成的 [[plans/0030-last-tram-english-i18n]] 已为《零点四十三分的末班车》建立可选英文剧本与完整主循环本地化，同时保留已经验收的睡眠硬件体验、稳定 ID、结算与既有存档兼容。
+当前没有进行中的主计划。最近完成的 [[plans/0031-night-shift-logo]] 已在最新主线接入位图 Logo、浏览器 favicon 与 Next.js `app/icon.png`；此前的 [[plans/0030-last-tram-english-i18n]] 已完成案件 001 英文化，并保留睡眠硬件体验与既有存档兼容。
 
 ## 计划清单
 
@@ -40,6 +40,7 @@
 | [[plans/0028-sleep-hardware-bridge]] | `completed` | `manual` | P0 | 8/8 | 已完成虚拟硬件闭环、双案件接入与跨设备验收 |
 | [[plans/0029-sleep-hardware-ux-pass]] | `completed` | `manual` | P0 | 7/7 | 已完成硬件链路 UI/UX 深度整修与跨设备验收 |
 | [[plans/0030-last-tram-english-i18n]] | `completed` | `manual` | P0 | 7/7 | 已整合英文版、当前硬件 UX 与最新 main |
+| [[plans/0031-night-shift-logo]] | `completed` | `auto` | P1 | 4/4 | Logo、favicon、文档与最新主线接入已完成 |
 
 ## 状态规则
 

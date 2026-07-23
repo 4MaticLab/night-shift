@@ -132,12 +132,9 @@ blockquote {
 .brand-mark>span {
   width: 42px;
   height: 42px;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(197, 154, 90, .8);
-  color: var(--amber);
-  font-family: var(--font-newsreader);
-  transform: rotate(-2deg);
+  flex: 0 0 42px;
+  display: block;
+  background: url("/art/brand/night-shift-logo-v1.png") center / contain no-repeat;
 }
 
 .brand-mark>div {
@@ -486,7 +483,7 @@ blockquote {
 .brand-mark.compact>span {
   width: 34px;
   height: 34px;
-  font-size: 12px;
+  flex-basis: 34px;
 }
 
 .brand-mark.compact b {
@@ -6919,11 +6916,8 @@ blockquote {
 .sandbox-brand>span {
   width: 36px;
   height: 36px;
-  display: grid;
-  place-items: center;
-  border: 1px solid #9a7847;
-  color: #b58d51;
-  font-family: var(--font-newsreader);
+  flex: 0 0 36px;
+  background: url("/art/brand/night-shift-logo-v1.png") center / contain no-repeat;
 }
 
 .sandbox-brand>div {
@@ -8534,10 +8528,8 @@ blockquote {
 .sandbox-night-brand>span {
   width: 38px;
   height: 38px;
-  display: grid;
-  place-items: center;
-  border: 1px solid #8f7146;
-  font-family: var(--font-newsreader);
+  flex: 0 0 38px;
+  background: url("/art/brand/night-shift-logo-v1.png") center / contain no-repeat;
 }
 
 .sandbox-night-brand>div,
@@ -8744,10 +8736,8 @@ blockquote {
 .sandbox-morning>header>button>span {
   width: 38px;
   height: 38px;
-  display: grid;
-  place-items: center;
-  border: 1px solid #786343;
-  font-family: var(--font-newsreader);
+  flex: 0 0 38px;
+  background: url("/art/brand/night-shift-logo-v1.png") center / contain no-repeat;
 }
 
 .sandbox-morning>header>button>div,

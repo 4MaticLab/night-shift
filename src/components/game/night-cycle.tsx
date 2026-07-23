@@ -117,7 +117,7 @@ export function NightRun({ onFinish, onHardware }: { onFinish: () => void; onHar
   return (
     <main className="night-run">
       <Image className="night-expedition-art" src={nightHeader.src} alt={nightHeader.alt} fill priority sizes="100vw" />
-      <div className="night-stars" /><div className="night-header"><div className="brand-mark compact"><span>NS</span><div><b>{t("夜班进行中")}</b><small>{locale === "en" ? `NIGHT ${chapter}` : `第 ${chapter} 夜`} · {sleepMode === "real" ? t("真实夜班") : t(qualityCopy[quality].time)}</small></div></div><button onClick={onFinish}>{sleepMode === "real" ? t("我醒了，拆开报告") : t("跳到清晨")} <ArrowRight size={16} /></button></div>
+      <div className="night-stars" /><div className="night-header"><div className="brand-mark compact"><span aria-hidden="true" /><div><b>{t("夜班进行中")}</b><small>{locale === "en" ? `NIGHT ${chapter}` : `第 ${chapter} 夜`} · {sleepMode === "real" ? t("真实夜班") : t(qualityCopy[quality].time)}</small></div></div><button onClick={onFinish}>{sleepMode === "real" ? t("我醒了，拆开报告") : t("跳到清晨")} <ArrowRight size={16} /></button></div>
       <div className="night-title"><p>{sleepMode === "real" ? t("合上页面也没关系。城市记得交接的时刻。") : t("你休息的时候，他会继续。")}</p><h2>{current.title}</h2><span>{sessionLine}</span><div className="route-order"><small>TONIGHT&apos;S DIRECTION</small><b>{direction.dispatchTitle}</b><em>{t("目的地")} · {direction.destination}</em></div></div>
       <aside className={`city-watch-live watch-${watch.id}`}><Clock3 /><div><small>{watch.archiveLabel} · {watch.window}</small><b>{watch.label}</b><span>{watchEcho.scene}</span></div></aside>
       <SleepHardwareNightTelemetry session={activeSleepSession} progress={progress} onOpen={onHardware} dark />

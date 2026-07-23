@@ -21,7 +21,7 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
       <Image className="hero-art" src={heroAsset.src} alt={heroAsset.alt} fill priority sizes="100vw" />
       <div className="hero-vignette" />
       <nav className="landing-nav">
-        <div className="brand-mark"><span>NS</span><div><b>{t("夜班侦探")}</b><small>NIGHT SHIFT</small></div></div>
+        <div className="brand-mark"><span aria-hidden="true" /><div><b>{t("夜班侦探")}</b><small>NIGHT SHIFT</small></div></div>
         <div className="landing-nav-actions">
           <button className="ghost-button language-button" disabled={!interactive} onClick={() => setLocale(preferredLocale === "en" ? "zh-CN" : "en")}><Languages size={15} /> {preferredLocale === "en" ? "中文" : "ENGLISH"}</button>
           <button className="ghost-button" disabled={!interactive} onClick={onDemo}><Zap size={15} /> {isSandbox ? "CASE FILE" : "DEMO MODE"}</button>
