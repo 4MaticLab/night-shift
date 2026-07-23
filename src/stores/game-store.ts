@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { boardPositionSchema, nightGrowthRecordSchema, type BoardPosition, type CorrespondenceRecord, type NightGrowthRecord, type OpportunityRecord, type SleepMode, type SleepQuality, type SleepSession, type SocietyMemoryRecord, type SouvenirRecord } from "@/src/lib/game-engine/schema";
+import { boardPositionSchema, cityWatchIdSchema, nightGrowthRecordSchema, type BoardPosition, type CorrespondenceRecord, type NightGrowthRecord, type OpportunityRecord, type SleepMode, type SleepQuality, type SleepSession, type SocietyMemoryRecord, type SouvenirRecord } from "@/src/lib/game-engine/schema";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import type { PreparationId } from "@/src/content/preparations";
 import { finishSleepSession, startSleepSession } from "@/src/lib/game-engine/sleep-session";
@@ -13,6 +13,7 @@ import { createSocietyMemory } from "@/src/content/societies";
 import { createCorrespondenceRecord, getCorrespondencePrompt } from "@/src/content/correspondence";
 import { createSouvenirRecord, DEMO_JOURNEY_SEED } from "@/src/content/souvenirs";
 import { createOpportunityRecord, getOpportunityCandidates } from "@/src/content/opportunities";
+import { DEMO_CITY_WATCH_ID, getCityWatchId } from "@/src/content/watches";
 
 export type Phase = "day" | "ready" | "night" | "morning" | "ending";
 
@@ -130,6 +131,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
           durationMinutes: completedSession.durationMinutes ?? 0,
           choiceId: result.choiceId,
           preparationId,
+          watchId: completedSession.watchId,
           completedAt,
         }),
       },
@@ -220,7 +222,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   reset: () => set({ ...initial, endingId: undefined }),
 }), {
   name: "night-shift-save-v1",
-  version: 10,
+  version: 11,
   migrate: migrateGameState,
 }));
 
@@ -229,13 +231,13 @@ export function migrateGameState(persistedState: unknown): GameState {
   const preparationHistory = persisted.preparationHistory ?? {};
   const choiceHistory = persisted.choiceHistory ?? {};
   const completedReports = persisted.completedReports ?? [];
-  const growthHistory = persisted.growthHistory ?? createLegacyGrowthHistory(completedReports, preparationHistory, choiceHistory);
+  const growthHistory = migrateGrowthHistory(persisted.growthHistory, completedReports, preparationHistory, choiceHistory);
   const journeySeed = persisted.journeySeed || DEMO_JOURNEY_SEED;
   return {
     ...persisted,
     sleepMode: persisted.sleepMode ?? "demo",
-    activeSleepSession: persisted.activeSleepSession ?? null,
-    lastSleepSession: persisted.lastSleepSession ?? null,
+    activeSleepSession: migrateSleepSession(persisted.activeSleepSession),
+    lastSleepSession: migrateSleepSession(persisted.lastSleepSession),
     preparationHistory,
     choiceHistory,
     growthHistory,
@@ -258,6 +260,34 @@ function sanitizeBoardPositions(value: unknown): Record<string, BoardPosition> {
   }));
 }
 
+function migrateSleepSession(session: SleepSession | null | undefined): SleepSession | null {
+  if (!session) return null;
+  const legacy = session as SleepSession & { watchId?: unknown };
+  const parsedWatch = cityWatchIdSchema.safeParse(legacy.watchId);
+  const startedAt = new Date(legacy.startedAt);
+  const watchId = parsedWatch.success
+    ? parsedWatch.data
+    : legacy.mode === "demo" || Number.isNaN(startedAt.getTime())
+      ? DEMO_CITY_WATCH_ID
+      : getCityWatchId(startedAt);
+  return { ...legacy, watchId };
+}
+
+function migrateGrowthHistory(
+  value: Partial<Record<number, NightGrowthRecord>> | undefined,
+  completedReports: number[],
+  preparationHistory: Partial<Record<number, PreparationId>>,
+  choiceHistory: Partial<Record<number, string>>,
+): Partial<Record<number, NightGrowthRecord>> {
+  const source = value ?? createLegacyGrowthHistory(completedReports, preparationHistory, choiceHistory);
+  return Object.fromEntries(Object.entries(source).flatMap(([chapter, record]) => {
+    if (!record) return [];
+    const legacy = record as NightGrowthRecord & { watchId?: unknown };
+    const parsedWatch = cityWatchIdSchema.safeParse(legacy.watchId);
+    return [[chapter, nightGrowthRecordSchema.parse({ ...legacy, watchId: parsedWatch.success ? parsedWatch.data : DEMO_CITY_WATCH_ID })]];
+  }));
+}
+
 function createLegacyGrowthHistory(completedReports: number[], preparationHistory: Partial<Record<number, PreparationId>>, choiceHistory: Partial<Record<number, string>>): Partial<Record<number, NightGrowthRecord>> {
   return Object.fromEntries(completedReports.map((chapter) => [chapter, nightGrowthRecordSchema.parse({
     chapter,
@@ -265,6 +295,7 @@ function createLegacyGrowthHistory(completedReports: number[], preparationHistor
     durationMinutes: 390,
     choiceId: choiceHistory[chapter] ?? getDefaultChoiceId(chapter),
     preparationId: preparationHistory[chapter] ?? "side-lamp",
+    watchId: DEMO_CITY_WATCH_ID,
     completedAt: `2026-07-${String(10 + chapter).padStart(2, "0")}T05:28:00.000Z`,
   })]));
 }

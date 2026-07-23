@@ -1,5 +1,6 @@
 import { nanoid } from "nanoid";
-import type { SleepMode, SleepQuality, SleepSession } from "./schema";
+import { DEMO_CITY_WATCH_ID, getCityWatchId } from "@/src/content/watches";
+import type { CityWatchId, SleepMode, SleepQuality, SleepSession } from "./schema";
 
 const demoDurationMinutes: Record<SleepQuality, number> = {
   interrupted: 248,
@@ -17,12 +18,14 @@ export function startSleepSession(
   mode: SleepMode,
   quality: SleepQuality,
   startedAt = new Date(),
+  watchId: CityWatchId = mode === "demo" ? DEMO_CITY_WATCH_ID : getCityWatchId(startedAt),
 ): SleepSession {
   return {
     id: nanoid(),
     startedAt: startedAt.toISOString(),
     quality,
     mode,
+    watchId,
   };
 }
 

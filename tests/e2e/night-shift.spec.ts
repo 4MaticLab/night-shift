@@ -40,12 +40,16 @@ test("starts a case and reaches the first morning report", async ({ page }) => {
   await expect(page.getByText(/可能惊动 · 错页登记处/)).toBeVisible();
   await page.getByRole("button", { name: /今晚交给你了/ }).click();
   await expect(page.locator(".night-expedition-art")).toHaveAttribute("src", /night-expedition-v1/);
+  await expect(page.locator(".city-watch-live")).toContainText("夜半时分");
   await expect(page.getByText("纸张的证词")).toBeVisible();
   await expect(page.getByText("GROWING WHILE YOU REST")).toBeVisible();
   await expect(page.getByText(/旧票据工坊承认这批纸早已销毁/)).toBeVisible();
   await page.getByRole("button", { name: /跳到清晨/ }).click();
   await expect(page.locator(".report-hero-art")).toHaveAttribute("src", /morning-report-v1/);
   await expect(page.getByText("昨夜调查完成")).toBeVisible();
+  await expect(page.locator(".city-watch-report")).toContainText("交接时辰留下的城市侧影");
+  await expect(page.locator(".city-watch-report")).toContainText("夜半时分");
+  await expect(page.locator(".city-watch-report")).toContainText("不改变线索、收藏、植物或睡眠评价");
   await expect(page.getByText("灯港拒收件")).toBeVisible();
   await expect(page.getByText(/市政厅的否认牌在雨里站了七年/)).toBeVisible();
   await expect(page.getByText(/我先让纸张开口/)).toBeVisible();
@@ -75,6 +79,9 @@ test("keeps returned postcards in the journey album", async ({ page }) => {
   await expect(page.getByText("雾灯城寄回的五个夜晚")).toBeVisible();
   await expect(page.getByText("雾灯温室")).toBeVisible();
   await expect(page.getByText("城市人情簿")).toBeVisible();
+  await expect(page.getByText("城市值更簿")).toBeVisible();
+  await expect(page.locator(".watch-ledger-entry:not(.locked)")).toHaveCount(2);
+  await expect(page.locator(".watch-ledger-entry:not(.locked)").first()).toContainText("夜半时分");
   await expect(page.getByText("口袋抽屉")).toBeVisible();
   await expect(page.locator(".pocket-object.unlocked")).toHaveCount(2);
   await expect(page.locator(".pocket-object.locked")).toHaveCount(7);
@@ -140,9 +147,12 @@ test("restores and settles a real night after reload", async ({ page }) => {
   await page.getByRole("button", { name: /今夜真实交接/ }).click();
   await page.getByRole("button", { name: /开始今夜的真实交接/ }).click();
   await expect(page.getByText(/城市记得交接的时刻/)).toBeVisible();
+  await expect(page.locator(".city-watch-live")).toContainText(/掌灯时分|夜半时分|末更时分|白昼小憩/);
+  const watchBeforeReload = await page.locator(".city-watch-live b").textContent();
 
   await page.reload();
   await expect(page.getByText(/真实夜班/)).toBeVisible();
+  await expect(page.locator(".city-watch-live b")).toHaveText(watchBeforeReload!);
   await page.getByRole("button", { name: /我醒了，拆开报告/ }).click();
   await expect(page.getByText("昨夜调查完成")).toBeVisible();
   await expect(page.getByText("真实夜班")).toBeVisible();
@@ -248,9 +258,11 @@ test.describe("mobile 390x844", () => {
     await expectNoOverlap(page.locator(".handoff-docket"), page.locator(".handoff-portrait"));
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /今晚交给你了/ }).click();
+    await expect(page.locator(".city-watch-live")).toContainText("夜半时分");
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /跳到清晨/ }).click();
     await expect(page.getByText("昨夜调查完成")).toBeVisible();
+    await expect(page.locator(".city-watch-report")).toBeVisible();
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /整理线索，准备下一夜/ }).click();
     await expect(page.getByRole("button", { name: "案件板" })).toBeVisible();

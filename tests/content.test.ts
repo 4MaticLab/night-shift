@@ -20,6 +20,7 @@ import { createOpportunityRecord, getOpportunityCandidates, getOpportunityRespon
 import { caseCharacters, getChapterCharacter, isCharacterRevealed } from "@/src/content/characters";
 import { cityDistricts, getCityDistrict } from "@/src/content/districts";
 import { endingEpilogues, getEndingEpilogue } from "@/src/content/endings";
+import { cityWatchEchoes, cityWatches, DEMO_CITY_WATCH_ID, getCityWatch, getCityWatchEcho, getCityWatchId } from "@/src/content/watches";
 
 describe("Night Shift case content", () => {
   it("contains the complete five-night mystery", () => {
@@ -307,6 +308,32 @@ describe("Night Shift case content", () => {
     expect(qualityFromDuration(420)).toBe("restful");
   });
 
+  it("partitions the local clock into four complete city watches", () => {
+    const at = (hour: number, minute = 0) => new Date(2026, 6, 23, hour, minute);
+    expect(cityWatches.map((watch) => watch.id)).toEqual(["lamplighting", "midnight", "last-watch", "daylight"]);
+    expect(getCityWatchId(at(18, 59))).toBe("daylight");
+    expect(getCityWatchId(at(19))).toBe("lamplighting");
+    expect(getCityWatchId(at(22, 59))).toBe("lamplighting");
+    expect(getCityWatchId(at(23))).toBe("midnight");
+    expect(getCityWatchId(at(1, 59))).toBe("midnight");
+    expect(getCityWatchId(at(2))).toBe("last-watch");
+    expect(getCityWatchId(at(5, 59))).toBe("last-watch");
+    expect(getCityWatchId(at(6))).toBe("daylight");
+  });
+
+  it("defines twenty literary echoes without reward or punishment language", () => {
+    expect(cityWatchEchoes).toHaveLength(20);
+    expect(new Set(cityWatchEchoes.map((echo) => `${echo.chapter}/${echo.watchId}`))).toHaveLength(20);
+    for (const watch of cityWatches) {
+      expect(cityWatchEchoes.filter((echo) => echo.watchId === watch.id)).toHaveLength(5);
+      expect(getCityWatch(watch.id)).toEqual(watch);
+    }
+    for (const echo of cityWatchEchoes) {
+      expect(getCityWatchEcho(echo.chapter, echo.watchId)).toEqual(echo);
+      expect(`${echo.scene}${echo.encounter}${echo.fieldNote}`).not.toMatch(/积分|奖励|分数|好感|失败/);
+    }
+  });
+
   it("settles a real night from its persisted start time", () => {
     const startedAt = new Date("2026-07-22T22:00:00.000Z");
     const session = startSleepSession("real", "regular", startedAt);
@@ -315,15 +342,17 @@ describe("Night Shift case content", () => {
     expect(completed.durationMinutes).toBe(390);
     expect(completed.quality).toBe("regular");
     expect(completed.endedAt).toBe("2026-07-23T04:30:00.000Z");
+    expect(session.watchId).toBe(getCityWatchId(startedAt));
     expect(resolveNight(1, completed.quality).clueIds.length).toBeGreaterThan(0);
   });
 
   it("keeps demo quality deterministic and compresses seal progress", () => {
-    const session = startSleepSession("demo", "restful", new Date("2026-07-22T22:00:00.000Z"));
+    const session = startSleepSession("demo", "restful", new Date(2026, 6, 22, 12, 0));
     const completed = finishSleepSession(session, new Date("2026-07-22T22:00:12.000Z"));
 
     expect(completed.durationMinutes).toBe(484);
     expect(completed.quality).toBe("restful");
+    expect(session.watchId).toBe(DEMO_CITY_WATCH_ID);
     expect(nightSealProgress(session, new Date("2026-07-22T22:00:01.000Z"))).toBe(3);
   });
 

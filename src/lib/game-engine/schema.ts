@@ -6,6 +6,27 @@ export type SleepQuality = z.infer<typeof sleepQualitySchema>;
 export const sleepModeSchema = z.enum(["demo", "real"]);
 export type SleepMode = z.infer<typeof sleepModeSchema>;
 
+export const cityWatchIdSchema = z.enum(["lamplighting", "midnight", "last-watch", "daylight"]);
+export type CityWatchId = z.infer<typeof cityWatchIdSchema>;
+
+export const cityWatchSchema = z.object({
+  id: cityWatchIdSchema,
+  label: z.string(),
+  archiveLabel: z.string(),
+  window: z.string(),
+  description: z.string().min(20),
+});
+export type CityWatch = z.infer<typeof cityWatchSchema>;
+
+export const cityWatchEchoSchema = z.object({
+  chapter: z.number().int().min(1).max(5),
+  watchId: cityWatchIdSchema,
+  scene: z.string().min(20),
+  encounter: z.string().min(15),
+  fieldNote: z.string().min(20),
+});
+export type CityWatchEcho = z.infer<typeof cityWatchEchoSchema>;
+
 export const sleepSessionSchema = z.object({
   id: z.string(),
   startedAt: z.string().datetime(),
@@ -13,6 +34,7 @@ export const sleepSessionSchema = z.object({
   durationMinutes: z.number().int().nonnegative().optional(),
   quality: sleepQualitySchema,
   mode: sleepModeSchema,
+  watchId: cityWatchIdSchema,
 });
 export type SleepSession = z.infer<typeof sleepSessionSchema>;
 
@@ -256,6 +278,7 @@ export const nightGrowthRecordSchema = z.object({
   durationMinutes: z.number().int().nonnegative(),
   choiceId: z.string(),
   preparationId: z.enum(["side-lamp", "flower-note", "tram-fare"]),
+  watchId: cityWatchIdSchema,
   completedAt: z.string().datetime(),
 });
 export type NightGrowthRecord = z.infer<typeof nightGrowthRecordSchema>;

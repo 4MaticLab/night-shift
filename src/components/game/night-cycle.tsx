@@ -15,6 +15,7 @@ import { getCorrespondencePrompt, getCorrespondenceReply, getLatestSocietyReply 
 import { getSouvenir } from "@/src/content/souvenirs";
 import { getOpportunityCandidates, getOpportunityNotice, getOpportunityResponse } from "@/src/content/opportunities";
 import { getChapterCharacter } from "@/src/content/characters";
+import { DEMO_CITY_WATCH_ID, getCityWatch, getCityWatchEcho, getCityWatchId } from "@/src/content/watches";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import type { SleepMode, SleepQuality } from "@/src/lib/game-engine/schema";
 import { elapsedSessionMinutes, formatSleepDuration, nightSealProgress } from "@/src/lib/game-engine/sleep-session";
@@ -31,6 +32,7 @@ export function Tonight({ onLaunch }: { onLaunch: (quality: SleepQuality, prepar
   const selectedDirection = selectedChoice ? getRouteDirection(chapter, selectedChoice) : null;
   const selectedPreparation = getPreparation(preparationId);
   const handoffPortrait = getAsset("character.lin-du-handoff");
+  const previewWatch = getCityWatch(sleepMode === "demo" ? DEMO_CITY_WATCH_ID : getCityWatchId(new Date()));
   return (
     <div className="content-grid tonight-page">
       <section className={selectedDirection ? "desk-scene handoff-ready" : "desk-scene"}>
@@ -55,6 +57,7 @@ export function Tonight({ onLaunch }: { onLaunch: (quality: SleepQuality, prepar
             <button className={sleepMode === "real" ? "active" : ""} onClick={() => setSleepMode("real")}><Moon size={14} /> 今夜真实交接</button>
           </div>
           {sleepMode === "demo" ? <div className="quality-tabs">{(Object.keys(qualityCopy) as SleepQuality[]).map((id) => <button key={id} className={quality === id ? "active" : ""} onClick={() => setQuality(id)} title={qualityCopy[id].note}>{qualityCopy[id].label}</button>)}</div> : <p className="real-mode-note">从交接那一刻起计时。你可以锁屏、关闭页面，醒来后再回来拆晨报；提前醒来也不会失去主线线索。</p>}
+          <div className={`watch-preview watch-${previewWatch.id}`}><Clock3 /><div><small>{sleepMode === "demo" ? "DEMO FIXED WATCH" : "LOCAL HANDOFF WATCH"}</small><b>{previewWatch.label} · {previewWatch.window}</b><span>{previewWatch.description}</span></div></div>
         </div>
         <button disabled={!selectedChoice || phase !== "ready"} className="handoff-button" onClick={() => onLaunch(quality, preparationId, sleepMode)}>{sleepMode === "real" ? "开始今夜的真实交接" : "今晚交给你了"} <Moon size={18} /></button>
       </section>
@@ -82,6 +85,8 @@ export function NightRun({ onFinish }: { onFinish: () => void }) {
   const preparation = getPreparation(selectedPreparationId);
   const nightSeal = getNightSealAsset(chapter);
   const nightHeader = getAsset("header.night-expedition");
+  const watch = getCityWatch(activeSleepSession?.watchId ?? DEMO_CITY_WATCH_ID);
+  const watchEcho = getCityWatchEcho(chapter, watch.id);
   const [seconds, setSeconds] = useState(12);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -107,6 +112,7 @@ export function NightRun({ onFinish }: { onFinish: () => void }) {
       <Image className="night-expedition-art" src={nightHeader.src} alt={nightHeader.alt} fill priority sizes="100vw" />
       <div className="night-stars" /><div className="night-header"><div className="brand-mark compact"><span>NS</span><div><b>夜班进行中</b><small>第 {chapter} 夜 · {sleepMode === "real" ? "真实夜班" : qualityCopy[quality].time}</small></div></div><button onClick={onFinish}>{sleepMode === "real" ? "我醒了，拆开报告" : "跳到清晨"} <ArrowRight size={16} /></button></div>
       <div className="night-title"><p>{sleepMode === "real" ? "合上页面也没关系。城市记得交接的时刻。" : "你休息的时候，他会继续。"}</p><h2>{current.title}</h2><span>{sessionLine}</span><div className="route-order"><small>TONIGHT&apos;S DIRECTION</small><b>{direction.dispatchTitle}</b><em>目的地 · {direction.destination}</em></div></div>
+      <aside className={`city-watch-live watch-${watch.id}`}><Clock3 /><div><small>{watch.archiveLabel} · {watch.window}</small><b>{watch.label}</b><span>{watchEcho.scene}</span></div></aside>
       <div className="night-seal-growth" aria-label={`第${chapter}夜的夜印正在形成`}><Image className="seal-ghost" src={nightSeal.src} alt="" width={118} height={118} /><span style={{ height: `${progress}%` }}><Image src={nightSeal.src} alt={nightSeal.alt} width={118} height={118} /></span></div>
       <div className="night-journey-stage"><CityRoute progress={progress} routeNodes={direction.routeNodes} variant={direction.mapVariant} /><aside className="night-growth-panel"><BotanicalSpecimen chapter={chapter} progress={progress} compact /><small>GROWING WHILE YOU REST</small><p>{botanical.growthStages[growthStage]}</p></aside></div>
       <div className="event-ticker">{result.events.slice(0, eventCount).map((event, index) => <motion.div key={event} initial={{ opacity: 0, x: -10 }} animate={{ opacity: index === eventCount - 1 ? 1 : .45, x: 0 }}><i />{event}</motion.div>)}</div>
@@ -144,13 +150,19 @@ export function MorningReport({ onContinue }: { onContinue: () => void }) {
   const priorReply = priorCorrespondence ? getCorrespondenceReply(priorCorrespondence) : null;
   const foundClues = nightShiftCase.clues.filter((item) => result.clueIds.includes(item.id));
   const foundItems = nightShiftCase.collectibles.filter((item) => result.collectibleIds.includes(item.id));
+  const watch = getCityWatch(lastSleepSession?.watchId ?? DEMO_CITY_WATCH_ID);
+  const watchEcho = getCityWatchEcho(chapter, watch.id);
+  const reportClock = lastSleepSession?.mode === "real" && lastSleepSession.endedAt
+    ? new Intl.DateTimeFormat("zh-CN", { hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(lastSleepSession.endedAt))
+    : "05:28";
   return (
     <div className="report-wrap">
-      <section className="report-hero"><Image className="report-hero-art" src={morningHeader.src} alt={morningHeader.alt} fill priority sizes="100vw" /><div><Seal>调查报告 · 0{chapter}</Seal><p>昨夜调查完成</p><h2>{current.title}</h2><small>记录人：林渡 · 雾灯城 · 05:28</small></div></section>
+      <section className="report-hero"><Image className="report-hero-art" src={morningHeader.src} alt={morningHeader.alt} fill priority sizes="100vw" /><div><Seal>调查报告 · 0{chapter}</Seal><p>昨夜调查完成</p><h2>{current.title}</h2><small>记录人：林渡 · 雾灯城 · {reportClock}</small></div></section>
       <section className="return-postcard" aria-label={`第${chapter}夜归来明信片`}>
         <div className="postcard-picture"><Image src={postcardArt.src} alt={postcardArt.alt} fill sizes="(max-width: 900px) 100vw, 58vw" /><span>RETURNED · NIGHT 0{chapter}</span></div>
         <PaperCard className="postcard-back"><div className="paper-heading"><small>01 · POSTCARD FROM LAST NIGHT</small><b>{postcard.title}</b></div><small className="postcard-location">{postcard.location}</small><p className="postcard-rumor">“{postcard.cityRumor}”</p><p>{postcard.message}</p><div className="route-letter"><small>ROUTE LETTER · {result.direction.dispatchTitle}</small><b>{result.direction.destination}</b><p>“{result.returnLetter}”</p><span>{result.cityEncounter}</span></div><div className="postcard-preparation-note"><b>{preparation?.shortTitle ?? "随身物"}留下的痕迹</b><span>{postcardPreparationNote}</span></div></PaperCard>
       </section>
+      <PaperCard className={`city-watch-report watch-${watch.id}`}><div className="watch-clock-stamp"><Clock3 /><span>{watch.window}</span></div><div><div className="paper-heading"><small>TIME WATCH · THE HOUR LEFT A MARK</small><b>交接时辰留下的城市侧影</b></div><span className="watch-archive-name">{watch.archiveLabel} · {watch.label}</span><h3>{watchEcho.scene}</h3><p><b>此时在街上遇见：</b>{watchEcho.encounter}</p><blockquote>“{watchEcho.fieldNote}”</blockquote><footer>时辰只改变侧影与短笺，不改变线索、收藏、植物或睡眠评价。</footer></div></PaperCard>
       <section className={`growth-reveal quality-${quality}`} aria-label={`第${chapter}夜时间植物`}><BotanicalSpecimen chapter={chapter} /><PaperCard className="growth-record"><div className="paper-heading"><small>02 · TIME GREW HERE</small><b>雾灯温室新标本</b></div><span className="botanical-archive-name">{botanical.archiveName} · {botanical.district}</span><h3>{botanical.name}</h3><p className="botanical-rumor">“{botanical.cityRumor}”</p><p>{botanical.specimenNote}</p><div className="growth-quality-note"><b>{qualityCopy[quality].label} · 仍然完整</b><span>{botanical.qualityNotes[quality]}</span></div></PaperCard></section>
       {encounteredCharacter && characterArt && <section className="character-encounter" aria-label={`昨夜遇见的人：${encounteredCharacter.name}`}><div><Image src={characterArt.src} alt={characterArt.alt} width={1024} height={1280} /></div><PaperCard><div className="paper-heading"><small>PERSON MET LAST NIGHT · 昨夜遇见的人</small><b>{encounteredCharacter.archiveName}</b></div><span>{encounteredCharacter.role} · {encounteredCharacter.district}</span><h3>{encounteredCharacter.name}</h3><p>“{encounteredCharacter.publicRumor}”</p><blockquote>“{encounteredCharacter.quote}”</blockquote><div><small>目前可以确认</small>{encounteredCharacter.knownFact}</div></PaperCard></section>}
       {opportunityNotice && opportunityResponse && <PaperCard className="opportunity-echo"><div><small>DAYLIGHT ANSWER RETURNED · 午后答复的回声</small><h3>{opportunityNotice.title}</h3></div><blockquote>“{opportunityResponse.echo}”</blockquote><span>这段回声不改变案件成果或结局资格。</span></PaperCard>}

@@ -57,7 +57,9 @@ describe("Night Shift game store", () => {
         quality: "restful",
         choiceId: chosenDirection,
         preparationId: "side-lamp",
+        watchId: "midnight",
       });
+      expect(state.lastSleepSession?.watchId).toBe("midnight");
       expect(state.societyHistory[chapter.number]).toMatchObject({
         chapter: chapter.number,
         choiceId: chosenDirection,
@@ -113,6 +115,7 @@ describe("Night Shift game store", () => {
     expect(restored.sleepMode).toBe("real");
     expect(restored.selectedChoice).toBe("source");
     expect(restored.activeSleepSession?.id).toBe(activeId);
+    expect(restored.activeSleepSession?.watchId).toMatch(/lamplighting|midnight|last-watch|daylight/);
     expect(restored.journeySeed).toBe(journeySeed);
   });
 
@@ -139,6 +142,38 @@ describe("Night Shift game store", () => {
     expect(migrated.boardPositions).toEqual({});
     expect(migrated.nightSealIds).toEqual([]);
     expect(migrated.selectedPreparationId).toBe("");
+  });
+
+  it("migrates legacy sessions and greenhouse records to safe city watches", () => {
+    const realStartedAt = new Date(2026, 6, 23, 3, 15);
+    const migrated = storeModule.migrateGameState({
+      activeSleepSession: {
+        id: "legacy-real",
+        mode: "real",
+        quality: "regular",
+        startedAt: realStartedAt.toISOString(),
+      },
+      lastSleepSession: {
+        id: "legacy-demo",
+        mode: "demo",
+        quality: "regular",
+        startedAt: "not-a-date",
+      },
+      growthHistory: {
+        1: {
+          chapter: 1,
+          quality: "regular",
+          durationMinutes: 390,
+          choiceId: "source",
+          preparationId: "side-lamp",
+          completedAt: "2026-07-11T05:28:00.000Z",
+        },
+      },
+    } as never);
+
+    expect(migrated.activeSleepSession?.watchId).toBe("last-watch");
+    expect(migrated.lastSleepSession?.watchId).toBe("midnight");
+    expect(migrated.growthHistory[1]?.watchId).toBe("midnight");
   });
 
   it("persists valid evidence positions and can restore the default desk", () => {
@@ -182,7 +217,7 @@ describe("Night Shift game store", () => {
     expect(new Set(Object.values(state.souvenirHistory).map((record) => record?.souvenirId))).toHaveLength(3);
     expect(Object.keys(state.opportunityHistory)).toEqual(["2", "3"]);
     expect(state.opportunityHistory[2]).toMatchObject({ chapter: 2, dismissed: false });
-    expect(state.growthHistory[2]).toMatchObject({ chapter: 2, quality: "regular", durationMinutes: 390, choiceId: "mina", preparationId: "side-lamp" });
+    expect(state.growthHistory[2]).toMatchObject({ chapter: 2, quality: "regular", durationMinutes: 390, choiceId: "mina", preparationId: "side-lamp", watchId: "midnight" });
     expect(state.societyHistory[3]).toMatchObject({ chapter: 3, choiceId: "hotel", societyId: "misfiled-registry", standing: "entrusted" });
     expect(state.correspondenceHistory[2]).toMatchObject({ chapter: 2, societyId: "misfiled-registry", standing: "known", replyId: "registry-known-witness" });
   });
@@ -194,7 +229,7 @@ describe("Night Shift game store", () => {
       choiceHistory: { 1: "track" },
     });
 
-    expect(migrated.growthHistory[1]).toMatchObject({ chapter: 1, choiceId: "track", preparationId: "flower-note", quality: "regular" });
+    expect(migrated.growthHistory[1]).toMatchObject({ chapter: 1, choiceId: "track", preparationId: "flower-note", quality: "regular", watchId: "midnight" });
     expect(migrated.growthHistory[2]).toMatchObject({ chapter: 2, choiceId: "mina", preparationId: "side-lamp", quality: "regular" });
     expect(migrated.societyHistory[1]).toMatchObject({ chapter: 1, choiceId: "track", societyId: "afterlight-cartographers", standing: "noticed" });
     expect(migrated.societyHistory[2]).toMatchObject({ chapter: 2, choiceId: "mina", societyId: "misfiled-registry", standing: "noticed" });

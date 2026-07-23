@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有 `in_progress` 主计划。下一轮继续从文学性城市、温暖等待和自主旅程三条北极星审计新的体验缺口，先建立计划再推进。
+当前主计划是 [[plans/0019-city-watches-and-real-time-echoes]]：让真实交接时刻改变城市侧影，而不改变主线成果或评价玩家。
 
 ## 计划清单
 
@@ -28,6 +28,7 @@
 | [[plans/0016-evidence-dossiers-and-remembered-desk]] | `completed` | `auto` | P0 | 6/6 | 已发布证物阅档、真实拖动与 v10 桌面记忆 |
 | [[plans/0017-five-night-case-closing-ledger]] | `completed` | `auto` | P0 | 6/6 | 已发布三封终函、五夜归来总账与可逆档案回看 |
 | [[plans/0018-lin-du-handoff-portrait]] | `completed` | `auto` | P0 | 6/6 | 已发布林渡交接肖像与实时交接单 |
+| [[plans/0019-city-watches-and-real-time-echoes]] | `in_progress` | `auto` | P0 | 5/6 | 完成全套验证、Git checkpoint 与第二十一个私密版本发布 |
 
 ## 状态规则
 
