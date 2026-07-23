@@ -6,6 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
+| [[plans/overlay-accessibility-demo-safety]] | `codex/overlay-accessibility-demo-safety` | `in_progress` | `auto` | 10% | 统一弹层生命周期并修正 Demo 存档语义 |
 
 ## 使用规则
 
