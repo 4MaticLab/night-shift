@@ -3,7 +3,7 @@ import { nightShiftCase } from "@/src/content/case";
 import { getCorrespondencePrompt } from "@/src/content/correspondence";
 import { DEMO_JOURNEY_SEED } from "@/src/content/souvenirs";
 import { getOpportunityCandidates } from "@/src/content/opportunities";
-import { DEFAULT_CAMPAIGN_ID, RAIN_RADIO_CAMPAIGN_ID } from "@/src/content/campaigns/registry";
+import { DEFAULT_CAMPAIGN_ID, LAST_TRAM_CAMPAIGN_ID, RAIN_RADIO_CAMPAIGN_ID } from "@/src/content/campaigns/registry";
 import { rainRadioCampaign } from "@/src/content/campaigns/rain-radio";
 
 type StoreModule = typeof import("@/src/stores/game-store");
@@ -33,6 +33,11 @@ beforeEach(() => {
 });
 
 describe("Night Shift game store", () => {
+  it("uses The Last Tram for new and invalid campaign saves", () => {
+    expect(DEFAULT_CAMPAIGN_ID).toBe(LAST_TRAM_CAMPAIGN_ID);
+    expect(storeModule.migrateGameState({ campaignId: "missing-case" }).campaignId).toBe(LAST_TRAM_CAMPAIGN_ID);
+  });
+
   it("completes the deterministic five-night loop", () => {
     storeModule.useGameStore.getState().begin();
 

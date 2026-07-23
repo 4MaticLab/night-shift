@@ -50,6 +50,10 @@ test("holds the first interaction behind a real hero-art loading screen", async 
   await expect(loadingScreen).toBeHidden({ timeout: 10_000 });
   await expect(page.locator(".app-boot-content")).not.toHaveAttribute("inert", "");
   await expect(page.getByRole("button", { name: /开始第 001 宗案件/ })).toBeEnabled();
+  const caseLibrary = page.getByRole("region", { name: "案件剧本选择" });
+  await expect(caseLibrary.locator(".featured-case")).toContainText("零点四十三分的末班车");
+  await expect(caseLibrary.locator(".featured-case")).toContainText("推荐起点");
+  await expect(page.locator(".case-teaser")).toHaveCount(0);
 });
 
 test("plays the first case in English and preserves the language preference", async ({ page }) => {
@@ -620,6 +624,7 @@ test.describe("mobile 390x844", () => {
   test("switches campaign cards without overflow on the landing page", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator(".campaign-shelf")).toBeVisible();
+    await expect(page.locator(".featured-case")).toContainText("零点四十三分的末班车");
     await expectMinimumTapTargets(page.locator(".campaign-shelf button"));
     await page.getByRole("button", { name: /CASE 002/ }).click();
     await expect(page.getByRole("button", { name: /开始第 002 宗案件/ })).toBeVisible();

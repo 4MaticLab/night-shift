@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有进行中的主计划；最近完成 [[plans/0038-first-load-experience]]，为慢网与冷缓存增加首屏加载幕，并拆分首页不需要的重型游戏模块。
+当前没有进行中的主计划；最近完成 [[plans/0039-default-case-home-art-pass]]，明确首案默认入口，并重整首页案件层级、响应式与美学表现。
 
 ## 计划清单
 
@@ -48,6 +48,7 @@
 | [[plans/0036-cipher-relay-sequencing]] | `completed` | `manual` | P0 | 6/6 | 已完成两案最终接线、v16 持久化、英文与移动端验收 |
 | [[plans/0037-interactive-cipher-dials]] | `completed` | `manual` | P0 | 6/6 | 已完成通用刻度盘、两案配置、英文与移动端验收 |
 | [[plans/0038-first-load-experience]] | `completed` | `auto` | P0 | 5/5 | 已完成真实加载幕、非首屏按需加载与慢网回归 |
+| [[plans/0039-default-case-home-art-pass]] | `completed` | `auto` | P0 | 6/6 | 已完成首案默认、首页双焦点卷宗与跨设备验收 |
 
 ## 状态规则
 
