@@ -5,7 +5,7 @@ const baseURL = `http://localhost:${port}`;
 
 export default defineConfig({
   testDir: "./tests/e2e",
-  use: { baseURL, trace: "on-first-retry" },
+  use: { baseURL, locale: "zh-CN", trace: "on-first-retry" },
   webServer: { command: `npm run dev -- -p ${port}`, url: baseURL, reuseExistingServer: true },
   projects: [{ name: "chrome", use: { ...devices["Desktop Chrome"], channel: "chrome" } }],
 });

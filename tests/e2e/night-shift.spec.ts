@@ -56,7 +56,38 @@ test("holds the first interaction behind a real hero-art loading screen", async 
   await expect(page.locator(".case-teaser")).toHaveCount(0);
 });
 
-test("plays the first case in English and preserves the language preference", async ({ page }) => {
+test.describe("automatic browser locale", () => {
+  test.use({ locale: "en-US" });
+
+  test("renders English on the first response and lets a cookie override it", async ({ page, context }) => {
+    const response = await page.goto("/", { waitUntil: "domcontentloaded" });
+    expect(await response?.text()).toContain('<html lang="en"');
+    await expect(page.getByRole("heading", { name: /When you fall asleep/ })).toBeVisible();
+    await expect(page.locator(".app-boot-screen")).toContainText("The night agency is turning on its lights");
+    expect((await context.cookies()).find((cookie) => cookie.name === "night-shift-locale")).toBeUndefined();
+
+    await page.getByRole("button", { name: /CASE 002/ }).click();
+    await expect(page.getByRole("heading", { name: /你睡着以后/ })).toBeVisible();
+    await page.getByRole("button", { name: /CASE 001/ }).click();
+    await expect(page.getByRole("heading", { name: /When you fall asleep/ })).toBeVisible();
+
+    await page.getByRole("button", { name: "中文", exact: true }).click();
+    await expect(page.getByRole("heading", { name: /你睡着以后/ })).toBeVisible();
+    expect((await context.cookies()).find((cookie) => cookie.name === "night-shift-locale")?.value).toBe("zh-CN");
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("lang", "zh-CN");
+    await expect(page.getByRole("heading", { name: /你睡着以后/ })).toBeVisible();
+  });
+});
+
+test("migrates a legacy local language preference into the cookie", async ({ page, context }) => {
+  await page.addInitScript(() => window.localStorage.setItem("night-shift-locale", "en"));
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: /When you fall asleep/ })).toBeVisible();
+  expect((await context.cookies()).find((cookie) => cookie.name === "night-shift-locale")?.value).toBe("en");
+});
+
+test("plays the first case in English and preserves the language preference", async ({ page, context }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /ENGLISH/ }).click();
   await expect(page.getByRole("button", { name: /Begin Case 001/ })).toBeVisible();
@@ -90,6 +121,7 @@ test("plays the first case in English and preserves the language preference", as
   await expect(page.getByRole("heading", { name: "The Last Tram at 00:43" })).toBeVisible();
   await expectNoVisibleHan(page);
   await expect(page.evaluate(() => localStorage.getItem("night-shift-locale"))).resolves.toBe("en");
+  expect((await context.cookies()).find((cookie) => cookie.name === "night-shift-locale")?.value).toBe("en");
 });
 
 test("keeps the English first-night handoff usable at 390 × 844", async ({ page }) => {
