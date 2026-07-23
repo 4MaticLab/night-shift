@@ -44,6 +44,7 @@
 | [[plans/0032-ai-rest-intention-ritual]] | `completed` | `manual` | P0 | 6/6 | 已完成 AI 休息仪式、v15 存档与全量回归 |
 | [[plans/0033-hackathon-submission-kit]] | `completed` | `manual` | P0 | 4/4 | 已完成提交作战卡、演示节拍与真实边界 |
 | [[plans/0034-night-cipher-desk]] | `completed` | `manual` | P0 | 6/6 | 已完成三段密文、v16 存档、中英文与移动端验收 |
+| [[plans/0035-original-sandbox-case-content-pilot]] | `proposed` | `manual` | P1 | 0/9 | 已批准，待同步计划状态后开工 |
 
 ## 状态规则
 
