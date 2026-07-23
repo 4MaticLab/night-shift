@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前主计划是 [[plans/0024-friend-clue-sharing]]：让玩家通过二维码或链接把一张白名单线索送进好友的本地案件板。
+当前没有进行中的主计划。下一项改进从实际游玩中的不满意点进入提案，再按优先级启动。
 
 ## 计划清单
 
@@ -33,7 +33,7 @@
 | [[plans/0021-cross-device-interaction-pass]] | `completed` | `manual` | P0 | 6/6 | 已发布桌面／移动端交互整修与浏览器实测版本 |
 | [[plans/0022-vercel-dual-target-deployment]] | `completed` | `manual` | P0 | 5/5 | Vercel 生产部署成功，Sites 双目标保留 |
 | [[plans/0023-mobile-case-board-inference]] | `completed` | `manual` | P0 | 5/5 | 已发布移动案板逃生手势与三步联合推理台 |
-| [[plans/0024-friend-clue-sharing]] | `in_progress` | `manual` | P0 | 4/5 | 提交推送并确认 Vercel 生产部署 |
+| [[plans/0024-friend-clue-sharing]] | `completed` | `manual` | P0 | 5/5 | 已发布好友线索二维码、白名单深链接与本地接收 |
 
 ## 状态规则
 

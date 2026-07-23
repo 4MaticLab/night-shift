@@ -1,6 +1,6 @@
 # 0024 — 好友线索二维码与深链接收
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P0
 - 创建：2026-07-23
 - 更新：2026-07-23
@@ -34,7 +34,7 @@
 - [x] 实现证物二维码、复制链接和分享状态界面。
 - [x] 实现 query 校验、好友线索入板与重复接收反馈。
 - [x] 补齐单元、浏览器、移动端和双构建验证。
-- [ ] 同步文档、提交、推送并确认生产部署。
+- [x] 同步文档、提交、推送并确认生产部署。
 
 ## 验收标准
 
@@ -61,6 +61,7 @@
 - 2026-07-23：依赖计划 [[plans/0023-mobile-case-board-inference]] 已随 `9021d2b` 成功部署；本计划进入 `in_progress`。
 - 2026-07-23：`receivedClueIds` 只记录仍属“好友送达”的来源；后来亲自完成对应夜班会自动移除标记。赠送线索可用于普通推理，但不直接计入真结局的十二条亲自取得线索。
 - 2026-07-23：本机验证通过 49 个 Vitest、16 条 Playwright（含 390 × 844）、ESLint、文档双链检查、原生 Next 构建与 Vinext/Sites 构建；等待 GitHub/Vercel 生产发布确认。
+- 2026-07-23：实现提交 `ce8e890` 已推送 GitHub `main`；Vercel 生产部署 `dpl_DXxo6WZMcjEjx3xo1jx2ysnWm6kX` 状态为 `Ready`，GitHub deployment status 为 `success`，固定地址的合法线索 query 返回 HTTP 200。本计划关闭。
 
 ## 相关文档
 

@@ -104,6 +104,10 @@ Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：除 Demo 方向�
 
 第二十四个公开版本建立 Vercel 与 Sites 双生产目标：默认原生 Next 构建生成 `.next/`，Vinext Worker 由独立脚本生成 `dist/`。提交 `d12984e` 的 Vercel 生产部署状态为 `Ready`，固定地址 `https://night-shift-zeta.vercel.app` 返回 HTTP 200，完成 [[plans/0022-vercel-dual-target-deployment]]。
 
+第二十五个公开版本修复移动案件板吞掉纵向手势的问题，关闭手机端画布拖移／缩放并保留页面滚动；联合推理改为常驻三步工具台、明确 A／B 槽、单独移除和选满保护。提交 `9021d2b` 已完成 Vercel 生产部署，完成 [[plans/0023-mobile-case-board-inference]]。
+
+第二十六个公开版本加入“送给好友”线索二维码与复制链接；白名单深链接在好友本地幂等接收单条证物、清理 query 并标记来源，非法 ID 不启动存档，好友线索不直接满足真结局门槛。提交 `ce8e890` 的 Vercel 生产部署状态为 `Ready`，固定地址 `https://night-shift-zeta.vercel.app/?clue=postcard` 返回 HTTP 200，完成 [[plans/0024-friend-clue-sharing]]。
+
 ## 相关文档
 
 - [[docs/architecture]]
