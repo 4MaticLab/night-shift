@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有 `in_progress` 主计划。下一轮继续从文学性城市、温暖等待和自主旅程三条北极星审计新的体验缺口，先建立计划再推进。
+当前主计划是 [[plans/0021-cross-device-interaction-pass]]：用本机浏览器实测并整修桌面／移动端交互手感。
 
 ## 计划清单
 
@@ -30,6 +30,7 @@
 | [[plans/0018-lin-du-handoff-portrait]] | `completed` | `auto` | P0 | 6/6 | 已发布林渡交接肖像与实时交接单 |
 | [[plans/0019-city-watches-and-real-time-echoes]] | `completed` | `auto` | P0 | 6/6 | 已发布四时辰、二十条回声与 v11 时辰快照 |
 | [[plans/0020-sleep-gap-echoes-and-gentle-wake-check-in]] | `completed` | `auto` | P0 | 6/6 | 已发布五条睡隙回声、一次醒转记录与 v12 存档 |
+| [[plans/0021-cross-device-interaction-pass]] | `in_progress` | `manual` | P0 | 5/6 | 完成全套验证、Git checkpoint 与第二十三个私密版本发布 |
 
 ## 状态规则
 

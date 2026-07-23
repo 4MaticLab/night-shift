@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useLayoutEffect, useState, useSyncExternalStore } from "react";
 import { AnimatePresence } from "motion/react";
 import { Hero, Intro } from "@/src/components/game/landing";
 import { ArchivePage, CaseBoard, Collection, Ending } from "@/src/components/game/investigation";
@@ -15,9 +15,18 @@ export default function HomePage() {
   const game = useGameStore();
   const hydrated = useSyncExternalStore(subscribeToHydration, () => true, () => false);
   const [intro, setIntro] = useState(false);
-  const [view, setView] = useState<GameView>("tonight");
+  const [view, setView] = useState<GameView>(game.phase === "morning" ? "report" : "tonight");
   const [demo, setDemo] = useState(false);
-  const activeView: GameView = game.phase === "morning" ? "report" : view;
+  const activeView: GameView = game.phase === "morning" && view === "tonight" ? "report" : view;
+
+  const changeView = (nextView: GameView) => {
+    if (nextView === activeView) window.scrollTo({ top: 0, left: 0 });
+    setView(nextView);
+  };
+
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0 });
+  }, [activeView]);
 
   useEffect(() => {
     const toggleDemo = (event: KeyboardEvent) => {
@@ -28,7 +37,7 @@ export default function HomePage() {
   }, []);
 
   if (!game.started && !intro) {
-    return <><Hero interactive={hydrated} onStart={() => setIntro(true)} onDemo={() => { game.begin(); setDemo(true); }} /><AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={setView} />}</AnimatePresence></>;
+    return <><Hero interactive={hydrated} onStart={() => setIntro(true)} onDemo={() => { game.begin(); setDemo(true); }} /><AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={changeView} />}</AnimatePresence></>;
   }
   if (intro && !game.started) return <Intro onDone={() => { game.begin(); setIntro(false); }} />;
   if (game.phase === "night") return <NightRun onFinish={game.finishNight} />;
@@ -39,13 +48,13 @@ export default function HomePage() {
       <TopBar chapter={game.chapter} onDemo={() => setDemo(true)} onHome={() => { game.reset(); setIntro(false); }} />
       <main className="app-content">
         {activeView === "tonight" && <Tonight onLaunch={game.startNight} />}
-        {activeView === "report" && (game.phase === "morning" ? <MorningReport onContinue={() => { game.continueDay(); setView(game.chapter >= 5 ? "tonight" : "board"); }} /> : <EmptyReport setView={setView} />)}
+        {activeView === "report" && (game.phase === "morning" ? <MorningReport onContinue={() => { game.continueDay(); changeView(game.chapter >= 5 ? "tonight" : "board"); }} /> : <EmptyReport setView={changeView} />)}
         {activeView === "board" && <CaseBoard />}
         {activeView === "collection" && <Collection />}
         {activeView === "archive" && <ArchivePage />}
       </main>
-      <BottomNav view={activeView} setView={setView} />
-      <AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={setView} />}</AnimatePresence>
+      <BottomNav view={activeView} setView={changeView} />
+      <AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={changeView} />}</AnimatePresence>
     </div>
   );
 }

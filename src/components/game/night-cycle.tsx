@@ -45,22 +45,24 @@ export function Tonight({ onLaunch }: { onLaunch: (quality: SleepQuality, prepar
         <aside className="handoff-docket" aria-live="polite"><small>TONIGHT&apos;S HANDOFF · 今晚交接单</small><b>{selectedDirection?.dispatchTitle ?? "方向尚未落笔"}</b><span>{selectedDirection ? `${selectedPreparation?.shortTitle ?? "随身物"} · ${selectedDirection.destination}` : "从右侧选择一条调查方向；林渡会负责怎样抵达。"}</span></aside>
       </section>
       <section className="plan-panel">
+        <div className="plan-panel-scroll">
         {chapter > 1 && <DaytimeNotices />}
         <div className="section-label"><span>夜 {chapter}</span><small>{current.title}</small></div>
         <h3>{current.question}</h3>
         <p className="city-aside">“{current.cityAside}”</p>
-        <div className="choice-list">{current.choices.map((choice, i) => { const direction = getRouteDirection(chapter, choice.id); const society = getCitySociety(direction.societyId); return <button key={choice.id} className={selectedChoice === choice.id ? "choice selected" : "choice"} onClick={() => selectChoice(choice.id)}><span>0{i + 1}</span><div><b>{choice.label}</b><small>{choice.note}</small><em>可能惊动 · {society.name}</em></div>{selectedChoice === choice.id ? <Check /> : <ChevronRight />}</button>; })}</div>
-        <div className="preparation-box"><div className="preparation-heading"><small>PACK ONE THING · 随身物</small><b>准备，然后放手</b></div><div className="preparation-list">{preparations.map((item) => { const Icon = item.icon; return <button key={item.id} className={preparationId === item.id ? "preparation selected" : "preparation"} onClick={() => setPreparationId(item.id)}><span><Icon size={19} /></span><div><b>{item.title}</b><small>{item.promise}</small></div>{preparationId === item.id && <Check size={15} />}</button>; })}</div><p>{getPreparation(preparationId)?.description}</p></div>
+        <div className="choice-list">{current.choices.map((choice, i) => { const direction = getRouteDirection(chapter, choice.id); const society = getCitySociety(direction.societyId); return <button type="button" aria-pressed={selectedChoice === choice.id} key={choice.id} className={selectedChoice === choice.id ? "choice selected" : "choice"} onClick={() => selectChoice(choice.id)}><span>0{i + 1}</span><div><b>{choice.label}</b><small>{choice.note}</small><em>可能惊动 · {society.name}</em></div>{selectedChoice === choice.id ? <Check /> : <ChevronRight />}</button>; })}</div>
+        <div className="preparation-box"><div className="preparation-heading"><small>PACK ONE THING · 随身物</small><b>准备，然后放手</b></div><div className="preparation-list">{preparations.map((item) => { const Icon = item.icon; return <button type="button" aria-pressed={preparationId === item.id} key={item.id} className={preparationId === item.id ? "preparation selected" : "preparation"} onClick={() => setPreparationId(item.id)}><span><Icon size={19} /></span><div><b>{item.title}</b><small>{item.promise}</small></div>{preparationId === item.id && <Check size={15} />}</button>; })}</div><p>{getPreparation(preparationId)?.description}</p></div>
         <div className="quality-box">
           <div><small>NIGHT HANDOFF</small><b>选择交接方式</b></div>
           <div className="mode-toggle" role="group" aria-label="夜班模式">
-            <button className={sleepMode === "demo" ? "active" : ""} onClick={() => setSleepMode("demo")}><Zap size={14} /> 演示旅程</button>
-            <button className={sleepMode === "real" ? "active" : ""} onClick={() => setSleepMode("real")}><Moon size={14} /> 今夜真实交接</button>
+            <button type="button" aria-pressed={sleepMode === "demo"} className={sleepMode === "demo" ? "active" : ""} onClick={() => setSleepMode("demo")}><Zap size={14} /> 演示旅程</button>
+            <button type="button" aria-pressed={sleepMode === "real"} className={sleepMode === "real" ? "active" : ""} onClick={() => setSleepMode("real")}><Moon size={14} /> 今夜真实交接</button>
           </div>
-          {sleepMode === "demo" ? <div className="quality-tabs">{(Object.keys(qualityCopy) as SleepQuality[]).map((id) => <button key={id} className={quality === id ? "active" : ""} onClick={() => setQuality(id)} title={qualityCopy[id].note}>{qualityCopy[id].label}</button>)}</div> : <p className="real-mode-note">从交接那一刻起计时。你可以锁屏、关闭页面，醒来后再回来拆晨报；提前醒来也不会失去主线线索。</p>}
+          {sleepMode === "demo" ? <div className="quality-tabs">{(Object.keys(qualityCopy) as SleepQuality[]).map((id) => <button type="button" aria-pressed={quality === id} key={id} className={quality === id ? "active" : ""} onClick={() => setQuality(id)} title={qualityCopy[id].note}>{qualityCopy[id].label}</button>)}</div> : <p className="real-mode-note">从交接那一刻起计时。你可以锁屏、关闭页面，醒来后再回来拆晨报；提前醒来也不会失去主线线索。</p>}
           <div className={`watch-preview watch-${previewWatch.id}`}><Clock3 /><div><small>{sleepMode === "demo" ? "DEMO FIXED WATCH" : "LOCAL HANDOFF WATCH"}</small><b>{previewWatch.label} · {previewWatch.window}</b><span>{previewWatch.description}</span></div></div>
         </div>
-        <button disabled={!selectedChoice || phase !== "ready"} className="handoff-button" onClick={() => onLaunch(quality, preparationId, sleepMode)}>{sleepMode === "real" ? "开始今夜的真实交接" : "今晚交给你了"} <Moon size={18} /></button>
+        </div>
+        <button type="button" disabled={!selectedChoice || phase !== "ready"} className="handoff-button" onClick={() => onLaunch(quality, preparationId, sleepMode)}>{!selectedChoice ? "先选择一个调查方向" : sleepMode === "real" ? "开始今夜的真实交接" : "今晚交给你了"} <Moon size={18} /></button>
       </section>
     </div>
   );

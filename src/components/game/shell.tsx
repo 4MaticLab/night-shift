@@ -21,7 +21,7 @@ export function BottomNav({ view, setView }: { view: GameView; setView: (view: G
   const items: [GameView, ReactNode, string][] = [
     ["report", <Coffee key="c" />, "今晨"], ["board", <Search key="s" />, "案件板"], ["tonight", <Moon key="m" />, "今晚"], ["collection", <Gift key="g" />, "收藏"], ["archive", <Archive key="a" />, "档案"],
   ];
-  return <nav className="bottom-nav">{items.map(([id, icon, label]) => <button className={view === id ? "active" : ""} key={id} onClick={() => setView(id)}>{icon}<span>{label}</span></button>)}</nav>;
+  return <nav className="bottom-nav" aria-label="主要导航">{items.map(([id, icon, label]) => <button type="button" aria-current={view === id ? "page" : undefined} className={view === id ? "active" : ""} key={id} onClick={() => setView(id)}>{icon}<span>{label}</span></button>)}</nav>;
 }
 
 export function DemoDrawer({ onClose, setView }: { onClose: () => void; setView: (view: GameView) => void }) {

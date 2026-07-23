@@ -20,6 +20,18 @@ async function expectNoOverlap(first: import("@playwright/test").Locator, second
   expect(a!.x + a!.width <= b!.x || b!.x + b!.width <= a!.x || a!.y + a!.height <= b!.y || b!.y + b!.height <= a!.y).toBe(true);
 }
 
+async function expectMinimumTapTargets(locator: import("@playwright/test").Locator, minimum = 44) {
+  const sizes = await locator.evaluateAll((elements) => elements.map((element) => {
+    const rect = element.getBoundingClientRect();
+    return { width: rect.width, height: rect.height, label: element.textContent?.trim() };
+  }));
+  expect(sizes.length).toBeGreaterThan(0);
+  for (const size of sizes) {
+    expect(size.width, `${size.label} width`).toBeGreaterThanOrEqual(minimum);
+    expect(size.height, `${size.label} height`).toBeGreaterThanOrEqual(minimum);
+  }
+}
+
 async function reachFinalDecision(page: import("@playwright/test").Page) {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
@@ -65,6 +77,28 @@ test("starts a case and reaches the first morning report", async ({ page }) => {
   await expect(page.getByText(/让空白先保护活人/)).toBeVisible();
   await expect(page.getByText(/断续|普通|安稳/).first()).toBeVisible();
   await expect(page.getByText(/为什么一张已经停运七年的车票/)).toBeVisible();
+  await page.getByRole("button", { name: "案件板", exact: true }).click();
+  await expect(page.locator(".board-shell")).toBeVisible();
+});
+
+test("anchors the desktop handoff and resets long-view scroll positions", async ({ page }) => {
+  await openFirstNight(page);
+  const handoff = page.getByRole("button", { name: /今晚交给你了/ });
+  const nav = page.getByRole("navigation", { name: "主要导航" });
+  await expect(handoff).toBeVisible();
+  await expectNoOverlap(handoff, nav);
+  await page.keyboard.press("Tab");
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.activeElement!).outlineStyle)).toBe("solid");
+
+  await page.getByRole("button", { name: "收藏", exact: true }).click();
+  await page.evaluate(() => window.scrollTo(0, 1200));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1000);
+  await page.getByRole("button", { name: "收藏", exact: true }).click();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+
+  await page.evaluate(() => window.scrollTo(0, 1200));
+  await page.getByRole("button", { name: "档案", exact: true }).click();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
 });
 
 test("keeps returned postcards in the journey album", async ({ page }) => {
@@ -267,7 +301,10 @@ test.describe("mobile 390x844", () => {
     await expectNoOverlap(page.locator(".scene-copy"), page.locator(".handoff-portrait"));
     await expectNoOverlap(page.locator(".handoff-docket"), page.locator(".handoff-portrait"));
     await expectNoPageOverflow(page);
+    await expectMinimumTapTargets(page.locator(".bottom-nav button, .mode-toggle button, .quality-tabs button"));
     await page.locator(".quality-tabs").getByRole("button", { name: "断续" }).click();
+    await page.getByRole("button", { name: /今晚交给你了/ }).scrollIntoViewIfNeeded();
+    await expectNoOverlap(page.getByRole("button", { name: /今晚交给你了/ }), page.getByRole("navigation", { name: "主要导航" }));
     await page.getByRole("button", { name: /今晚交给你了/ }).click();
     await expect(page.locator(".city-watch-live")).toContainText("夜半时分");
     await expectNoPageOverflow(page);
