@@ -1,6 +1,6 @@
 # 弹层可访问性与 Demo 存档语义
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P1
 - 创建：2026-07-24
 - 更新：2026-07-24
@@ -38,7 +38,7 @@
 - [x] 重写 Demo 打开与危险操作确认语义。
 - [x] 优化弹层标题、关闭按钮、影响说明与响应式确认区。
 - [x] 增加浏览器回归并更新稳定文档。
-- [ ] 完成桌面、iPad 竖屏、手机验收与全部工程护栏。
+- [x] 完成桌面、iPad 竖屏、手机验收与全部工程护栏。
 
 ## 验收标准
 
@@ -51,16 +51,20 @@
 
 ## 验证
 
-- `npm test`
-- `npm run lint`
-- `npm run build`
-- `npm run build:sites`
-- `npm run test:render`
-- `npm run docs:check`
-- `npm run test:e2e`
-- `npm run contract:compile && npm run contract:test`
-- `git diff --check`
-- 浏览器人工验收：1440 × 900、820 × 1180、390 × 844。
+- `npm test`：6 个测试文件、82 条测试通过。
+- `npm run lint`：通过。
+- `npm run build`：Next.js 生产构建与 TypeScript 检查通过。
+- `npm run build:sites`：vinext 五阶段构建通过。
+- `npm run test:render`：服务端渲染测试通过。
+- `npm run docs:check`：81 份 Markdown 文档的双链全部解析。
+- `npm run test:e2e`：34 条浏览器旅程通过。
+- `npm run contract:compile && npm run contract:test`：合约编译通过，2 条 Hardhat 测试通过。
+- `git diff --check`：通过。
+- 浏览器人工验收：
+  - 1440 × 900：抽屉宽 440 px，最小操作高度 44 px，确认区底部 867 px，无横向溢出。
+  - 820 × 1180：抽屉宽 440 px，最小操作高度 44 px，确认区底部约 1120 px，无横向溢出。
+  - 390 × 844：抽屉铺满 390 px，最小操作高度 46 px，确认区 370 × 230.5 px、底部 821 px，无横向溢出。
+  - 三档均确认初始焦点、确认焦点、背景 inert、Body 滚动锁定与 Escape 关闭。
 
 ## 决定记录
 
@@ -68,6 +72,7 @@
 - 2026-07-24：不在本 PR 引入独立 Demo 存档域；改为“打开控制台零写入，执行快照前明确确认”。这能修复误触和隐性改写，同时保持黑客松演示的既有状态工具。
 - 2026-07-24：统一生命周期沿对话框祖先链隔离背景兄弟节点，并精确恢复原有 `inert` 与 `aria-hidden` 状态；四类弹层共享初始焦点、焦点圈、Escape、滚动锁定和触发器恢复。
 - 2026-07-24：桌面浏览器验收中，Demo 抽屉在 1280 × 720 下为 440 px 宽、无横向溢出，背景 5 个节点进入 inert；章节确认区完整位于视口内，打开后初始焦点落在关闭按钮，确认时落在取消按钮。
+- 2026-07-24：三档正式验收发现桌面关闭按钮为 42 × 42 px，随即补到 44 px 并重跑静态检查、生产构建、文档检查与 Demo 浏览器回归；最终三档均满足触控和溢出基线。
 
 ## 相关文档
 
