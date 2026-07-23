@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前主计划 [[plans/0029-sleep-hardware-ux-pass]] 已完成：睡眠硬件的入口、草稿选择、原子授权、桥接预演、响应式反馈与美术层级已经过自动化和本机浏览器验收。下一项工作从 [[plans/README#计划模板]] 提案。
+当前没有进行中的主计划。最近完成的 [[plans/0030-last-tram-english-i18n]] 已为《零点四十三分的末班车》建立可选英文剧本与完整主循环本地化，同时保留已经验收的睡眠硬件体验、稳定 ID、结算与既有存档兼容。
 
 ## 计划清单
 
@@ -39,6 +39,7 @@
 | [[plans/0027-sandbox-delayed-expedition-loop]] | `completed` | `manual` | P0 | 8/8 | 已完成沙盒延迟探索、v2 存档、真实恢复与跨设备验收 |
 | [[plans/0028-sleep-hardware-bridge]] | `completed` | `manual` | P0 | 8/8 | 已完成虚拟硬件闭环、双案件接入与跨设备验收 |
 | [[plans/0029-sleep-hardware-ux-pass]] | `completed` | `manual` | P0 | 7/7 | 已完成硬件链路 UI/UX 深度整修与跨设备验收 |
+| [[plans/0030-last-tram-english-i18n]] | `completed` | `manual` | P0 | 7/7 | 已整合英文版、当前硬件 UX 与最新 main |
 
 ## 状态规则
 
