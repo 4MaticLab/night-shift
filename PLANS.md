@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/fix-core-loop-reading-hierarchy]] | `fix/core-loop-reading-hierarchy` | `in_progress` | `auto` | 85% | 运行全量门禁并完成三档视觉验收 |
+| [[plans/fix-core-loop-reading-hierarchy]] | `fix/core-loop-reading-hierarchy` | `completed` | `auto` | 100% | 提交最终证据后退役计划并开 Draft PR |
 
 ## 使用规则
 
