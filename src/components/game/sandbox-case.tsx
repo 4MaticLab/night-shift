@@ -37,6 +37,7 @@ import { elapsedSessionMinutes, formatSleepDuration, nightSealProgress } from "@
 import type { SleepMode, SleepQuality } from "@/src/lib/game-engine/schema";
 import { getCityWatch } from "@/src/content/watches";
 import { CityRoute, qualityCopy } from "./shared";
+import { SleepHardwareHandoff, SleepHardwareMorningReceipt, SleepHardwareNightTelemetry, SleepHardwareStatus } from "./sleep-hardware";
 
 type SandboxView = "map" | "evidence" | "people" | "ending";
 
@@ -61,10 +62,12 @@ export function SandboxCase({
   campaignId,
   content,
   onHome,
+  onHardware,
 }: {
   campaignId: string;
   content: SandboxCampaignContent;
   onHome: () => void;
+  onHardware: () => void;
 }) {
   const hydrated = useSyncExternalStore(subscribeToHydration, () => true, () => false);
   const sandboxStore = useSandboxStore();
@@ -81,10 +84,10 @@ export function SandboxCase({
     return <OriginBriefing content={content} reducedHorror={progress.reducedHorror} onHome={onHome} onToggle={() => sandboxStore.toggleReducedHorror(campaignId, content)} onStart={(originId) => sandboxStore.start(campaignId, content, originId)} />;
   }
   if (progress.phase === "night" && progress.pendingActionId && progress.activeSleepSession) {
-    return <SandboxNight content={content} progress={progress} onHome={onHome} onFinish={() => sandboxStore.finishExpedition(campaignId, content)} />;
+    return <SandboxNight content={content} progress={progress} onHome={onHome} onFinish={() => sandboxStore.finishExpedition(campaignId, content)} onHardware={onHardware} />;
   }
   if (progress.phase === "morning" && progress.latestReport) {
-    return <SandboxMorning content={content} progress={progress} report={progress.latestReport} onHome={onHome} onArchive={() => sandboxStore.archiveReport(campaignId, content)} />;
+    return <SandboxMorning content={content} progress={progress} report={progress.latestReport} onHome={onHome} onArchive={() => sandboxStore.archiveReport(campaignId, content)} onHardware={onHardware} />;
   }
   if (ending && view !== "evidence") {
     return <SandboxEnding content={content} progress={progress} endingId={ending.id} onHome={onHome} onReview={() => setView("evidence")} onReset={() => { sandboxStore.reset(campaignId, content); setSelectedLocationId(null); }} />;
@@ -109,6 +112,7 @@ export function SandboxCase({
         <div className={`corruption-level corruption-${progress.corruption}`}><Sparkles /><span><small>污染 · {corruption.name}</small><b>{progress.corruption} / 7</b></span></div>
         <div className={`threat-level threat-${progress.threat}`}><Gauge /><span><small>山谷警觉</small><b>{progress.threat} / 6</b></span></div>
         <button type="button" aria-pressed={progress.reducedHorror} onClick={() => sandboxStore.toggleReducedHorror(campaignId, content)}><ShieldAlert /><span><small>表现强度</small><b>{progress.reducedHorror ? "低刺激" : "完整"}</b></span></button>
+        <SleepHardwareStatus onOpen={onHardware} label={false} />
       </section>
 
       <main className="sandbox-main">
@@ -136,6 +140,7 @@ export function SandboxCase({
         onMode={(mode) => sandboxStore.setSleepMode(campaignId, content, mode)}
         onQuality={(quality) => sandboxStore.setQuality(campaignId, content, quality)}
         onStart={() => sandboxStore.startExpedition(campaignId, content)}
+        onHardware={onHardware}
       />}
     </div>
   );
@@ -245,6 +250,7 @@ function SandboxHandoff({
   onMode,
   onQuality,
   onStart,
+  onHardware,
 }: {
   content: SandboxCampaignContent;
   progress: SandboxProgress;
@@ -253,6 +259,7 @@ function SandboxHandoff({
   onMode: (mode: SleepMode) => void;
   onQuality: (quality: SleepQuality) => void;
   onStart: () => void;
+  onHardware: () => void;
 }) {
   const found = progress.pendingActionId ? findSandboxAction(content, progress.pendingActionId) : undefined;
   if (!found) return null;
@@ -294,6 +301,7 @@ function SandboxHandoff({
             </div> : <p className="real-night-note">真实夜班按你回来时的经过时间生成断续、普通或安稳记录；任何时长都会得到同一组关键事实。</p>}
           </div>
         </section>
+        <SleepHardwareHandoff onOpen={onHardware} dark />
         <footer>
           <p><Moon /> 睡眠质量只改变报告的叙事丰富度，不改变线索、污染、人物状态或结局。</p>
           <button type="button" onClick={onStart}>今晚交给调查队 <ArrowRight /></button>
@@ -308,11 +316,13 @@ function SandboxNight({
   progress,
   onHome,
   onFinish,
+  onHardware,
 }: {
   content: SandboxCampaignContent;
   progress: SandboxProgress;
   onHome: () => void;
   onFinish: () => void;
+  onHardware: () => void;
 }) {
   const session = progress.activeSleepSession!;
   const found = findSandboxAction(content, progress.pendingActionId!)!;
@@ -363,6 +373,7 @@ function SandboxNight({
       <aside className="sandbox-watch-card">
         <Clock3 /><div><small>{watch.archiveLabel} · {watch.window}</small><b>{watch.label}</b><p>{watch.description}</p></div>
       </aside>
+      <SleepHardwareNightTelemetry session={session} progress={expeditionProgress} onOpen={onHardware} dark />
       <section className="sandbox-night-route">
         <CityRoute progress={expeditionProgress} routeNodes={routeNodes} variant={mapVariant} />
         <aside>
@@ -386,12 +397,14 @@ function SandboxMorning({
   report,
   onHome,
   onArchive,
+  onHardware,
 }: {
   content: SandboxCampaignContent;
   progress: SandboxProgress;
   report: SandboxExpeditionReport;
   onHome: () => void;
   onArchive: () => void;
+  onHardware: () => void;
 }) {
   const found = findSandboxAction(content, report.actionId)!;
   const location = content.locations.find((item) => item.id === report.locationId)!;
@@ -440,6 +453,7 @@ function SandboxMorning({
           {newClues.length + newHandouts.length + newItems.length + newLocations.length + report.npcEffects.length === 0 && <p className="no-new-evidence">没有新增卷宗，但行动已经改变山谷的威胁与可用收场。</p>}
         </article>
       </section>
+      <div className="sandbox-sleep-receipt"><SleepHardwareMorningReceipt sessionId={report.session.id} /><button type="button" onClick={onHardware}>管理睡眠硬件 <ChevronRight /></button></div>
       <section className="sandbox-report-ethic">
         <Moon /><p>睡眠质量只改变这份报告的叙事层级。行动事实、证物、污染和人物命运来自交接前已经写明的选择。</p>
       </section>

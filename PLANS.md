@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有进行中的主计划。最近完成的 [[plans/0027-sandbox-delayed-expedition-loop]] 保留《黑水溪》的九地点沙盒世界，并把即时行动改造成 Night Shift 核心的交接、延迟探索和晨报循环；下一轮不满意点先建立新的 `proposed` 计划。
+当前没有进行中的主计划。最近完成的 [[plans/0028-sleep-hardware-bridge]] 已用虚拟戒指、手表、床垫与枕头完成睡眠信号闭环，并以诚实的桥接预演为 Apple Health、Health Connect、Oura 与 Fitbit 保留真实接入位。
 
 ## 计划清单
 
@@ -35,8 +35,9 @@
 | [[plans/0023-mobile-case-board-inference]] | `completed` | `manual` | P0 | 5/5 | 已发布移动案板逃生手势与三步联合推理台 |
 | [[plans/0024-friend-clue-sharing]] | `completed` | `manual` | P0 | 5/5 | 已发布好友线索二维码、白名单深链接与本地接收 |
 | [[plans/0025-multi-campaign-runtime]] | `completed` | `manual` | P0 | 7/7 | 已发布双案件运行时、独立存档与第二案 |
-| [[plans/0026-blackwater-creek-sandbox-adaptation]] | `completed` | `manual` | P0 | 12/12 | 本地原型完成；公开推送／部署仍需 G4 授权复核 |
+| [[plans/0026-blackwater-creek-sandbox-adaptation]] | `completed` | `manual` | P0 | 12/12 | 已并入公开学习项目并由 Vercel 自动部署 |
 | [[plans/0027-sandbox-delayed-expedition-loop]] | `completed` | `manual` | P0 | 8/8 | 已完成沙盒延迟探索、v2 存档、真实恢复与跨设备验收 |
+| [[plans/0028-sleep-hardware-bridge]] | `completed` | `manual` | P0 | 8/8 | 已完成虚拟硬件闭环、双案件接入与跨设备验收 |
 
 ## 状态规则
 

@@ -20,8 +20,9 @@ import { elapsedSessionMinutes, formatSleepDuration, nightSealProgress } from "@
 import { useGameStore } from "@/src/stores/game-store";
 import { BotanicalSpecimen, CityRoute, PaperCard, qualityCopy, Seal, SocietyCrest } from "./shared";
 import type { GameView } from "./types";
+import { SleepHardwareHandoff, SleepHardwareMorningReceipt, SleepHardwareNightTelemetry } from "./sleep-hardware";
 
-export function Tonight({ onLaunch }: { onLaunch: (quality: SleepQuality, preparationId: PreparationId, mode: SleepMode) => void }) {
+export function Tonight({ onLaunch, onHardware }: { onLaunch: (quality: SleepQuality, preparationId: PreparationId, mode: SleepMode) => void; onHardware: () => void }) {
   const { campaignId, chapter, selectedChoice, selectChoice, phase } = useGameStore();
   const campaign = getCampaign(campaignId);
   const current = campaign.case.chapters.find((item) => item.number === chapter)!;
@@ -59,6 +60,7 @@ export function Tonight({ onLaunch }: { onLaunch: (quality: SleepQuality, prepar
           {sleepMode === "demo" ? <div className="quality-tabs">{(Object.keys(qualityCopy) as SleepQuality[]).map((id) => <button type="button" aria-pressed={quality === id} key={id} className={quality === id ? "active" : ""} onClick={() => setQuality(id)} title={qualityCopy[id].note}>{qualityCopy[id].label}</button>)}</div> : <p className="real-mode-note">从交接那一刻起计时。你可以锁屏、关闭页面，醒来后再回来拆晨报；提前醒来也不会失去主线线索。</p>}
           <div className={`watch-preview watch-${previewWatch.id}`}><Clock3 /><div><small>{sleepMode === "demo" ? "DEMO FIXED WATCH" : "LOCAL HANDOFF WATCH"}</small><b>{previewWatch.label} · {previewWatch.window}</b><span>{previewWatch.description}</span></div></div>
         </div>
+        <SleepHardwareHandoff onOpen={onHardware} />
         </div>
         <button type="button" disabled={!selectedChoice || phase !== "ready"} className="handoff-button" onClick={() => onLaunch(quality, preparationId, sleepMode)}>{!selectedChoice ? "先选择一个调查方向" : sleepMode === "real" ? "开始今夜的真实交接" : "今晚交给你了"} <Moon size={18} /></button>
       </section>
@@ -78,7 +80,7 @@ function DaytimeNotices() {
   return <aside className="daytime-notices" aria-label="门缝下的三张机会告示"><div className="daytime-notices-heading"><div><small>THREE PAPERS UNDER THE DOOR</small><b>门缝下的三张纸</b></div><button onClick={dismissOpportunities}>全部收起，不拆</button></div><p>任选一张回应，也可以全部收起。没有行动点、奖励差或正确答案，不影响今晚的调查。</p><div className="daytime-notice-list">{notices.map((notice) => <details key={notice.id}><summary><span>{notice.location}</span><b>{notice.title}</b><small>{notice.hook}</small></summary><div><p>{notice.detail}</p><small>— {notice.sender}</small><div>{notice.responses.map((response) => <button key={response.id} onClick={() => resolveOpportunity(notice.id, response.id)}><b>{response.label}</b><span>{response.note}</span></button>)}</div></div></details>)}</div></aside>;
 }
 
-export function NightRun({ onFinish }: { onFinish: () => void }) {
+export function NightRun({ onFinish, onHardware }: { onFinish: () => void; onHardware: () => void }) {
   const { campaignId, chapter, quality, selectedChoice, selectedPreparationId, sleepMode, activeSleepSession, recordWakeEcho } = useGameStore();
   const campaign = getCampaign(campaignId);
   const current = campaign.case.chapters.find((item) => item.number === chapter)!;
@@ -117,6 +119,7 @@ export function NightRun({ onFinish }: { onFinish: () => void }) {
       <div className="night-stars" /><div className="night-header"><div className="brand-mark compact"><span>NS</span><div><b>夜班进行中</b><small>第 {chapter} 夜 · {sleepMode === "real" ? "真实夜班" : qualityCopy[quality].time}</small></div></div><button onClick={onFinish}>{sleepMode === "real" ? "我醒了，拆开报告" : "跳到清晨"} <ArrowRight size={16} /></button></div>
       <div className="night-title"><p>{sleepMode === "real" ? "合上页面也没关系。城市记得交接的时刻。" : "你休息的时候，他会继续。"}</p><h2>{current.title}</h2><span>{sessionLine}</span><div className="route-order"><small>TONIGHT&apos;S DIRECTION</small><b>{direction.dispatchTitle}</b><em>目的地 · {direction.destination}</em></div></div>
       <aside className={`city-watch-live watch-${watch.id}`}><Clock3 /><div><small>{watch.archiveLabel} · {watch.window}</small><b>{watch.label}</b><span>{watchEcho.scene}</span></div></aside>
+      <SleepHardwareNightTelemetry session={activeSleepSession} progress={progress} onOpen={onHardware} dark />
       {sleepMode === "real" && <aside className={wakeEchoVisible ? "wake-check-in recorded" : "wake-check-in"}><div><small>SLEEP GAP · 睡隙记录</small><b>{wakeEchoVisible ? "这次醒转已经夹进夜印" : "如果你只是短暂醒来"}</b><p>{wakeEchoVisible ? "林渡仍在调查；同一夜不会再收集第二条回声。" : "可以留下一次记录再继续休息。它不会结束夜班，也不改变睡眠评价或任何成果。"}</p></div><button type="button" disabled={Boolean(activeSleepSession?.wakeEcho)} onClick={recordWakeEcho}><Ear /> {wakeEchoVisible ? "已记录，夜班继续" : "我只是醒了一下"}</button>{wakeEchoVisible && wakeEcho && <WakeEchoSlip echo={wakeEcho} recordedAt={activeSleepSession?.wakeEcho?.recordedAt} mode="real" />}</aside>}
       {sleepMode === "demo" && wakeEchoVisible && wakeEcho && <aside className="wake-check-in demo recorded"><div><small>INTERRUPTED SLEEP ECHO · 断续旅程回声</small><b>睡意裂开时，城市递来一张薄纸</b><p>这是断续旅程的叙事侧影，不是失败或额外奖励。</p></div><WakeEchoSlip echo={wakeEcho} recordedAt={activeSleepSession?.wakeEcho?.recordedAt} mode="demo" /></aside>}
       <div className="night-seal-growth" aria-label={`第${chapter}夜的夜印正在形成`}><Image className="seal-ghost" src={nightSeal.src} alt="" width={118} height={118} /><span style={{ height: `${progress}%` }}><Image src={nightSeal.src} alt={nightSeal.alt} width={118} height={118} /></span></div>
@@ -132,7 +135,7 @@ function WakeEchoSlip({ echo, recordedAt, mode }: { echo: WakeEcho; recordedAt?:
   return <article className="wake-echo-slip"><header><Radio /><span><small>{clock} · ONE ECHO ONLY</small><b>{echo.title}</b></span></header><p><strong>听见：</strong>{echo.sound}</p><p><strong>看见：</strong>{echo.glimpse}</p><blockquote>“{echo.fieldNote}”</blockquote></article>;
 }
 
-export function MorningReport({ onContinue }: { onContinue: () => void }) {
+export function MorningReport({ onContinue, onHardware }: { onContinue: () => void; onHardware: () => void }) {
   const { campaignId, chapter, quality, selectedChoice, selectedPreparationId, lastSleepSession, societyHistory, correspondenceHistory, souvenirHistory, opportunityHistory, answerCorrespondence } = useGameStore();
   const campaign = getCampaign(campaignId);
   const current = campaign.case.chapters.find((item) => item.number === chapter)!;
@@ -171,6 +174,7 @@ export function MorningReport({ onContinue }: { onContinue: () => void }) {
   return (
     <div className="report-wrap">
       <section className="report-hero"><Image className="report-hero-art" src={morningHeader.src} alt={morningHeader.alt} fill priority sizes="100vw" /><div><Seal>调查报告 · 0{chapter}</Seal><p>昨夜调查完成</p><h2>{current.title}</h2><small>记录人：{campaign.presentation.detectiveName} · {campaign.presentation.cityName} · {reportClock}</small></div></section>
+      <div className="sleep-receipt-wrap"><SleepHardwareMorningReceipt sessionId={lastSleepSession?.id} /><button type="button" onClick={onHardware}>管理睡眠硬件 <ChevronRight /></button></div>
       <section className="return-postcard" aria-label={`第${chapter}夜归来明信片`}>
         <div className="postcard-picture"><Image src={postcardArt.src} alt={postcardArt.alt} fill sizes="(max-width: 900px) 100vw, 58vw" /><span>RETURNED · NIGHT 0{chapter}</span></div>
         <PaperCard className="postcard-back"><div className="paper-heading"><small>01 · POSTCARD FROM LAST NIGHT</small><b>{postcard.title}</b></div><small className="postcard-location">{postcard.location}</small><p className="postcard-rumor">“{postcard.cityRumor}”</p><p>{postcard.message}</p><div className="route-letter"><small>ROUTE LETTER · {result.direction.dispatchTitle}</small><b>{result.direction.destination}</b><p>“{result.returnLetter}”</p><span>{result.cityEncounter}</span></div><div className="postcard-preparation-note"><b>{preparation?.shortTitle ?? "随身物"}留下的痕迹</b><span>{postcardPreparationNote}</span></div></PaperCard>

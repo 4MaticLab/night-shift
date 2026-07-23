@@ -14,6 +14,7 @@ import { createOpportunityRecord, getOpportunityCandidates } from "@/src/content
 import { DEMO_CITY_WATCH_ID, getCityWatchId } from "@/src/content/watches";
 import { DEFAULT_CAMPAIGN_ID, getCampaign, isCampaignId, type CampaignId } from "@/src/content/campaigns/registry";
 import { getCampaignRouteDirection, getCampaignWakeEcho, matchCampaignEvidenceRelation, type CampaignManifest } from "@/src/content/campaigns/types";
+import { useSleepHardwareStore } from "@/src/stores/sleep-hardware-store";
 
 export type Phase = "day" | "ready" | "night" | "morning" | "ending";
 
@@ -168,6 +169,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
     const activeSleepSession = sleepMode === "demo" && quality === "interrupted"
       ? recordWakeEcho(session, getCampaignWakeEcho(campaign, state.chapter).id, new Date(session.startedAt))
       : session;
+    useSleepHardwareStore.getState().beginCapture(activeSleepSession);
     set({
       quality,
       selectedPreparationId,
@@ -189,6 +191,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
     const campaign = getCampaign(state.campaignId);
     const activeSession = state.activeSleepSession ?? startSleepSession(state.sleepMode, state.quality);
     const completedSession = finishSleepSession(activeSession);
+    useSleepHardwareStore.getState().finishCapture(completedSession);
     const result = resolveNight(campaign, state.chapter, completedSession.quality, state.selectedPreparationId, state.selectedChoice);
     const completedAt = completedSession.endedAt ?? new Date().toISOString();
     const societyMemory = createSocietyMemory(state.chapter, result.choiceId, state.societyHistory, completedAt, result.direction);

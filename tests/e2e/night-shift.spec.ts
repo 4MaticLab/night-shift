@@ -81,6 +81,38 @@ test("starts a case and reaches the first morning report", async ({ page }) => {
   await expect(page.locator(".board-shell")).toBeVisible();
 });
 
+test("sleep hardware authorizes a virtual ring and returns a local morning receipt", async ({ page }) => {
+  await openFirstNight(page);
+  await page.getByRole("button", { name: /打开睡眠硬件中心/ }).first().click();
+  await expect(page.getByRole("dialog", { name: /把一夜的微光/ })).toBeVisible();
+  await expect(page.locator(".sleep-device-grid img")).toHaveCount(4);
+
+  await page.getByRole("tab", { name: /真实桥接/ }).click();
+  await page.getByRole("button", { name: /Oura Cloud/ }).click();
+  await expect(page.getByText(/接口预演，不会发起真实连接/)).toBeVisible();
+  await expect(page.getByRole("button", { name: /等候真实 SDK/ })).toBeDisabled();
+
+  await page.getByRole("tab", { name: /虚拟硬件/ }).click();
+  await page.getByRole("button", { name: /雾灯睡眠戒/ }).click();
+  await page.getByRole("button", { name: /授权这台虚拟设备/ }).click();
+  await expect(page.getByText("下一次夜班会自动采集")).toBeVisible();
+  await page.getByRole("button", { name: "关闭", exact: true }).click();
+
+  await expect(page.locator(".sleep-handoff-card")).toContainText("雾灯睡眠戒已待命");
+  await page.getByRole("button", { name: /今晚交给你了/ }).click();
+  await expect(page.locator(".sleep-live-telemetry")).toContainText("雾灯睡眠戒正在记录");
+  await expect(page.locator(".sleep-live-telemetry")).toContainText("夜间脉搏");
+  await page.getByRole("button", { name: /跳到清晨/ }).click();
+  await expect(page.locator(".sleep-morning-receipt")).toContainText("雾灯睡眠戒留下的一夜");
+  await expect(page.locator(".sleep-morning-receipt")).toContainText("仅本机摘要");
+  await expect(page.locator(".sleep-morning-receipt")).toContainText("非医疗结论");
+
+  const hardwareState = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-sleep-hardware-v1")!).state);
+  expect(hardwareState.activeCapture).toBeNull();
+  expect(Object.values(hardwareState.history)).toHaveLength(1);
+  expect(JSON.stringify(hardwareState)).not.toContain("samples");
+});
+
 test("anchors the desktop handoff and resets long-view scroll positions", async ({ page }) => {
   await openFirstNight(page);
   const handoff = page.getByRole("button", { name: /今晚交给你了/ });
@@ -444,6 +476,10 @@ test.describe("mobile 390x844", () => {
 
     const bootlegger = page.locator("article", { hasText: "波士顿私酒贩小队" });
     await bootlegger.getByRole("button", { name: /以此身份进入山谷/ }).click();
+    await page.getByRole("button", { name: /打开睡眠硬件中心/ }).click();
+    await page.getByRole("button", { name: /静默枕/ }).click();
+    await page.getByRole("button", { name: /授权这台虚拟设备/ }).click();
+    await page.getByRole("button", { name: "关闭", exact: true }).click();
     await page.locator(".sandbox-map").getByRole("button", { name: /08 卡莫迪农场/ }).click();
 
     const negotiation = page.locator("article", { hasText: "同达米恩谈一笔更大的生意" });
@@ -452,10 +488,12 @@ test.describe("mobile 390x844", () => {
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /今晚交给调查队/ }).click();
     await expect(page.getByRole("heading", { name: "同达米恩谈一笔更大的生意" })).toBeVisible();
+    await expect(page.locator(".sleep-live-telemetry")).toContainText("静默枕正在记录");
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /跳到清晨/ }).click();
     await expect(page.getByText("昨夜调查完成")).toBeVisible();
     await expect(page.getByText("每周驶向波士顿的货单")).toBeVisible();
+    await expect(page.locator(".sleep-morning-receipt")).toContainText("静默枕留下的一夜");
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /归档晨报，准备下一夜/ }).click();
     await page.getByRole("navigation", { name: "黑水溪卷宗导航" }).getByRole("button", { name: /收场/ }).click();
@@ -493,6 +531,21 @@ test.describe("mobile 390x844", () => {
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /整理线索，准备下一夜/ }).click();
     await expect(page.getByRole("button", { name: "案件板" })).toBeVisible();
+  });
+
+  test("keeps the sleep hardware panel touchable and contained on a phone", async ({ page }) => {
+    await openFirstNight(page);
+    await page.getByRole("button", { name: /打开睡眠硬件中心/ }).first().click();
+    await expect(page.getByRole("dialog", { name: /把一夜的微光/ })).toBeVisible();
+    await expect(page.locator(".sleep-device-grid img")).toHaveCount(4);
+    await expectMinimumTapTargets(page.locator(".sleep-source-tabs button, .sleep-device-grid > button"));
+    await expectNoPageOverflow(page);
+    await page.getByRole("button", { name: /静默枕/ }).click();
+    await page.getByRole("button", { name: /授权这台虚拟设备/ }).click();
+    await expect(page.getByText("下一次夜班会自动采集")).toBeVisible();
+    await expectNoPageOverflow(page);
+    await page.getByRole("button", { name: "关闭", exact: true }).click();
+    await expect(page.locator(".sleep-handoff-card")).toContainText("静默枕已待命");
   });
 
   test("opens long collections and connects evidence on a phone", async ({ page }) => {

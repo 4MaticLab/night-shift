@@ -13,6 +13,7 @@ import {
 import type { SandboxCampaignContent, SandboxProgress } from "@/src/lib/sandbox/types";
 import { finishSleepSession, startSleepSession } from "@/src/lib/game-engine/sleep-session";
 import type { SleepMode, SleepQuality } from "@/src/lib/game-engine/schema";
+import { useSleepHardwareStore } from "@/src/stores/sleep-hardware-store";
 
 interface SandboxStore {
   saves: Record<string, SandboxProgress>;
@@ -90,6 +91,7 @@ export const useSandboxStore = create<SandboxStore>()(persist((set, get) => ({
       || !current.unlockedLocationIds.includes(found.locationId)
       || !requirementMet(current, found.action.requires)) return false;
     const activeSleepSession = startSleepSession(current.sleepMode, current.selectedQuality, startedAt);
+    useSleepHardwareStore.getState().beginCapture(activeSleepSession);
     set((state) => ({
       saves: {
         ...state.saves,
@@ -106,6 +108,7 @@ export const useSandboxStore = create<SandboxStore>()(persist((set, get) => ({
     const resolution = resolveSandboxAction(content, current, current.pendingActionId);
     if (!resolution.ok || !resolution.entry) return false;
     const session = finishSleepSession(current.activeSleepSession, endedAt);
+    useSleepHardwareStore.getState().finishCapture(session);
     const before = current;
     const after = resolution.progress;
     const latestReport = {
