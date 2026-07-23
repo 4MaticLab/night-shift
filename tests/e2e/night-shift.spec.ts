@@ -90,6 +90,20 @@ test("migrates a legacy local language preference into the cookie", async ({ pag
   expect((await context.cookies()).find((cookie) => cookie.name === "night-shift-locale")?.value).toBe("en");
 });
 
+test("starts an unopened case after returning from a campaign with progress", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /CASE 002/ }).click();
+  await page.getByRole("button", { name: /开始第 002 宗案件/ }).click();
+  await page.getByRole("button", { name: "继续" }).click();
+  await page.getByRole("button", { name: "继续" }).click();
+  await page.getByRole("button", { name: /进入事务所/ }).click();
+
+  await page.getByRole("button", { name: /夜班侦探 NIGHT SHIFT/ }).click();
+  await page.getByRole("button", { name: /CASE 001/ }).click();
+  await page.getByRole("button", { name: /开始第 001 宗案件/ }).click();
+  await expect(page.getByRole("heading", { name: "你们从未同时醒着。" })).toBeVisible();
+});
+
 test("plays the first case in English and preserves the language preference", async ({ page, context }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /ENGLISH/ }).click();

@@ -110,7 +110,7 @@ function GamePage() {
   const hardwarePanel = <AnimatePresence>{hardwareOpen && <SleepHardwarePanel onClose={() => setHardwareOpen(false)} />}</AnimatePresence>;
 
   if (libraryOpen || (!game.started && !intro)) {
-    return <>{clueNotice}<Hero interactive={hydrated} onStart={() => { if (game.started || sandboxContent) { if (!game.started) game.begin(); setLibraryOpen(false); setIntro(false); } else setIntro(true); }} onDemo={() => { game.begin(); setLibraryOpen(false); if (!sandboxContent) setDemo(true); }} /><AnimatePresence>{demo && !sandboxContent && <DemoDrawer onClose={() => setDemo(false)} setView={changeView} />}</AnimatePresence></>;
+    return <>{clueNotice}<Hero interactive={hydrated} onStart={() => { setLibraryOpen(false); if (game.started || sandboxContent) { if (!game.started) game.begin(); setIntro(false); } else setIntro(true); }} onDemo={() => { game.begin(); setLibraryOpen(false); if (!sandboxContent) setDemo(true); }} /><AnimatePresence>{demo && !sandboxContent && <DemoDrawer onClose={() => setDemo(false)} setView={changeView} />}</AnimatePresence></>;
   }
   if (sandboxContent) return <>{clueNotice}<SandboxCase campaignId={campaign.id} content={sandboxContent} onHome={() => { setLibraryOpen(true); setIntro(false); }} onHardware={() => setHardwareOpen(true)} />{hardwarePanel}</>;
   if (intro && !game.started) return <>{clueNotice}<Intro onDone={() => { game.begin(); setIntro(false); }} /></>;
