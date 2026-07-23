@@ -52,6 +52,7 @@
 | [[plans/0040-browser-locale-negotiation]] | `completed` | `auto` | P0 | 6/6 | 已完成服务端语言协商、偏好迁移与跨设备验收 |
 | [[plans/0041-restored-main-integration-regressions]] | `completed` | `auto` | P0 | 4/4 | 已完成恢复主线后的兼容修复与全量验收 |
 | [[plans/0042-ipad-case-board-layout]] | `completed` | `auto` | P0 | 5/5 | 已完成平板竖屏案件板触控文档流与回归验收 |
+| [[plans/0043-case-library-unstarted-entry]] | `completed` | `auto` | P0 | 4/4 | 已修复卷宗库未开封案件入口并完成跨案件回归 |
 
 ## 状态规则
 
