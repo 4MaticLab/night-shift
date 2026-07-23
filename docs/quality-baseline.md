@@ -55,7 +55,7 @@ Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：除既有 Demo／
 
 - 浏览器端尚未建立像素截图基线或多设备／多浏览器矩阵；当前响应式证据聚焦 390 × 844 Chrome 关键路径。
 - 默认 `npm run build` 验证原生 Next.js/Vercel 产物；`npm run build:sites` 与 `npm run test:render` 验证 Vinext/Cloudflare Worker 产物。仅供 Cloudflare 使用的目录不进入 Next 类型检查，但仍由 Vinext 构建和 ESLint 覆盖。
-- 《黑水溪》专属人物／场景插图和环境音批次尚未制作；当前使用原创 CSS 档案地图与纸本界面。项目负责人已批准现有非商业、可披露源码推送；生产部署、商业发行和新增原作资产仍需独立授权复核。
+- 《黑水溪》专属人物／场景插图和环境音批次尚未制作；当前使用原创 CSS 档案地图与纸本界面。项目负责人已批准现有学习项目的公开源码与 Vercel 自动部署；未来商业发行和新增原作资产仍需独立授权复核。
 
 完成的工程加固见 [[plans/0003-mvp-quality-hardening]]；当前时间成长升级见 [[plans/0007-night-greenhouse-and-time-growth]]。
 
