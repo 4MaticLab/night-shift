@@ -23,6 +23,7 @@ import { cityDistricts, getCityDistrict } from "@/src/content/districts";
 import { endingEpilogues, getEndingEpilogue } from "@/src/content/endings";
 import { cityWatchEchoes, cityWatches, DEMO_CITY_WATCH_ID, getCityWatch, getCityWatchEcho, getCityWatchId } from "@/src/content/watches";
 import { getWakeEcho, getWakeEchoById, wakeEchoes } from "@/src/content/wake-echoes";
+import { createClueShareUrl, readSharedClueQuery, removeSharedClueQuery } from "@/src/lib/game-engine/clue-sharing";
 
 describe("Night Shift case content", () => {
   it("contains the complete five-night mystery", () => {
@@ -399,5 +400,15 @@ describe("Night Shift case content", () => {
     expect(matchEvidenceRelation("postcard", "flower-cycle")?.id).toBe("mina-evelyn");
     expect(matchEvidenceRelation("ticket-date", "postcard")).toBeUndefined();
     expect(matchEvidenceRelation("postcard", "postcard")).toBeUndefined();
+  });
+
+  it("builds and validates a single-clue share link", () => {
+    const shareUrl = createClueShareUrl("https://night-shift-zeta.vercel.app/?old=1#desk", "flower-cycle");
+
+    expect(shareUrl).toBe("https://night-shift-zeta.vercel.app/?clue=flower-cycle");
+    expect(readSharedClueQuery("?clue=flower-cycle")).toEqual({ present: true, clue: nightShiftCase.clues.find((clue) => clue.id === "flower-cycle") });
+    expect(readSharedClueQuery("?clue=unknown")).toEqual({ present: true, clue: undefined });
+    expect(readSharedClueQuery("?chapter=2")).toEqual({ present: false });
+    expect(removeSharedClueQuery("https://night-shift-zeta.vercel.app/?clue=flower-cycle&from=qr#desk")).toBe("/?from=qr#desk");
   });
 });

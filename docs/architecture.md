@@ -25,6 +25,7 @@
 | 睡隙回声 | `src/content/wake-echoes.ts` | 五夜各一条声音、掠影与短笺，以及确定性回声记录创建 |
 | 结局终函 | `src/content/endings.ts` | 三种结局的独立结果、林渡终函、档案标签与结案语 |
 | 证物关系 | `src/content/relations.ts` | 三条核心推论、对应证物对与成功解释 |
+| 好友线索链接 | `src/lib/game-engine/clue-sharing.ts` | 白名单线索查询、深链接生成与 query 清理 |
 | 内容契约 | `src/lib/game-engine/schema.ts` | Zod schema、引用与数量约束 |
 | 夜间结算 | `src/lib/game-engine/resolve-night.ts` | 根据章节、睡眠质量、随身物与调查方向选择确定性结果 |
 | 睡眠会话 | `src/lib/game-engine/sleep-session.ts` | 创建、恢复和结束 Demo／真实夜班，按时长生成质量与夜印进度 |
@@ -34,6 +35,7 @@
 | 落地叙事 | `src/components/game/landing.tsx` | 首页主视觉与三幕开场 |
 | 夜间循环 | `src/components/game/night-cycle.tsx` | 睡前准备、夜班会话、晨报与空晨报状态 |
 | 调查与归档 | `src/components/game/investigation.tsx` | 案件板、收藏柜、档案与结局 |
+| 好友线索界面 | `src/components/game/clue-sharing.tsx` | 二维码、复制链接与接收反馈 |
 | 游戏框架 | `src/components/game/shell.tsx` | 顶栏、底部导航与 Demo 控制台 |
 | 共享游戏 UI | `src/components/game/shared.tsx` | 纸卡、印章、城市路线与睡眠文案 |
 | 视觉系统 | `app/globals.css` | 色板、纸张、地图、雨雾、响应式与动效 |
@@ -41,7 +43,7 @@
 
 ## 状态模型
 
-主要阶段为 `day → ready → night → morning → ending`。章节结算只通过确定性内容函数产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 12；迁移会为旧存档补齐睡眠模式、会话、夜印、随身物历史、方向历史、温室成长记录、城市关系历史、问函答复历史、口袋纪念物、机会告示历史、案件板坐标、城市时辰与可选睡隙快照。
+主要阶段为 `day → ready → night → morning → ending`。章节结算只通过确定性内容函数产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 13；迁移会为旧存档补齐睡眠模式、会话、夜印、随身物历史、方向历史、温室成长记录、城市关系历史、问函答复历史、口袋纪念物、机会告示历史、案件板坐标、城市时辰、可选睡隙快照与好友送达线索 ID。
 
 睡眠质量为 `interrupted`、`regular`、`restful`：三者都至少解锁一条主线线索；差异只体现在路线长度、收藏数量、回声事件和环境观察。`selectedPreparationId` 记录当前随身物，`preparationHistory` 按章节保存已经归来的准备；`selectedChoice` 记录当前方向，`choiceHistory` 按章节保存路线履历。方向决定四个路线节点、五段夜间事件、城市遭遇与归来来信，但同章节三个方向的线索和藏品结果保持一致。完成一夜后，章节编号会加入持久化的 `nightSealIds` 与 `completedReports`，旅程册据此解锁明信片与路线履历。
 
@@ -71,6 +73,8 @@ React Flow 使用本地受控节点承接拖动过程，只在桌面端从图钉
 
 案件板由常驻联合推理台、明确尺寸的证物画布和证物侧页组成：桌面端侧页叠放在画布右侧，390 px 手机端则顺序排列到画布下方。推理动作始终在画布上方完成，侧页只负责阅档和展示已确认推论；这样玩家无需在长档案末尾寻找提交按钮，React Flow 也不会拦截移动页面滚动。
 
+好友线索使用 `?clue=<稳定线索 ID>` 的 local-first 深链接。分享端只从案件内容白名单生成链接和二维码；接收端在 hydration 后重新查同一白名单，合法 ID 才能经 `receiveSharedClue` 写入 `unlockedClueIds` 与 `receivedClueIds`，随后立即从地址栏移除该 query，未知 ID 不创建存档。重复链接保持幂等，不传送其他进度，也不会确认关系或推进章节。赠送线索可参与普通阅档与联合推理，但真结局只计算非 `receivedClueIds` 的亲自取得线索；玩家后来完成对应夜班时，该 ID 会从好友来源表移除，转为亲自取得。
+
 真结局资格由 `canUnlockTrueEnding` 统一判断，界面锁定与存档动作共用同一规则；因此不能通过绕开按钮直接写入未满足条件的真结局。旧存档迁移由可独立测试的 `migrateGameState` 提供。
 
 调查方向必须来自当前章节的三个 choice ID。空值只用于兼容旧夜班并确定性回退到第一条方向；非空非法 ID 会被拒绝。内容测试遍历全部十五条分支，证明同章节、同睡眠质量下的固定线索与收藏不随方向改变。
@@ -99,6 +103,7 @@ React Flow 使用本地受控节点承接拖动过程，只在桌面端从图钉
 - `landing.tsx`：落地页与开场，不读取游戏结算规则。
 - `night-cycle.tsx`：调查方向、随身物、林渡交接肖像与交接单、Demo／真实模式、夜印显影、归来明信片和晨报。
 - `investigation.tsx`：案件板、明信片旅程册、夜印收藏、物证档案、三结局与五夜结案卷宗。
+- `clue-sharing.tsx`：单条证物二维码、复制链接与接收结果提示；不拥有存档校验规则。
 - `shell.tsx`：跨视图导航与 Demo 控制台。
 - `shared.tsx`：跨功能域复用的纸张、印章和路线视觉原语。
 

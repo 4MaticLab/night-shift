@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { motion } from "motion/react";
-import { ArrowLeft, ArrowRight, BookOpen, Check, FileText, Flower2, KeyRound, Link2, RotateCcw, Search, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { ArrowLeft, ArrowRight, BookOpen, Check, FileText, Flower2, KeyRound, Link2, QrCode, RotateCcw, Search, X } from "lucide-react";
 import { Background, BackgroundVariant, Controls, Handle, Position, ReactFlow, useNodesState, type Edge, type Node, type NodeProps } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { nightShiftCase } from "@/src/content/case";
@@ -27,12 +27,13 @@ import { canUnlockTrueEnding, type EndingId } from "@/src/lib/game-engine/ending
 import { formatSleepDuration } from "@/src/lib/game-engine/sleep-session";
 import type { Clue, CorrespondenceRecord, SocietyMemoryRecord } from "@/src/lib/game-engine/schema";
 import { BotanicalSpecimen, PaperCard, qualityCopy, Seal, SocietyCrest } from "./shared";
+import { ClueShareDialog } from "./clue-sharing";
 
-type EvidenceNode = Node<{ clue: Clue; selected: boolean; selectionIndex: number | null; focused: boolean; onSelect: (clueId: string) => void }, "evidence">;
+type EvidenceNode = Node<{ clue: Clue; selected: boolean; selectionIndex: number | null; focused: boolean; received: boolean; onSelect: (clueId: string) => void }, "evidence">;
 
 function EvidenceNodeCard({ data }: NodeProps<EvidenceNode>) {
-  const { clue, selected, selectionIndex, focused, onSelect } = data;
-  return <div className="board-node-wrap"><Handle className="board-connection-handle" type="target" position={Position.Left} isConnectable={false} /><span className="board-node-drag-handle" title="拖动图钉整理证物"><span className="pin" /></span><div role="button" tabIndex={0} aria-pressed={selected} onClick={() => onSelect(clue.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onSelect(clue.id); } }} className={`board-node ${clue.type} ${selected ? "selected" : ""} ${focused ? "focused" : ""}`}>{selectionIndex !== null && <span className="evidence-slot-mark" aria-hidden="true">证物 {selectionIndex === 0 ? "A" : "B"}</span>}<small>{clue.type.toUpperCase()} · 0{clue.chapter}</small><b>{clue.title}</b><p>{clue.summary}</p></div><Handle className="board-connection-handle" type="source" position={Position.Right} isConnectable={false} /></div>;
+  const { clue, selected, selectionIndex, focused, received, onSelect } = data;
+  return <div className="board-node-wrap"><Handle className="board-connection-handle" type="target" position={Position.Left} isConnectable={false} /><span className="board-node-drag-handle" title="拖动图钉整理证物"><span className="pin" /></span><div role="button" tabIndex={0} aria-pressed={selected} onClick={() => onSelect(clue.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onSelect(clue.id); } }} className={`board-node ${clue.type} ${selected ? "selected" : ""} ${focused ? "focused" : ""} ${received ? "received" : ""}`}>{selectionIndex !== null && <span className="evidence-slot-mark" aria-hidden="true">证物 {selectionIndex === 0 ? "A" : "B"}</span>}{received && <span className="friend-clue-mark">好友送达</span>}<small>{clue.type.toUpperCase()} · 0{clue.chapter}</small><b>{clue.title}</b><p>{clue.summary}</p></div><Handle className="board-connection-handle" type="source" position={Position.Right} isConnectable={false} /></div>;
 }
 
 const evidenceNodeTypes = { evidence: EvidenceNodeCard };
@@ -42,11 +43,12 @@ function defaultBoardPosition(index: number) {
 }
 
 export function CaseBoard() {
-  const { unlockedClueIds, confirmedRelations, boardPositions, connectClues, setBoardPosition, resetBoardPositions } = useGameStore();
+  const { unlockedClueIds, receivedClueIds, confirmedRelations, boardPositions, connectClues, setBoardPosition, resetBoardPositions } = useGameStore();
   const [selectedClueIds, setSelectedClueIds] = useState<string[]>([]);
   const [focusedClueId, setFocusedClueId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ kind: "success" | "error"; text: string } | null>(null);
   const [isCompactBoard, setIsCompactBoard] = useState(false);
+  const [sharedClue, setSharedClue] = useState<Clue | null>(null);
   const available = nightShiftCase.clues.filter((clue) => unlockedClueIds.includes(clue.id));
 
   const selectEvidence = useCallback((clueId: string) => {
@@ -76,7 +78,7 @@ export function CaseBoard() {
     id: clue.id,
     type: "evidence",
     position: boardPositions[clue.id] ?? defaultBoardPosition(index),
-    data: { clue, selected: false, selectionIndex: null, focused: false, onSelect: selectEvidence },
+    data: { clue, selected: false, selectionIndex: null, focused: false, received: receivedClueIds.includes(clue.id), onSelect: selectEvidence },
     dragHandle: ".board-node-drag-handle",
     style: { background: "transparent", border: 0, padding: 0, width: 190 },
   })));
@@ -84,9 +86,9 @@ export function CaseBoard() {
   useEffect(() => {
     setNodes((current) => current.map((node) => {
       const selectionIndex = selectedClueIds.indexOf(node.id);
-      return { ...node, data: { ...node.data, selected: selectionIndex !== -1, selectionIndex: selectionIndex === -1 ? null : selectionIndex, focused: focusedClueId === node.id, onSelect: selectEvidence } };
+      return { ...node, data: { ...node.data, selected: selectionIndex !== -1, selectionIndex: selectionIndex === -1 ? null : selectionIndex, focused: focusedClueId === node.id, received: receivedClueIds.includes(node.id), onSelect: selectEvidence } };
     }));
-  }, [focusedClueId, selectEvidence, selectedClueIds, setNodes]);
+  }, [focusedClueId, receivedClueIds, selectEvidence, selectedClueIds, setNodes]);
   const edges = useMemo<Edge[]>(() => evidenceRelations.flatMap((relation, index) => {
     if (!confirmedRelations.includes(relation.id) || !relation.clueIds.every((clueId) => unlockedClueIds.includes(clueId))) return [];
     return [{ id: relation.id, source: relation.clueIds[0], target: relation.clueIds[1], animated: true, label: `推论 0${index + 1}`, style: { stroke: index === 1 ? "#a86158" : "#698d89", strokeWidth: 3 }, labelStyle: { fill: "#e7dcc5", fontSize: 9 } }];
@@ -148,10 +150,11 @@ export function CaseBoard() {
       </div>
       <aside className="relation-panel" aria-label="证物档案与关系">
         <div className="board-panel-heading"><small>OPEN DOSSIER · {focusedClue ? `NIGHT 0${focusedClue.chapter}` : "NO FILE"}</small><button type="button" onClick={restoreBoardLayout}><RotateCcw /> 恢复摆放</button></div>
-        {focusedClue ? <article className="clue-dossier" aria-live="polite"><span>{focusedClue.type}</span><h3>{focusedClue.title}</h3><p>{focusedClue.detail}</p><blockquote><small>城市异议</small>“{focusedClue.cityObjection}”</blockquote><div><small>林渡 · 页边批注</small>{focusedClue.marginNote}</div>{focusedRelations.length > 0 && <footer><small>这份证物已经参与作证</small>{focusedRelations.map((relation) => <b key={relation.id}><Link2 /> {relation.statement}</b>)}</footer>}</article> : <div className="clue-dossier empty"><FileText /><p>点击案板上的证物即可阅档；被选中的两件会进入上方联合推理台。</p></div>}
+        {focusedClue ? <article className="clue-dossier" aria-live="polite"><span>{focusedClue.type}{receivedClueIds.includes(focusedClue.id) ? " · 好友送达" : ""}</span><h3>{focusedClue.title}</h3><button className="clue-share-trigger" type="button" onClick={() => setSharedClue(focusedClue)}><QrCode /> 送给好友</button><p>{focusedClue.detail}</p><blockquote><small>城市异议</small>“{focusedClue.cityObjection}”</blockquote><div><small>林渡 · 页边批注</small>{focusedClue.marginNote}</div>{focusedRelations.length > 0 && <footer><small>这份证物已经参与作证</small>{focusedRelations.map((relation) => <b key={relation.id}><Link2 /> {relation.statement}</b>)}</footer>}</article> : <div className="clue-dossier empty"><FileText /><p>点击案板上的证物即可阅档；被选中的两件会进入上方联合推理台。</p></div>}
         <div className="relation-ledger"><small>核心推论 · {confirmedRelations.length}/3</small>{evidenceRelations.map((relation, index) => { const confirmed = confirmedRelations.includes(relation.id); return <div className={confirmed ? "relation-entry done" : "relation-entry"} key={relation.id}><span>{confirmed ? <Check /> : `0${index + 1}`}</span><div><small>{confirmed ? "CONFIRMED" : "UNRESOLVED"}</small><b>{confirmed ? relation.statement : "未确认推论"}</b></div></div>; })}</div>
       </aside>
     </div>
+    <AnimatePresence>{sharedClue && <ClueShareDialog clue={sharedClue} onClose={() => setSharedClue(null)} />}</AnimatePresence>
   </div>;
 }
 
@@ -197,9 +200,10 @@ export function ArchivePage() {
 }
 
 export function Ending() {
-  const { unlockedClueIds, unlockedCollectibleIds, confirmedRelations, correspondenceHistory, completedReports, preparationHistory, choiceHistory, growthHistory, souvenirHistory, endingId, chooseEnding, reset } = useGameStore();
+  const { unlockedClueIds, receivedClueIds, unlockedCollectibleIds, confirmedRelations, correspondenceHistory, completedReports, preparationHistory, choiceHistory, growthHistory, souvenirHistory, endingId, chooseEnding, reset } = useGameStore();
   const [reviewingArchive, setReviewingArchive] = useState(false);
-  const trueReady = canUnlockTrueEnding({ unlockedClueIds, unlockedCollectibleIds, confirmedRelations });
+  const earnedClueIds = unlockedClueIds.filter((clueId) => !receivedClueIds.includes(clueId));
+  const trueReady = canUnlockTrueEnding({ unlockedClueIds: earnedClueIds, unlockedCollectibleIds, confirmedRelations });
   const dominantStance = getDominantCorrespondenceStance(correspondenceHistory);
   const cityAfterword = dominantStance ? correspondencePostures[dominantStance] : { title: "未寄出的答复", note: "你没有让任何社团替你固定立场。雾灯城把那些空信封也归了档：沉默不是失败，只是一种尚未交出的决定。" };
   const icons: Record<EndingId, React.ReactNode> = { public: <FileText />, protect: <KeyRound />, return: <Flower2 /> };
@@ -231,5 +235,5 @@ export function Ending() {
     <div className="ending-actions"><button type="button" onClick={() => setReviewingArchive(true)}><BookOpen /> 重看档案</button><button type="button" disabled><KeyRound /> 下一宗案件 · 即将开放</button><button type="button" onClick={reset}><RotateCcw /> 重新调查</button></div>
   </main>;
 
-  return <main className="ending-choice"><Image className="ending-background" src={endingArt.src} alt={endingArt.alt} fill priority sizes="100vw" /><div className="page-title"><div><p className="eyebrow">FINAL DECISION · 05:43</p><h2>最后的决定，<br />由你写进档案。</h2></div><p>伊芙琳把账册留在站台，却没有把决定也留下。三种真相，都有各自的代价。</p></div><div className="ending-cards">{endingEpilogues.map((ending) => { const locked = ending.id === "return" && !trueReady; return <button key={ending.id} disabled={locked} onClick={() => chooseEnding(ending.id)} className={ending.id === "return" ? "true-ending" : ""}><span>{icons[ending.id]}</span><small>{locked ? `尚需 ${12 - unlockedClueIds.length} 条线索 / ${3 - confirmedRelations.length} 条关系` : "可选择"}</small><h3>{ending.title}</h3><p>{ending.theme}</p><ArrowRight /></button>; })}</div></main>;
+  return <main className="ending-choice"><Image className="ending-background" src={endingArt.src} alt={endingArt.alt} fill priority sizes="100vw" /><div className="page-title"><div><p className="eyebrow">FINAL DECISION · 05:43</p><h2>最后的决定，<br />由你写进档案。</h2></div><p>伊芙琳把账册留在站台，却没有把决定也留下。三种真相，都有各自的代价。</p></div><div className="ending-cards">{endingEpilogues.map((ending) => { const locked = ending.id === "return" && !trueReady; return <button key={ending.id} disabled={locked} onClick={() => chooseEnding(ending.id)} className={ending.id === "return" ? "true-ending" : ""}><span>{icons[ending.id]}</span><small>{locked ? `尚需 ${12 - earnedClueIds.length} 条亲自带回的线索 / ${3 - confirmedRelations.length} 条关系` : "可选择"}</small><h3>{ending.title}</h3><p>{ending.theme}</p><ArrowRight /></button>; })}</div></main>;
 }

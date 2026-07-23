@@ -14,6 +14,7 @@ import { createCorrespondenceRecord, getCorrespondencePrompt } from "@/src/conte
 import { createSouvenirRecord, DEMO_JOURNEY_SEED } from "@/src/content/souvenirs";
 import { createOpportunityRecord, getOpportunityCandidates } from "@/src/content/opportunities";
 import { DEMO_CITY_WATCH_ID, getCityWatchId } from "@/src/content/watches";
+import { getShareableClue } from "@/src/lib/game-engine/clue-sharing";
 
 export type Phase = "day" | "ready" | "night" | "morning" | "ending";
 
@@ -36,6 +37,7 @@ export interface GameState {
   souvenirHistory: Partial<Record<number, SouvenirRecord>>;
   opportunityHistory: Partial<Record<number, OpportunityRecord>>;
   unlockedClueIds: string[];
+  receivedClueIds: string[];
   unlockedCollectibleIds: string[];
   completedReports: number[];
   confirmedRelations: string[];
@@ -52,6 +54,7 @@ export interface GameState {
   dismissOpportunities: () => boolean;
   continueDay: () => void;
   connectClues: (firstClueId: string, secondClueId: string) => string | null;
+  receiveSharedClue: (clueId: string) => "received" | "already-received" | "already-owned" | "invalid";
   setBoardPosition: (clueId: string, position: BoardPosition) => boolean;
   resetBoardPositions: () => void;
   jumpToChapter: (chapter: number) => void;
@@ -79,6 +82,7 @@ const initial = {
   souvenirHistory: {} as Partial<Record<number, SouvenirRecord>>,
   opportunityHistory: {} as Partial<Record<number, OpportunityRecord>>,
   unlockedClueIds: [] as string[],
+  receivedClueIds: [] as string[],
   unlockedCollectibleIds: [] as string[],
   completedReports: [] as number[],
   confirmedRelations: [] as string[],
@@ -157,6 +161,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
         [state.chapter]: souvenirRecord,
       },
       unlockedClueIds: Array.from(new Set([...state.unlockedClueIds, ...result.clueIds])),
+      receivedClueIds: state.receivedClueIds.filter((clueId) => !result.clueIds.includes(clueId)),
       unlockedCollectibleIds: Array.from(new Set([...state.unlockedCollectibleIds, ...result.collectibleIds])),
       completedReports: Array.from(new Set([...state.completedReports, state.chapter])),
       nightSealIds: Array.from(new Set([...state.nightSealIds, state.chapter])),
@@ -210,6 +215,19 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
     set({ confirmedRelations: Array.from(new Set([...state.confirmedRelations, relation.id])) });
     return relation.id;
   },
+  receiveSharedClue: (clueId) => {
+    const clue = getShareableClue(clueId);
+    if (!clue) return "invalid";
+    const state = get();
+    if (state.receivedClueIds.includes(clue.id)) return "already-received";
+    if (state.unlockedClueIds.includes(clue.id)) return "already-owned";
+    set({
+      started: true,
+      unlockedClueIds: [...state.unlockedClueIds, clue.id],
+      receivedClueIds: [...state.receivedClueIds, clue.id],
+    });
+    return "received";
+  },
   setBoardPosition: (clueId, position) => {
     const state = get();
     const parsed = boardPositionSchema.safeParse(position);
@@ -226,15 +244,16 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
     const societyHistory = createLegacySocietyHistory(priorChapters, choiceHistory, growthHistory);
     set({ ...initial, started: true, chapter, phase: "day", journeySeed: DEMO_JOURNEY_SEED, souvenirHistory: createLegacySouvenirHistory(priorChapters, preparationHistory, choiceHistory, DEMO_JOURNEY_SEED, growthHistory), opportunityHistory: createDemoOpportunityHistory(priorChapters, DEMO_JOURNEY_SEED), nightSealIds: priorChapters, completedReports: priorChapters, preparationHistory, choiceHistory, growthHistory, societyHistory, correspondenceHistory: createDemoCorrespondenceHistory(priorChapters, societyHistory), unlockedClueIds: chapter === 1 ? [] : Array.from({ length: Math.min(12, (chapter - 1) * 3) }, (_, i) => ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "room-307", "transport-photo", "scratched-map", "museum-tag", "ledger-clasp", "evelyn-message"][i]), unlockedCollectibleIds: Array.from({ length: Math.min(8, (chapter - 1) * 2) }, (_, i) => ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"][i]) });
   },
-  unlockBoard: (confirmRelations = false) => set({ unlockedClueIds: ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "scratched-map", "room-307", "transport-photo", "museum-tag", "ledger-clasp", "evelyn-message"], unlockedCollectibleIds: ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"], confirmedRelations: confirmRelations ? ["line-institution", "mina-evelyn", "gideon-escape"] : [] }),
+  unlockBoard: (confirmRelations = false) => set({ unlockedClueIds: ["ticket-date", "ticket-paper", "matchbox", "flower-cycle", "postcard", "missing-log", "scratched-map", "room-307", "transport-photo", "museum-tag", "ledger-clasp", "evelyn-message"], receivedClueIds: [], unlockedCollectibleIds: ["torn-ticket", "matchbox-item", "pressed-flower", "postcard-item", "hotel-key", "driver-badge", "museum-tag-item", "ledger-clasp-item"], confirmedRelations: confirmRelations ? ["line-institution", "mina-evelyn", "gideon-escape"] : [] }),
   chooseEnding: (endingId) => {
     const state = get();
-    if (canChooseEnding(endingId, state)) set({ endingId, phase: "ending" });
+    const earnedClueIds = state.unlockedClueIds.filter((clueId) => !state.receivedClueIds.includes(clueId));
+    if (canChooseEnding(endingId, { ...state, unlockedClueIds: earnedClueIds })) set({ endingId, phase: "ending" });
   },
   reset: () => set({ ...initial, endingId: undefined }),
 }), {
   name: "night-shift-save-v1",
-  version: 12,
+  version: 13,
   migrate: migrateGameState,
 }));
 
@@ -245,6 +264,7 @@ export function migrateGameState(persistedState: unknown): GameState {
   const completedReports = persisted.completedReports ?? [];
   const growthHistory = migrateGrowthHistory(persisted.growthHistory, completedReports, preparationHistory, choiceHistory);
   const journeySeed = persisted.journeySeed || DEMO_JOURNEY_SEED;
+  const receivedClueIds = sanitizeReceivedClueIds(persisted.receivedClueIds);
   return {
     ...persisted,
     sleepMode: persisted.sleepMode ?? "demo",
@@ -258,10 +278,17 @@ export function migrateGameState(persistedState: unknown): GameState {
     journeySeed,
     souvenirHistory: persisted.souvenirHistory ?? createLegacySouvenirHistory(completedReports, preparationHistory, choiceHistory, journeySeed, growthHistory),
     opportunityHistory: persisted.opportunityHistory ?? {},
+    unlockedClueIds: Array.from(new Set([...(persisted.unlockedClueIds ?? []), ...receivedClueIds])),
+    receivedClueIds,
     boardPositions: sanitizeBoardPositions(persisted.boardPositions),
     nightSealIds: persisted.nightSealIds ?? [],
     selectedPreparationId: persisted.selectedPreparationId ?? "",
   } as GameState;
+}
+
+function sanitizeReceivedClueIds(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return Array.from(new Set(value.filter((clueId): clueId is string => Boolean(getShareableClue(clueId)))));
 }
 
 function sanitizeBoardPositions(value: unknown): Record<string, BoardPosition> {

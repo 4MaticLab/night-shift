@@ -162,6 +162,7 @@ describe("Night Shift game store", () => {
     expect(migrated.journeySeed).toBe(DEMO_JOURNEY_SEED);
     expect(migrated.souvenirHistory).toEqual({});
     expect(migrated.opportunityHistory).toEqual({});
+    expect(migrated.receivedClueIds).toEqual([]);
     expect(migrated.boardPositions).toEqual({});
     expect(migrated.nightSealIds).toEqual([]);
     expect(migrated.selectedPreparationId).toBe("");
@@ -224,6 +225,38 @@ describe("Night Shift game store", () => {
     });
 
     expect(migrated.boardPositions).toEqual({ "ticket-date": { x: 240, y: 160 } });
+  });
+
+  it("receives one whitelisted friend clue without advancing the case", () => {
+    const state = storeModule.useGameStore.getState();
+
+    expect(state.receiveSharedClue("not-a-clue")).toBe("invalid");
+    expect(state.receiveSharedClue("flower-cycle")).toBe("received");
+    const received = storeModule.useGameStore.getState();
+    expect(received.started).toBe(true);
+    expect(received.chapter).toBe(1);
+    expect(received.phase).toBe("day");
+    expect(received.unlockedClueIds).toEqual(["flower-cycle"]);
+    expect(received.receivedClueIds).toEqual(["flower-cycle"]);
+    expect(received.completedReports).toEqual([]);
+    expect(received.confirmedRelations).toEqual([]);
+    expect(received.receiveSharedClue("flower-cycle")).toBe("already-received");
+
+    const migrated = storeModule.migrateGameState({
+      unlockedClueIds: [],
+      receivedClueIds: ["postcard", "unknown", "postcard"],
+    });
+    expect(migrated.receivedClueIds).toEqual(["postcard"]);
+    expect(migrated.unlockedClueIds).toEqual(["postcard"]);
+
+    storeModule.useGameStore.getState().reset();
+    expect(storeModule.useGameStore.getState().receiveSharedClue("ticket-date")).toBe("received");
+    storeModule.useGameStore.getState().selectChoice("source");
+    storeModule.useGameStore.getState().startNight("restful", "side-lamp", "demo");
+    storeModule.useGameStore.getState().finishNight();
+    const earned = storeModule.useGameStore.getState();
+    expect(earned.receivedClueIds).toEqual([]);
+    expect(earned.unlockedClueIds).toEqual(["ticket-date", "ticket-paper", "matchbox"]);
   });
 
   it("restores prior reports and postcard preparations for demo chapter jumps", () => {
@@ -297,6 +330,11 @@ describe("Night Shift game store", () => {
 
     storeModule.useGameStore.getState().jumpToChapter(5);
     storeModule.useGameStore.getState().unlockBoard(true);
+    storeModule.useGameStore.setState({ receivedClueIds: [...storeModule.useGameStore.getState().unlockedClueIds] });
+    storeModule.useGameStore.getState().chooseEnding("return");
+    expect(storeModule.useGameStore.getState().endingId).toBeUndefined();
+
+    storeModule.useGameStore.setState({ receivedClueIds: [] });
     storeModule.useGameStore.getState().chooseEnding("return");
     expect(storeModule.useGameStore.getState().endingId).toBe("return");
   });

@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前主计划是 [[plans/0023-mobile-case-board-inference]]：修复移动端案件板吞手势的问题，并把联合推理重构为可见、可撤销的三步流程。
+当前主计划是 [[plans/0024-friend-clue-sharing]]：让玩家通过二维码或链接把一张白名单线索送进好友的本地案件板。
 
 ## 计划清单
 
@@ -32,8 +32,8 @@
 | [[plans/0020-sleep-gap-echoes-and-gentle-wake-check-in]] | `completed` | `auto` | P0 | 6/6 | 已发布五条睡隙回声、一次醒转记录与 v12 存档 |
 | [[plans/0021-cross-device-interaction-pass]] | `completed` | `manual` | P0 | 6/6 | 已发布桌面／移动端交互整修与浏览器实测版本 |
 | [[plans/0022-vercel-dual-target-deployment]] | `completed` | `manual` | P0 | 5/5 | Vercel 生产部署成功，Sites 双目标保留 |
-| [[plans/0023-mobile-case-board-inference]] | `in_progress` | `manual` | P0 | 4/5 | 提交、推送并确认最新 Vercel 生产部署 |
-| [[plans/0024-friend-clue-sharing]] | `approved` | `manual` | P0 | 0/5 | 等待 0023 完成后进入好友线索深链实现 |
+| [[plans/0023-mobile-case-board-inference]] | `completed` | `manual` | P0 | 5/5 | 已发布移动案板逃生手势与三步联合推理台 |
+| [[plans/0024-friend-clue-sharing]] | `in_progress` | `manual` | P0 | 4/5 | 提交推送并确认 Vercel 生产部署 |
 
 ## 状态规则
 

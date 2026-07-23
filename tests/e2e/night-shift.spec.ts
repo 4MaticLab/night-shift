@@ -222,6 +222,58 @@ test("builds a core inference by connecting two evidence cards", async ({ page }
   await expect(page.locator(".react-flow__edge")).toHaveCount(1);
 });
 
+test("shares one clue as a QR deep link", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /DEMO MODE/ }).click();
+  await page.getByRole("button", { name: /解锁完整案件板/ }).click();
+  await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
+  await page.getByRole("button", { name: /送给好友/ }).click();
+
+  const dialog = page.getByRole("dialog", { name: /把「四十三天」/ });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText(/不会附带你的夜班进度/)).toBeVisible();
+  await expect(dialog.getByLabel("好友线索链接")).toHaveValue("http://localhost:3000/?clue=flower-cycle");
+  await expect(dialog.getByRole("img", { name: /分享线索「四十三天」的二维码/ })).toHaveAttribute("src", /^data:image\/png;base64,/);
+  await dialog.getByRole("button", { name: "复制链接" }).click();
+  await expect(dialog.getByRole("button", { name: "链接已复制" })).toBeVisible();
+  await dialog.getByRole("button", { name: "关闭线索分享" }).click();
+  await expect(dialog).toHaveCount(0);
+});
+
+test("receives a friend clue from a validated query without advancing the case", async ({ page }) => {
+  await page.goto("/?clue=postcard");
+
+  await expect(page.locator(".clue-gift-notice")).toContainText("好友送来「未寄出的明信片」");
+  await expect(page).toHaveURL("/");
+  await expect(page.getByRole("heading", { name: /把城市说过的谎/ })).toBeVisible();
+  await expect(page.locator('.react-flow__node[data-id="postcard"] .board-node.received')).toBeVisible();
+  await expect(page.locator('.react-flow__node[data-id="postcard"]')).toContainText("好友送达");
+  const importedState = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state);
+  expect(importedState).toMatchObject({
+    started: true,
+    chapter: 1,
+    phase: "day",
+    unlockedClueIds: ["postcard"],
+    receivedClueIds: ["postcard"],
+    completedReports: [],
+    confirmedRelations: [],
+  });
+
+  await page.goto("/?clue=postcard");
+  await expect(page.locator(".clue-gift-notice")).toContainText("已经收过");
+  const repeatedState = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state);
+  expect(repeatedState.receivedClueIds).toEqual(["postcard"]);
+});
+
+test("rejects an unknown friend clue without starting a save", async ({ page }) => {
+  await page.goto("/?clue=not-a-real-clue");
+
+  await expect(page.locator(".clue-gift-notice")).toContainText("这封线索无法归档");
+  await expect(page).toHaveURL("/");
+  await expect(page.getByRole("heading", { name: /你睡着以后/ })).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem("night-shift-save-v1"))).toBeNull();
+});
+
 test("remembers a hand-arranged evidence desk after reload", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
