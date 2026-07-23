@@ -11,6 +11,7 @@ import { useGameStore } from "@/src/stores/game-store";
 import { ClueGiftNotice, type ClueGiftNoticeData } from "@/src/components/game/clue-sharing";
 import { readSharedClueQuery, removeSharedClueQuery } from "@/src/lib/game-engine/clue-sharing";
 import { getCampaign } from "@/src/content/campaigns/registry";
+import { SandboxCase } from "@/src/components/game/sandbox-case";
 
 const subscribeToHydration = () => () => undefined;
 
@@ -23,6 +24,8 @@ export default function HomePage() {
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [clueGiftNotice, setClueGiftNotice] = useState<ClueGiftNoticeData | null>(null);
   const processedClueQuery = useRef(false);
+  const campaign = getCampaign(game.campaignId);
+  const sandboxContent = campaign.format === "sandbox-expedition" ? campaign.sandbox : undefined;
   const activeView: GameView = game.phase === "morning" && view === "tonight" ? "report" : view;
   const receiveSharedClue = game.receiveSharedClue;
   const switchCampaign = game.switchCampaign;
@@ -84,8 +87,9 @@ export default function HomePage() {
   const clueNotice = <AnimatePresence>{clueGiftNotice && <ClueGiftNotice notice={clueGiftNotice} onClose={() => setClueGiftNotice(null)} />}</AnimatePresence>;
 
   if (libraryOpen || (!game.started && !intro)) {
-    return <>{clueNotice}<Hero interactive={hydrated} onStart={() => { if (game.started) setLibraryOpen(false); else setIntro(true); }} onDemo={() => { game.begin(); setLibraryOpen(false); setDemo(true); }} /><AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={changeView} />}</AnimatePresence></>;
+    return <>{clueNotice}<Hero interactive={hydrated} onStart={() => { if (game.started || sandboxContent) { if (!game.started) game.begin(); setLibraryOpen(false); setIntro(false); } else setIntro(true); }} onDemo={() => { game.begin(); setLibraryOpen(false); if (!sandboxContent) setDemo(true); }} /><AnimatePresence>{demo && !sandboxContent && <DemoDrawer onClose={() => setDemo(false)} setView={changeView} />}</AnimatePresence></>;
   }
+  if (sandboxContent) return <>{clueNotice}<SandboxCase campaignId={campaign.id} content={sandboxContent} onHome={() => { setLibraryOpen(true); setIntro(false); }} /></>;
   if (intro && !game.started) return <>{clueNotice}<Intro onDone={() => { game.begin(); setIntro(false); }} /></>;
   if (game.phase === "night") return <>{clueNotice}<NightRun onFinish={game.finishNight} /></>;
   if (game.phase === "ending") return <>{clueNotice}<Ending onOpenLibrary={() => setLibraryOpen(true)} /></>;
