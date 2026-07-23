@@ -1,6 +1,6 @@
 # 收藏页信息架构与移动端可达性
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P1
 - 创建：2026-07-24
 - 更新：2026-07-24
@@ -37,7 +37,7 @@
 - [x] 实现核心物证优先、分类导航与响应式单组聚焦。
 - [x] 补齐键盘语义、44 px 触控目标、选中态与定位反馈。
 - [x] 增加浏览器回归并更新稳定交互文档。
-- [ ] 完成三档浏览器验收与全部工程护栏。
+- [x] 完成三档浏览器验收与全部工程护栏。
 
 ## 验收标准
 
@@ -49,16 +49,16 @@
 
 ## 验证
 
-- `npm test`
-- `npm run lint`
-- `npm run build`
-- `npm run build:sites`
-- `npm run test:render`
-- `npm run docs:check`
-- `npm run test:e2e`
-- `npm run contract:compile && npm run contract:test`
-- `git diff --check`
-- 浏览器人工验收：1440 × 900、820 × 1180、390 × 844。
+- `npm test`：82 项通过。
+- `npm run lint`：通过。
+- `npm run build`：Next.js 生产构建通过。
+- `npm run build:sites`：由 `npm run test:render` 覆盖，vinext 构建通过。
+- `npm run test:render`：1 项服务端渲染检查通过。
+- `npm run docs:check`：81 篇 Markdown 的双链全部可解析。
+- `npm run test:e2e`：35 项通过；覆盖 1440 × 900、820 × 1180、390 × 844 三档视口及四分类切换。
+- `npm run contract:compile && npm run contract:test`：合约编译通过，2 项测试通过。
+- `git diff --check`：通过。
+- 本机浏览器抽查：1280 × 720 无横向溢出，核心物证位于 419 px 后，四个按钮均为 60 px 高；桌面四组连续排序正确。
 
 ## 决定记录
 
@@ -66,6 +66,7 @@
 - 2026-07-24：初始分类定为“核心物证、夜班归来、城市回声、口袋小物”。核心物证永远排第一；桌面连续展示、触屏单组聚焦，避免把桌面也改成需要反复切换的仪表盘。
 - 2026-07-24：分类状态是纯界面状态，不进入游戏 store。桌面按钮负责平滑定位且所有 section 始终显示；900 px 以下依照同一状态只显示当前组。CSS `order` 调整阅读顺序，不复制任何收藏数据。
 - 2026-07-24：1280 × 720 本机浏览器样本中，核心物证从索引后的 419 px 开始，随后依次是夜班归来、城市回声与口袋小物；页面无横向溢出。390 × 844 自动化把默认核心物证组的总高度约束在 5200 px 内。
+- 2026-07-24：全量门禁、三档 Playwright 与桌面实机抽查通过，计划完成；弹层焦点和 Demo 状态语义保持为下一笔独立 UI/UX PR。
 
 ## 相关文档
 

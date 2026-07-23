@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/collection-information-architecture]] | `codex/collection-information-architecture` | `in_progress` | `auto` | 80% | 运行全量门禁并完成三档视觉验收 |
+| [[plans/collection-information-architecture]] | `codex/collection-information-architecture` | `completed` | `auto` | 100% | 提交最终证据后退役计划并开 Draft PR |
 
 ## 使用规则
 
