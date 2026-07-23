@@ -6,7 +6,6 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/feat-injective-keepsake-mint]] | `feat/injective-keepsake-mint` | `completed` | `manual` | 8/8 | 验证证据已记录；下一提交按规范退役临时计划 |
 
 ## 使用规则
 
