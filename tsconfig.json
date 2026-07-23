@@ -37,6 +37,7 @@
     "db",
     "examples",
     "worker",
+    "contract-tests",
     "vite.config.ts"
   ]
 }

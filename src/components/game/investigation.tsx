@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, ArrowRight, BookOpen, Check, FileCheck2, FileText, Flower2, KeyRound, Link2, QrCode, RotateCcw, Search, Sparkles, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, FileCheck2, FileText, Flower2, KeyRound, Link2, QrCode, RotateCcw, Search, Sparkles, X } from "lucide-react";
 import { Background, BackgroundVariant, Controls, Handle, Position, ReactFlow, useNodesState, type Edge, type Node, type NodeProps } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { getAsset } from "@/src/content/assets";
@@ -127,7 +127,6 @@ export function CaseBoard() {
 
   return <div className="board-page">
     <div className="page-title"><div><p className="eyebrow">CASE BOARD · {t("证物关系图")}</p><h2>{locale === "en" ? <>Connect the lies<br />the city has told.</> : <>把城市说过的谎，<br />一根根连起来。</>}</h2></div><p>{t("点两张证物，再核对它们是否能共同作证。无需拖线；桌面端拖动图钉只用于整理案板。")}</p></div>
-    <CipherDesk />
     <div className="board-workspace">
       <div className="board-shell">
         <div className="board-flow">{nodes.length ? <ReactFlow nodes={nodes} edges={edges} nodeTypes={evidenceNodeTypes} onNodesChange={onNodesChange} onNodeDragStop={(_, node) => setBoardPosition(node.id, node.position)} fitView minZoom={0.5} maxZoom={1.6} nodesDraggable={!isCompactBoard} panOnDrag={!isCompactBoard} zoomOnPinch={!isCompactBoard} zoomOnScroll={!isCompactBoard} zoomOnDoubleClick={!isCompactBoard} preventScrolling={!isCompactBoard} proOptions={{ hideAttribution: true }}><Background color="#988d73" gap={28} size={1} variant={BackgroundVariant.Dots} />{!isCompactBoard && <Controls showInteractive={false} />}</ReactFlow> : <div className="board-empty"><Search /><h3>{t("案件板还很安静")}</h3><p>{t("完成第一夜调查，林渡带回的证物会出现在这里。")}</p></div>}</div>
@@ -156,6 +155,13 @@ export function CaseBoard() {
         <div className="relation-ledger"><small>{t("核心推论")} · {confirmedRelations.length}/{campaign.relations.length}</small>{campaign.relations.map((relation, index) => { const confirmed = confirmedRelations.includes(relation.id); return <div className={confirmed ? "relation-entry done" : "relation-entry"} key={relation.id}><span>{confirmed ? <Check /> : `0${index + 1}`}</span><div><small>{confirmed ? "CONFIRMED" : "UNRESOLVED"}</small><b>{confirmed ? relation.statement : t("未确认推论")}</b></div></div>; })}</div>
       </aside>
     </div>
+    <details className="board-cipher-disclosure">
+      <summary>
+        <span><small>OPTIONAL ARCHIVE · {locale === "en" ? "OPTIONAL CIPHERS" : "可选解密"}</small><b>{locale === "en" ? "Open the night cipher desk" : "打开夜班密文台"}</b><p>{locale === "en" ? "Ciphers reveal extra archive notes. They add no reward, replace no inference, and change no ending condition." : "密文只展开补充旁注，不增加奖励、不替代联合推理，也不改变任何结局资格。"}</p></span>
+        <ChevronRight />
+      </summary>
+      <CipherDesk />
+    </details>
     <AnimatePresence>{sharedClue && <ClueShareDialog clue={sharedClue} onClose={() => setSharedClue(null)} />}</AnimatePresence>
   </div>;
 }

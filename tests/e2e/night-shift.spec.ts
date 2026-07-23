@@ -807,6 +807,19 @@ test.describe("tablet portrait 820x1180", () => {
     await page.locator(".relation-panel").scrollIntoViewIfNeeded();
     await expect(page.getByRole("region", { name: "联合推理操作台" })).toBeVisible();
     await expect(page.getByRole("button", { name: /还需选择 2 件证物/ })).toBeVisible();
+    const cipherDisclosure = page.locator(".board-cipher-disclosure");
+    await expect(cipherDisclosure).not.toHaveAttribute("open", "");
+    await expect(cipherDisclosure.getByText("可选解密")).toBeVisible();
+    const [workspaceBox, cipherBox] = await Promise.all([
+      page.locator(".board-workspace").boundingBox(),
+      cipherDisclosure.boundingBox(),
+    ]);
+    expect(workspaceBox).not.toBeNull();
+    expect(cipherBox).not.toBeNull();
+    expect(cipherBox!.y).toBeGreaterThanOrEqual(workspaceBox!.y + workspaceBox!.height - 1);
+    await page.locator(".board-cipher-disclosure > summary").click();
+    await expect(page.locator(".cipher-desk")).toBeVisible();
+    await expectNoPageOverflow(page);
   });
 });
 
@@ -841,6 +854,15 @@ test.describe("mobile 390x844", () => {
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /跳到清晨/ }).click();
     await expect(page.getByText("昨夜调查完成")).toBeVisible();
+    const reportArchive = page.locator(".report-archive-details");
+    await expect(reportArchive).not.toHaveAttribute("open", "");
+    await expect(reportArchive.getByText("可选详读")).toBeVisible();
+    await expect(page.locator(".city-watch-report")).toBeHidden();
+    const compactReportHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+    expect(compactReportHeight).toBeLessThan(6000);
+    await page.getByRole("button", { name: /整理线索，准备下一夜/ }).scrollIntoViewIfNeeded();
+    await expect(page.getByRole("button", { name: /整理线索，准备下一夜/ })).toBeVisible();
+    await page.locator(".report-archive-details > summary").click();
     await expect(page.locator(".city-watch-report")).toBeVisible();
     await expect(page.locator(".wake-echo-report")).toContainText("纸纤维里的第二场雨");
     await expectNoPageOverflow(page);
