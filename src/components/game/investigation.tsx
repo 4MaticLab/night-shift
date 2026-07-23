@@ -123,30 +123,30 @@ export function CaseBoard() {
     <div className="page-title"><div><p className="eyebrow">CASE BOARD · 证物关系图</p><h2>把城市说过的谎，<br />一根根连起来。</h2></div><p>点两张证物，再核对它们是否能共同作证。无需拖线；桌面端拖动图钉只用于整理案板。</p></div>
     <div className="board-workspace">
       <div className="board-shell">
+        <div className="board-flow">{nodes.length ? <ReactFlow nodes={nodes} edges={edges} nodeTypes={evidenceNodeTypes} onNodesChange={onNodesChange} onNodeDragStop={(_, node) => setBoardPosition(node.id, node.position)} fitView minZoom={0.5} maxZoom={1.6} nodesDraggable={!isCompactBoard} panOnDrag={!isCompactBoard} zoomOnPinch={!isCompactBoard} zoomOnScroll={!isCompactBoard} zoomOnDoubleClick={!isCompactBoard} preventScrolling={!isCompactBoard} proOptions={{ hideAttribution: true }}><Background color="#988d73" gap={28} size={1} variant={BackgroundVariant.Dots} />{!isCompactBoard && <Controls showInteractive={false} />}</ReactFlow> : <div className="board-empty"><Search /><h3>案件板还很安静</h3><p>完成第一夜调查，林渡带回的证物会出现在这里。</p></div>}</div>
+      </div>
+      <aside className="relation-panel" aria-label="证物档案与关系">
         <section className="inference-toolbar" aria-label="联合推理操作台">
           <div className="inference-toolbar-copy">
             <small>JOINT INFERENCE · 联合推理</small>
             <b>{inferencePrompt}</b>
-            <span><i className="desktop-board-hint">点证物选择；只有图钉可以拖动整理。</i><i className="mobile-board-hint">点证物选择；上下滑动可以离开案板。</i></span>
+            <span><i className="desktop-board-hint">从左侧案板点选；只有图钉可以拖动整理。</i><i className="mobile-board-hint">从上方案板点选；上下滑动可以继续阅档。</i></span>
           </div>
           <ol className="inference-steps" aria-label="联合推理步骤">
             {["选第一件", "选第二件", "核对证词"].map((label, index) => <li className={inferenceStep > index || (index === 2 && inferenceStep === 2) ? "active" : ""} aria-current={inferenceStep === index ? "step" : undefined} key={label}><span>{index + 1}</span>{label}</li>)}
           </ol>
-          <div className="evidence-slots" aria-live="polite">
+          <div className="inference-workbench" aria-label="待核对证物" aria-live="polite">
             {[0, 1].map((index) => {
               const clue = selectedClues[index];
-              return clue ? <button type="button" className="evidence-slot filled" aria-label={`移除证物 ${index === 0 ? "A" : "B"}：${clue.title}`} onClick={() => selectEvidence(clue.id)} key={clue.id}><span>{index === 0 ? "A" : "B"}</span><b>{clue.title}</b><X /></button> : <div className="evidence-slot" key={index}><span>{index === 0 ? "A" : "B"}</span><b>等待选择</b></div>;
+              return clue ? <button type="button" className={`evidence-slot slot-${index === 0 ? "a" : "b"} filled`} aria-label={`移除证物 ${index === 0 ? "A" : "B"}：${clue.title}`} onClick={() => selectEvidence(clue.id)} key={clue.id}><span>{index === 0 ? "A" : "B"}</span><div><small>{clue.type} · NIGHT 0{clue.chapter}</small><b>{clue.title}</b><p>{clue.summary}</p></div><X /></button> : <div className={`evidence-slot slot-${index === 0 ? "a" : "b"}`} key={index}><span>{index === 0 ? "A" : "B"}</span><div><small>等待线索</small><b>尚未选择</b><p>从案板点选一件证物。</p></div></div>;
             })}
+            <button className="connect-evidence" aria-label={selectedClueIds.length === 2 ? "核对这两件证物" : `还需选择 ${2 - selectedClueIds.length} 件证物`} disabled={selectedClueIds.length !== 2} onClick={submitConnection}><Link2 /><span>{selectedClueIds.length === 2 ? "核对证物" : "等待配对"}</span><small>{selectedClueIds.length === 2 ? "A 与 B" : `${selectedClueIds.length}/2 已选择`}</small></button>
           </div>
-          <button className="connect-evidence" disabled={selectedClueIds.length !== 2} onClick={submitConnection}><Link2 /> {selectedClueIds.length === 2 ? "核对这两件证物" : `还需选择 ${2 - selectedClueIds.length} 件`}</button>
           {feedback && <p className={`relation-feedback ${feedback.kind}`} role="status">{feedback.text}</p>}
         </section>
-        <div className="board-flow">{nodes.length ? <ReactFlow nodes={nodes} edges={edges} nodeTypes={evidenceNodeTypes} onNodesChange={onNodesChange} onNodeDragStop={(_, node) => setBoardPosition(node.id, node.position)} fitView minZoom={0.5} maxZoom={1.6} nodesDraggable={!isCompactBoard} panOnDrag={!isCompactBoard} zoomOnPinch={!isCompactBoard} zoomOnScroll={!isCompactBoard} zoomOnDoubleClick={!isCompactBoard} preventScrolling={!isCompactBoard} proOptions={{ hideAttribution: true }}><Background color="#988d73" gap={28} size={1} variant={BackgroundVariant.Dots} />{!isCompactBoard && <Controls showInteractive={false} />}</ReactFlow> : <div className="board-empty"><Search /><h3>案件板还很安静</h3><p>完成第一夜调查，林渡带回的证物会出现在这里。</p></div>}</div>
-      </div>
-      <aside className="relation-panel" aria-label="证物档案与关系">
         <div className="board-panel-heading"><small>OPEN DOSSIER · {focusedClue ? `NIGHT 0${focusedClue.chapter}` : "NO FILE"}</small><button type="button" onClick={restoreBoardLayout}><RotateCcw /> 恢复摆放</button></div>
-        {focusedClue ? <article className="clue-dossier" aria-live="polite"><span>{focusedClue.type}{receivedClueIds.includes(focusedClue.id) ? " · 好友送达" : ""}</span><h3>{focusedClue.title}</h3><button className="clue-share-trigger" type="button" onClick={() => setSharedClue(focusedClue)}><QrCode /> 送给好友</button><p>{focusedClue.detail}</p><blockquote><small>城市异议</small>“{focusedClue.cityObjection}”</blockquote><div><small>林渡 · 页边批注</small>{focusedClue.marginNote}</div>{focusedRelations.length > 0 && <footer><small>这份证物已经参与作证</small>{focusedRelations.map((relation) => <b key={relation.id}><Link2 /> {relation.statement}</b>)}</footer>}</article> : <div className="clue-dossier empty"><FileText /><p>点击案板上的证物即可阅档；被选中的两件会进入上方联合推理台。</p></div>}
-        <div className="relation-ledger"><small>核心推论 · {confirmedRelations.length}/{campaign.relations.length}</small>{campaign.relations.map((relation, index) => { const confirmed = confirmedRelations.includes(relation.id); return <div className={confirmed ? "relation-entry done" : "relation-entry"} key={relation.id}><span>{confirmed ? <Check /> : `0${index + 1}`}</span><div><small>{confirmed ? "CONFIRMED" : "UNRESOLVED"}</small><b>{confirmed ? relation.statement : "未确认推论"}</b></div></div>; })}</div>
+        {focusedClue ? <article className="clue-dossier" aria-live="polite"><span>{focusedClue.type}{receivedClueIds.includes(focusedClue.id) ? " · 好友送达" : ""}</span><h3>{focusedClue.title}</h3><button className="clue-share-trigger" type="button" onClick={() => setSharedClue(focusedClue)}><QrCode /> 送给好友</button><p>{focusedClue.detail}</p><blockquote><small>城市异议</small>“{focusedClue.cityObjection}”</blockquote><div><small>林渡 · 页边批注</small>{focusedClue.marginNote}</div>{focusedRelations.length > 0 && <footer><small>这份证物已经参与作证</small>{focusedRelations.map((relation) => <b key={relation.id}><Link2 /> {relation.statement}</b>)}</footer>}</article> : <div className="clue-dossier empty"><FileText /><p>点击案板上的证物即可阅档；选中的两件会留在右侧推理栏中。</p></div>}
+        <div className="relation-ledger"><small>核心论断 · {confirmedRelations.length}/{campaign.relations.length}</small>{campaign.relations.map((relation, index) => { const confirmed = confirmedRelations.includes(relation.id); return <div className={confirmed ? "relation-entry done" : "relation-entry"} key={relation.id}><span>{confirmed ? <Check /> : `0${index + 1}`}</span><div><small>{confirmed ? "CONFIRMED" : "UNRESOLVED"}</small><b>{confirmed ? relation.statement : "未确认论断"}</b></div></div>; })}</div>
       </aside>
     </div>
     <AnimatePresence>{sharedClue && <ClueShareDialog clue={sharedClue} onClose={() => setSharedClue(null)} />}</AnimatePresence>

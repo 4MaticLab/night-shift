@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有进行中的主计划。最近完成的 [[plans/0025-multi-campaign-runtime]] 已把单案件应用改造成可切换、独立存档、可继续扩展的多案件运行时，并用第二个完整案件完成验证。
+当前没有进行中的主计划。最近完成的 [[plans/0027-case-board-right-inference-panel]] 已把案件板改为左侧证物画布、右侧选择与匹配的稳定双栏，并将核心论断置于右栏最下方。
 
 ## 计划清单
 
@@ -35,6 +35,8 @@
 | [[plans/0023-mobile-case-board-inference]] | `completed` | `manual` | P0 | 5/5 | 已发布移动案板逃生手势与三步联合推理台 |
 | [[plans/0024-friend-clue-sharing]] | `completed` | `manual` | P0 | 5/5 | 已发布好友线索二维码、白名单深链接与本地接收 |
 | [[plans/0025-multi-campaign-runtime]] | `completed` | `manual` | P0 | 7/7 | 已发布双案件运行时、独立存档与第二案 |
+| [[plans/0026-case-board-inference-layout]] | `completed` | `auto` | P1 | 4/4 | 已重排联合推理操作区并验证桌面与移动端 |
+| [[plans/0027-case-board-right-inference-panel]] | `completed` | `auto` | P1 | 4/4 | 已重构案件板为左画布、右侧推理栏 |
 
 ## 状态规则
 
