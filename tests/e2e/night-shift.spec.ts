@@ -654,6 +654,43 @@ test("restores a real Blackwater Creek expedition after reload and settles it on
   await expect(page.getByText("每周驶向波士顿的货单")).toHaveCount(1);
 });
 
+test.describe("tablet portrait 820x1180", () => {
+  test.use({ viewport: { width: 820, height: 1180 } });
+
+  test("keeps the case board and inference desk in one touch-scroll flow", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: /DEMO MODE/ }).click();
+    await page.getByRole("button", { name: /解锁完整案件板/ }).click();
+    await expect(page.locator(".demo-drawer")).toHaveCount(0);
+
+    await expect(page.locator(".board-workspace")).toHaveCSS("flex-direction", "column");
+    await expect(page.locator(".board-flow .react-flow__pane")).toHaveCSS("touch-action", "pan-y");
+    await expect(page.locator(".mobile-board-hint")).toBeVisible();
+    await expect(page.locator(".desktop-board-hint")).toBeHidden();
+    await expectNoPageOverflow(page);
+
+    const [shell, flow, relation] = await Promise.all([
+      page.locator(".board-shell").boundingBox(),
+      page.locator(".board-flow").boundingBox(),
+      page.locator(".relation-panel").boundingBox(),
+    ]);
+    expect(shell).not.toBeNull();
+    expect(flow).not.toBeNull();
+    expect(relation).not.toBeNull();
+    expect(shell!.width).toBeGreaterThan(780);
+    expect(flow!.width).toBeGreaterThan(750);
+    expect(relation!.width).toBeGreaterThan(760);
+    expect(relation!.y - (shell!.y + shell!.height)).toBeLessThanOrEqual(24);
+    expect(await page.locator(".board-node-drag-handle").evaluateAll(
+      (handles) => handles.every((handle) => getComputedStyle(handle).display === "none"),
+    )).toBe(true);
+
+    await page.locator(".relation-panel").scrollIntoViewIfNeeded();
+    await expect(page.getByRole("region", { name: "联合推理操作台" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /还需选择 2 件证物/ })).toBeVisible();
+  });
+});
+
 test.describe("mobile 390x844", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 

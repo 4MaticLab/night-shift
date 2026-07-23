@@ -11956,6 +11956,59 @@ blockquote {
   }
 }
 
+@media (min-width: 601px) and (max-width: 1024px) and (orientation: portrait) {
+  .board-workspace {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .board-workspace>.board-shell {
+    width: 100%;
+    height: min(620px, 72svh);
+    min-height: 500px;
+    flex: none;
+    border-width: 12px;
+  }
+
+  .board-flow {
+    width: 100%;
+    min-width: 0;
+    overscroll-behavior-x: none;
+  }
+
+  .board-flow .react-flow__pane,
+  .board-flow .react-flow__node {
+    touch-action: pan-y !important;
+  }
+
+  .board-node-drag-handle {
+    display: none;
+  }
+
+  .board-workspace>.relation-panel {
+    position: relative;
+    inset: auto;
+    width: auto;
+    height: auto;
+    max-height: none;
+    margin: 12px;
+    overflow: visible;
+  }
+
+  .desktop-board-hint {
+    display: none;
+  }
+
+  .mobile-board-hint {
+    display: inline;
+  }
+
+  .relation-panel .board-panel-heading button {
+    display: none;
+  }
+}
+
 .rest-intention-box {
   margin-top: 22px;
   padding: 18px;
