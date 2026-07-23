@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前进行中的主计划是 [[plans/0029-last-tram-english-i18n]]：为《零点四十三分的末班车》建立可选英文剧本与完整主循环本地化，同时保持稳定 ID、结算与既有存档兼容。
+当前没有进行中的主计划。最近完成的 [[plans/0029-last-tram-english-i18n]] 已为《零点四十三分的末班车》建立可选英文剧本与完整主循环本地化，同时保持稳定 ID、结算与既有存档兼容。
 
 ## 计划清单
 
@@ -38,7 +38,7 @@
 | [[plans/0026-blackwater-creek-sandbox-adaptation]] | `completed` | `manual` | P0 | 12/12 | 已并入公开学习项目并由 Vercel 自动部署 |
 | [[plans/0027-sandbox-delayed-expedition-loop]] | `completed` | `manual` | P0 | 8/8 | 已完成沙盒延迟探索、v2 存档、真实恢复与跨设备验收 |
 | [[plans/0028-sleep-hardware-bridge]] | `completed` | `manual` | P0 | 8/8 | 已完成虚拟硬件闭环、双案件接入与跨设备验收 |
-| [[plans/0029-last-tram-english-i18n]] | `in_progress` | `manual` | P0 | 6/7 | 提交独立分支并创建草稿 PR |
+| [[plans/0029-last-tram-english-i18n]] | `completed` | `manual` | P0 | 7/7 | 已提交独立分支并创建草稿 PR #6 |
 
 ## 状态规则
 
