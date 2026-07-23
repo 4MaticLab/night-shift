@@ -4,9 +4,7 @@
 
 ## 当前 checkout
 
-| 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
-|---|---|---|---|---:|---|
-| [[plans/refactor-remove-blackwater-sandbox]] | `refactor/remove-blackwater-sandbox` | `completed` | `manual` | 6/6 | 退役计划并准备 PR |
+当前没有活跃计划。
 
 ## 使用规则
 
