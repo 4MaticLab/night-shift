@@ -143,3 +143,12 @@
 - 决定：撤销 ADR-008 与 ADR-009，从现行产品移除 CASE 003、`sandbox-expedition`、独立沙盒引擎／store／UI 和专属自动化。案件包仍可改变题材、人物、地区、谜面和固定事实，但必须共享白天推理、睡前交接、林渡夜间调查与清晨归报的生命周期。旧沙盒 localStorage 不主动删除；旧 `case-003` 活动选择通过注册表白名单安全回落到默认 CASE 001。
 - 代价：不再把开放地点沙盒视为同一客户端的可插拔案件格式，已完成的原型只从 Git 历史恢复；未来若重做该类玩法，应按独立产品评估，或先完整改写为 Night Shift 案件而不是复活运行时分叉。
 - 相关：[[docs/product-overview]]、[[docs/campaign-authoring]]、[[docs/blackwater-creek-adaptation-bible]]。
+
+## ADR-017：Injective 藏品采用服务端 EIP-712 领取凭证
+
+- 日期：2026-07-24
+- 状态：已采用
+- 背景：黑客松版本需要把玩家带回的收藏品接入 Injective，同时保持“后端签完、前端 mint”的现场演示手感；直接把服务端私钥或密码下发浏览器会让任何人获得永久签名能力。
+- 决定：使用 Injective EVM Testnet ERC-721。服务端只为编译期案件注册表中的收藏品签发绑定接收钱包、案件、收藏、元数据哈希和 15 分钟期限的 EIP-712 voucher；前端钱包调用合约 `redeem`，合约承担签名校验和最终去重。浏览器仅保存公开回执，整个域与游戏存档、睡眠数据和结局资格隔离。
+- 代价：需要部署 Solidity 合约、准备测试网 INJ 并保管服务端签名密钥；进程内 API 限流不等同生产级跨实例防滥用。换来的收益是密钥不下发、钱包仍亲自 mint、未配置时完整 local-first 降级。
+- 相关：[[docs/injective-keepsake-mint]]、[[docs/architecture]]、[[docs/privacy-and-guardrails]]。

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, ArrowRight, BookOpen, Check, FileText, Flower2, KeyRound, Link2, QrCode, RotateCcw, Search, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Check, FileCheck2, FileText, Flower2, KeyRound, Link2, QrCode, RotateCcw, Search, Sparkles, X } from "lucide-react";
 import { Background, BackgroundVariant, Controls, Handle, Position, ReactFlow, useNodesState, type Edge, type Node, type NodeProps } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { getAsset } from "@/src/content/assets";
@@ -18,11 +18,13 @@ import { getCampaignNightSealAssetId, getCampaignRouteDirection, getCampaignWake
 import { useGameStore } from "@/src/stores/game-store";
 import { canUnlockTrueEnding, type EndingId } from "@/src/lib/game-engine/ending";
 import { formatSleepDuration } from "@/src/lib/game-engine/sleep-session";
-import type { Clue, CorrespondenceRecord, SocietyMemoryRecord } from "@/src/lib/game-engine/schema";
+import type { Clue, Collectible, CorrespondenceRecord, SocietyMemoryRecord } from "@/src/lib/game-engine/schema";
 import { BotanicalSpecimen, PaperCard, qualityCopy, Seal, SocietyCrest } from "./shared";
 import { ClueShareDialog } from "./clue-sharing";
 import { useI18n } from "@/src/i18n/provider";
 import { CipherDesk } from "./cipher-desk";
+import { InjectiveMintDialog } from "./injective-mint";
+import { readMintReceipts } from "@/src/lib/injective/client";
 
 type EvidenceNode = Node<{ clue: Clue; selected: boolean; selectionIndex: number | null; focused: boolean; received: boolean; onSelect: (clueId: string) => void }, "evidence">;
 
@@ -161,12 +163,23 @@ export function CaseBoard() {
 export function Collection() {
   const { unlockedCollectibleIds, nightSealIds, chapter, completedReports, preparationHistory, choiceHistory, growthHistory, societyHistory, correspondenceHistory, souvenirHistory, opportunityHistory } = useGameStore();
   const { campaign, localize, locale, t } = useI18n();
+  const [mintingCollectible, setMintingCollectible] = useState<Collectible | null>(null);
+  const [mintedCollectibleIds, setMintedCollectibleIds] = useState<string[]>([]);
   const nightCount = campaign.case.chapters.length;
   const finalChapter = campaign.case.chapters.at(-1)!.number;
   const opportunityDays = campaign.case.chapters.filter((entry) => entry.number >= 2).map((entry) => entry.number);
   const societyRecords = Object.values(societyHistory).filter((record): record is SocietyMemoryRecord => Boolean(record)).sort((a, b) => a.chapter - b.chapter);
   const correspondenceRecords = Object.values(correspondenceHistory).filter((record): record is CorrespondenceRecord => Boolean(record));
   const wakeEchoCount = Object.values(growthHistory).filter((record) => record?.wakeEchoId).length;
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const ids = Object.values(readMintReceipts())
+        .filter((receipt) => receipt.campaignId === campaign.id)
+        .map((receipt) => receipt.collectibleId);
+      setMintedCollectibleIds([...new Set(ids)]);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [campaign.id]);
   return <div className="collection-page">
     <div className="page-title"><div><p className="eyebrow">NIGHT CABINET · {t("夜间陈列柜")}</p><h2>{locale === "en" ? <>Time did not vanish.<br />Nor did the city forget.</> : <>时间没有消失。<br />城市也没有忘记。</>}</h2></div><p>{locale === "en" ? `Every wait leaves a night seal, grows a plant, returns a postcard, and lets one of the underground societies remember how you worked. These are not scores, but ${nightCount} stretches of time that can be told again.` : `每次等待都会形成一枚夜印、长成一株植物、寄回一张明信片，也让某个地下社团记住你的做事方式。这里保存的不是分数，是 ${nightCount} 段可以重新讲述的时间。`}</p></div>
     <section className="city-favor-ledger">
@@ -194,7 +207,14 @@ export function Collection() {
     </section>
     <section className="journey-album"><div className="shelf-heading"><small>RETURNED POSTCARDS · {completedReports.length}/{nightCount}</small><h3>{locale === "en" ? `${nightCount} nights returned by ${campaign.presentation.cityName}` : `${campaign.presentation.cityName}寄回的 ${nightCount} 个夜晚`}</h3></div><div className="journey-postcard-grid">{campaign.postcards.map((postcard) => { const unlocked = completedReports.includes(postcard.chapter); const preparationId = preparationHistory[postcard.chapter] ?? "side-lamp"; const preparation = localize(getPreparation(preparationId)); const direction = getCampaignRouteDirection(campaign, postcard.chapter, choiceHistory[postcard.chapter] ?? ""); const art = getAsset(postcard.assetId); return <article className={unlocked ? "journey-postcard unlocked" : "journey-postcard locked"} key={postcard.id}><div className="journey-postcard-image">{unlocked ? <Image src={art.src} alt={art.alt} width={768} height={512} /> : <div className="postcard-locked"><KeyRound /><span>NIGHT 0{postcard.chapter}</span></div>}</div><div className="journey-postcard-copy"><small>{unlocked ? postcard.location : "ROUTE NOT RETURNED"}</small><h3>{unlocked ? postcard.title : t("尚未寄回")}</h3><p>{unlocked ? postcard.message : locale === "en" ? `Complete this night's handoff and ${campaign.presentation.detectiveName} will send a postcard home from the city.` : `完成这一夜的交接，${campaign.presentation.detectiveName}会从城市里寄回一张明信片。`}</p>{unlocked && <div className="journey-route-history"><small>CHOSEN ROUTE</small><b>{direction.dispatchTitle} · {direction.destination}</b><p>{direction.returnLetter}</p></div>}{unlocked && <span><b>{preparation?.shortTitle ?? t("随身物")}</b>{postcard.preparationNotes[preparationId]}</span>}</div></article>; })}</div></section>
     <section className="night-seal-shelf"><div className="shelf-heading"><small>NIGHT SEALS · {nightSealIds.length}/{nightCount}</small><h3>{locale === "en" ? `${nightCount} night seals` : `${nightCount} 夜印记`}</h3></div><div className="night-seal-row">{campaign.case.chapters.map((entry) => { const art = getAsset(getCampaignNightSealAssetId(campaign, entry.number)); const unlocked = nightSealIds.includes(entry.number); return <div className={unlocked ? "night-seal unlocked" : "night-seal locked"} key={entry.number}><Image src={art.src} alt={unlocked ? art.alt : t("尚未形成的夜印")} width={160} height={160} /><span>{locale === "en" ? "NIGHT" : "夜"} 0{entry.number}</span><b>{unlocked ? entry.title : t("尚未成形")}</b></div>; })}</div></section>
-    <div className="collection-grid">{campaign.case.collectibles.map((item, index) => { const unlocked = unlockedCollectibleIds.includes(item.id); const revealed = unlocked && chapter >= Math.min(finalChapter, item.chapter + 2); const art = getAsset(item.assetId); return <motion.article whileHover={unlocked ? { y: -5, rotate: index % 2 ? .3 : -.3 } : {}} key={item.id} className={`collectible-card ${unlocked ? "unlocked" : "locked"}`}><div className="item-number">0{index + 1}</div><div className="item-art"><Image src={art.src} alt={unlocked ? art.alt : t("尚未发现的物品")} width={438} height={438} /></div><div className="item-meta"><small>{unlocked ? `${item.district} · ${item.rarity}` : t("尚未发现")}</small><h3>{unlocked ? item.title : t("未归档物品")}</h3><p>{unlocked ? (revealed ? item.revealedDescription : item.surfaceDescription) : t("下一次夜间调查，也许会让它出现在林渡的口袋里。")}</p>{revealed && <Seal>{t("隐藏含义已揭示")}</Seal>}</div></motion.article>; })}</div>
+    <div className="collection-grid">{campaign.case.collectibles.map((item, index) => { const unlocked = unlockedCollectibleIds.includes(item.id); const revealed = unlocked && chapter >= Math.min(finalChapter, item.chapter + 2); const minted = mintedCollectibleIds.includes(item.id); const art = getAsset(item.assetId); return <motion.article whileHover={unlocked ? { y: -5, rotate: index % 2 ? .3 : -.3 } : {}} key={item.id} className={`collectible-card ${unlocked ? "unlocked" : "locked"}`}><div className="item-number">0{index + 1}</div><div className="item-art"><Image src={art.src} alt={unlocked ? art.alt : t("尚未发现的物品")} width={438} height={438} /></div><div className="item-meta"><small>{unlocked ? `${item.district} · ${item.rarity}` : t("尚未发现")}</small><h3>{unlocked ? item.title : t("未归档物品")}</h3><p>{unlocked ? (revealed ? item.revealedDescription : item.surfaceDescription) : t("下一次夜间调查，也许会让它出现在林渡的口袋里。")}</p>{revealed && <Seal>{t("隐藏含义已揭示")}</Seal>}{unlocked && <button className={minted ? "collectible-mint-trigger minted" : "collectible-mint-trigger"} type="button" onClick={() => setMintingCollectible(item)}>{minted ? <FileCheck2 /> : <Sparkles />}<span>{minted ? t("此浏览器已有链上回执") : t("封进 Injective 链上档案")}</span></button>}</div></motion.article>; })}</div>
+    <AnimatePresence>{mintingCollectible && <InjectiveMintDialog
+      campaignId={campaign.id}
+      collectible={mintingCollectible}
+      asset={getAsset(mintingCollectible.assetId)}
+      onClose={() => setMintingCollectible(null)}
+      onMinted={(receipt) => setMintedCollectibleIds((current) => [...new Set([...current, receipt.collectibleId])])}
+    />}</AnimatePresence>
   </div>;
 }
 

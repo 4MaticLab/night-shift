@@ -32,6 +32,9 @@
 | 结局终函 | `src/content/endings.ts` | 三种结局的独立结果、林渡终函、档案标签与结案语 |
 | 证物关系 | `src/content/relations.ts` | 三条核心推论、对应证物对与成功解释 |
 | 好友线索链接 | `src/lib/game-engine/clue-sharing.ts` | 白名单线索查询、深链接生成与 query 清理 |
+| Injective 藏品契约 | `contracts/NightShiftKeepsake.sol`、`src/lib/injective/keepsake.ts` | ERC-721、EIP-712 voucher、规范元数据、网络与 ABI |
+| Injective 授权 API | `app/api/injective/mint-authorization/`、`src/lib/injective/server.ts` | 服务端签名、白名单、同源、大小、幂等与限流降级 |
+| Injective 藏品界面 | `src/components/game/injective-mint.tsx`、`src/lib/injective/client.ts` | 钱包切链、前端 redeem、交易确认与本地回执 |
 | 夜班密文内容 | `src/content/ciphers.ts` | 按案件注册的确定性关卡、开放条件、答案归一化、提示与回执 |
 | 内容契约 | `src/lib/game-engine/schema.ts` | Zod schema、引用与数量约束 |
 | 夜间结算 | `src/lib/game-engine/resolve-night.ts` | 根据章节、睡眠质量、随身物与调查方向选择确定性结果 |
@@ -84,6 +87,8 @@
 第一夜归来后的四个白天各由 `getOpportunityCandidates` 从十二张告示中稳定取三张，并排除 `opportunityHistory` 里所有曾展示的 ID。选择一张会保存对应答复，全部收起则只保存三张展示记录；两种方式都不会重抽或阻断调查。下一份晨报读取同章节记录显示一句回响，收藏页剪报册保存结果。v9 迁移不替旧档伪造白天选择，Demo 跳章才生成明确的第一选项演示履历。
 
 ## 内容边界
+
+链上藏品是确定性内容之外的可选公开回执层。服务端只为案件注册表中真实存在的收藏品生成元数据和 15 分钟 EIP-712 voucher，前端钱包在 Injective EVM Testnet 调用 ERC-721 合约；合约按钱包、案件和收藏拒绝重复领取。`night-shift-injective-mints-v1` 与游戏 store 完全分离，任何钱包、RPC、签名或交易失败都不得进入 `resolveNight`、存档迁移或结局资格。完整部署和隐私边界见 [[docs/injective-keepsake-mint]]。
 
 生成式能力用于视觉资产和玩家明确授权的晨间短笺风格。部署必须同时配置模型密钥、访问码和持久化 Redis 配额；访问码只用于换取带独立会话 ID 的 24 小时 HMAC 签名 HttpOnly、SameSite Strict Cookie，不写入游戏存档。访问尝试、单会话额度、部署每日预算和纸条 `requestId` 幂等均由 Redis 跨实例执行，配额不可用时关闭 AI。模型只接收当前纸条、案件／章节标题、方向、地点、随身物和侦探名，并只能返回固定 `tone`／`image` 枚举；服务端以校验后的枚举组合安全短笺，不直接展示自由模型文本。未配置模型、权限失效、超时、上游错误和无效输出都返回有明确原因的本地确定性回信。伊芙琳是否活着、人物动机、线索存在性、核心因果与结局条件必须来自确定性内容，详见 [[docs/story-bible]]。
 
