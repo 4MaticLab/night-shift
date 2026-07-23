@@ -614,6 +614,8 @@ export const englishCatalog: Record<string, string> = {
   "私人收藏馆": "Private collection gallery",
   "黄铜侧照灯": "Brass side lamp",
   "侧照灯": "Side lights",
+  "黄铜提灯": "Brass lantern",
+  "提灯": "Lantern",
   "让刮痕、旧墨和不愿见光的指纹从纸面上浮起来。": "Let scratches, old ink, and fingerprints that don't want to be exposed to light float off the paper.",
   "偏向物证细节": "Leaning toward detailed physical evidence",
   "你装进包里的侧照灯派上了用场：斜光越过票面时，七年前的压印与昨夜的新油墨各自露出了边界。它们彼此客气，像两位拒绝同桌的证人。": "The side light you packed in your bag comes in handy: when the slanted light passes over the banknote, the boundaries between the seven-year-old stamp and last night's new ink each reveal themselves. They were polite to each other, like two witnesses refusing to share a desk.",

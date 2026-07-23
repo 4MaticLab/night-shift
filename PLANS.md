@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有进行中的主计划；最近完成 [[plans/0040-browser-locale-negotiation]]，已用偏好 Cookie 与浏览器语言实现免配置本地化并消除首帧语言跳变。
+当前没有进行中的主计划；最近完成 [[plans/0041-restored-main-integration-regressions]]，已修复恢复主线后的准备物本地化、AI 请求契约、案板拖动与桌面交接布局回归。
 
 ## 计划清单
 
@@ -50,6 +50,7 @@
 | [[plans/0038-first-load-experience]] | `completed` | `auto` | P0 | 5/5 | 已完成真实加载幕、非首屏按需加载与慢网回归 |
 | [[plans/0039-default-case-home-art-pass]] | `completed` | `auto` | P0 | 6/6 | 已完成首案默认、首页双焦点卷宗与跨设备验收 |
 | [[plans/0040-browser-locale-negotiation]] | `completed` | `auto` | P0 | 6/6 | 已完成服务端语言协商、偏好迁移与跨设备验收 |
+| [[plans/0041-restored-main-integration-regressions]] | `completed` | `auto` | P0 | 4/4 | 已完成恢复主线后的兼容修复与全量验收 |
 
 ## 状态规则
 

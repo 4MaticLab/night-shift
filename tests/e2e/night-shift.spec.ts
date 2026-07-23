@@ -17,7 +17,10 @@ async function expectNoOverlap(first: import("@playwright/test").Locator, second
   const [a, b] = await Promise.all([first.boundingBox(), second.boundingBox()]);
   expect(a).not.toBeNull();
   expect(b).not.toBeNull();
-  expect(a!.x + a!.width <= b!.x || b!.x + b!.width <= a!.x || a!.y + a!.height <= b!.y || b!.y + b!.height <= a!.y).toBe(true);
+  expect(
+    a!.x + a!.width <= b!.x || b!.x + b!.width <= a!.x || a!.y + a!.height <= b!.y || b!.y + b!.height <= a!.y,
+    `Expected boxes not to overlap: ${JSON.stringify({ a, b })}`,
+  ).toBe(true);
 }
 
 async function expectMinimumTapTargets(locator: import("@playwright/test").Locator, minimum = 44) {
@@ -156,7 +159,7 @@ test("starts a case and reaches the first morning report", async ({ page }) => {
   await openFirstNight(page);
   await expect(page.locator(".handoff-portrait img")).toHaveAttribute("src", /lin-du-handoff-portrait-v1/);
   await expect(page.locator(".handoff-docket")).toContainText("纸张的证词");
-  await expect(page.locator(".handoff-docket")).toContainText("侧照灯 · 灯港旧票据工坊");
+  await expect(page.locator(".handoff-docket")).toContainText("提灯 · 灯港旧票据工坊");
   await expectNoOverlap(page.locator(".scene-copy"), page.locator(".handoff-portrait"));
   await expectNoOverlap(page.locator(".handoff-docket"), page.locator(".handoff-portrait"));
   await expect(page.getByText(/可能惊动 · 错页登记处/)).toBeVisible();
@@ -223,7 +226,7 @@ test("rest intention requests an AI note only after explicit consent", async ({ 
   expect(requestBody).toMatchObject({
     intention,
     destination: "灯港旧票据工坊",
-    preparation: "侧照灯",
+    preparation: "提灯",
     detectiveName: "林渡",
   });
   expect(requestBody).not.toHaveProperty("sleepData");
@@ -528,6 +531,7 @@ test("remembers a hand-arranged evidence desk after reload", async ({ page }) =>
   await page.getByRole("button", { name: /解锁完整案件板/ }).click();
   await expect(page.locator(".demo-drawer")).toHaveCount(0);
   const handle = page.locator('.react-flow__node[data-id="ticket-date"] .board-node-drag-handle');
+  await handle.scrollIntoViewIfNeeded();
   const box = await handle.boundingBox();
   expect(box).not.toBeNull();
   await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);

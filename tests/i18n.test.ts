@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   appLocaleFromAcceptLanguage,
   appLocaleFromLanguageTag,
+  localizeValue,
   localeCookieFromHeader,
   resolveRequestLocale,
   serializeLocaleCookie,
 } from "@/src/i18n/core";
+import { preparations } from "@/src/content/preparations";
 
 describe("request locale negotiation", () => {
   it("maps supported browser language tags", () => {
@@ -35,5 +37,11 @@ describe("request locale negotiation", () => {
     expect(localeCookieFromHeader("night-shift-locale=unknown")).toBeUndefined();
     expect(serializeLocaleCookie("zh-CN")).toContain("night-shift-locale=zh-CN; Path=/;");
     expect(serializeLocaleCookie("zh-CN")).toContain("SameSite=Lax");
+  });
+
+  it("projects every preparation into English without changing stable IDs", () => {
+    const localized = localizeValue(preparations, "en");
+    expect(localized.map((item) => item.id)).toEqual(preparations.map((item) => item.id));
+    expect(localized.map((item) => `${item.title} ${item.shortTitle} ${item.description}`).join(" ")).not.toMatch(/\p{Script=Han}/u);
   });
 });
