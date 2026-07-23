@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
-import { ArrowRight, Check, ChevronRight, Clock3, Coffee, Ear, FileText, Lightbulb, Moon, Radio, Zap } from "lucide-react";
+import { ArrowRight, Check, ChevronRight, Clock3, Coffee, Ear, FileText, Lightbulb, Moon, PenLine, Radio, Sparkles, Zap } from "lucide-react";
 import { getAsset } from "@/src/content/assets";
 import { growthStageFromProgress } from "@/src/content/botany";
 import { getPreparation, preparations, type PreparationId } from "@/src/content/preparations";
@@ -20,19 +20,72 @@ import { useGameStore } from "@/src/stores/game-store";
 import { BotanicalSpecimen, CityRoute, PaperCard, qualityCopy, Seal, SocietyCrest } from "./shared";
 import type { GameView } from "./types";
 import { SleepHardwareHandoff, SleepHardwareMorningReceipt, SleepHardwareNightTelemetry } from "./sleep-hardware";
+import { REST_INTENTION_MAX_LENGTH, restReflectionResponseSchema, type RestRitualInput } from "@/src/lib/rest-ritual";
 import { useI18n } from "@/src/i18n/provider";
 
-export function Tonight({ onLaunch, onHardware }: { onLaunch: (quality: SleepQuality, preparationId: PreparationId, mode: SleepMode) => void; onHardware: () => void }) {
+const pendingRestReflectionRequests = new Set<string>();
+
+export function Tonight({ onLaunch, onHardware }: { onLaunch: (quality: SleepQuality, preparationId: PreparationId, mode: SleepMode, restRitual?: RestRitualInput) => void; onHardware: () => void }) {
   const { chapter, selectedChoice, selectChoice, phase } = useGameStore();
   const { campaign, localize, locale, t } = useI18n();
   const current = campaign.case.chapters.find((item) => item.number === chapter)!;
   const [quality, setQuality] = useState<SleepQuality>("regular");
   const [preparationId, setPreparationId] = useState<PreparationId>("side-lamp");
   const [sleepMode, setSleepMode] = useState<SleepMode>("demo");
+  const [restIntention, setRestIntention] = useState("");
+  const [aiRequested, setAiRequested] = useState(false);
+  const [aiAccessOpen, setAiAccessOpen] = useState(false);
+  const [aiAccessCode, setAiAccessCode] = useState("");
+  const [aiAccessMessage, setAiAccessMessage] = useState("");
+  const [aiAccessChecking, setAiAccessChecking] = useState(false);
   const selectedDirection = selectedChoice ? getCampaignRouteDirection(campaign, chapter, selectedChoice) : null;
   const selectedPreparation = localize(getPreparation(preparationId));
   const handoffPortrait = getAsset("character.lin-du-handoff");
   const previewWatch = localize(getCityWatch(sleepMode === "demo" ? DEMO_CITY_WATCH_ID : getCityWatchId(new Date())));
+  const toggleAiRequest = async () => {
+    if (aiRequested) {
+      setAiRequested(false);
+      return;
+    }
+    setAiAccessChecking(true);
+    try {
+      const response = await fetch("/api/rest-reflection/access");
+      const access = await response.json() as { configured?: boolean; authorized?: boolean };
+      if (access.authorized) {
+        setAiRequested(true);
+        setAiAccessOpen(false);
+        setAiAccessMessage("");
+      } else {
+        setAiAccessOpen(true);
+        setAiAccessMessage(access.configured ? t("输入主办方或部署者提供的访问码。") : t("当前部署未配置 AI，仍可使用仅本机回信。"));
+      }
+    } catch {
+      setAiAccessOpen(true);
+      setAiAccessMessage(t("暂时无法确认 AI 访问权限，仍可使用仅本机回信。"));
+    } finally {
+      setAiAccessChecking(false);
+    }
+  };
+  const unlockAiRequest = async () => {
+    if (!aiAccessCode.trim()) return;
+    setAiAccessChecking(true);
+    try {
+      const response = await fetch("/api/rest-reflection/access", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: aiAccessCode }) });
+      const access = await response.json() as { configured?: boolean; authorized?: boolean };
+      if (response.ok && access.authorized) {
+        setAiRequested(true);
+        setAiAccessOpen(false);
+        setAiAccessCode("");
+        setAiAccessMessage("");
+      } else {
+        setAiAccessMessage(access.configured ? t("访问码不正确；纸条尚未发送。") : t("当前部署未配置 AI，仍可使用仅本机回信。"));
+      }
+    } catch {
+      setAiAccessMessage(t("无法验证访问码；纸条尚未发送。"));
+    } finally {
+      setAiAccessChecking(false);
+    }
+  };
   return (
     <div className="content-grid tonight-page">
       <section className={selectedDirection ? "desk-scene handoff-ready" : "desk-scene"}>
@@ -60,9 +113,18 @@ export function Tonight({ onLaunch, onHardware }: { onLaunch: (quality: SleepQua
           {sleepMode === "demo" ? <div className="quality-tabs">{(Object.keys(qualityCopy) as SleepQuality[]).map((id) => <button type="button" aria-pressed={quality === id} key={id} className={quality === id ? "active" : ""} onClick={() => setQuality(id)} title={t(qualityCopy[id].note)}>{t(qualityCopy[id].label)}</button>)}</div> : <p className="real-mode-note">{t("从交接那一刻起计时。你可以锁屏、关闭页面，醒来后再回来拆晨报；提前醒来也不会失去主线线索。")}</p>}
           <div className={`watch-preview watch-${previewWatch.id}`}><Clock3 /><div><small>{sleepMode === "demo" ? "DEMO FIXED WATCH" : "LOCAL HANDOFF WATCH"}</small><b>{previewWatch.label} · {previewWatch.window}</b><span>{previewWatch.description}</span></div></div>
         </div>
+        <section className="rest-intention-box" aria-labelledby="rest-intention-title">
+          <div className="rest-intention-heading"><PenLine /><div><small>LEAVE IT FOR THE NIGHT · {t("可选休息仪式")}</small><b id="rest-intention-title">{t("今晚，有什么可以先不解决？")}</b></div></div>
+          <p>{t("写下一件想暂时放下的事。它不参与睡眠评分、案件结算或奖励，清晨只会换回一张短笺。")}</p>
+          <label htmlFor="rest-intention">{t("放下纸条")}</label>
+          <textarea id="rest-intention" value={restIntention} maxLength={REST_INTENTION_MAX_LENGTH} onChange={(event) => { setRestIntention(event.target.value); if (!event.target.value.trim()) { setAiRequested(false); setAiAccessOpen(false); } }} placeholder={t("例如：明天的演示还没准备完，但今晚先到这里。")} />
+          <div className="rest-intention-meta"><span>{restIntention.length}/{REST_INTENTION_MAX_LENGTH}</span><small>{t("默认仅保存在这台设备")}</small></div>
+          <button type="button" className={aiRequested ? "ai-consent selected" : "ai-consent"} aria-pressed={aiRequested} disabled={!restIntention.trim() || aiAccessChecking} onClick={() => void toggleAiRequest()}><span>{aiRequested ? <Check /> : <Sparkles />}</span><div><b>{aiAccessChecking ? t("正在确认 AI 访问权限") : t("请 AI 替林渡选择晨间短笺风格")}</b><small>{t("仅发送本夜纸条，以及案件／章节标题、地点、方向、随身物和侦探名；AI 只选择受限风格，短笺由安全模板组成。需要部署者访问码。")}</small></div></button>
+          {aiAccessOpen && <div className="ai-access-gate"><label htmlFor="ai-access-code">{t("AI 访问码")}</label><div><input id="ai-access-code" type="password" autoComplete="off" value={aiAccessCode} maxLength={128} onChange={(event) => setAiAccessCode(event.target.value)} placeholder={t("由部署者提供")} /><button type="button" disabled={!aiAccessCode.trim() || aiAccessChecking} onClick={() => void unlockAiRequest()}>{t("验证并启用")}</button></div><p role="status">{aiAccessMessage}</p></div>}
+        </section>
         <SleepHardwareHandoff onOpen={onHardware} />
         </div>
-        <button type="button" disabled={!selectedChoice || phase !== "ready"} className="handoff-button" onClick={() => onLaunch(quality, preparationId, sleepMode)}>{!selectedChoice ? t("先选择一个调查方向") : sleepMode === "real" ? t("开始今夜的真实交接") : t("今晚交给你了")} <Moon size={18} /></button>
+  <button type="button" disabled={!selectedChoice || phase !== "ready"} className="handoff-button" onClick={() => onLaunch(quality, preparationId, sleepMode, restIntention.trim() ? { intention: restIntention, aiRequested, locale } : undefined)}>{!selectedChoice ? t("先选择一个调查方向") : sleepMode === "real" ? t("开始今夜的真实交接") : t("今晚交给你了")} <Moon size={18} /></button>
       </section>
     </div>
   );
@@ -138,7 +200,7 @@ function WakeEchoSlip({ echo, recordedAt, mode }: { echo: WakeEcho; recordedAt?:
 }
 
 export function MorningReport({ onContinue, onHardware }: { onContinue: () => void; onHardware: () => void }) {
-  const { chapter, quality, selectedChoice, selectedPreparationId, lastSleepSession, societyHistory, correspondenceHistory, souvenirHistory, opportunityHistory, answerCorrespondence } = useGameStore();
+  const { campaignId, chapter, quality, selectedChoice, selectedPreparationId, lastSleepSession, societyHistory, correspondenceHistory, souvenirHistory, opportunityHistory, restRitualHistory, answerCorrespondence, completeRestReflection } = useGameStore();
   const { campaign, localize, locale, t } = useI18n();
   const current = campaign.case.chapters.find((item) => item.number === chapter)!;
   const result = resolveNight(campaign, chapter, quality, selectedPreparationId, selectedChoice);
@@ -170,13 +232,66 @@ export function MorningReport({ onContinue, onHardware }: { onContinue: () => vo
   const watch = localize(getCityWatch(lastSleepSession?.watchId ?? DEMO_CITY_WATCH_ID));
   const watchEcho = getCampaignWatchEcho(campaign, chapter, watch.id);
   const wakeEcho = lastSleepSession?.wakeEcho ? getCampaignWakeEchoById(campaign, lastSleepSession.wakeEcho.echoId) : null;
+  const restRitual = restRitualHistory[chapter];
   const reportClock = lastSleepSession?.mode === "real" && lastSleepSession.endedAt
     ? new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(lastSleepSession.endedAt))
     : "05:28";
+  useEffect(() => {
+    if (!restRitual || !restRitual.aiRequested || restRitual.status !== "pending") return;
+    const requestKey = restRitual.requestId;
+    if (pendingRestReflectionRequests.has(requestKey)) return;
+    pendingRestReflectionRequests.add(requestKey);
+    const requestReflection = async () => {
+      try {
+        const response = await fetch("/api/rest-reflection", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            requestId: restRitual.requestId,
+            locale: restRitual.locale,
+            intention: restRitual.intention,
+            campaignTitle: campaign.case.title,
+            chapterTitle: current.title,
+            direction: result.direction.dispatchTitle,
+            destination: result.direction.destination,
+            preparation: preparation?.shortTitle ?? t("随身物"),
+            detectiveName: campaign.presentation.detectiveName,
+          }),
+        });
+        const parsed = restReflectionResponseSchema.safeParse(await response.json());
+        if (parsed.success) completeRestReflection(campaignId, chapter, restRitual.requestId, parsed.data.reflection, parsed.data.source, parsed.data.reason);
+        else completeRestReflection(campaignId, chapter, restRitual.requestId, restRitual.reflection, "local", response.status === 401 || response.status === 403 || response.status === 429 ? "access-required" : "invalid-output");
+      } catch {
+        completeRestReflection(campaignId, chapter, restRitual.requestId, restRitual.reflection, "local", "provider-error");
+      } finally {
+        pendingRestReflectionRequests.delete(requestKey);
+      }
+    };
+    void requestReflection();
+  }, [campaign.case.title, campaign.presentation.detectiveName, campaignId, chapter, completeRestReflection, current.title, preparation?.shortTitle, restRitual, result.direction.destination, result.direction.dispatchTitle, t]);
+  const restReflectionLabel = restRitual?.status === "pending"
+    ? t("AI 正在写回信")
+    : restRitual?.status === "ai"
+      ? t("AI 个性化短笺")
+      : restRitual?.status === "unavailable"
+        ? t("AI 未完成 · 本地回信")
+        : t("仅本机 · 固定回信");
+  const restReflectionDisclosure = restRitual?.status === "pending"
+    ? t("本地回信已先写好；模型完成后会在原位替换。")
+    : restRitual?.source === "ai"
+      ? t("只向模型发送了本夜纸条与已列明的最小叙事上下文。")
+      : restRitual?.reason === "local-only"
+        ? t("内容只在本机生成和保存，没有发起网络请求。")
+        : restRitual?.reason === "not-configured"
+          ? t("纸条到达应用服务端，但服务端未配置模型，因此没有发送给模型。")
+          : restRitual?.reason === "access-required"
+            ? t("纸条到达应用服务端，但访问权限已失效，因此没有发送给模型。")
+            : t("应用服务端已尝试请求模型，但请求失败或输出未通过校验，因此改用本地回信。");
   return (
     <div className="report-wrap">
       <section className="report-hero"><Image className="report-hero-art" src={morningHeader.src} alt={morningHeader.alt} fill priority sizes="100vw" /><div><Seal>{t("调查报告")} · 0{chapter}</Seal><p>{t("昨夜调查完成")}</p><h2>{current.title}</h2><small>{t("记录人：")}{campaign.presentation.detectiveName} · {campaign.presentation.cityName} · {reportClock}</small></div></section>
       <div className="sleep-receipt-wrap"><SleepHardwareMorningReceipt sessionId={lastSleepSession?.id} /><button type="button" onClick={onHardware}>{t("管理睡眠硬件")} <ChevronRight /></button></div>
+      {restRitual && <PaperCard className={`rest-reflection-card source-${restRitual.source}`}><div className="rest-reflection-mark"><Sparkles /><span>{restReflectionLabel}</span></div><div><div className="paper-heading"><small>WHAT YOU LEFT FOR THE NIGHT · {t("放下纸条")}</small><b>{t("林渡把它夹回晨报里")}</b></div><blockquote>“{restRitual.intention}”</blockquote><p>{restRitual.reflection}</p><footer>{restReflectionDisclosure} {t("回信不改变案件事实、睡眠评价或任何奖励。")}</footer></div></PaperCard>}
       <section className="return-postcard" aria-label={locale === "en" ? `Postcard returned from Night ${chapter}` : `第${chapter}夜归来明信片`}>
         <div className="postcard-picture"><Image src={postcardArt.src} alt={postcardArt.alt} fill sizes="(max-width: 900px) 100vw, 58vw" /><span>RETURNED · NIGHT 0{chapter}</span></div>
         <PaperCard className="postcard-back"><div className="paper-heading"><small>01 · POSTCARD FROM LAST NIGHT</small><b>{postcard.title}</b></div><small className="postcard-location">{postcard.location}</small><p className="postcard-rumor">“{postcard.cityRumor}”</p><p>{postcard.message}</p><div className="route-letter"><small>ROUTE LETTER · {result.direction.dispatchTitle}</small><b>{result.direction.destination}</b><p>“{result.returnLetter}”</p><span>{result.cityEncounter}</span></div><div className="postcard-preparation-note"><b>{preparation?.shortTitle ?? t("随身物")}{t("留下的痕迹")}</b><span>{postcardPreparationNote}</span></div></PaperCard>

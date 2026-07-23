@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有进行中的主计划。最近完成的 [[plans/0031-night-shift-logo]] 已在最新主线接入位图 Logo、浏览器 favicon 与 Next.js `app/icon.png`；此前的 [[plans/0030-last-tram-english-i18n]] 已完成案件 001 英文化，并保留睡眠硬件体验与既有存档兼容。
+当前没有进行中的主计划。最近完成的 [[plans/0032-ai-rest-intention-ritual]] 已在最新主线上交付“放下纸条 → 离开屏幕 → 晨间回信”闭环；此前的 [[plans/0031-night-shift-logo]]、[[plans/0030-last-tram-english-i18n]] 与 [[plans/0029-sleep-hardware-ux-pass]] 继续保留 Logo、案件 001 英文化和睡眠硬件体验成果。
 
 ## 计划清单
 
@@ -41,6 +41,7 @@
 | [[plans/0029-sleep-hardware-ux-pass]] | `completed` | `manual` | P0 | 7/7 | 已完成硬件链路 UI/UX 深度整修与跨设备验收 |
 | [[plans/0030-last-tram-english-i18n]] | `completed` | `manual` | P0 | 7/7 | 已整合英文版、当前硬件 UX 与最新 main |
 | [[plans/0031-night-shift-logo]] | `completed` | `auto` | P1 | 4/4 | Logo、favicon、文档与最新主线接入已完成 |
+| [[plans/0032-ai-rest-intention-ritual]] | `completed` | `manual` | P0 | 6/6 | 已完成 AI 休息仪式、v15 存档与全量回归 |
 
 ## 状态规则
 
