@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 import Image from "next/image";
-import { motion } from "motion/react";
 import { Footprints } from "lucide-react";
 import type { RouteDirection, SleepQuality, SocietyId } from "@/src/lib/game-engine/schema";
 import { growthStageFromProgress } from "@/src/content/botany";

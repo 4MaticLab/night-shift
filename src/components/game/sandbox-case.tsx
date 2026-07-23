@@ -1,32 +1,42 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import {
   ArrowLeft,
+  ArrowRight,
   BookOpen,
   Check,
   ChevronRight,
   CircleAlert,
+  Clock3,
   FileText,
   Footprints,
   Gauge,
   House,
   Map,
+  Moon,
+  PackageOpen,
   RotateCcw,
   ShieldAlert,
   Sparkles,
+  Sunrise,
   Users,
   X,
 } from "lucide-react";
-import { availableSandboxEndings, requirementMet } from "@/src/lib/sandbox/engine";
+import { availableSandboxEndings, findSandboxAction, requirementMet } from "@/src/lib/sandbox/engine";
 import type {
   SandboxCampaignContent,
+  SandboxExpeditionReport,
   SandboxHandout,
   SandboxLocation,
   SandboxProgress,
   SandboxRisk,
 } from "@/src/lib/sandbox/types";
 import { getSandboxProgress, useSandboxStore } from "@/src/stores/sandbox-store";
+import { elapsedSessionMinutes, formatSleepDuration, nightSealProgress } from "@/src/lib/game-engine/sleep-session";
+import type { SleepMode, SleepQuality } from "@/src/lib/game-engine/schema";
+import { getCityWatch } from "@/src/content/watches";
+import { CityRoute, qualityCopy } from "./shared";
 
 type SandboxView = "map" | "evidence" | "people" | "ending";
 
@@ -70,6 +80,12 @@ export function SandboxCase({
   if (!progress.started || !progress.originId) {
     return <OriginBriefing content={content} reducedHorror={progress.reducedHorror} onHome={onHome} onToggle={() => sandboxStore.toggleReducedHorror(campaignId, content)} onStart={(originId) => sandboxStore.start(campaignId, content, originId)} />;
   }
+  if (progress.phase === "night" && progress.pendingActionId && progress.activeSleepSession) {
+    return <SandboxNight content={content} progress={progress} onHome={onHome} onFinish={() => sandboxStore.finishExpedition(campaignId, content)} />;
+  }
+  if (progress.phase === "morning" && progress.latestReport) {
+    return <SandboxMorning content={content} progress={progress} report={progress.latestReport} onHome={onHome} onArchive={() => sandboxStore.archiveReport(campaignId, content)} />;
+  }
   if (ending && view !== "evidence") {
     return <SandboxEnding content={content} progress={progress} endingId={ending.id} onHome={onHome} onReview={() => setView("evidence")} onReset={() => { sandboxStore.reset(campaignId, content); setSelectedLocationId(null); }} />;
   }
@@ -96,7 +112,7 @@ export function SandboxCase({
       </section>
 
       <main className="sandbox-main">
-        {view === "map" && <MapView content={content} progress={progress} selected={selectedLocation} onSelect={(location) => setSelectedLocationId(location.id)} onAction={(actionId) => sandboxStore.resolveAction(campaignId, content, actionId)} />}
+        {view === "map" && <MapView content={content} progress={progress} selected={selectedLocation} onSelect={(location) => setSelectedLocationId(location.id)} onAction={(actionId) => sandboxStore.selectAction(campaignId, content, actionId)} />}
         {view === "evidence" && <EvidenceView content={content} progress={progress} onHandout={setSelectedHandout} />}
         {view === "people" && <PeopleView content={content} progress={progress} />}
         {view === "ending" && <EndingDesk content={content} progress={progress} onChoose={(endingId) => sandboxStore.chooseEnding(campaignId, content, endingId)} />}
@@ -112,6 +128,15 @@ export function SandboxCase({
       {selectedHandout && <HandoutModal handout={selectedHandout} onClose={() => setSelectedHandout(null)} />}
       {showBriefing && <BriefingModal content={content} originTitle={origin.title} objective={origin.objective} onClose={() => setShowBriefing(false)} onReset={() => setShowReset(true)} />}
       {showReset && <ConfirmReset onClose={() => setShowReset(false)} onConfirm={() => { sandboxStore.reset(campaignId, content); setSelectedLocationId(null); setShowReset(false); setShowBriefing(false); }} />}
+      {view === "map" && progress.pendingActionId && <SandboxHandoff
+        content={content}
+        progress={progress}
+        onClose={() => sandboxStore.clearSelection(campaignId, content)}
+        onItem={(itemId) => sandboxStore.selectItem(campaignId, content, itemId)}
+        onMode={(mode) => sandboxStore.setSleepMode(campaignId, content, mode)}
+        onQuality={(quality) => sandboxStore.setQuality(campaignId, content, quality)}
+        onStart={() => sandboxStore.startExpedition(campaignId, content)}
+      />}
     </div>
   );
 }
@@ -197,17 +222,229 @@ function MapView({
             {selected.actions.map((action) => {
               const completed = progress.completedActionIds.includes(action.id);
               const allowed = requirementMet(progress, action.requires);
-              return <article className={`${completed ? "completed" : ""} risk-${action.risk}`} key={action.id}>
+              const selectedAction = progress.pendingActionId === action.id;
+              return <article className={`${completed ? "completed" : ""} ${selectedAction ? "selected" : ""} risk-${action.risk}`} key={action.id}>
                 <div><span>{riskLabels[action.risk]}</span>{completed && <i><Check /> 已归档</i>}</div>
                 <h3>{action.title}</h3><p>{action.intent}</p>
                 {!allowed && action.requirementHint && <small>{action.requirementHint}</small>}
-                {completed ? <details><summary>重看结果</summary><p>{progress.log.find((entry) => entry.actionId === action.id)?.result}</p></details> : <button type="button" disabled={!allowed} onClick={() => onAction(action.id)}>{allowed ? "执行这次调查" : "条件尚未满足"} <ChevronRight /></button>}
+                {completed ? <details><summary>重看结果</summary><p>{progress.log.find((entry) => entry.actionId === action.id)?.result}</p></details> : <button type="button" aria-pressed={selectedAction} disabled={!allowed} onClick={() => onAction(action.id)}>{allowed ? (selectedAction ? "已写入今晚交接单" : "安排今晚调查") : "条件尚未满足"} <ChevronRight /></button>}
               </article>;
             })}
           </div>
         </> : <div className="sandbox-empty-panel"><Map /><h2>选择一个已显影地点</h2><p>线索会打开新的道路；不必按编号前进。</p></div>}
       </aside>
     </div>
+  );
+}
+
+function SandboxHandoff({
+  content,
+  progress,
+  onClose,
+  onItem,
+  onMode,
+  onQuality,
+  onStart,
+}: {
+  content: SandboxCampaignContent;
+  progress: SandboxProgress;
+  onClose: () => void;
+  onItem: (itemId?: string) => void;
+  onMode: (mode: SleepMode) => void;
+  onQuality: (quality: SleepQuality) => void;
+  onStart: () => void;
+}) {
+  const found = progress.pendingActionId ? findSandboxAction(content, progress.pendingActionId) : undefined;
+  if (!found) return null;
+  const location = content.locations.find((item) => item.id === found.locationId)!;
+  const items = content.items.filter((item) => progress.itemIds.includes(item.id));
+  return (
+    <div className="sandbox-handoff-scrim" role="presentation" onClick={onClose}>
+      <section className="sandbox-handoff" role="dialog" aria-modal="true" aria-labelledby="sandbox-handoff-title" onClick={(event) => event.stopPropagation()}>
+        <button type="button" className="sandbox-handoff-close" aria-label="关闭交接单" onClick={onClose}><X /></button>
+        <header>
+          <small>TONIGHT&apos;S HANDOFF · 延迟探索</small>
+          <h2 id="sandbox-handoff-title">把这一程交给夜班。</h2>
+          <p>你现在负责方向与准备。出发后，调查队会在你离开页面或休息时继续前往。</p>
+        </header>
+        <article className={`handoff-action risk-${found.action.risk}`}>
+          <span>{location.archiveName} · {riskLabels[found.action.risk]}</span>
+          <h3>{found.action.title}</h3>
+          <b>{location.name}</b>
+          <p>{found.action.intent}</p>
+        </article>
+        <section className="handoff-items">
+          <div><small>PACK ONE THING</small><h3>随队带上一件</h3></div>
+          <div>
+            {items.map((item) => <button type="button" aria-pressed={progress.selectedItemId === item.id} key={item.id} onClick={() => onItem(item.id)}><PackageOpen /><span><b>{item.name}</b><small>{item.description}</small></span></button>)}
+          </div>
+        </section>
+        <section className="handoff-timing">
+          <div>
+            <small>NIGHT MODE</small>
+            <div className="handoff-mode" role="group" aria-label="黑水溪夜班模式">
+              <button type="button" aria-pressed={progress.sleepMode === "demo"} onClick={() => onMode("demo")}>12 秒演示</button>
+              <button type="button" aria-pressed={progress.sleepMode === "real"} onClick={() => onMode("real")}>真实夜班</button>
+            </div>
+          </div>
+          <div>
+            <small>{progress.sleepMode === "demo" ? "DEMO JOURNEY" : "REAL RETURN"}</small>
+            {progress.sleepMode === "demo" ? <div className="handoff-quality">
+              {(["interrupted", "regular", "restful"] as const).map((quality) => <button type="button" aria-pressed={progress.selectedQuality === quality} key={quality} onClick={() => onQuality(quality)}><b>{qualityCopy[quality].label}</b><span>{qualityCopy[quality].note}</span></button>)}
+            </div> : <p className="real-night-note">真实夜班按你回来时的经过时间生成断续、普通或安稳记录；任何时长都会得到同一组关键事实。</p>}
+          </div>
+        </section>
+        <footer>
+          <p><Moon /> 睡眠质量只改变报告的叙事丰富度，不改变线索、污染、人物状态或结局。</p>
+          <button type="button" onClick={onStart}>今晚交给调查队 <ArrowRight /></button>
+        </footer>
+      </section>
+    </div>
+  );
+}
+
+function SandboxNight({
+  content,
+  progress,
+  onHome,
+  onFinish,
+}: {
+  content: SandboxCampaignContent;
+  progress: SandboxProgress;
+  onHome: () => void;
+  onFinish: () => void;
+}) {
+  const session = progress.activeSleepSession!;
+  const found = findSandboxAction(content, progress.pendingActionId!)!;
+  const location = content.locations.find((item) => item.id === found.locationId)!;
+  const carriedItem = content.items.find((item) => item.id === progress.selectedItemId);
+  const [seconds, setSeconds] = useState(12);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setNow(Date.now());
+      if (session.mode === "demo") setSeconds((value) => {
+        if (value <= 1) {
+          window.clearInterval(timer);
+          window.setTimeout(onFinish, 350);
+          return 0;
+        }
+        return value - 1;
+      });
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [onFinish, session.mode]);
+  const elapsedMinutes = elapsedSessionMinutes(session, new Date(now));
+  const expeditionProgress = session.mode === "demo" ? ((12 - seconds) / 12) * 100 : nightSealProgress(session, new Date(now));
+  const watch = getCityWatch(session.watchId);
+  const routeNodes = ["临时营地", location.name, found.action.title, "晨报桌"];
+  const mapVariants = ["river", "market", "heights"] as const;
+  const mapVariant = mapVariants[(location.order - 1) % mapVariants.length];
+  const events = [
+    found.action.scene,
+    location.atmosphere,
+    `调查意图：${found.action.intent}`,
+    carriedItem ? `${carriedItem.name}被放在随手可取的位置。` : "队伍只带着最基本的照明离开营地。",
+    "山谷没有停止变化；晨报会把结果完整带回来。",
+  ];
+  const visibleEvents = Math.max(1, Math.min(events.length, Math.ceil(expeditionProgress / 20)));
+  return (
+    <main className="sandbox-night">
+      <div className="sandbox-night-stars" />
+      <header>
+        <button type="button" className="sandbox-night-brand" onClick={onHome}><span>NS</span><div><b>黑水溪夜班进行中</b><small>{session.mode === "demo" ? qualityCopy[session.quality].time : "真实夜班"}</small></div></button>
+        <button type="button" className="sandbox-wake-button" onClick={onFinish}>{session.mode === "demo" ? "跳到清晨" : "我回来了，拆开晨报"} <ArrowRight /></button>
+      </header>
+      <section className="sandbox-night-heading">
+        <p>{session.mode === "demo" ? "你离开以后，调查仍在继续。" : "合上页面也没关系。交接时间已经写进存档。"}</p>
+        <h1>{found.action.title}</h1>
+        <span>{location.name} · {riskLabels[found.action.risk]}</span>
+      </section>
+      <aside className="sandbox-watch-card">
+        <Clock3 /><div><small>{watch.archiveLabel} · {watch.window}</small><b>{watch.label}</b><p>{watch.description}</p></div>
+      </aside>
+      <section className="sandbox-night-route">
+        <CityRoute progress={expeditionProgress} routeNodes={routeNodes} variant={mapVariant} />
+        <aside>
+          <small>FIELD ORDER · {Math.round(expeditionProgress)}%</small>
+          <h2>{location.archiveName}</h2>
+          <b>{carriedItem?.name ?? "基础照明与空白笔记"}</b>
+          <p>{session.mode === "demo" ? `夜印正在形成 · ${seconds} 秒` : `已调查 ${formatSleepDuration(elapsedMinutes)}`}</p>
+        </aside>
+      </section>
+      <section className="sandbox-night-events" aria-live="polite">
+        {events.slice(0, visibleEvents).map((event, index) => <p className={index === visibleEvents - 1 ? "current" : ""} key={event}><i />{event}</p>)}
+      </section>
+      <div className="sandbox-night-progress"><span style={{ width: `${expeditionProgress}%` }} /></div>
+    </main>
+  );
+}
+
+function SandboxMorning({
+  content,
+  progress,
+  report,
+  onHome,
+  onArchive,
+}: {
+  content: SandboxCampaignContent;
+  progress: SandboxProgress;
+  report: SandboxExpeditionReport;
+  onHome: () => void;
+  onArchive: () => void;
+}) {
+  const found = findSandboxAction(content, report.actionId)!;
+  const location = content.locations.find((item) => item.id === report.locationId)!;
+  const entry = progress.log.find((item) => item.id === report.entryId)!;
+  const watch = getCityWatch(report.session.watchId);
+  const carriedItem = content.items.find((item) => item.id === report.carriedItemId);
+  const newClues = content.clues.filter((item) => report.clueIds.includes(item.id));
+  const newHandouts = content.handouts.filter((item) => report.handoutIds.includes(item.id));
+  const newItems = content.items.filter((item) => report.itemIds.includes(item.id));
+  const newLocations = content.locations.filter((item) => report.unlockedLocationIds.includes(item.id));
+  return (
+    <main className="sandbox-morning">
+      <header>
+        <button type="button" onClick={onHome}><span>NS</span><div><b>黑水溪晨报</b><small>DELAYED EXPEDITION RETURN</small></div></button>
+        <div><Sunrise /><span><small>{watch.label}交接</small><b>{report.session.mode === "demo" ? "演示夜班" : formatSleepDuration(report.session.durationMinutes)}</b></span></div>
+      </header>
+      <section className="sandbox-morning-hero">
+        <small>MORNING REPORT · {location.archiveName}</small>
+        <p>昨夜调查完成</p>
+        <h1>{found.action.title}</h1>
+        <span>{location.name} · {qualityCopy[report.session.quality].label}</span>
+      </section>
+      <section className="sandbox-report-grid">
+        <article className="sandbox-report-result">
+          <small>FIELD NOTES · 确定性结算</small>
+          <h2>{entry.title}</h2>
+          <blockquote>{entry.result}</blockquote>
+          <dl>
+            <div><dt>携带物</dt><dd>{carriedItem?.name ?? "基础装备"}</dd></div>
+            <div><dt>污染变化</dt><dd>{report.corruptionDelta ? `+${report.corruptionDelta}` : "无"}</dd></div>
+            <div><dt>警觉变化</dt><dd>{report.threatDelta ? `+${report.threatDelta}` : "无"}</dd></div>
+            <div><dt>夜班记录</dt><dd>{formatSleepDuration(report.session.durationMinutes)}</dd></div>
+          </dl>
+        </article>
+        <article className="sandbox-report-effects">
+          <small>RETURNED WITH · 带回卷宗</small>
+          <h2>清晨桌上的新东西</h2>
+          {newClues.map((clue) => <div key={clue.id}><FileText /><span><b>{clue.title}</b><p>{clue.summary}</p></span></div>)}
+          {newHandouts.map((handout) => <div key={handout.id}><BookOpen /><span><b>展示材料 {String(handout.number).padStart(2, "0")} · {handout.title}</b><p>{handout.source}</p></span></div>)}
+          {newItems.map((item) => <div key={item.id}><PackageOpen /><span><b>{item.name}</b><p>{item.description}</p></span></div>)}
+          {newLocations.map((item) => <div key={item.id}><Map /><span><b>地图显影 · {item.name}</b><p>{item.subtitle}</p></span></div>)}
+          {report.npcEffects.map((effect) => {
+            const npc = content.npcs.find((item) => item.id === effect.npcId)!;
+            return <div key={effect.npcId}><Users /><span><b>{npc.name} · {npcStateLabels[effect.state]}</b><p>{npc.role}</p></span></div>;
+          })}
+          {newClues.length + newHandouts.length + newItems.length + newLocations.length + report.npcEffects.length === 0 && <p className="no-new-evidence">没有新增卷宗，但行动已经改变山谷的威胁与可用收场。</p>}
+        </article>
+      </section>
+      <section className="sandbox-report-ethic">
+        <Moon /><p>睡眠质量只改变这份报告的叙事层级。行动事实、证物、污染和人物命运来自交接前已经写明的选择。</p>
+      </section>
+      <button type="button" className="sandbox-archive-report" onClick={onArchive}>归档晨报，准备下一夜 <ArrowRight /></button>
+    </main>
   );
 }
 

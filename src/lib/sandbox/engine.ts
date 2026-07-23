@@ -10,6 +10,7 @@ import type {
 export function createSandboxProgress(content: SandboxCampaignContent, reducedHorror = false): SandboxProgress {
   return {
     started: false,
+    phase: "day",
     unlockedLocationIds: [],
     visitedLocationIds: [],
     completedActionIds: [],
@@ -21,6 +22,8 @@ export function createSandboxProgress(content: SandboxCampaignContent, reducedHo
     npcStates: Object.fromEntries(content.npcs.map((npc) => [npc.id, "unknown"])),
     log: [],
     reducedHorror,
+    sleepMode: "demo",
+    selectedQuality: "regular",
   };
 }
 

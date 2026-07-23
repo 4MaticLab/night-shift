@@ -1,6 +1,9 @@
+import type { SleepMode, SleepQuality, SleepSession } from "@/src/lib/game-engine/schema";
+
 export type SandboxOriginId = "university" | "bootlegger";
 export type SandboxRisk = "quiet" | "exposed" | "dangerous" | "terminal";
 export type SandboxNpcState = "unknown" | "wary" | "helpful" | "hostile" | "rescued" | "lost" | "transformed";
+export type SandboxPhase = "day" | "night" | "morning";
 
 export interface SandboxOrigin {
   id: SandboxOriginId;
@@ -152,9 +155,25 @@ export interface SandboxLogEntry {
   threatDelta: number;
 }
 
+export interface SandboxExpeditionReport {
+  actionId: string;
+  locationId: string;
+  entryId: string;
+  carriedItemId?: string;
+  session: SleepSession;
+  clueIds: string[];
+  handoutIds: string[];
+  itemIds: string[];
+  unlockedLocationIds: string[];
+  npcEffects: SandboxNpcEffect[];
+  corruptionDelta: number;
+  threatDelta: number;
+}
+
 export interface SandboxProgress {
   started: boolean;
   originId?: SandboxOriginId;
+  phase: SandboxPhase;
   unlockedLocationIds: string[];
   visitedLocationIds: string[];
   completedActionIds: string[];
@@ -167,6 +186,12 @@ export interface SandboxProgress {
   log: SandboxLogEntry[];
   endingId?: string;
   reducedHorror: boolean;
+  pendingActionId?: string;
+  selectedItemId?: string;
+  sleepMode: SleepMode;
+  selectedQuality: SleepQuality;
+  activeSleepSession?: SleepSession;
+  latestReport?: SandboxExpeditionReport;
 }
 
 export interface SandboxResolution {

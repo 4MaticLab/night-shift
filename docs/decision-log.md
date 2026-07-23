@@ -71,3 +71,12 @@
 - 决定：`CampaignManifest.format` 在同一编译期注册表中区分 `linear-night` 与 `sandbox-expedition`；沙盒使用通用条件／效果结算器、通用界面和独立 `night-shift-sandbox-v1` 存档。前两案不迁移。
 - 代价：manifest 暂时保留一层线性兼容字段；好友线索与共享城市系统也暂不自动适用于沙盒。长期可在更多沙盒案件验证后再收紧为真正的 TypeScript 判别联合。
 - 相关：[[docs/blackwater-creek-adaptation-bible]]、[[docs/campaign-authoring]]、[[plans/0026-blackwater-creek-sandbox-adaptation]]。
+
+## ADR-009：沙盒世界状态复用核心延迟探索会话
+
+- 日期：2026-07-23
+- 状态：已采用
+- 背景：《黑水溪》的开放地点与 NPC 状态适合独立沙盒内容层，但行动点击后即时结算绕开了 Night Shift 最有辨识度的交接、等待与归来循环。
+- 决定：保留沙盒的地点、条件／效果与独立存档，把行动运输层改为 `day → night → morning → day`，并直接复用核心 `SleepSession`、12 秒 Demo、真实时间恢复和城市时辰。睡眠质量只改变叙事丰富度，不进入沙盒行动效果计算。
+- 代价：线性与沙盒仍有两套页面编排和存档字段；共享的是时间会话与产品伦理，而不是强行统一章节模型。未来抽取更多共享 UI 前，先用第二个沙盒案件验证抽象。
+- 相关：[[docs/architecture]]、[[docs/blackwater-creek-adaptation-bible]]、[[plans/0027-sandbox-delayed-expedition-loop]]。

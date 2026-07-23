@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { nightShiftCase } from "@/src/content/case";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import { preparations } from "@/src/content/preparations";
@@ -30,6 +30,7 @@ import { rainRadioCampaign } from "@/src/content/campaigns/rain-radio";
 import { getCampaignRouteDirection, matchCampaignEvidenceRelation } from "@/src/content/campaigns/types";
 import { blackwaterCreekCampaign } from "@/src/content/campaigns/blackwater-creek";
 import { availableSandboxEndings, resolveSandboxAction, startSandboxCampaign } from "@/src/lib/sandbox/engine";
+import { normalizeSandboxProgress, useSandboxStore } from "@/src/stores/sandbox-store";
 
 describe("Night Shift case content", () => {
   it("contains the complete five-night mystery", () => {
@@ -94,6 +95,69 @@ describe("Night Shift case content", () => {
     const terminal = resolveSandboxAction(content, startSandboxCampaign(content, "bootlegger"), "farm-assault");
     expect(terminal.ok).toBe(true);
     expect(availableSandboxEndings(content, terminal.progress).map((ending) => ending.id)).toEqual(["farm-fall"]);
+  });
+
+  it("delays Blackwater Creek action effects until the morning report and settles only once", () => {
+    const content = blackwaterCreekCampaign.sandbox!;
+    const campaignId = blackwaterCreekCampaign.id;
+    const persistWarning = vi.spyOn(console, "warn").mockImplementation(() => {});
+    useSandboxStore.setState({ saves: {} });
+
+    expect(useSandboxStore.getState().start(campaignId, content, "bootlegger")).toBe(true);
+    const before = useSandboxStore.getState().saves[campaignId];
+    expect(before.phase).toBe("day");
+    expect(before.clueIds).not.toContain("distribution-ledger");
+
+    expect(useSandboxStore.getState().selectAction(campaignId, content, "carmody-negotiate")).toBe(true);
+    useSandboxStore.getState().setSleepMode(campaignId, content, "real");
+    expect(useSandboxStore.getState().startExpedition(
+      campaignId,
+      content,
+      new Date("2026-07-23T20:00:00.000Z"),
+    )).toBe(true);
+    const during = useSandboxStore.getState().saves[campaignId];
+    expect(during.phase).toBe("night");
+    expect(during.completedActionIds).not.toContain("carmody-negotiate");
+    expect(during.clueIds).not.toContain("distribution-ledger");
+
+    expect(useSandboxStore.getState().finishExpedition(
+      campaignId,
+      content,
+      new Date("2026-07-24T02:30:00.000Z"),
+    )).toBe(true);
+    const morning = useSandboxStore.getState().saves[campaignId];
+    expect(morning.phase).toBe("morning");
+    expect(morning.completedActionIds).toContain("carmody-negotiate");
+    expect(morning.clueIds).toContain("distribution-ledger");
+    expect(morning.latestReport?.session.durationMinutes).toBe(390);
+    expect(morning.latestReport?.session.quality).toBe("regular");
+
+    const logLength = morning.log.length;
+    expect(useSandboxStore.getState().finishExpedition(campaignId, content)).toBe(false);
+    expect(useSandboxStore.getState().saves[campaignId].log).toHaveLength(logLength);
+    expect(useSandboxStore.getState().archiveReport(campaignId, content)).toBe(true);
+    expect(useSandboxStore.getState().saves[campaignId]).toMatchObject({
+      phase: "day",
+      pendingActionId: undefined,
+      selectedItemId: undefined,
+    });
+    persistWarning.mockRestore();
+  });
+
+  it("normalizes legacy sandbox saves into a safe daytime v2 state", () => {
+    const legacy = startSandboxCampaign(blackwaterCreekCampaign.sandbox!, "university");
+    const normalized = normalizeSandboxProgress({
+      ...legacy,
+      phase: undefined,
+      sleepMode: undefined,
+      selectedQuality: undefined,
+    });
+
+    expect(normalized.phase).toBe("day");
+    expect(normalized.sleepMode).toBe("demo");
+    expect(normalized.selectedQuality).toBe("regular");
+    expect(normalized.originId).toBe("university");
+    expect(normalized.unlockedLocationIds).toEqual(legacy.unlockedLocationIds);
   });
 
   it("gives every clue a literary dossier without changing fixed facts", () => {
