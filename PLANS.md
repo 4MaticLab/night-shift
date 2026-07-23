@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前正在推进 [[plans/0031-case-board-contained-right-panel]]，在独立协作分支恢复案件板左画布、右侧普通内容框的真实双栏，消除右栏裁切和横向滚动后提交草稿 PR。
+当前正在推进 [[plans/0036-case-board-contained-right-panel]]，在独立协作分支完善案件板真实双栏、滚轮逃生与无文字线索索引，完成后提交草稿 PR。
 
 ## 计划清单
 
@@ -38,14 +38,14 @@
 | [[plans/0026-blackwater-creek-sandbox-adaptation]] | `completed` | `manual` | P0 | 12/12 | 已并入公开学习项目并由 Vercel 自动部署 |
 | [[plans/0027-sandbox-delayed-expedition-loop]] | `completed` | `manual` | P0 | 8/8 | 已完成沙盒延迟探索、v2 存档、真实恢复与跨设备验收 |
 | [[plans/0028-sleep-hardware-bridge]] | `completed` | `manual` | P0 | 8/8 | 已完成虚拟硬件闭环、双案件接入与跨设备验收 |
-| [[plans/0029-case-board-inference-layout]] | `completed` | `auto` | P1 | 4/4 | 已重排联合推理操作区并验证桌面与移动端 |
-| [[plans/0030-case-board-right-inference-panel]] | `completed` | `auto` | P1 | 4/4 | 已把选择与匹配移动到右侧推理栏 |
-| [[plans/0031-case-board-contained-right-panel]] | `in_progress` | `manual` | P1 | 4/5 | 修复右栏完整显示并提交协作 PR |
 | [[plans/0029-sleep-hardware-ux-pass]] | `completed` | `manual` | P0 | 7/7 | 已完成硬件链路 UI/UX 深度整修与跨设备验收 |
 | [[plans/0030-last-tram-english-i18n]] | `completed` | `manual` | P0 | 7/7 | 已整合英文版、当前硬件 UX 与最新 main |
 | [[plans/0031-night-shift-logo]] | `completed` | `auto` | P1 | 4/4 | Logo、favicon、文档与最新主线接入已完成 |
 | [[plans/0032-ai-rest-intention-ritual]] | `completed` | `manual` | P0 | 6/6 | 已完成 AI 休息仪式、v15 存档与全量回归 |
 | [[plans/0033-hackathon-submission-kit]] | `completed` | `manual` | P0 | 6/6 | 已完成提交作战卡、真实边界与独立质量门禁 |
+| [[plans/0034-case-board-inference-layout]] | `completed` | `auto` | P1 | 4/4 | 已重排联合推理操作区并验证桌面与移动端 |
+| [[plans/0035-case-board-right-inference-panel]] | `completed` | `auto` | P1 | 4/4 | 已把选择与匹配移动到右侧推理栏 |
+| [[plans/0036-case-board-contained-right-panel]] | `in_progress` | `manual` | P1 | 6/7 | 已完成右栏、滚轮与线索索引，下一步提交协作 PR |
 
 ## 状态规则
 

@@ -365,51 +365,78 @@ test("builds a core inference by connecting two evidence cards", async ({ page }
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
   await page.getByRole("button", { name: /解锁完整案件板/ }).click();
+  await expect(page.getByRole("region", { name: "线索索引" })).toContainText("12 份档案 · 3 条未结线");
+  await expect(page.locator(".board-node.checkable")).toHaveCount(6);
+  await expect(page.locator(".clue-index-track i.checkable")).toHaveCount(6);
+  await expect(page.locator(".relation-panel")).toHaveCount(0);
+  await expect(page.locator(".core-inference-dock")).toBeVisible();
   await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
-  await expect(page.getByRole("heading", { name: "四十三天" })).toBeVisible();
-  await expect(page.getByText(/某位顾客长期迟到而形成的礼貌习惯/)).toBeVisible();
-  await expect(page.getByText(/有人七年没有忘记按时想念/)).toBeVisible();
-  await expect(page.getByRole("region", { name: "联合推理操作台" })).toContainText("再点一张");
-  await page.getByRole("button", { name: /^OBJECT · 02 未寄出的明信片/ }).click();
-  await expect(page.getByRole("button", { name: /移除证物 A：四十三天/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: /移除证物 B：未寄出的明信片/ })).toBeVisible();
-  const [board, panel, slotA, slotB, connectAction] = await Promise.all([
-    page.locator(".board-shell").boundingBox(),
-    page.locator(".relation-panel").boundingBox(),
-    page.locator(".inference-workbench .slot-a").boundingBox(),
-    page.locator(".inference-workbench .slot-b").boundingBox(),
-    page.getByRole("button", { name: /核对这两件证物/ }).boundingBox(),
-  ]);
-  expect(board).not.toBeNull();
-  expect(panel).not.toBeNull();
-  expect(slotA).not.toBeNull();
-  expect(slotB).not.toBeNull();
-  expect(connectAction).not.toBeNull();
-  expect(board!.x + board!.width).toBeLessThanOrEqual(panel!.x);
-  expect(slotA!.y + slotA!.height).toBeLessThanOrEqual(slotB!.y);
-  expect(slotB!.y + slotB!.height).toBeLessThanOrEqual(connectAction!.y);
-  const panelLayout = await page.locator(".relation-panel").evaluate((element) => ({
-    position: getComputedStyle(element).position,
-    scrollWidth: element.scrollWidth,
-    clientWidth: element.clientWidth,
-  }));
-  expect(panelLayout.position).toBe("relative");
-  expect(panelLayout.scrollWidth).toBeLessThanOrEqual(panelLayout.clientWidth + 1);
+  const selectedFlower = page.locator('.react-flow__node[data-id="flower-cycle"] .board-node');
+  const matchingPostcard = page.locator('.react-flow__node[data-id="postcard"] .board-node');
+  await expect(selectedFlower).toHaveClass(/selected/);
+  await expect(selectedFlower.locator(".evidence-slot-mark")).toHaveText("A");
+  await expect(matchingPostcard).toHaveClass(/compatible/);
+  await expect(matchingPostcard.locator(".evidence-relation-cue.compatible")).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "四十三天" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "线索索引" })).toContainText("再点一张");
+  await page.getByRole("button", { name: /打开证物档案：四十三天/ }).click();
+  const dossierDialog = page.getByRole("dialog", { name: "四十三天" });
+  await expect(dossierDialog).toBeVisible();
+  await expect(dossierDialog.getByText(/某位顾客长期迟到而形成的礼貌习惯/)).toBeVisible();
+  await expect(dossierDialog.getByText(/有人七年没有忘记按时想念/)).toBeVisible();
+  await dossierDialog.getByRole("button", { name: "关闭证物档案" }).click();
+  await expect(dossierDialog).toHaveCount(0);
   await expectNoPageOverflow(page);
-  await expect(page.locator(".relation-panel > :last-child")).toHaveClass(/relation-ledger/);
-  await page.getByRole("button", { name: /核对这两件证物/ }).click();
-
-  await expect(page.locator(".relation-ledger").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
-  await expect(page.getByText(/共同证明米娜一直替她维持联络/)).toBeVisible();
-  await expect(page.getByText("这份证物已经参与作证")).toBeVisible();
+  await page.setViewportSize({ width: 900, height: 720 });
+  await expect(page.locator(".board-workspace-solo")).toBeVisible();
+  await expect(page.locator(".relation-panel")).toHaveCount(0);
+  await expectNoPageOverflow(page);
+  const boardFlow = page.locator(".board-flow");
+  await page.evaluate(() => window.scrollTo(0, 0));
+  const boardFlowBox = await boardFlow.boundingBox();
+  expect(boardFlowBox).not.toBeNull();
+  const viewportTransformBeforeWheel = await page.locator(".react-flow__viewport").getAttribute("style");
+  const scrollBeforeBoardWheel = await page.evaluate(() => window.scrollY);
+  await page.mouse.move(boardFlowBox!.x + boardFlowBox!.width / 2, boardFlowBox!.y + Math.min(220, boardFlowBox!.height / 2));
+  await page.mouse.wheel(0, 360);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(scrollBeforeBoardWheel);
+  await expect(page.locator(".react-flow__viewport")).toHaveAttribute("style", viewportTransformBeforeWheel ?? "");
+  await page.locator(".react-flow__pane").dispatchEvent("dblclick");
+  await expect(page.locator(".react-flow__viewport")).toHaveAttribute("style", viewportTransformBeforeWheel ?? "");
+  await page.getByRole("button", { name: "Zoom In" }).click();
+  await expect(page.locator(".react-flow__viewport")).not.toHaveAttribute("style", viewportTransformBeforeWheel ?? "");
+  const nodeBoxes = await page.locator(".react-flow__node").evaluateAll((elements) => elements.map((element) => {
+    const rect = element.getBoundingClientRect();
+    return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom };
+  }));
+  for (let first = 0; first < nodeBoxes.length; first += 1) {
+    for (let second = first + 1; second < nodeBoxes.length; second += 1) {
+      const a = nodeBoxes[first];
+      const b = nodeBoxes[second];
+      expect(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top).toBe(true);
+    }
+  }
+  await page.getByRole("button", { name: /^OBJECT · 02 未寄出的明信片/ }).click();
+  const relationDialog = page.getByRole("dialog", { name: "米娜知道伊芙琳仍然活着" });
+  await expect(relationDialog).toBeVisible();
+  await expect(relationDialog.getByText(/共同证明米娜一直替她维持联络/)).toBeVisible();
+  await expect(page.locator(".core-inference-dock").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
+  await relationDialog.getByRole("button", { name: "关闭核心推论" }).click();
+  await expect(relationDialog).toHaveCount(0);
   await expect(page.locator(".react-flow__edge")).toHaveCount(1);
+  await expect(page.getByRole("region", { name: "线索索引" })).toContainText("12 份档案 · 2 条未结线");
+  await expect(page.locator(".clue-index-track i.checkable")).toHaveCount(4);
+  await expect(selectedFlower).not.toHaveClass(/checkable/);
+  await expect(matchingPostcard).not.toHaveClass(/checkable/);
+  await page.getByRole("button", { name: /查看核心推论：米娜知道伊芙琳仍然活着/ }).click();
+  await expect(page.getByRole("dialog", { name: "米娜知道伊芙琳仍然活着" })).toBeVisible();
 });
 
 test("shares one clue as a QR deep link", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
   await page.getByRole("button", { name: /解锁完整案件板/ }).click();
-  await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
+  await page.getByRole("button", { name: /打开证物档案：四十三天/ }).click();
   await page.getByRole("button", { name: /送给好友/ }).click();
 
   const dialog = page.getByRole("dialog", { name: /把「四十三天」/ });
@@ -729,7 +756,9 @@ test.describe("mobile 390x844", () => {
     await page.getByRole("button", { name: /DEMO/ }).click();
     await page.getByRole("button", { name: /解锁完整案件板/ }).click();
     await expect(page.locator(".demo-drawer")).toHaveCount(0);
-    await expect(page.getByRole("region", { name: "联合推理操作台" })).toContainText("上下滑动可以继续阅档");
+    await expect(page.locator(".relation-panel")).toHaveCount(0);
+    await expect(page.locator(".core-inference-dock")).toBeVisible();
+    await expect(page.getByRole("region", { name: "线索索引" })).toContainText("点选证物进行配对");
     await expect(page.locator(".board-node-drag-handle").first()).toBeHidden();
     await expect(page.locator(".board-flow .react-flow__pane")).toHaveCSS("touch-action", "pan-y");
     const boardFlow = page.locator(".board-flow");
@@ -741,35 +770,17 @@ test.describe("mobile 390x844", () => {
     await page.mouse.wheel(0, 360);
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(scrollBeforeBoardGesture);
     await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
-    await expect(page.getByRole("heading", { name: "四十三天" })).toBeVisible();
-    await expect(page.getByText(/有人七年没有忘记按时想念/)).toBeVisible();
-    await expect(page.getByRole("region", { name: "联合推理操作台" })).toContainText("再点一张");
+    await expect(page.getByRole("dialog", { name: "四十三天" })).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "线索索引" })).toContainText("再点一张");
+    await page.getByRole("button", { name: /打开证物档案：四十三天/ }).click();
+    const dossierDialog = page.getByRole("dialog", { name: "四十三天" });
+    await expect(dossierDialog).toBeVisible();
+    await expect(dossierDialog.getByText(/有人七年没有忘记按时想念/)).toBeVisible();
+    await dossierDialog.getByRole("button", { name: "关闭证物档案" }).click();
     await page.getByRole("button", { name: /^OBJECT · 02 未寄出的明信片/ }).click();
-    const [slotA, slotB, connectAction] = await Promise.all([
-      page.locator(".inference-workbench .slot-a").boundingBox(),
-      page.locator(".inference-workbench .slot-b").boundingBox(),
-      page.getByRole("button", { name: /核对这两件证物/ }).boundingBox(),
-    ]);
-    expect(slotA).not.toBeNull();
-    expect(slotB).not.toBeNull();
-    expect(connectAction).not.toBeNull();
-    expect(slotA!.y + slotA!.height).toBeLessThanOrEqual(slotB!.y);
-    expect(slotB!.y + slotB!.height).toBeLessThanOrEqual(connectAction!.y);
-    const [boardShellBox, relationPanelBox] = await Promise.all([
-      page.locator(".board-shell").boundingBox(),
-      page.locator(".relation-panel").boundingBox(),
-    ]);
-    expect(boardShellBox).not.toBeNull();
-    expect(relationPanelBox).not.toBeNull();
-    expect(boardShellBox!.y + boardShellBox!.height).toBeLessThanOrEqual(relationPanelBox!.y);
-    const panelOverflow = await page.locator(".relation-panel").evaluate((element) => ({
-      scrollWidth: element.scrollWidth,
-      clientWidth: element.clientWidth,
-    }));
-    expect(panelOverflow.scrollWidth).toBeLessThanOrEqual(panelOverflow.clientWidth + 1);
-    await expect(page.locator(".relation-panel > :last-child")).toHaveClass(/relation-ledger/);
-    await page.getByRole("button", { name: /核对这两件证物/ }).click();
-    await expect(page.locator(".relation-ledger").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
+    const relationDialog = page.getByRole("dialog", { name: "米娜知道伊芙琳仍然活着" });
+    await expect(relationDialog).toBeVisible();
+    await expect(page.locator(".core-inference-dock").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
     await expectNoPageOverflow(page);
   });
 
