@@ -188,6 +188,40 @@ describe("Night Shift game store", () => {
     expect(storeModule.useGameStore.getState().activeSleepSession?.wakeEcho).toBeUndefined();
   });
 
+  it("keeps rest intentions local, resumable, and isolated by campaign", () => {
+    const state = storeModule.useGameStore.getState();
+    state.begin();
+    state.selectChoice("source");
+    storeModule.useGameStore.getState().startNight("regular", "side-lamp", "demo", {
+      intention: "明天的演示还没准备完，但今晚先到这里。",
+      aiRequested: true,
+    });
+
+    let ritual = storeModule.useGameStore.getState().restRitualHistory[1];
+    expect(ritual).toMatchObject({ chapter: 1, source: "local", status: "pending", aiRequested: true });
+    expect(ritual?.reflection).toContain("灯港旧票据工坊");
+    expect(memoryStorage.getItem("night-shift-save-v1")).toContain("明天的演示");
+    expect(storeModule.useGameStore.getState().completeRestReflection(DEFAULT_CAMPAIGN_ID, 1, ritual!.requestId, "纸条我收到了，清晨再决定下一步。", "ai", "generated")).toBe(true);
+    expect(storeModule.useGameStore.getState().completeRestReflection(DEFAULT_CAMPAIGN_ID, 1, ritual!.requestId, "不应覆盖", "local", "provider-error")).toBe(false);
+    ritual = storeModule.useGameStore.getState().restRitualHistory[1];
+    expect(ritual).toMatchObject({ source: "ai", status: "ai", reflection: "纸条我收到了，清晨再决定下一步。" });
+
+    expect(storeModule.useGameStore.getState().switchCampaign(RAIN_RADIO_CAMPAIGN_ID)).toBe(true);
+    expect(storeModule.useGameStore.getState().restRitualHistory).toEqual({});
+    expect(storeModule.useGameStore.getState().completeRestReflection(DEFAULT_CAMPAIGN_ID, 1, ritual!.requestId, "不能写入另一案件", "local", "provider-error")).toBe(false);
+    expect(storeModule.useGameStore.getState().switchCampaign(DEFAULT_CAMPAIGN_ID)).toBe(true);
+    expect(storeModule.useGameStore.getState().restRitualHistory[1]).toMatchObject({ source: "ai", status: "ai" });
+
+    const migrated = storeModule.migrateGameState({
+      restRitualHistory: {
+        1: storeModule.useGameStore.getState().restRitualHistory[1],
+        2: { chapter: 2, intention: "未授权", aiRequested: false, reflection: "非法 pending", source: "local", status: "pending", createdAt: "2026-07-23T23:40:00.000Z", reflectedAt: "2026-07-23T23:40:00.000Z" },
+        99: storeModule.useGameStore.getState().restRitualHistory[1],
+      },
+    });
+    expect(Object.keys(migrated.restRitualHistory)).toEqual(["1"]);
+  });
+
   it("migrates legacy saves with session defaults", () => {
     const migrated = storeModule.migrateGameState({
       started: true,
@@ -210,6 +244,7 @@ describe("Night Shift game store", () => {
     expect(migrated.journeySeed).toBe(DEMO_JOURNEY_SEED);
     expect(migrated.souvenirHistory).toEqual({});
     expect(migrated.opportunityHistory).toEqual({});
+    expect(migrated.restRitualHistory).toEqual({});
     expect(migrated.receivedClueIds).toEqual([]);
     expect(migrated.boardPositions).toEqual({});
     expect(migrated.nightSealIds).toEqual([]);

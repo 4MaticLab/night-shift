@@ -7,9 +7,8 @@ import type { RouteDirection, SleepQuality, SocietyId } from "@/src/lib/game-eng
 import { growthStageFromProgress } from "@/src/content/botany";
 import { getAsset } from "@/src/content/assets";
 import { getCitySociety } from "@/src/content/societies";
-import { getCampaign } from "@/src/content/campaigns/registry";
 import { getCampaignBotanical } from "@/src/content/campaigns/types";
-import { useGameStore } from "@/src/stores/game-store";
+import { useI18n } from "@/src/i18n/provider";
 
 export const qualityCopy: Record<SleepQuality, { label: string; time: string; note: string }> = {
   interrupted: { label: "4小时 · 断续", time: "短程调查", note: "会听见一次特别的城市回声" },
@@ -32,17 +31,22 @@ const ROUTE_STOPS: Record<string, { x: number; y: number }[]> = {
 };
 
 export function CityRoute({ progress = 100, compact = false, routeNodes = ["事务所", "灯港", "旧子午", "玻璃丘"], variant = "river" }: { progress?: number; compact?: boolean; routeNodes?: string[]; variant?: RouteDirection["mapVariant"] }) {
-  const stops = Array.from({ length: 4 }, (_, index) => routeNodes[index] ?? "未抵达");
+  const { localize, t } = useI18n();
+  const localizedNodes = localize(routeNodes);
+  const stops = Array.from({ length: 4 }, (_, index) => localizedNodes[index] ?? t("未抵达"));
   const points = ROUTE_STOPS[variant] ?? ROUTE_STOPS.river;
   const pathRef = useRef<SVGPathElement>(null);
-  const [pathLen, setPathLen] = useState(0);
+  const [marker, setMarker] = useState(points[0]);
   const d = useMemo(() => points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x} ${p.y}`).join(" "), [points]);
-  useEffect(() => { if (pathRef.current) setPathLen(pathRef.current.getTotalLength()); }, [d]);
-  const marker = useMemo(() => {
-    if (!pathLen || !pathRef.current) return { x: points[0].x, y: points[0].y };
-    const pt = pathRef.current.getPointAtLength((Math.max(0, Math.min(100, progress)) / 100) * pathLen);
-    return { x: pt.x, y: pt.y };
-  }, [pathLen, progress, points]);
+  useEffect(() => {
+    const path = pathRef.current;
+    if (!path) {
+      setMarker(points[0]);
+      return;
+    }
+    const point = path.getPointAtLength((Math.max(0, Math.min(100, progress)) / 100) * path.getTotalLength());
+    setMarker({ x: point.x, y: point.y });
+  }, [d, progress, points]);
   return (
     <div className={`city-map route-${variant} ${compact ? "compact" : ""}`}>
       <div className="river" />
@@ -58,7 +62,7 @@ export function CityRoute({ progress = 100, compact = false, routeNodes = ["事�
 }
 
 export function BotanicalSpecimen({ chapter, progress = 100, compact = false }: { chapter: number; progress?: number; compact?: boolean }) {
-  const campaign = getCampaign(useGameStore((state) => state.campaignId));
+  const { campaign } = useI18n();
   const botanical = getCampaignBotanical(campaign, chapter);
   const art = getAsset(botanical.assetId);
   const normalizedProgress = Math.max(0, Math.min(100, progress));
@@ -68,7 +72,8 @@ export function BotanicalSpecimen({ chapter, progress = 100, compact = false }: 
 }
 
 export function SocietyCrest({ societyId, compact = false }: { societyId: SocietyId; compact?: boolean }) {
-  const society = getCitySociety(societyId);
+  const { localize } = useI18n();
+  const society = localize(getCitySociety(societyId));
   const art = getAsset(society.assetId);
   return <div className={`society-crest ${compact ? "compact" : ""}`}><Image src={art.src} alt={art.alt} width={240} height={240} /></div>;
 }

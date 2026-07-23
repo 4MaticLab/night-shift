@@ -102,7 +102,7 @@ export function SandboxCase({
   return (
     <div className="sandbox-shell">
       <header className="sandbox-topbar">
-        <button type="button" className="sandbox-brand" onClick={onHome}><span>NS</span><div><b>夜班侦探</b><small>异地卷宗 · 003</small></div></button>
+        <button type="button" className="sandbox-brand" onClick={onHome}><span aria-hidden="true" /><div><b>夜班侦探</b><small>异地卷宗 · 003</small></div></button>
         <div className="sandbox-case-title"><small>{content.year} · {content.place}</small><b>{content.title}</b></div>
         <button type="button" className="sandbox-brief-button" onClick={() => setShowBriefing(true)}><BookOpen /> 委托</button>
       </header>
@@ -362,7 +362,7 @@ function SandboxNight({
     <main className="sandbox-night">
       <div className="sandbox-night-stars" />
       <header>
-        <button type="button" className="sandbox-night-brand" onClick={onHome}><span>NS</span><div><b>黑水溪夜班进行中</b><small>{session.mode === "demo" ? qualityCopy[session.quality].time : "真实夜班"}</small></div></button>
+        <button type="button" className="sandbox-night-brand" onClick={onHome}><span aria-hidden="true" /><div><b>黑水溪夜班进行中</b><small>{session.mode === "demo" ? qualityCopy[session.quality].time : "真实夜班"}</small></div></button>
         <button type="button" className="sandbox-wake-button" onClick={onFinish}>{session.mode === "demo" ? "跳到清晨" : "我回来了，拆开晨报"} <ArrowRight /></button>
       </header>
       <section className="sandbox-night-heading">
@@ -418,7 +418,7 @@ function SandboxMorning({
   return (
     <main className="sandbox-morning">
       <header>
-        <button type="button" onClick={onHome}><span>NS</span><div><b>黑水溪晨报</b><small>DELAYED EXPEDITION RETURN</small></div></button>
+        <button type="button" onClick={onHome}><span aria-hidden="true" /><div><b>黑水溪晨报</b><small>DELAYED EXPEDITION RETURN</small></div></button>
         <div><Sunrise /><span><small>{watch.label}交接</small><b>{report.session.mode === "demo" ? "演示夜班" : formatSleepDuration(report.session.durationMinutes)}</b></span></div>
       </header>
       <section className="sandbox-morning-hero">

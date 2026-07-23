@@ -41,6 +41,10 @@
 | [[plans/0029-case-board-inference-layout]] | `completed` | `auto` | P1 | 4/4 | 已重排联合推理操作区并验证桌面与移动端 |
 | [[plans/0030-case-board-right-inference-panel]] | `completed` | `auto` | P1 | 4/4 | 已把选择与匹配移动到右侧推理栏 |
 | [[plans/0031-case-board-contained-right-panel]] | `in_progress` | `manual` | P1 | 4/5 | 修复右栏完整显示并提交协作 PR |
+| [[plans/0029-sleep-hardware-ux-pass]] | `completed` | `manual` | P0 | 7/7 | 已完成硬件链路 UI/UX 深度整修与跨设备验收 |
+| [[plans/0030-last-tram-english-i18n]] | `completed` | `manual` | P0 | 7/7 | 已整合英文版、当前硬件 UX 与最新 main |
+| [[plans/0031-night-shift-logo]] | `completed` | `auto` | P1 | 4/4 | Logo、favicon、文档与最新主线接入已完成 |
+| [[plans/0032-ai-rest-intention-ritual]] | `completed` | `manual` | P0 | 6/6 | 已完成 AI 休息仪式、v15 存档与全量回归 |
 
 ## 状态规则
 

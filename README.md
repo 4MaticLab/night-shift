@@ -13,6 +13,8 @@ npm run dev
 
 打开 `http://localhost:3000`。项目无需环境变量、数据库、登录、API Key 或可穿戴设备。
 
+“放下纸条”默认使用确定性本地晨间回信。若要启用玩家逐夜明确授权的 AI 个性化短笺，服务端必须同时配置 `OPENAI_API_KEY`、`REST_REFLECTION_ACCESS_CODE`、`UPSTASH_REDIS_REST_URL` 与 `UPSTASH_REDIS_REST_TOKEN`；缺少任一项都会保持本地回信。用户先用部署者提供的访问码取得 24 小时签名 HttpOnly 授权；Redis 对访问尝试、单会话调用、请求幂等和部署每日预算做跨实例限制，`REST_REFLECTION_DAILY_BUDGET` 可调整默认每日 200 次上限。可选的 `OPENAI_BASE_URL` 与 `OPENAI_MODEL` 用于 OpenAI-compatible 服务。模型只从固定枚举选择语气和意象，最终短笺由服务端安全模板组成。
+
 ## 验证
 
 ```bash

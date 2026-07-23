@@ -32,6 +32,65 @@ async function expectMinimumTapTargets(locator: import("@playwright/test").Locat
   }
 }
 
+async function expectNoVisibleHan(page: import("@playwright/test").Page) {
+  const visibleText = await page.locator("body").innerText();
+  expect(visibleText).not.toMatch(/\p{Script=Han}/u);
+}
+
+test("plays the first case in English and preserves the language preference", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /ENGLISH/ }).click();
+  await expect(page.getByRole("button", { name: /Begin Case 001/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /When you fall asleep/ })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("button", { name: /Begin Case 001/ })).toBeVisible();
+
+  await page.getByRole("button", { name: /Begin Case 001/ }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: /Enter the agency/ }).click();
+  await expect(page.getByText("The Ticket That Never Existed")).toBeVisible();
+  await expectNoVisibleHan(page);
+
+  await page.getByRole("button", { name: /Let the paper speak first/ }).click();
+  await page.getByRole("button", { name: /The night is yours/ }).click();
+  await expect(page.getByText("Night shift in progress")).toBeVisible();
+  await expectNoVisibleHan(page);
+  await page.getByRole("button", { name: /Skip to morning/ }).click();
+  await expect(page.getByText("Last night's investigation is complete")).toBeVisible();
+  await expect(page.getByText(/Rain had washed the signs of Lantern Wharf quiet/)).toBeVisible();
+  await expectNoVisibleHan(page);
+
+  await page.getByRole("button", { name: "Caseboard", exact: true }).click();
+  await expect(page.getByText("Connect the lies", { exact: false })).toBeVisible();
+  await expectNoVisibleHan(page);
+  await page.getByRole("button", { name: "Collection", exact: true }).click();
+  await expect(page.getByText("Time did not vanish.", { exact: false })).toBeVisible();
+  await expectNoVisibleHan(page);
+  await page.getByRole("button", { name: "Archive", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "The Last Tram at 00:43" })).toBeVisible();
+  await expectNoVisibleHan(page);
+  await expect(page.evaluate(() => localStorage.getItem("night-shift-locale"))).resolves.toBe("en");
+});
+
+test("keeps the English first-night handoff usable at 390 × 844", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await page.getByRole("button", { name: /ENGLISH/ }).click();
+  await expectNoPageOverflow(page);
+  await page.getByRole("button", { name: /Begin Case 001/ }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: /Enter the agency/ }).click();
+  await expectNoVisibleHan(page);
+  await expectNoPageOverflow(page);
+  await page.getByRole("button", { name: /Let the paper speak first/ }).click();
+  const handoff = page.getByRole("button", { name: /The night is yours/ });
+  await expect(handoff).toBeVisible();
+  await expectMinimumTapTargets(page.locator(".choice-list .choice"));
+  await expectNoPageOverflow(page);
+});
+
 async function reachFinalDecision(page: import("@playwright/test").Page) {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
@@ -81,6 +140,45 @@ test("starts a case and reaches the first morning report", async ({ page }) => {
   await expect(page.locator(".board-shell")).toBeVisible();
 });
 
+test("rest intention requests an AI note only after explicit consent", async ({ page }) => {
+  let requestBody: Record<string, unknown> | undefined;
+  await page.route("**/api/rest-reflection/access", async (route) => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ configured: true, authorized: true }) });
+  });
+  await page.route("**/api/rest-reflection", async (route) => {
+    requestBody = route.request().postDataJSON();
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        reflection: "纸条我收到了。今晚先让旧票据工坊替你守住未完成的部分，天亮以后再决定下一步。",
+        source: "ai",
+        reason: "generated",
+      }),
+    });
+  });
+
+  await openFirstNight(page);
+  const intention = "明天的演示还没准备完，但今晚先到这里。";
+  await page.getByLabel("放下纸条").fill(intention);
+  await expect(page.getByRole("button", { name: /请 AI 替林渡选择晨间短笺风格/ })).toHaveAttribute("aria-pressed", "false");
+  await page.getByRole("button", { name: /请 AI 替林渡选择晨间短笺风格/ }).click();
+  await page.getByRole("button", { name: /今晚交给你了/ }).click();
+  await page.getByRole("button", { name: /跳到清晨/ }).click();
+
+  await expect(page.locator(".rest-reflection-card")).toContainText(intention);
+  await expect(page.locator(".rest-reflection-card")).toContainText("AI 个性化短笺");
+  await expect(page.locator(".rest-reflection-card")).toContainText("今晚先让旧票据工坊替你守住未完成的部分");
+  expect(requestBody).toMatchObject({
+    intention,
+    destination: "灯港旧票据工坊",
+    preparation: "侧照灯",
+    detectiveName: "林渡",
+  });
+  expect(requestBody).not.toHaveProperty("sleepData");
+  expect(requestBody).not.toHaveProperty("history");
+});
+
 test("sleep hardware authorizes a virtual ring and returns a local morning receipt", async ({ page }) => {
   await openFirstNight(page);
   await page.getByRole("button", { name: /打开睡眠硬件中心/ }).first().click();
@@ -89,13 +187,12 @@ test("sleep hardware authorizes a virtual ring and returns a local morning recei
 
   await page.getByRole("tab", { name: /真实桥接/ }).click();
   await page.getByRole("button", { name: /Oura Cloud/ }).click();
-  await expect(page.getByText(/接口预演，不会发起真实连接/)).toBeVisible();
-  await expect(page.getByRole("button", { name: /等候真实 SDK/ })).toBeDisabled();
+  await expect(page.getByText(/可以浏览，不会改动当前连接/)).toBeVisible();
+  await expect(page.getByRole("button", { name: /用 雾灯睡眠戒 体验这条链路/ })).toBeEnabled();
 
-  await page.getByRole("tab", { name: /虚拟硬件/ }).click();
-  await page.getByRole("button", { name: /雾灯睡眠戒/ }).click();
-  await page.getByRole("button", { name: /授权这台虚拟设备/ }).click();
-  await expect(page.getByText("下一次夜班会自动采集")).toBeVisible();
+  await page.getByRole("button", { name: /用 雾灯睡眠戒 体验这条链路/ }).click();
+  await page.getByRole("button", { name: /授权并连接 雾灯睡眠戒/ }).click();
+  await expect(page.getByText("连接完成，可以回到游戏了")).toBeVisible();
   await page.getByRole("button", { name: "关闭", exact: true }).click();
 
   await expect(page.locator(".sleep-handoff-card")).toContainText("雾灯睡眠戒已待命");
@@ -111,6 +208,36 @@ test("sleep hardware authorizes a virtual ring and returns a local morning recei
   expect(hardwareState.activeCapture).toBeNull();
   expect(Object.values(hardwareState.history)).toHaveLength(1);
   expect(JSON.stringify(hardwareState)).not.toContain("samples");
+});
+
+test("sleep hardware keeps the active device while browsing drafts and resets panel scroll", async ({ page }) => {
+  await openFirstNight(page);
+  await page.getByRole("button", { name: /打开睡眠硬件中心/ }).first().click();
+  await page.locator(".sleep-device-grid > button").filter({ hasText: "雾灯睡眠戒" }).click();
+  await page.getByRole("button", { name: /授权并连接 雾灯睡眠戒/ }).click();
+  await page.getByRole("button", { name: /完成并返回游戏/ }).click();
+  await expect(page.locator(".sleep-handoff-card")).toContainText("雾灯睡眠戒已待命");
+
+  await page.getByRole("button", { name: /打开睡眠硬件中心/ }).first().click();
+  const panel = page.locator(".sleep-hardware-panel");
+  await panel.evaluate((element) => element.scrollTo({ top: element.scrollHeight }));
+  await expect.poll(() => panel.evaluate((element) => element.scrollTop)).toBeGreaterThan(100);
+  await page.getByRole("button", { name: "关闭", exact: true }).click();
+
+  await page.getByRole("button", { name: /打开睡眠硬件中心/ }).first().click();
+  await expect.poll(() => panel.evaluate((element) => element.scrollTop)).toBeLessThan(5);
+  await page.getByRole("button", { name: /静默枕/ }).click();
+  await page.getByRole("tab", { name: /真实桥接/ }).click();
+  await page.getByRole("button", { name: /Oura Cloud/ }).click();
+  await page.getByRole("button", { name: "关闭", exact: true }).click();
+
+  await expect(page.locator(".sleep-handoff-card")).toContainText("雾灯睡眠戒已待命");
+  const hardwareState = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-sleep-hardware-v1")!).state);
+  expect(hardwareState).toMatchObject({
+    mode: "virtual",
+    selectedDeviceId: "night-ring",
+    consent: { sourceId: "night-ring" },
+  });
 });
 
 test("anchors the desktop handoff and resets long-view scroll positions", async ({ page }) => {
@@ -288,7 +415,7 @@ test("shares one clue as a QR deep link", async ({ page }) => {
   const dialog = page.getByRole("dialog", { name: /把「四十三天」/ });
   await expect(dialog).toBeVisible();
   await expect(dialog.getByText(/不会附带你的夜班进度/)).toBeVisible();
-  await expect(dialog.getByLabel("好友线索链接")).toHaveValue("http://localhost:3000/?case=case-001&clue=flower-cycle");
+  await expect(dialog.getByLabel("好友线索链接")).toHaveValue(`${new URL(page.url()).origin}/?case=case-001&clue=flower-cycle`);
   await expect(dialog.getByRole("img", { name: /分享线索「四十三天」的二维码/ })).toHaveAttribute("src", /^data:image\/png;base64,/);
   await dialog.getByRole("button", { name: "复制链接" }).click();
   await expect(dialog.getByRole("button", { name: "链接已复制" })).toBeVisible();
@@ -502,7 +629,7 @@ test.describe("mobile 390x844", () => {
     await bootlegger.getByRole("button", { name: /以此身份进入山谷/ }).click();
     await page.getByRole("button", { name: /打开睡眠硬件中心/ }).click();
     await page.getByRole("button", { name: /静默枕/ }).click();
-    await page.getByRole("button", { name: /授权这台虚拟设备/ }).click();
+    await page.getByRole("button", { name: /授权并连接 静默枕/ }).click();
     await page.getByRole("button", { name: "关闭", exact: true }).click();
     await page.locator(".sandbox-map").getByRole("button", { name: /08 卡莫迪农场/ }).click();
 
@@ -557,16 +684,32 @@ test.describe("mobile 390x844", () => {
     await expect(page.getByRole("button", { name: "案件板" })).toBeVisible();
   });
 
+  test("keeps a maximum unbroken local rest intention inside the mobile report", async ({ page }) => {
+    await openFirstNight(page);
+    const intention = "x".repeat(160);
+    await page.getByLabel("放下纸条").fill(intention);
+    await expect(page.getByRole("button", { name: /请 AI 替林渡选择晨间短笺风格/ })).toHaveAttribute("aria-pressed", "false");
+    await expectNoPageOverflow(page);
+    await page.getByRole("button", { name: /今晚交给你了/ }).click();
+    await page.getByRole("button", { name: /跳到清晨/ }).click();
+    await expect(page.locator(".rest-reflection-card")).toContainText("仅本机 · 固定回信");
+    await expect(page.locator(".rest-reflection-card")).toContainText(intention);
+    await expectNoPageOverflow(page);
+  });
+
   test("keeps the sleep hardware panel touchable and contained on a phone", async ({ page }) => {
     await openFirstNight(page);
-    await page.getByRole("button", { name: /打开睡眠硬件中心/ }).first().click();
+    const hardwareEntry = page.getByRole("button", { name: /打开睡眠硬件中心/ }).first();
+    await expect(hardwareEntry).toContainText("睡眠设备");
+    await expectMinimumTapTargets(hardwareEntry);
+    await hardwareEntry.click();
     await expect(page.getByRole("dialog", { name: /把一夜的微光/ })).toBeVisible();
     await expect(page.locator(".sleep-device-grid img")).toHaveCount(4);
-    await expectMinimumTapTargets(page.locator(".sleep-source-tabs button, .sleep-device-grid > button"));
+    await expectMinimumTapTargets(page.locator(".sleep-source-tabs button, .sleep-device-grid > button, .sleep-hardware-panel-header > button"));
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /静默枕/ }).click();
-    await page.getByRole("button", { name: /授权这台虚拟设备/ }).click();
-    await expect(page.getByText("下一次夜班会自动采集")).toBeVisible();
+    await page.getByRole("button", { name: /授权并连接 静默枕/ }).click();
+    await expect(page.getByText("连接完成，可以回到游戏了")).toBeVisible();
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: "关闭", exact: true }).click();
     await expect(page.locator(".sleep-handoff-card")).toContainText("静默枕已待命");

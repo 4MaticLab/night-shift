@@ -13,6 +13,8 @@
 | 案件包契约 | `src/content/campaigns/types.ts` | `CampaignManifest`、引用完整性校验与案件内容查询 |
 | 案件注册表 | `src/content/campaigns/registry.ts` | 当前三案、默认案件和合法 `campaignId` 白名单 |
 | 首案内容包 | `src/content/campaigns/last-tram.ts` | 组合既有首案模块与视觉／结局规则 |
+| 本地化核心 | `src/i18n/core.ts`、`src/i18n/provider.tsx` | 语言偏好、案件能力回退、递归内容投影和界面翻译上下文 |
+| 首案英文目录 | `src/i18n/en-catalog.ts`、`src/i18n/en-overrides.ts` | 首案完整英文覆盖与关键文学文本人工润色 |
 | 第二案内容包 | `src/content/campaigns/rain-radio.ts` | 《只在雨中播出的电台》的五夜完整内容 |
 | 第三案内容包 | `src/content/campaigns/blackwater-creek.ts` | 《黑水溪》的沙盒 manifest 与线性兼容外壳 |
 | 第三案沙盒内容 | `src/content/campaigns/blackwater-creek-data.ts` | 双入口、九地点、行动、证物、手札、人物、污染与五结局 |
@@ -41,6 +43,9 @@
 | 睡眠硬件契约 | `src/lib/sleep-hardware/` | 厂商无关设备／权限模型、确定性虚拟信号和本地摘要 |
 | 睡眠硬件存档 | `src/stores/sleep-hardware-store.ts` | 可撤销授权、活动采集和最近 8 条本地摘要 |
 | 睡眠硬件界面 | `src/components/game/sleep-hardware.tsx` | 硬件中心、交接状态、夜间遥测和晨报回执 |
+| 放下纸条契约 | `src/lib/rest-ritual.ts` | 纸条／回信校验、确定性本地回信与最小模型请求契约 |
+| AI 晨间回信 | `app/api/rest-reflection/` | 部署访问码、签名 HttpOnly 授权、持久化配额、OpenAI-compatible 受限风格选择与本地回退 |
+| AI 服务端护栏 | `src/lib/server-ai-guard.ts` | Redis 跨实例访问限流、会话额度、部署预算、请求幂等与流式大小限制 |
 | 结局资格 | `src/lib/game-engine/ending.ts` | 三结局白名单与真结局的线索、藏品、关系门槛 |
 | 游戏存档 | `src/stores/game-store.ts` | Zustand 状态、阶段转换与浏览器持久化 |
 | 产品外壳 | `app/page.tsx` | 阶段判断、视图编排、Demo 抽屉开关与顶层导航 |
@@ -55,7 +60,9 @@
 
 ## 状态模型
 
-主要阶段为 `day → ready → night → morning → ending`。章节结算只通过当前案件 manifest 的确定性内容函数产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 14。`campaignId` 标识活动案件，活动进度仍保持扁平供组件读取；切换时先把它快照到 `campaignSaves[campaignId]`，再恢复目标案件或创建新档。章节、线索、关系、结局、案板坐标和夜间历史因此按案隔离。v13 及更早的单案件存档默认归入 `case-001`，原有数据无需清除。
+主要阶段为 `day → ready → night → morning → ending`。章节结算只通过当前案件 manifest 的确定性内容函数产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 15。`campaignId` 标识活动案件，活动进度仍保持扁平供组件读取；切换时先把它快照到 `campaignSaves[campaignId]`，再恢复目标案件或创建新档。章节、线索、关系、结局、案板坐标、夜间历史和放下纸条因此按案隔离。v13 及更早的单案件存档默认归入 `case-001`，原有数据无需清除；v15 对纸条记录逐章校验，旧档默认没有纸条，不伪造用户输入。
+
+语言偏好单独保存为 `night-shift-locale`，不进入任一游戏 store、存档版本或结算函数。`I18nProvider` 根据当前案件把偏好解析为有效语言：`case-001` 支持 `zh-CN` 与 `en`，未翻译案件明确回退中文。英文模式只递归投影 manifest 的字符串值，稳定 ID、引用、数字、规则和存档键保持原样，因此切换语言或刷新不会复制、重置或迁移游戏进度。
 
 案件 manifest 同时提供章节数、线索数、藏品数、真结局门槛、档案标题和逐夜视觉。`resolveNight`、关系匹配、结局资格、迁移过滤和页面投影都显式接收当前 manifest；通用模块不按 `case-001`／`case-002` 写分支。`defineCampaign` 要求章节从 1 连续排列、每个 choice 有路线、每夜拥有明信片／植物／四时辰回声／睡隙回声／夜印，并拒绝跨案件线索引用和不可达门槛。
 
@@ -83,7 +90,9 @@
 
 ## 内容边界
 
-生成式能力只用于视觉资产或未来对固定报告事实的文字润色。伊芙琳是否活着、人物动机、线索存在性、核心因果与结局条件必须来自确定性内容，详见 [[docs/story-bible]]。
+生成式能力用于视觉资产和玩家明确授权的晨间短笺风格。部署必须同时配置模型密钥、访问码和持久化 Redis 配额；访问码只用于换取带独立会话 ID 的 24 小时 HMAC 签名 HttpOnly、SameSite Strict Cookie，不写入游戏存档。访问尝试、单会话额度、部署每日预算和纸条 `requestId` 幂等均由 Redis 跨实例执行，配额不可用时关闭 AI。模型只接收当前纸条、案件／章节标题、方向、地点、随身物和侦探名，并只能返回固定 `tone`／`image` 枚举；服务端以校验后的枚举组合安全短笺，不直接展示自由模型文本。未配置模型、权限失效、超时、上游错误和无效输出都返回有明确原因的本地确定性回信。伊芙琳是否活着、人物动机、线索存在性、核心因果与结局条件必须来自确定性内容，详见 [[docs/story-bible]]。
+
+英文内容同样是随构建提交的确定性目录，不在运行时调用翻译服务或生成模型。内容测试要求首案英文投影不含汉字，并逐项比较章节、方向、线索、收藏、关系与结局的稳定 ID 及规则，防止翻译改变剧情图谱。
 
 案件板只接受 `src/content/relations.ts` 中定义的无序证物对。玩家点击已解锁证物时同时展开完整详情、城市异议与林渡页边批注，并把它放入联合推理台的 A／B 槽；推理台常驻显示“选第一件—选第二件—核对证词”，选满后点击第三件不会静默替换，必须先明确移除其中一件。`connectClues` 只会为合法配对写入 `confirmedRelations`，错误配对不改变存档。已确认关系会生成持久连线，并在参与作证的证物侧页回响，继续作为真结局条件的一部分。
 

@@ -31,8 +31,36 @@ import { getCampaignRouteDirection, matchCampaignEvidenceRelation } from "@/src/
 import { blackwaterCreekCampaign } from "@/src/content/campaigns/blackwater-creek";
 import { availableSandboxEndings, resolveSandboxAction, startSandboxCampaign } from "@/src/lib/sandbox/engine";
 import { normalizeSandboxProgress, useSandboxStore } from "@/src/stores/sandbox-store";
+import { campaignSupportsLocale, localizeCampaign } from "@/src/i18n/core";
 
 describe("Night Shift case content", () => {
+  it("provides a complete English presentation of the first case without changing stable ids or rules", () => {
+    const english = localizeCampaign(lastTramCampaign, "en");
+    const collectStrings = (value: unknown): string[] => {
+      if (typeof value === "string") return [value];
+      if (Array.isArray(value)) return value.flatMap(collectStrings);
+      if (value && typeof value === "object") return Object.values(value).flatMap(collectStrings);
+      return [];
+    };
+    const stableIds = (campaign: typeof lastTramCampaign) => ({
+      campaign: campaign.id,
+      chapters: campaign.case.chapters.map((chapter) => [chapter.number, ...chapter.choices.map((choice) => choice.id)]),
+      clues: campaign.case.clues.map((clue) => clue.id),
+      collectibles: campaign.case.collectibles.map((item) => item.id),
+      routes: campaign.routes.map((route) => [route.id, route.choiceId, route.societyId]),
+      relations: campaign.relations.map((relation) => [relation.id, ...relation.clueIds]),
+      endings: campaign.endings.map((ending) => ending.id),
+    });
+
+    expect(english).not.toBe(lastTramCampaign);
+    expect(english.case.title).toBe("The Last Tram at 00:43");
+    expect(stableIds(english as typeof lastTramCampaign)).toEqual(stableIds(lastTramCampaign));
+    expect(english.rules).toEqual(lastTramCampaign.rules);
+    expect(collectStrings(english).filter((text) => /\p{Script=Han}/u.test(text))).toEqual([]);
+    expect(campaignSupportsLocale(lastTramCampaign.id, "en")).toBe(true);
+    expect(campaignSupportsLocale(rainRadioCampaign.id, "en")).toBe(false);
+  });
+
   it("contains the complete five-night mystery", () => {
     expect(nightShiftCase.chapters).toHaveLength(5);
     expect(nightShiftCase.clues).toHaveLength(12);
@@ -45,7 +73,7 @@ describe("Night Shift case content", () => {
     expect(new Set(campaignRegistry.flatMap((campaign) => campaign.case.clues.map((clue) => clue.id))).size)
       .toBe(campaignRegistry.reduce((total, campaign) => total + campaign.case.clues.length, 0));
 
-    for (const campaign of campaignRegistry.filter((item) => item.format !== "sandbox-expedition")) {
+    for (const campaign of campaignRegistry.filter((item) => !("format" in item) || item.format !== "sandbox-expedition")) {
       expect(campaign.case.chapters).toHaveLength(5);
       expect(campaign.routes).toHaveLength(15);
       expect(campaign.endings).toHaveLength(3);

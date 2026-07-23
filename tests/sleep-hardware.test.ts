@@ -56,6 +56,44 @@ describe("sleep hardware bridge", () => {
     expect(hardwareModule.useSleepHardwareStore.getState().activeCapture).toBeNull();
   });
 
+  it("switches device and consent atomically only after explicit authorization", () => {
+    const store = hardwareModule.useSleepHardwareStore.getState();
+    expect(store.authorizeVirtualDevice("night-ring", ["sleep-window", "heart-rate"])).toBe(true);
+    expect(hardwareModule.useSleepHardwareStore.getState()).toMatchObject({
+      mode: "virtual",
+      selectedDeviceId: "night-ring",
+      consent: {
+        sourceId: "night-ring",
+        permissions: ["sleep-window", "heart-rate"],
+      },
+    });
+
+    expect(hardwareModule.useSleepHardwareStore.getState().authorizeVirtualDevice("quiet-pillow", ["movement"])).toBe(true);
+    expect(hardwareModule.useSleepHardwareStore.getState()).toMatchObject({
+      mode: "virtual",
+      selectedDeviceId: "quiet-pillow",
+      consent: {
+        sourceId: "quiet-pillow",
+        permissions: ["sleep-window", "movement"],
+      },
+    });
+  });
+
+  it("does not change hardware authorization while a night is being captured", () => {
+    const store = hardwareModule.useSleepHardwareStore.getState();
+    store.authorizeVirtualDevice("night-ring", ["sleep-window", "heart-rate"]);
+    const session = startSleepSession("demo", "regular", new Date("2026-07-23T22:00:00.000Z"));
+    expect(hardwareModule.useSleepHardwareStore.getState().beginCapture(session)).toBe(true);
+
+    expect(hardwareModule.useSleepHardwareStore.getState().authorizeVirtualDevice("quiet-pillow", ["sleep-window", "movement"])).toBe(false);
+    expect(hardwareModule.useSleepHardwareStore.getState()).toMatchObject({
+      mode: "virtual",
+      selectedDeviceId: "night-ring",
+      consent: { sourceId: "night-ring" },
+      activeCapture: { sourceId: "night-ring", sessionId: session.id },
+    });
+  });
+
   it("generates deterministic device-aware summaries", () => {
     const session = finishSleepSession(
       startSleepSession("demo", "regular", new Date("2026-07-23T22:00:00.000Z")),
@@ -108,4 +146,3 @@ describe("sleep hardware bridge", () => {
     expect(session.endedAt).toBeUndefined();
   });
 });
-
