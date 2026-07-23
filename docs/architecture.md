@@ -19,6 +19,7 @@
 | 机会告示 | `src/content/opportunities.ts` | 十二张午后短章、两种答复、稳定三张候选与未来回响 |
 | 案件人物 | `src/content/characters.ts` | 四位见证人的章节映射、公共传闻、已知事实与证物揭示条件 |
 | 城市地区 | `src/content/districts.ts` | 三个城区的首次章节、公共说法、生活规矩与固定地标 |
+| 结局终函 | `src/content/endings.ts` | 三种结局的独立结果、林渡终函、档案标签与结案语 |
 | 证物关系 | `src/content/relations.ts` | 三条核心推论、对应证物对与成功解释 |
 | 内容契约 | `src/lib/game-engine/schema.ts` | Zod schema、引用与数量约束 |
 | 夜间结算 | `src/lib/game-engine/resolve-night.ts` | 根据章节、睡眠质量、随身物与调查方向选择确定性结果 |
@@ -78,6 +79,8 @@ React Flow 使用本地受控节点承接拖动过程，只在拖动结束时把
 
 分区志只用 `completedReports` 判断地区是否已经被走过：第 1、3、4 夜分别展开灯港区、旧子午区与玻璃丘。地区内容不写存档，不替换路线图，也不进入任何结算或资格判断。
 
+结案卷宗同样是只读投影，不增加新的持久化结构：它按 `completedReports` 排列五夜，再从 `choiceHistory`、`preparationHistory`、`growthHistory` 与 `souvenirHistory` 读取当夜真实履历；核心物证只过滤 `unlockedCollectibleIds`。三封终函由 `src/content/endings.ts` 的 schema 校验内容选择，城市附言仍独立取自问函总体姿态。“重看档案”只切换结局页内的本地视图，不清除 `endingId`；只有“重新调查”调用既有重置动作。
+
 ## 交互基线与组件边界
 
 0003 开工时冻结以下行为：Demo 仍可在 12 秒内完成一夜；三种睡眠都推进固定主线；随身物只改变环境回响；晨报、夜印和收藏结果保持兼容。
@@ -87,7 +90,7 @@ React Flow 使用本地受控节点承接拖动过程，只在拖动结束时把
 - `app/page.tsx`：阶段与视图编排，不拥有章节结算或功能域展示细节。
 - `landing.tsx`：落地页与开场，不读取游戏结算规则。
 - `night-cycle.tsx`：调查方向、随身物、Demo／真实模式、夜印显影、归来明信片和晨报。
-- `investigation.tsx`：案件板、明信片旅程册、夜印收藏、物证档案和三结局。
+- `investigation.tsx`：案件板、明信片旅程册、夜印收藏、物证档案、三结局与五夜结案卷宗。
 - `shell.tsx`：跨视图导航与 Demo 控制台。
 - `shared.tsx`：跨功能域复用的纸张、印章和路线视觉原语。
 

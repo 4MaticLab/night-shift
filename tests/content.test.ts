@@ -19,6 +19,7 @@ import { createSouvenirRecord, DEMO_JOURNEY_SEED, getSouvenir, selectSouvenir, s
 import { createOpportunityRecord, getOpportunityCandidates, getOpportunityResponse, opportunityNotices } from "@/src/content/opportunities";
 import { caseCharacters, getChapterCharacter, isCharacterRevealed } from "@/src/content/characters";
 import { cityDistricts, getCityDistrict } from "@/src/content/districts";
+import { endingEpilogues, getEndingEpilogue } from "@/src/content/endings";
 
 describe("Night Shift case content", () => {
   it("contains the complete five-night mystery", () => {
@@ -32,6 +33,17 @@ describe("Night Shift case content", () => {
       expect(clue.cityObjection.length).toBeGreaterThanOrEqual(20);
       expect(clue.marginNote.length).toBeGreaterThanOrEqual(12);
       expect(clue.cityObjection).not.toMatch(/积分|奖励|好感/);
+    }
+  });
+
+  it("defines three distinct literary epilogues without reward language", () => {
+    expect(endingEpilogues.map((ending) => ending.id)).toEqual(["public", "protect", "return"]);
+    expect(new Set(endingEpilogues.map((ending) => ending.detectiveLetter))).toHaveLength(3);
+    expect(new Set(endingEpilogues.map((ending) => ending.closingLine))).toHaveLength(3);
+    for (const ending of endingEpilogues) {
+      expect(getEndingEpilogue(ending.id)).toEqual(ending);
+      expect(ending.detectiveLetter.length).toBeGreaterThanOrEqual(80);
+      expect(`${ending.result}${ending.detectiveLetter}${ending.closingLine}`).not.toMatch(/积分|奖励|分数|好感度/);
     }
   });
 

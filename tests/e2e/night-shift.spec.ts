@@ -13,6 +13,16 @@ async function expectNoPageOverflow(page: import("@playwright/test").Page) {
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 }
 
+async function reachFinalDecision(page: import("@playwright/test").Page) {
+  await page.goto("/");
+  await page.getByRole("button", { name: /DEMO MODE/ }).click();
+  await page.getByRole("button", { name: /跳到真结局条件/ }).click();
+  await page.getByRole("button", { name: /去站台等一辆被否认的车/ }).click();
+  await page.getByRole("button", { name: /今晚交给你了/ }).click();
+  await page.getByRole("button", { name: /跳到清晨/ }).click();
+  await page.getByRole("button", { name: /做出最终决定/ }).click();
+}
+
 test("starts a case and reaches the first morning report", async ({ page }) => {
   await openFirstNight(page);
   await expect(page.getByText(/可能惊动 · 错页登记处/)).toBeVisible();
@@ -174,17 +184,22 @@ test("remembers a hand-arranged evidence desk after reload", async ({ page }) =>
 });
 
 test("carries the hidden-platform tableau through final choice and ending", async ({ page }) => {
-  await page.goto("/");
-  await page.getByRole("button", { name: /DEMO MODE/ }).click();
-  await page.getByRole("button", { name: /跳到真结局条件/ }).click();
-  await page.getByRole("button", { name: /去站台等一辆被否认的车/ }).click();
-  await page.getByRole("button", { name: /今晚交给你了/ }).click();
-  await page.getByRole("button", { name: /跳到清晨/ }).click();
-  await page.getByRole("button", { name: /做出最终决定/ }).click();
+  await reachFinalDecision(page);
   await expect(page.locator(".ending-background")).toHaveAttribute("src", /hidden-platform-tableau-v1/);
   await page.getByRole("button", { name: /公开档案/ }).click();
   await expect(page.getByRole("heading", { name: "公开档案" })).toBeVisible();
   await expect(page.locator(".ending-background")).toHaveAttribute("src", /hidden-platform-tableau-v1/);
+  await expect(page.getByText("FINAL LETTER · 林渡终函")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "五夜归来总账" })).toBeVisible();
+  await expect(page.locator(".ending-night-entry")).toHaveCount(5);
+  await expect(page.locator(".ending-evidence-item")).toHaveCount(8);
+  await expect(page.getByRole("button", { name: /下一宗案件/ })).toBeDisabled();
+
+  await page.getByRole("button", { name: /重看档案/ }).click();
+  await expect(page.getByRole("heading", { name: /零点四十三分/ })).toBeVisible();
+  await expect(page.getByText("雾灯城分区志")).toBeVisible();
+  await page.getByRole("button", { name: /回到结案页/ }).click();
+  await expect(page.getByRole("heading", { name: "五夜归来总账" })).toBeVisible();
 });
 
 test("completes all five nights from a new save without chapter jumps", async ({ page }) => {
@@ -245,6 +260,23 @@ test.describe("mobile 390x844", () => {
     await page.getByRole("button", { name: /^OBJECT · 02 未寄出的明信片/ }).click();
     await page.getByRole("button", { name: /建立证物连接/ }).click();
     await expect(page.locator(".relation-ledger").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
+    await expectNoPageOverflow(page);
+  });
+
+  test("keeps the five-night closing ledger readable and reversible on a phone", async ({ page }) => {
+    await reachFinalDecision(page);
+    await page.getByRole("button", { name: /保护证人/ }).click();
+    await expect(page.getByRole("heading", { name: "保护证人" })).toBeVisible();
+    await expect(page.locator(".ending-night-entry")).toHaveCount(5);
+    await expect(page.locator(".ending-evidence-item")).toHaveCount(8);
+    await expect(page.getByRole("button", { name: /下一宗案件/ })).toBeDisabled();
+    await expectNoPageOverflow(page);
+
+    await page.getByRole("button", { name: /重看档案/ }).click();
+    await expect(page.getByRole("button", { name: /回到结案页/ })).toBeVisible();
+    await expectNoPageOverflow(page);
+    await page.getByRole("button", { name: /回到结案页/ }).click();
+    await expect(page.getByRole("heading", { name: "五夜归来总账" })).toBeVisible();
     await expectNoPageOverflow(page);
   });
 });

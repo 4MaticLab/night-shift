@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
-import { ArrowRight, Check, FileText, Flower2, KeyRound, Link2, RotateCcw, Search } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Check, FileText, Flower2, KeyRound, Link2, RotateCcw, Search } from "lucide-react";
 import { Background, BackgroundVariant, Controls, Handle, Position, ReactFlow, useNodesState, type Edge, type Node, type NodeProps } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { nightShiftCase } from "@/src/content/case";
@@ -18,6 +18,7 @@ import { souvenirs } from "@/src/content/souvenirs";
 import { getOpportunityNotice, getOpportunityResponse } from "@/src/content/opportunities";
 import { caseCharacters, isCharacterRevealed } from "@/src/content/characters";
 import { cityDistricts } from "@/src/content/districts";
+import { endingEpilogues } from "@/src/content/endings";
 import { evidenceRelations } from "@/src/content/relations";
 import { useGameStore } from "@/src/stores/game-store";
 import { canUnlockTrueEnding, type EndingId } from "@/src/lib/game-engine/ending";
@@ -152,17 +153,39 @@ export function ArchivePage() {
 }
 
 export function Ending() {
-  const { unlockedClueIds, unlockedCollectibleIds, confirmedRelations, correspondenceHistory, endingId, chooseEnding, reset } = useGameStore();
+  const { unlockedClueIds, unlockedCollectibleIds, confirmedRelations, correspondenceHistory, completedReports, preparationHistory, choiceHistory, growthHistory, souvenirHistory, endingId, chooseEnding, reset } = useGameStore();
+  const [reviewingArchive, setReviewingArchive] = useState(false);
   const trueReady = canUnlockTrueEnding({ unlockedClueIds, unlockedCollectibleIds, confirmedRelations });
   const dominantStance = getDominantCorrespondenceStance(correspondenceHistory);
   const cityAfterword = dominantStance ? correspondencePostures[dominantStance] : { title: "未寄出的答复", note: "你没有让任何社团替你固定立场。雾灯城把那些空信封也归了档：沉默不是失败，只是一种尚未交出的决定。" };
-  const endings: Array<{ id: EndingId; icon: React.ReactNode; title: string; theme: string; result: string; locked?: boolean }> = [
-    { id: "public", icon: <FileText />, title: "公开档案", theme: "真相属于所有人。", result: "全部证据被公开，私人收藏机构受到调查，部分资产陆续归还。伊芙琳再次消失。" },
-    { id: "protect", icon: <KeyRound />, title: "保护证人", theme: "真相不应以牺牲证人为代价。", result: "证据被交给可信档案机构，伊芙琳的身份暂不公布。一张没有目的地的车票寄到了事务所。" },
-    { id: "return", icon: <Flower2 />, title: "让失踪者自己决定", theme: "把证据，也把选择权交还给她。", result: "数周后，伊芙琳亲自署名的调查报告公开。林渡收到第九件藏品：一卷尚未冲洗的胶卷。", locked: !trueReady },
-  ];
-  const selected = endings.find((item) => item.id === endingId);
+  const icons: Record<EndingId, React.ReactNode> = { public: <FileText />, protect: <KeyRound />, return: <Flower2 /> };
+  const selected = endingEpilogues.find((item) => item.id === endingId);
   const endingArt = getAsset("ending.hidden-platform");
-  if (selected) return <main className="ending-reveal"><Image className="ending-background" src={endingArt.src} alt={endingArt.alt} fill priority sizes="100vw" /><div className="ending-light" /><Seal>{selected.id === "return" ? "TRUE ENDING" : "CASE CLOSED"}</Seal><h1>{selected.title}</h1><p className="ending-theme">{selected.theme}</p><PaperCard><p>{selected.result}</p><hr /><p>林渡最后一封信：</p><blockquote>“我们总以为破案是替一件事写下句号。后来才明白，有些真相只是把笔还给真正应该写下它的人。”</blockquote><div className="city-afterword"><small>CITY POSTSCRIPT · 与结局资格无关</small><b>{cityAfterword.title}</b><p>{cityAfterword.note}</p></div></PaperCard><h2>城市里仍有许多灯，<br />只在你睡着以后亮起。</h2><button className="ghost-button" onClick={reset}><RotateCcw /> 重新调查</button></main>;
-  return <main className="ending-choice"><Image className="ending-background" src={endingArt.src} alt={endingArt.alt} fill priority sizes="100vw" /><div className="page-title"><div><p className="eyebrow">FINAL DECISION · 05:43</p><h2>最后的决定，<br />由你写进档案。</h2></div><p>伊芙琳把账册留在站台，却没有把决定也留下。三种真相，都有各自的代价。</p></div><div className="ending-cards">{endings.map((ending) => <button key={ending.id} disabled={ending.locked} onClick={() => chooseEnding(ending.id)} className={ending.id === "return" ? "true-ending" : ""}><span>{ending.icon}</span><small>{ending.locked ? `尚需 ${12 - unlockedClueIds.length} 条线索 / ${3 - confirmedRelations.length} 条关系` : "可选择"}</small><h3>{ending.title}</h3><p>{ending.theme}</p><ArrowRight /></button>)}</div></main>;
+  const journeyNights = [...completedReports].sort((a, b) => a - b).flatMap((chapterNumber) => {
+    const chapter = nightShiftCase.chapters.find((item) => item.number === chapterNumber);
+    const postcard = journeyPostcards.find((item) => item.chapter === chapterNumber);
+    const botanical = nightBotanicals.find((item) => item.chapter === chapterNumber);
+    if (!chapter || !postcard || !botanical) return [];
+    const direction = getRouteDirection(chapterNumber, choiceHistory[chapterNumber] ?? "");
+    const preparation = getPreparation(preparationHistory[chapterNumber] ?? "side-lamp");
+    const growth = growthHistory[chapterNumber];
+    const souvenirRecord = souvenirHistory[chapterNumber];
+    const souvenir = souvenirRecord ? souvenirs.find((item) => item.id === souvenirRecord.souvenirId) : undefined;
+    return [{ chapter, postcard, botanical, direction, preparation, growth, souvenir }];
+  });
+  const recoveredEvidence = nightShiftCase.collectibles.filter((item) => unlockedCollectibleIds.includes(item.id));
+
+  if (selected && reviewingArchive) return <main className="ending-archive-review"><header><button type="button" onClick={() => setReviewingArchive(false)}><ArrowLeft /> 回到结案页</button><span>CASE REMAINS CLOSED · 档案只读</span></header><ArchivePage /></main>;
+
+  if (selected) return <main className="ending-reveal">
+    <Image className="ending-background" src={endingArt.src} alt={endingArt.alt} fill priority sizes="100vw" /><div className="ending-light" />
+    <Seal>{selected.archiveLabel}</Seal><h1>{selected.title}</h1><p className="ending-theme">{selected.theme}</p>
+    <PaperCard className="ending-letter"><small>FINAL LETTER · 林渡终函</small><p>{selected.result}</p><hr /><blockquote>“{selected.detectiveLetter}”</blockquote><div className="city-afterword"><small>CITY POSTSCRIPT · 与结局资格无关</small><b>{cityAfterword.title}</b><p>{cityAfterword.note}</p></div></PaperCard>
+    <section className="case-closing-ledger"><div className="ending-section-heading"><small>FIVE NIGHTS RETURNED · {journeyNights.length}/5</small><h2>五夜归来总账</h2><p>这里不计算分数。它只保存你交给林渡的方向、时间长成的植物，以及城市擅自塞进他口袋的小东西。</p></div><div className="ending-night-grid">{journeyNights.map(({ chapter, postcard, botanical, direction, preparation, growth, souvenir }) => { const postcardArt = getPostcardAsset(chapter.number); const sealArt = getNightSealAsset(chapter.number); return <article className="ending-night-entry" key={chapter.number}><div className="ending-night-art"><Image src={postcardArt.src} alt={postcardArt.alt} fill sizes="(max-width: 600px) 100vw, 220px" /><Image className="ending-night-seal" src={sealArt.src} alt={sealArt.alt} width={74} height={74} /></div><div><small>NIGHT 0{chapter.number} · {postcard.location}</small><h3>{chapter.title}</h3><p>{direction.dispatchTitle} · {direction.destination}</p><dl><div><dt>随身</dt><dd>{preparation?.shortTitle ?? "未记录"}</dd></div><div><dt>时间长成</dt><dd>{botanical.name}</dd></div><div><dt>口袋带回</dt><dd>{souvenir?.name ?? "这一夜只带回了雨"}</dd></div><div><dt>夜班留痕</dt><dd>{growth ? `${qualityCopy[growth.quality].label} · ${formatSleepDuration(growth.durationMinutes)}` : "已归档"}</dd></div></dl></div></article>; })}</div></section>
+    <section className="ending-evidence-ledger"><div className="ending-section-heading"><small>RECOVERED EVIDENCE · {recoveredEvidence.length}/8</small><h2>带回事务所的核心物证</h2><p>只陈列这个存档真正找到的东西。没有补齐的格子不会在结案时替你伪造。</p></div><div>{recoveredEvidence.map((item) => { const art = getAsset(item.assetId); return <article className="ending-evidence-item" key={item.id}><Image src={art.src} alt={art.alt} width={160} height={160} /><span><small>{item.district}</small><b>{item.title}</b><p>{item.revealedDescription}</p></span></article>; })}</div></section>
+    <h2 className="ending-closing-line">{selected.closingLine}</h2><p className="ending-refrain">城市里仍有许多灯，只在你睡着以后亮起。</p>
+    <div className="ending-actions"><button type="button" onClick={() => setReviewingArchive(true)}><BookOpen /> 重看档案</button><button type="button" disabled><KeyRound /> 下一宗案件 · 即将开放</button><button type="button" onClick={reset}><RotateCcw /> 重新调查</button></div>
+  </main>;
+
+  return <main className="ending-choice"><Image className="ending-background" src={endingArt.src} alt={endingArt.alt} fill priority sizes="100vw" /><div className="page-title"><div><p className="eyebrow">FINAL DECISION · 05:43</p><h2>最后的决定，<br />由你写进档案。</h2></div><p>伊芙琳把账册留在站台，却没有把决定也留下。三种真相，都有各自的代价。</p></div><div className="ending-cards">{endingEpilogues.map((ending) => { const locked = ending.id === "return" && !trueReady; return <button key={ending.id} disabled={locked} onClick={() => chooseEnding(ending.id)} className={ending.id === "return" ? "true-ending" : ""}><span>{icons[ending.id]}</span><small>{locked ? `尚需 ${12 - unlockedClueIds.length} 条线索 / ${3 - confirmedRelations.length} 条关系` : "可选择"}</small><h3>{ending.title}</h3><p>{ending.theme}</p><ArrowRight /></button>; })}</div></main>;
 }

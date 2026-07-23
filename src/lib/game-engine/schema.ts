@@ -43,6 +43,17 @@ export const evidenceRelationSchema = z.object({
 });
 export type EvidenceRelation = z.infer<typeof evidenceRelationSchema>;
 
+export const endingEpilogueSchema = z.object({
+  id: z.enum(["public", "protect", "return"]),
+  archiveLabel: z.string(),
+  title: z.string(),
+  theme: z.string(),
+  result: z.string().min(30),
+  detectiveLetter: z.string().min(80),
+  closingLine: z.string().min(12),
+});
+export type EndingEpilogue = z.infer<typeof endingEpilogueSchema>;
+
 export const journeyPostcardSchema = z.object({
   id: z.string(),
   chapter: z.number().int().min(1).max(5),
