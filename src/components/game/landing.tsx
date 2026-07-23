@@ -11,6 +11,7 @@ import { useGameStore } from "@/src/stores/game-store";
 export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; onDemo: () => void; interactive: boolean }) {
   const { campaignId, started, switchCampaign } = useGameStore();
   const campaign = getCampaign(campaignId);
+  const isSandbox = campaign.format === "sandbox-expedition";
   const heroAsset = getAsset(campaign.presentation.heroAssetId);
   return (
     <main className="hero-shell">
@@ -19,7 +20,7 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
       <div className="hero-vignette" />
       <nav className="landing-nav">
         <div className="brand-mark"><span>NS</span><div><b>夜班侦探</b><small>NIGHT SHIFT</small></div></div>
-        <button className="ghost-button" disabled={!interactive} onClick={onDemo}><Zap size={15} /> DEMO MODE</button>
+        <button className="ghost-button" disabled={!interactive} onClick={onDemo}><Zap size={15} /> {isSandbox ? "CASE FILE" : "DEMO MODE"}</button>
       </nav>
       <section className="hero-copy">
         <p className="eyebrow"><Moon size={14} /> 一款与你轮班生活的异步侦探游戏</p>
@@ -27,9 +28,9 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
         <p className="hero-lede">白天分析线索，晚上把调查交给侦探。等你醒来，雾灯城会留下一份新的报告。</p>
         <div className="hero-actions">
           <button className="primary-button" disabled={!interactive} onClick={onStart}>{started ? "继续当前案件" : `开始第 ${campaign.presentation.archiveNumber} 宗案件`} <ArrowRight size={18} /></button>
-          <button className="text-button" disabled={!interactive} onClick={onDemo}><BookOpen size={17} /> 观看 90 秒演示</button>
+          <button className="text-button" disabled={!interactive} onClick={onDemo}><BookOpen size={17} /> {isSandbox ? "查看案件说明" : "观看 90 秒演示"}</button>
         </div>
-        <div className="shift-rule"><span>你负责白天推理</span><i /><span>林渡负责夜晚调查</span></div>
+        <div className="shift-rule"><span>{isSandbox ? "你负责调度调查小队" : "你负责白天推理"}</span><i /><span>{isSandbox ? "山谷按行动改变" : "林渡负责夜晚调查"}</span></div>
       </section>
       <section className="campaign-shelf" aria-label="案件剧本选择">
         <small>CASE LIBRARY · 选择剧本</small>

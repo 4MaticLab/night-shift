@@ -11,9 +11,14 @@
 | 模块 | 位置 | 职责 |
 |---|---|---|
 | 案件包契约 | `src/content/campaigns/types.ts` | `CampaignManifest`、引用完整性校验与案件内容查询 |
-| 案件注册表 | `src/content/campaigns/registry.ts` | 当前两案、默认案件和合法 `campaignId` 白名单 |
+| 案件注册表 | `src/content/campaigns/registry.ts` | 当前三案、默认案件和合法 `campaignId` 白名单 |
 | 首案内容包 | `src/content/campaigns/last-tram.ts` | 组合既有首案模块与视觉／结局规则 |
 | 第二案内容包 | `src/content/campaigns/rain-radio.ts` | 《只在雨中播出的电台》的五夜完整内容 |
+| 第三案内容包 | `src/content/campaigns/blackwater-creek.ts` | 《黑水溪》的沙盒 manifest 与线性兼容外壳 |
+| 第三案沙盒内容 | `src/content/campaigns/blackwater-creek-data.ts` | 双入口、九地点、行动、证物、手札、人物、污染与五结局 |
+| 沙盒契约与结算 | `src/lib/sandbox/` | 地点条件／效果类型、引用校验和确定性行动／结局结算 |
+| 沙盒存档 | `src/stores/sandbox-store.ts` | 按案件隔离的入口、地点、行动、人物、污染、威胁和结局 |
+| 沙盒案件界面 | `src/components/game/sandbox-case.tsx` | 身份开场、地点图、证物、手札、人物、污染、风险与收场 |
 | 首案核心内容 | `src/content/case.ts` | 首案五夜章节、12 条线索、8 件藏品与固定报告文本 |
 | 随身物内容 | `src/content/preparations.ts` | 三件准备物、五夜各自的确定性环境回响 |
 | 归来明信片 | `src/content/postcards.ts` | 五夜地点、城市传闻、背面短笺与三种随身物附言 |
@@ -50,6 +55,10 @@
 主要阶段为 `day → ready → night → morning → ending`。章节结算只通过当前案件 manifest 的确定性内容函数产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 14。`campaignId` 标识活动案件，活动进度仍保持扁平供组件读取；切换时先把它快照到 `campaignSaves[campaignId]`，再恢复目标案件或创建新档。章节、线索、关系、结局、案板坐标和夜间历史因此按案隔离。v13 及更早的单案件存档默认归入 `case-001`，原有数据无需清除。
 
 案件 manifest 同时提供章节数、线索数、藏品数、真结局门槛、档案标题和逐夜视觉。`resolveNight`、关系匹配、结局资格、迁移过滤和页面投影都显式接收当前 manifest；通用模块不按 `case-001`／`case-002` 写分支。`defineCampaign` 要求章节从 1 连续排列、每个 choice 有路线、每夜拥有明信片／植物／四时辰回声／睡隙回声／夜印，并拒绝跨案件线索引用和不可达门槛。
+
+`CampaignManifest.format` 额外区分 `linear-night` 与 `sandbox-expedition`。第三案通过一个最小线性兼容外壳继续满足注册表的共享展示字段，实际玩法读取 `sandbox` 内容；`app/page.tsx` 只按格式选择通用沙盒界面，不按 `case-003` 写业务分支。`assertSandboxCampaign` 校验地点、行动、证物、手札、物品、NPC 和全部条件／效果引用，并要求污染阶段严格覆盖 0–7。
+
+沙盒进度单独持久化到 `night-shift-sandbox-v1` v1 的 `saves[campaignId]`，不修改线性存档 v14。其状态包含入口、已显影／访问地点、已完成行动、证物、手札、物品、污染、威胁、NPC 状态、行动日志、低刺激偏好与结局。行动结算没有随机数：前置条件决定是否可执行，效果通过去重与有界增量写入，终局结局会优先于普通收场。独立存档避免旧案迁移承受无关字段，也让重置第三案不会触及前两案。
 
 睡眠质量为 `interrupted`、`regular`、`restful`：三者都至少解锁一条主线线索；差异只体现在路线长度、收藏数量、回声事件和环境观察。`selectedPreparationId` 记录当前随身物，`preparationHistory` 按章节保存已经归来的准备；`selectedChoice` 记录当前方向，`choiceHistory` 按章节保存路线履历。方向决定四个路线节点、五段夜间事件、城市遭遇与归来来信，但同章节三个方向的线索和藏品结果保持一致。完成一夜后，章节编号会加入持久化的 `nightSealIds` 与 `completedReports`，旅程册据此解锁明信片与路线履历。
 
@@ -121,6 +130,7 @@ React Flow 使用本地受控节点承接拖动过程，只在桌面端从图钉
 
 - [[docs/product-overview]]
 - [[docs/campaign-authoring]]
+- [[docs/blackwater-creek-adaptation-bible]]
 - [[docs/decision-log]]
 - [[docs/quality-baseline]]
 - [[plans/0001-hackathon-mvp]]

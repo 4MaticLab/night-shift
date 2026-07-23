@@ -8,6 +8,7 @@
 - [[docs/north-star]] — 文学性城市、异步等待与原创边界的北极星。
 - [[docs/story-bible]] — 首案真相、人物关系和不可被动态改写的事实。
 - [[docs/rain-radio-story-bible]] — 第二案的广播网络、四十七户居民与固定真相。
+- [[docs/blackwater-creek-adaptation-bible]] — 第三案双入口、九地点、污染规则、结局矩阵与非商业改编边界。
 - [[docs/demo-script]] — 90 秒现场演示路径。
 - [[docs/quality-baseline]] — 当前版本的质量基线、验证命令和已知边界。
 - [[docs/viewport-checklist]] — 桌面与移动端关键页面的交互检查清单。

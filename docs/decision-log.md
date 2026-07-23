@@ -62,3 +62,12 @@
 - 决定：用经过运行时校验的 `CampaignManifest` 组合案件事实、路线、推理、结局、逐夜叙事与视觉配置，并通过编译期注册表选择；通用引擎只接收 manifest，不按案件 ID 分支。
 - 代价：案件仍需随可信前端构建发布；新作者必须补齐完整内容契约与自动化，暂不支持远程下载 storylet 或任意脚本。
 - 相关：[[docs/campaign-authoring]]、[[docs/architecture]]、[[plans/0025-multi-campaign-runtime]]。
+
+## ADR-008：沙盒案件与五夜案件共享注册表、隔离运行时
+
+- 日期：2026-07-23
+- 状态：已采用
+- 背景：《黑水溪》的双入口、乱序地点、NPC 状态、污染和开放收场无法由连续五夜模型忠实表达，把它压成固定章节会失去主要玩法。
+- 决定：`CampaignManifest.format` 在同一编译期注册表中区分 `linear-night` 与 `sandbox-expedition`；沙盒使用通用条件／效果结算器、通用界面和独立 `night-shift-sandbox-v1` 存档。前两案不迁移。
+- 代价：manifest 暂时保留一层线性兼容字段；好友线索与共享城市系统也暂不自动适用于沙盒。长期可在更多沙盒案件验证后再收紧为真正的 TypeScript 判别联合。
+- 相关：[[docs/blackwater-creek-adaptation-bible]]、[[docs/campaign-authoring]]、[[plans/0026-blackwater-creek-sandbox-adaptation]]。

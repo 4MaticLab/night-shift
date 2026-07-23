@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有进行中的主计划。最近完成的 [[plans/0025-multi-campaign-runtime]] 已把单案件应用改造成可切换、独立存档、可继续扩展的多案件运行时，并用第二个完整案件完成验证。
+当前没有进行中的主计划。最近完成的 [[plans/0026-blackwater-creek-sandbox-adaptation]] 已按“忠实、非商业的完整本地原型”路线加入首个双入口、九地点沙盒案件；授权复核前不公开推送或部署生产。
 
 ## 计划清单
 
@@ -35,6 +35,7 @@
 | [[plans/0023-mobile-case-board-inference]] | `completed` | `manual` | P0 | 5/5 | 已发布移动案板逃生手势与三步联合推理台 |
 | [[plans/0024-friend-clue-sharing]] | `completed` | `manual` | P0 | 5/5 | 已发布好友线索二维码、白名单深链接与本地接收 |
 | [[plans/0025-multi-campaign-runtime]] | `completed` | `manual` | P0 | 7/7 | 已发布双案件运行时、独立存档与第二案 |
+| [[plans/0026-blackwater-creek-sandbox-adaptation]] | `completed` | `manual` | P0 | 12/12 | 本地原型完成；公开推送／部署仍需 G4 授权复核 |
 
 ## 状态规则
 

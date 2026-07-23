@@ -24,10 +24,12 @@ import { endingEpilogues, getEndingEpilogue } from "@/src/content/endings";
 import { cityWatchEchoes, cityWatches, DEMO_CITY_WATCH_ID, getCityWatch, getCityWatchEcho, getCityWatchId } from "@/src/content/watches";
 import { getWakeEcho, getWakeEchoById, wakeEchoes } from "@/src/content/wake-echoes";
 import { createClueShareUrl, readSharedClueQuery, removeSharedClueQuery } from "@/src/lib/game-engine/clue-sharing";
-import { campaignRegistry, DEFAULT_CAMPAIGN_ID, RAIN_RADIO_CAMPAIGN_ID } from "@/src/content/campaigns/registry";
+import { BLACKWATER_CREEK_CAMPAIGN_ID, campaignRegistry, DEFAULT_CAMPAIGN_ID, RAIN_RADIO_CAMPAIGN_ID } from "@/src/content/campaigns/registry";
 import { lastTramCampaign } from "@/src/content/campaigns/last-tram";
 import { rainRadioCampaign } from "@/src/content/campaigns/rain-radio";
 import { getCampaignRouteDirection, matchCampaignEvidenceRelation } from "@/src/content/campaigns/types";
+import { blackwaterCreekCampaign } from "@/src/content/campaigns/blackwater-creek";
+import { availableSandboxEndings, resolveSandboxAction, startSandboxCampaign } from "@/src/lib/sandbox/engine";
 
 describe("Night Shift case content", () => {
   it("contains the complete five-night mystery", () => {
@@ -36,13 +38,13 @@ describe("Night Shift case content", () => {
     expect(nightShiftCase.collectibles).toHaveLength(8);
   });
 
-  it("registers two complete and distinct playable campaigns", () => {
-    expect(campaignRegistry.map((campaign) => campaign.id)).toEqual(["case-001", "case-002"]);
-    expect(new Set(campaignRegistry.map((campaign) => campaign.case.title))).toHaveLength(2);
+  it("registers two linear campaigns and one distinct sandbox campaign", () => {
+    expect(campaignRegistry.map((campaign) => campaign.id)).toEqual(["case-001", "case-002", "case-003"]);
+    expect(new Set(campaignRegistry.map((campaign) => campaign.case.title))).toHaveLength(3);
     expect(new Set(campaignRegistry.flatMap((campaign) => campaign.case.clues.map((clue) => clue.id))).size)
       .toBe(campaignRegistry.reduce((total, campaign) => total + campaign.case.clues.length, 0));
 
-    for (const campaign of campaignRegistry) {
+    for (const campaign of campaignRegistry.filter((item) => item.format !== "sandbox-expedition")) {
       expect(campaign.case.chapters).toHaveLength(5);
       expect(campaign.routes).toHaveLength(15);
       expect(campaign.endings).toHaveLength(3);
@@ -59,8 +61,39 @@ describe("Night Shift case content", () => {
         }
       }
     }
+    expect(blackwaterCreekCampaign.id).toBe(BLACKWATER_CREEK_CAMPAIGN_ID);
+    expect(blackwaterCreekCampaign.format).toBe("sandbox-expedition");
+    expect(blackwaterCreekCampaign.sandbox?.locations).toHaveLength(9);
     expect(rainRadioCampaign.case.title).toBe("只在雨中播出的电台");
     expect(lastTramCampaign.case.clues.some((clue) => rainRadioCampaign.case.clues.some((other) => other.id === clue.id))).toBe(false);
+  });
+
+  it("covers both Blackwater Creek origins, nine locations, six handouts, corruption, and major endings", () => {
+    const content = blackwaterCreekCampaign.sandbox!;
+    expect(content.origins.map((origin) => origin.id)).toEqual(["university", "bootlegger"]);
+    expect(content.locations.map((location) => location.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect(content.clues).toHaveLength(20);
+    expect(content.handouts).toHaveLength(6);
+    expect(content.corruptionStages.map((stage) => stage.stage)).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+    expect(content.endings.map((ending) => ending.id)).toEqual(["farm-fall", "escape", "bargain", "contain", "destroy"]);
+
+    let university = startSandboxCampaign(content, "university");
+    for (const actionId of ["camp-blast-plan", "riverbed-trace", "riverbed-blast", "riverbed-muck", "cave-dynamite", "cave-destroy"]) {
+      const resolution = resolveSandboxAction(content, university, actionId);
+      expect(resolution.ok, actionId).toBe(true);
+      university = resolution.progress;
+    }
+    expect(availableSandboxEndings(content, university).map((ending) => ending.id)).toContain("destroy");
+
+    let bootlegger = startSandboxCampaign(content, "bootlegger");
+    const negotiation = resolveSandboxAction(content, bootlegger, "carmody-negotiate");
+    expect(negotiation.ok).toBe(true);
+    bootlegger = negotiation.progress;
+    expect(availableSandboxEndings(content, bootlegger).map((ending) => ending.id)).toContain("bargain");
+
+    const terminal = resolveSandboxAction(content, startSandboxCampaign(content, "bootlegger"), "farm-assault");
+    expect(terminal.ok).toBe(true);
+    expect(availableSandboxEndings(content, terminal.progress).map((ending) => ending.id)).toEqual(["farm-fall"]);
   });
 
   it("gives every clue a literary dossier without changing fixed facts", () => {
