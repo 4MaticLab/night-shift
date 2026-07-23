@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前进行中的主计划是 [[plans/0035-original-sandbox-case-content-pilot]]：以原创第四案《潮汐不肯归档》复用并通用化沙盒调查结构，增加双入口、非线性地点、人物状态、证物网络与首批统一版画资产。
+当前没有 `in_progress` 主计划。最近完成的是 [[plans/0035-original-sandbox-case-content-pilot]]：原创第四案《潮汐不肯归档》、通用沙盒展示契约与首批 1+3+3 版画资产已进入 Draft PR #14；下一项候选是 [[plans/0036-evidence-board-drag-e2e-reliability]]。
 
 ## 计划清单
 
@@ -44,7 +44,7 @@
 | [[plans/0032-ai-rest-intention-ritual]] | `completed` | `manual` | P0 | 6/6 | 已完成 AI 休息仪式、v15 存档与全量回归 |
 | [[plans/0033-hackathon-submission-kit]] | `completed` | `manual` | P0 | 4/4 | 已完成提交作战卡、演示节拍与真实边界 |
 | [[plans/0034-night-cipher-desk]] | `completed` | `manual` | P0 | 6/6 | 已完成三段密文、v16 存档、中英文与移动端验收 |
-| [[plans/0035-original-sandbox-case-content-pilot]] | `in_progress` | `manual` | P1 | 8/9 | 完成提交、推送并创建 Draft PR |
+| [[plans/0035-original-sandbox-case-content-pilot]] | `completed` | `manual` | P1 | 9/9 | Draft PR #14 等待评审 |
 | [[plans/0036-evidence-board-drag-e2e-reliability]] | `proposed` | `auto` | P1 | 0/4 | 定位当前 Chrome 下桌面图钉拖动未落盘 |
 
 ## 状态规则
