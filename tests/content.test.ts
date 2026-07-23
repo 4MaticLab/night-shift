@@ -8,6 +8,7 @@ import {
   finishSleepSession,
   nightSealProgress,
   qualityFromDuration,
+  recordWakeEcho,
   startSleepSession,
 } from "@/src/lib/game-engine/sleep-session";
 import { evidenceRelations, matchEvidenceRelation } from "@/src/content/relations";
@@ -21,6 +22,7 @@ import { caseCharacters, getChapterCharacter, isCharacterRevealed } from "@/src/
 import { cityDistricts, getCityDistrict } from "@/src/content/districts";
 import { endingEpilogues, getEndingEpilogue } from "@/src/content/endings";
 import { cityWatchEchoes, cityWatches, DEMO_CITY_WATCH_ID, getCityWatch, getCityWatchEcho, getCityWatchId } from "@/src/content/watches";
+import { getWakeEcho, getWakeEchoById, wakeEchoes } from "@/src/content/wake-echoes";
 
 describe("Night Shift case content", () => {
   it("contains the complete five-night mystery", () => {
@@ -332,6 +334,27 @@ describe("Night Shift case content", () => {
       expect(getCityWatchEcho(echo.chapter, echo.watchId)).toEqual(echo);
       expect(`${echo.scene}${echo.encounter}${echo.fieldNote}`).not.toMatch(/积分|奖励|分数|好感|失败/);
     }
+  });
+
+  it("defines one non-scoring sleep-gap echo for every night", () => {
+    expect(wakeEchoes).toHaveLength(5);
+    expect(wakeEchoes.map((echo) => echo.chapter)).toEqual([1, 2, 3, 4, 5]);
+    expect(new Set(wakeEchoes.map((echo) => echo.id))).toHaveLength(5);
+    for (const echo of wakeEchoes) {
+      expect(getWakeEcho(echo.chapter)).toEqual(echo);
+      expect(getWakeEchoById(echo.id)).toEqual(echo);
+      expect(`${echo.title}${echo.sound}${echo.glimpse}${echo.fieldNote}`).not.toMatch(/积分|奖励|分数|好感|失败|惩罚/);
+    }
+  });
+
+  it("records at most one sleep-gap echo without ending a session", () => {
+    const session = startSleepSession("real", "regular", new Date("2026-07-22T22:00:00.000Z"));
+    const first = recordWakeEcho(session, 1, new Date("2026-07-23T00:43:00.000Z"));
+    const second = recordWakeEcho(first, 1, new Date("2026-07-23T01:18:00.000Z"));
+
+    expect(first.wakeEcho).toEqual({ echoId: "sleep-gap-01", recordedAt: "2026-07-23T00:43:00.000Z" });
+    expect(first.endedAt).toBeUndefined();
+    expect(second).toBe(first);
   });
 
   it("settles a real night from its persisted start time", () => {

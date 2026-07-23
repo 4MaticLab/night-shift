@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
-import { ArrowRight, Check, ChevronRight, Clock3, Coffee, FileText, Lightbulb, Moon, Zap } from "lucide-react";
+import { ArrowRight, Check, ChevronRight, Clock3, Coffee, Ear, FileText, Lightbulb, Moon, Radio, Zap } from "lucide-react";
 import { nightShiftCase } from "@/src/content/case";
 import { getAsset, getNightSealAsset, getPostcardAsset } from "@/src/content/assets";
 import { getJourneyPostcard, getPostcardPreparationNote } from "@/src/content/postcards";
@@ -16,8 +16,9 @@ import { getSouvenir } from "@/src/content/souvenirs";
 import { getOpportunityCandidates, getOpportunityNotice, getOpportunityResponse } from "@/src/content/opportunities";
 import { getChapterCharacter } from "@/src/content/characters";
 import { DEMO_CITY_WATCH_ID, getCityWatch, getCityWatchEcho, getCityWatchId } from "@/src/content/watches";
+import { getWakeEchoById } from "@/src/content/wake-echoes";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
-import type { SleepMode, SleepQuality } from "@/src/lib/game-engine/schema";
+import type { SleepMode, SleepQuality, WakeEcho } from "@/src/lib/game-engine/schema";
 import { elapsedSessionMinutes, formatSleepDuration, nightSealProgress } from "@/src/lib/game-engine/sleep-session";
 import { useGameStore } from "@/src/stores/game-store";
 import { BotanicalSpecimen, CityRoute, PaperCard, qualityCopy, Seal, SocietyCrest } from "./shared";
@@ -78,7 +79,7 @@ function DaytimeNotices() {
 }
 
 export function NightRun({ onFinish }: { onFinish: () => void }) {
-  const { chapter, quality, selectedChoice, selectedPreparationId, sleepMode, activeSleepSession } = useGameStore();
+  const { chapter, quality, selectedChoice, selectedPreparationId, sleepMode, activeSleepSession, recordWakeEcho } = useGameStore();
   const current = nightShiftCase.chapters[chapter - 1];
   const result = resolveNight(chapter, quality, selectedPreparationId, selectedChoice);
   const direction = result.direction;
@@ -101,6 +102,8 @@ export function NightRun({ onFinish }: { onFinish: () => void }) {
   }, [onFinish, sleepMode]);
   const elapsedMinutes = elapsedSessionMinutes(activeSleepSession, new Date(now));
   const progress = sleepMode === "demo" ? ((12 - seconds) / 12) * 100 : nightSealProgress(activeSleepSession, new Date(now));
+  const wakeEcho = activeSleepSession?.wakeEcho ? getWakeEchoById(activeSleepSession.wakeEcho.echoId) : null;
+  const wakeEchoVisible = Boolean(wakeEcho && (sleepMode === "real" || progress >= 35));
   const botanical = getNightBotanical(chapter);
   const growthStage = growthStageFromProgress(progress);
   const eventCount = sleepMode === "demo" ? Math.max(1, Math.ceil(progress / 20)) : Math.min(result.events.length, Math.max(1, Math.floor(elapsedMinutes / 90) + 1));
@@ -113,12 +116,19 @@ export function NightRun({ onFinish }: { onFinish: () => void }) {
       <div className="night-stars" /><div className="night-header"><div className="brand-mark compact"><span>NS</span><div><b>夜班进行中</b><small>第 {chapter} 夜 · {sleepMode === "real" ? "真实夜班" : qualityCopy[quality].time}</small></div></div><button onClick={onFinish}>{sleepMode === "real" ? "我醒了，拆开报告" : "跳到清晨"} <ArrowRight size={16} /></button></div>
       <div className="night-title"><p>{sleepMode === "real" ? "合上页面也没关系。城市记得交接的时刻。" : "你休息的时候，他会继续。"}</p><h2>{current.title}</h2><span>{sessionLine}</span><div className="route-order"><small>TONIGHT&apos;S DIRECTION</small><b>{direction.dispatchTitle}</b><em>目的地 · {direction.destination}</em></div></div>
       <aside className={`city-watch-live watch-${watch.id}`}><Clock3 /><div><small>{watch.archiveLabel} · {watch.window}</small><b>{watch.label}</b><span>{watchEcho.scene}</span></div></aside>
+      {sleepMode === "real" && <aside className={wakeEchoVisible ? "wake-check-in recorded" : "wake-check-in"}><div><small>SLEEP GAP · 睡隙记录</small><b>{wakeEchoVisible ? "这次醒转已经夹进夜印" : "如果你只是短暂醒来"}</b><p>{wakeEchoVisible ? "林渡仍在调查；同一夜不会再收集第二条回声。" : "可以留下一次记录再继续休息。它不会结束夜班，也不改变睡眠评价或任何成果。"}</p></div><button type="button" disabled={Boolean(activeSleepSession?.wakeEcho)} onClick={recordWakeEcho}><Ear /> {wakeEchoVisible ? "已记录，夜班继续" : "我只是醒了一下"}</button>{wakeEchoVisible && wakeEcho && <WakeEchoSlip echo={wakeEcho} recordedAt={activeSleepSession?.wakeEcho?.recordedAt} mode="real" />}</aside>}
+      {sleepMode === "demo" && wakeEchoVisible && wakeEcho && <aside className="wake-check-in demo recorded"><div><small>INTERRUPTED SLEEP ECHO · 断续旅程回声</small><b>睡意裂开时，城市递来一张薄纸</b><p>这是断续旅程的叙事侧影，不是失败或额外奖励。</p></div><WakeEchoSlip echo={wakeEcho} recordedAt={activeSleepSession?.wakeEcho?.recordedAt} mode="demo" /></aside>}
       <div className="night-seal-growth" aria-label={`第${chapter}夜的夜印正在形成`}><Image className="seal-ghost" src={nightSeal.src} alt="" width={118} height={118} /><span style={{ height: `${progress}%` }}><Image src={nightSeal.src} alt={nightSeal.alt} width={118} height={118} /></span></div>
       <div className="night-journey-stage"><CityRoute progress={progress} routeNodes={direction.routeNodes} variant={direction.mapVariant} /><aside className="night-growth-panel"><BotanicalSpecimen chapter={chapter} progress={progress} compact /><small>GROWING WHILE YOU REST</small><p>{botanical.growthStages[growthStage]}</p></aside></div>
       <div className="event-ticker">{result.events.slice(0, eventCount).map((event, index) => <motion.div key={event} initial={{ opacity: 0, x: -10 }} animate={{ opacity: index === eventCount - 1 ? 1 : .45, x: 0 }}><i />{event}</motion.div>)}</div>
       <div className="night-progress"><span style={{ width: `${progress}%` }} /></div>
     </main>
   );
+}
+
+function WakeEchoSlip({ echo, recordedAt, mode }: { echo: WakeEcho; recordedAt?: string; mode: SleepMode }) {
+  const clock = mode === "demo" ? "02:17" : recordedAt ? new Intl.DateTimeFormat("zh-CN", { hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(recordedAt)) : "此刻";
+  return <article className="wake-echo-slip"><header><Radio /><span><small>{clock} · ONE ECHO ONLY</small><b>{echo.title}</b></span></header><p><strong>听见：</strong>{echo.sound}</p><p><strong>看见：</strong>{echo.glimpse}</p><blockquote>“{echo.fieldNote}”</blockquote></article>;
 }
 
 export function MorningReport({ onContinue }: { onContinue: () => void }) {
@@ -152,6 +162,7 @@ export function MorningReport({ onContinue }: { onContinue: () => void }) {
   const foundItems = nightShiftCase.collectibles.filter((item) => result.collectibleIds.includes(item.id));
   const watch = getCityWatch(lastSleepSession?.watchId ?? DEMO_CITY_WATCH_ID);
   const watchEcho = getCityWatchEcho(chapter, watch.id);
+  const wakeEcho = lastSleepSession?.wakeEcho ? getWakeEchoById(lastSleepSession.wakeEcho.echoId) : null;
   const reportClock = lastSleepSession?.mode === "real" && lastSleepSession.endedAt
     ? new Intl.DateTimeFormat("zh-CN", { hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(lastSleepSession.endedAt))
     : "05:28";
@@ -163,6 +174,7 @@ export function MorningReport({ onContinue }: { onContinue: () => void }) {
         <PaperCard className="postcard-back"><div className="paper-heading"><small>01 · POSTCARD FROM LAST NIGHT</small><b>{postcard.title}</b></div><small className="postcard-location">{postcard.location}</small><p className="postcard-rumor">“{postcard.cityRumor}”</p><p>{postcard.message}</p><div className="route-letter"><small>ROUTE LETTER · {result.direction.dispatchTitle}</small><b>{result.direction.destination}</b><p>“{result.returnLetter}”</p><span>{result.cityEncounter}</span></div><div className="postcard-preparation-note"><b>{preparation?.shortTitle ?? "随身物"}留下的痕迹</b><span>{postcardPreparationNote}</span></div></PaperCard>
       </section>
       <PaperCard className={`city-watch-report watch-${watch.id}`}><div className="watch-clock-stamp"><Clock3 /><span>{watch.window}</span></div><div><div className="paper-heading"><small>TIME WATCH · THE HOUR LEFT A MARK</small><b>交接时辰留下的城市侧影</b></div><span className="watch-archive-name">{watch.archiveLabel} · {watch.label}</span><h3>{watchEcho.scene}</h3><p><b>此时在街上遇见：</b>{watchEcho.encounter}</p><blockquote>“{watchEcho.fieldNote}”</blockquote><footer>时辰只改变侧影与短笺，不改变线索、收藏、植物或睡眠评价。</footer></div></PaperCard>
+      {wakeEcho && <PaperCard className="wake-echo-report"><div className="wake-report-signal"><Radio /><span>ONE BRIEF WAKING</span></div><div><div className="paper-heading"><small>SLEEP GAP · A NOTE BETWEEN DREAMS</small><b>你短暂醒来时，夜班没有结束</b></div><h3>{wakeEcho.title}</h3><p><b>听见：</b>{wakeEcho.sound}</p><p><b>看见：</b>{wakeEcho.glimpse}</p><blockquote>“{wakeEcho.fieldNote}”</blockquote><footer>这条回声不是奖励，不改变线索、植物、睡眠评价或结局资格。</footer></div></PaperCard>}
       <section className={`growth-reveal quality-${quality}`} aria-label={`第${chapter}夜时间植物`}><BotanicalSpecimen chapter={chapter} /><PaperCard className="growth-record"><div className="paper-heading"><small>02 · TIME GREW HERE</small><b>雾灯温室新标本</b></div><span className="botanical-archive-name">{botanical.archiveName} · {botanical.district}</span><h3>{botanical.name}</h3><p className="botanical-rumor">“{botanical.cityRumor}”</p><p>{botanical.specimenNote}</p><div className="growth-quality-note"><b>{qualityCopy[quality].label} · 仍然完整</b><span>{botanical.qualityNotes[quality]}</span></div></PaperCard></section>
       {encounteredCharacter && characterArt && <section className="character-encounter" aria-label={`昨夜遇见的人：${encounteredCharacter.name}`}><div><Image src={characterArt.src} alt={characterArt.alt} width={1024} height={1280} /></div><PaperCard><div className="paper-heading"><small>PERSON MET LAST NIGHT · 昨夜遇见的人</small><b>{encounteredCharacter.archiveName}</b></div><span>{encounteredCharacter.role} · {encounteredCharacter.district}</span><h3>{encounteredCharacter.name}</h3><p>“{encounteredCharacter.publicRumor}”</p><blockquote>“{encounteredCharacter.quote}”</blockquote><div><small>目前可以确认</small>{encounteredCharacter.knownFact}</div></PaperCard></section>}
       {opportunityNotice && opportunityResponse && <PaperCard className="opportunity-echo"><div><small>DAYLIGHT ANSWER RETURNED · 午后答复的回声</small><h3>{opportunityNotice.title}</h3></div><blockquote>“{opportunityResponse.echo}”</blockquote><span>这段回声不改变案件成果或结局资格。</span></PaperCard>}

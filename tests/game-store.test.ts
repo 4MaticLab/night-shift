@@ -60,6 +60,8 @@ describe("Night Shift game store", () => {
         watchId: "midnight",
       });
       expect(state.lastSleepSession?.watchId).toBe("midnight");
+      expect(state.lastSleepSession?.wakeEcho).toBeUndefined();
+      expect(state.growthHistory[chapter.number]?.wakeEchoId).toBeUndefined();
       expect(state.societyHistory[chapter.number]).toMatchObject({
         chapter: chapter.number,
         choiceId: chosenDirection,
@@ -101,6 +103,9 @@ describe("Night Shift game store", () => {
     storeModule.useGameStore.getState().startNight("regular", "side-lamp", "real");
     const activeId = storeModule.useGameStore.getState().activeSleepSession?.id;
     const journeySeed = storeModule.useGameStore.getState().journeySeed;
+    expect(storeModule.useGameStore.getState().recordWakeEcho()).toBe(true);
+    expect(storeModule.useGameStore.getState().recordWakeEcho()).toBe(false);
+    const wakeEcho = storeModule.useGameStore.getState().activeSleepSession?.wakeEcho;
     const saved = memoryStorage.getItem("night-shift-save-v1");
 
     expect(saved).toContain(activeId);
@@ -116,7 +121,25 @@ describe("Night Shift game store", () => {
     expect(restored.selectedChoice).toBe("source");
     expect(restored.activeSleepSession?.id).toBe(activeId);
     expect(restored.activeSleepSession?.watchId).toMatch(/lamplighting|midnight|last-watch|daylight/);
+    expect(restored.activeSleepSession?.wakeEcho).toEqual(wakeEcho);
     expect(restored.journeySeed).toBe(journeySeed);
+  });
+
+  it("gives only interrupted Demo nights one deterministic sleep-gap echo", () => {
+    const state = storeModule.useGameStore.getState();
+    state.begin();
+    state.selectChoice("source");
+    storeModule.useGameStore.getState().startNight("interrupted", "side-lamp", "demo");
+    expect(storeModule.useGameStore.getState().activeSleepSession?.wakeEcho?.echoId).toBe("sleep-gap-01");
+    expect(storeModule.useGameStore.getState().recordWakeEcho()).toBe(false);
+    storeModule.useGameStore.getState().finishNight();
+    expect(storeModule.useGameStore.getState().growthHistory[1]?.wakeEchoId).toBe("sleep-gap-01");
+
+    storeModule.useGameStore.getState().reset();
+    storeModule.useGameStore.getState().begin();
+    storeModule.useGameStore.getState().selectChoice("source");
+    storeModule.useGameStore.getState().startNight("regular", "side-lamp", "demo");
+    expect(storeModule.useGameStore.getState().activeSleepSession?.wakeEcho).toBeUndefined();
   });
 
   it("migrates legacy saves with session defaults", () => {
@@ -174,6 +197,8 @@ describe("Night Shift game store", () => {
     expect(migrated.activeSleepSession?.watchId).toBe("last-watch");
     expect(migrated.lastSleepSession?.watchId).toBe("midnight");
     expect(migrated.growthHistory[1]?.watchId).toBe("midnight");
+    expect(migrated.activeSleepSession?.wakeEcho).toBeUndefined();
+    expect(migrated.growthHistory[1]?.wakeEchoId).toBeUndefined();
   });
 
   it("persists valid evidence positions and can restore the default desk", () => {

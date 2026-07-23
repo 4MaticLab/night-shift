@@ -2,10 +2,10 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { boardPositionSchema, cityWatchIdSchema, nightGrowthRecordSchema, type BoardPosition, type CorrespondenceRecord, type NightGrowthRecord, type OpportunityRecord, type SleepMode, type SleepQuality, type SleepSession, type SocietyMemoryRecord, type SouvenirRecord } from "@/src/lib/game-engine/schema";
+import { boardPositionSchema, cityWatchIdSchema, nightGrowthRecordSchema, wakeEchoIdSchema, wakeEchoRecordSchema, type BoardPosition, type CorrespondenceRecord, type NightGrowthRecord, type OpportunityRecord, type SleepMode, type SleepQuality, type SleepSession, type SocietyMemoryRecord, type SouvenirRecord } from "@/src/lib/game-engine/schema";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import type { PreparationId } from "@/src/content/preparations";
-import { finishSleepSession, startSleepSession } from "@/src/lib/game-engine/sleep-session";
+import { finishSleepSession, recordWakeEcho, startSleepSession } from "@/src/lib/game-engine/sleep-session";
 import { matchEvidenceRelation } from "@/src/content/relations";
 import { canChooseEnding, type EndingId } from "@/src/lib/game-engine/ending";
 import { getDefaultChoiceId } from "@/src/content/routes";
@@ -46,6 +46,7 @@ export interface GameState {
   selectChoice: (choice: string) => void;
   startNight: (quality: SleepQuality, preparationId: PreparationId, mode: SleepMode) => void;
   finishNight: () => void;
+  recordWakeEcho: () => boolean;
   answerCorrespondence: (chapter: number, replyId: string) => boolean;
   resolveOpportunity: (noticeId: string, responseId: string) => boolean;
   dismissOpportunities: () => boolean;
@@ -91,14 +92,24 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   selectChoice: (selectedChoice) => set({ selectedChoice, phase: "ready" }),
   startNight: (quality, selectedPreparationId, sleepMode) => {
     const state = get();
+    const session = startSleepSession(sleepMode, quality);
+    const activeSleepSession = sleepMode === "demo" && quality === "interrupted"
+      ? recordWakeEcho(session, state.chapter, new Date(session.startedAt))
+      : session;
     set({
       quality,
       selectedPreparationId,
       sleepMode,
       journeySeed: state.journeySeed || (sleepMode === "demo" ? DEMO_JOURNEY_SEED : createJourneySeed()),
-      activeSleepSession: startSleepSession(sleepMode, quality),
+      activeSleepSession,
       phase: "night",
     });
+  },
+  recordWakeEcho: () => {
+    const state = get();
+    if (state.phase !== "night" || state.activeSleepSession?.mode !== "real" || state.activeSleepSession.wakeEcho) return false;
+    set({ activeSleepSession: recordWakeEcho(state.activeSleepSession, state.chapter) });
+    return true;
   },
   finishNight: () => {
     const state = get();
@@ -132,6 +143,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
           choiceId: result.choiceId,
           preparationId,
           watchId: completedSession.watchId,
+          wakeEchoId: completedSession.wakeEcho?.echoId,
           completedAt,
         }),
       },
@@ -222,7 +234,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   reset: () => set({ ...initial, endingId: undefined }),
 }), {
   name: "night-shift-save-v1",
-  version: 11,
+  version: 12,
   migrate: migrateGameState,
 }));
 
@@ -265,12 +277,13 @@ function migrateSleepSession(session: SleepSession | null | undefined): SleepSes
   const legacy = session as SleepSession & { watchId?: unknown };
   const parsedWatch = cityWatchIdSchema.safeParse(legacy.watchId);
   const startedAt = new Date(legacy.startedAt);
+  const wakeEcho = wakeEchoRecordSchema.safeParse(legacy.wakeEcho);
   const watchId = parsedWatch.success
     ? parsedWatch.data
     : legacy.mode === "demo" || Number.isNaN(startedAt.getTime())
       ? DEMO_CITY_WATCH_ID
       : getCityWatchId(startedAt);
-  return { ...legacy, watchId };
+  return { ...legacy, watchId, wakeEcho: wakeEcho.success ? wakeEcho.data : undefined };
 }
 
 function migrateGrowthHistory(
@@ -284,7 +297,8 @@ function migrateGrowthHistory(
     if (!record) return [];
     const legacy = record as NightGrowthRecord & { watchId?: unknown };
     const parsedWatch = cityWatchIdSchema.safeParse(legacy.watchId);
-    return [[chapter, nightGrowthRecordSchema.parse({ ...legacy, watchId: parsedWatch.success ? parsedWatch.data : DEMO_CITY_WATCH_ID })]];
+    const parsedWakeEcho = wakeEchoIdSchema.safeParse(legacy.wakeEchoId);
+    return [[chapter, nightGrowthRecordSchema.parse({ ...legacy, watchId: parsedWatch.success ? parsedWatch.data : DEMO_CITY_WATCH_ID, wakeEchoId: parsedWakeEcho.success ? parsedWakeEcho.data : undefined })]];
   }));
 }
 

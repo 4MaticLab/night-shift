@@ -1,5 +1,6 @@
 import { nanoid } from "nanoid";
 import { DEMO_CITY_WATCH_ID, getCityWatchId } from "@/src/content/watches";
+import { createWakeEchoRecord } from "@/src/content/wake-echoes";
 import type { CityWatchId, SleepMode, SleepQuality, SleepSession } from "./schema";
 
 const demoDurationMinutes: Record<SleepQuality, number> = {
@@ -38,6 +39,11 @@ export function finishSleepSession(session: SleepSession, endedAt = new Date()):
     durationMinutes,
     quality: session.mode === "demo" ? session.quality : qualityFromDuration(durationMinutes),
   };
+}
+
+export function recordWakeEcho(session: SleepSession, chapter: number, recordedAt = new Date()): SleepSession {
+  if (session.wakeEcho) return session;
+  return { ...session, wakeEcho: createWakeEchoRecord(chapter, recordedAt) };
 }
 
 export function elapsedSessionMinutes(session: SleepSession | null, now = new Date()): number {

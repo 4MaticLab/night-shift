@@ -149,13 +149,23 @@ test("restores and settles a real night after reload", async ({ page }) => {
   await expect(page.getByText(/城市记得交接的时刻/)).toBeVisible();
   await expect(page.locator(".city-watch-live")).toContainText(/掌灯时分|夜半时分|末更时分|白昼小憩/);
   const watchBeforeReload = await page.locator(".city-watch-live b").textContent();
+  await page.getByRole("button", { name: /我只是醒了一下/ }).click();
+  await expect(page.locator(".wake-echo-slip")).toContainText("纸纤维里的第二场雨");
+  await expect(page.getByRole("button", { name: /已记录，夜班继续/ })).toBeDisabled();
 
   await page.reload();
   await expect(page.getByText(/真实夜班/)).toBeVisible();
   await expect(page.locator(".city-watch-live b")).toHaveText(watchBeforeReload!);
+  await expect(page.locator(".wake-echo-slip")).toContainText("纸纤维里的第二场雨");
   await page.getByRole("button", { name: /我醒了，拆开报告/ }).click();
   await expect(page.getByText("昨夜调查完成")).toBeVisible();
   await expect(page.getByText("真实夜班")).toBeVisible();
+  await expect(page.locator(".wake-echo-report")).toContainText("你短暂醒来时，夜班没有结束");
+  await expect(page.locator(".wake-echo-report")).toContainText("不是奖励");
+  await page.getByRole("button", { name: /整理线索，准备下一夜/ }).click();
+  await page.getByRole("button", { name: "收藏", exact: true }).click();
+  await expect(page.getByText("睡隙回声簿")).toBeVisible();
+  await expect(page.locator(".sleep-gap-entry.returned")).toHaveCount(1);
 });
 
 test("builds a core inference by connecting two evidence cards", async ({ page }) => {
@@ -257,12 +267,14 @@ test.describe("mobile 390x844", () => {
     await expectNoOverlap(page.locator(".scene-copy"), page.locator(".handoff-portrait"));
     await expectNoOverlap(page.locator(".handoff-docket"), page.locator(".handoff-portrait"));
     await expectNoPageOverflow(page);
+    await page.locator(".quality-tabs").getByRole("button", { name: "断续" }).click();
     await page.getByRole("button", { name: /今晚交给你了/ }).click();
     await expect(page.locator(".city-watch-live")).toContainText("夜半时分");
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /跳到清晨/ }).click();
     await expect(page.getByText("昨夜调查完成")).toBeVisible();
     await expect(page.locator(".city-watch-report")).toBeVisible();
+    await expect(page.locator(".wake-echo-report")).toContainText("纸纤维里的第二场雨");
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /整理线索，准备下一夜/ }).click();
     await expect(page.getByRole("button", { name: "案件板" })).toBeVisible();
