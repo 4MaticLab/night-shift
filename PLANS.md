@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前主计划是 [[plans/0022-vercel-dual-target-deployment]]：保留 Sites 能力的同时修通原生 Next.js/Vercel 构建，并追踪到线上部署成功。
+当前没有 `in_progress` 主计划。下一轮继续从真实游玩与线上反馈中审计新的体验缺口，先建立计划再推进。
 
 ## 计划清单
 
@@ -31,7 +31,7 @@
 | [[plans/0019-city-watches-and-real-time-echoes]] | `completed` | `auto` | P0 | 6/6 | 已发布四时辰、二十条回声与 v11 时辰快照 |
 | [[plans/0020-sleep-gap-echoes-and-gentle-wake-check-in]] | `completed` | `auto` | P0 | 6/6 | 已发布五条睡隙回声、一次醒转记录与 v12 存档 |
 | [[plans/0021-cross-device-interaction-pass]] | `completed` | `manual` | P0 | 6/6 | 已发布桌面／移动端交互整修与浏览器实测版本 |
-| [[plans/0022-vercel-dual-target-deployment]] | `in_progress` | `manual` | P0 | 3/5 | 提交并推送 GitHub `main`，随后监测 Vercel 部署 |
+| [[plans/0022-vercel-dual-target-deployment]] | `completed` | `manual` | P0 | 5/5 | Vercel 生产部署成功，Sites 双目标保留 |
 
 ## 状态规则
 

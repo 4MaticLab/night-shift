@@ -1,6 +1,6 @@
 # 0022 — Vercel／Sites 双目标构建与部署闭环
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P0
 - 创建：2026-07-23
 - 更新：2026-07-23
@@ -35,8 +35,8 @@ GitHub `main` 已接入 Vercel，但仓库默认 `build` 脚本仍执行面向 C
 - [x] 从 Vercel 日志与本地原生构建复现中确认根因。
 - [x] 建立 Next.js/Vercel 与 Vinext/Sites 双目标脚本及类型边界。
 - [x] 通过原生 Next、Vinext Worker、单元、Lint、E2E、渲染和文档验证。
-- [ ] 提交并推送 GitHub `main`。
-- [ ] 监测并修复 Vercel 部署，记录最终可访问结果。
+- [x] 提交并推送 GitHub `main`。
+- [x] 监测并修复 Vercel 部署，记录最终可访问结果。
 
 ## 验收标准
 
@@ -65,6 +65,7 @@ GitHub `main` 已接入 Vercel，但仓库默认 `build` 脚本仍执行面向 C
 - 2026-07-23：默认脚本已切为 `next dev/build/start`，Sites 使用并列的 `dev:sites/build:sites/start:sites`；`test:render` 明确消费 Worker 构建。Node 固定为 `22.x`，原生 Next 类型检查排除未被产品导入的 Cloudflare 脚手架目录。
 - 2026-07-23：首次原生构建继续发现 `getLatestSocietyReply` 的类型谓词依赖 `Boolean(record)`，Next 严格检查不能据此缩窄；改为显式 `record !== undefined` 后，Next 16.2.6 已完成编译、类型检查、页面数据收集与动态 SSR 路由生成，Vinext Worker 构建也继续通过。
 - 2026-07-23：本地交付门禁全部通过：原生 Next 与 Vinext Worker 双生产构建、47 个 Vitest、13 条以 `next dev` 为服务端的 Playwright、ESLint、Worker 服务端渲染冒烟，以及 48 份 Markdown 的双链检查。
+- 2026-07-23：部署修复以提交 `d12984e` 推送 GitHub `main`；Vercel 生产部署 `dpl_CWgVrX7e6sSgmyYGafodEReyC8Em` 返回 `Ready`，固定别名 `https://night-shift-zeta.vercel.app` 实测返回 HTTP 200、正确产品标题与 Next 静态资源。本计划完成。
 
 ## 相关文档
 
