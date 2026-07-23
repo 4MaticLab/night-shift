@@ -81,6 +81,45 @@ test("starts a case and reaches the first morning report", async ({ page }) => {
   await expect(page.locator(".board-shell")).toBeVisible();
 });
 
+test("rest intention requests an AI note only after explicit consent", async ({ page }) => {
+  let requestBody: Record<string, unknown> | undefined;
+  await page.route("**/api/rest-reflection/access", async (route) => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ configured: true, authorized: true }) });
+  });
+  await page.route("**/api/rest-reflection", async (route) => {
+    requestBody = route.request().postDataJSON();
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        reflection: "纸条我收到了。今晚先让旧票据工坊替你守住未完成的部分，天亮以后再决定下一步。",
+        source: "ai",
+        reason: "generated",
+      }),
+    });
+  });
+
+  await openFirstNight(page);
+  const intention = "明天的演示还没准备完，但今晚先到这里。";
+  await page.getByLabel("放下纸条").fill(intention);
+  await expect(page.getByRole("button", { name: /请 AI 替林渡选择晨间短笺风格/ })).toHaveAttribute("aria-pressed", "false");
+  await page.getByRole("button", { name: /请 AI 替林渡选择晨间短笺风格/ }).click();
+  await page.getByRole("button", { name: /今晚交给你了/ }).click();
+  await page.getByRole("button", { name: /跳到清晨/ }).click();
+
+  await expect(page.locator(".rest-reflection-card")).toContainText(intention);
+  await expect(page.locator(".rest-reflection-card")).toContainText("AI 个性化短笺");
+  await expect(page.locator(".rest-reflection-card")).toContainText("今晚先让旧票据工坊替你守住未完成的部分");
+  expect(requestBody).toMatchObject({
+    intention,
+    destination: "灯港旧票据工坊",
+    preparation: "侧照灯",
+    detectiveName: "林渡",
+  });
+  expect(requestBody).not.toHaveProperty("sleepData");
+  expect(requestBody).not.toHaveProperty("history");
+});
+
 test("sleep hardware authorizes a virtual ring and returns a local morning receipt", async ({ page }) => {
   await openFirstNight(page);
   await page.getByRole("button", { name: /打开睡眠硬件中心/ }).first().click();
@@ -547,6 +586,19 @@ test.describe("mobile 390x844", () => {
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /整理线索，准备下一夜/ }).click();
     await expect(page.getByRole("button", { name: "案件板" })).toBeVisible();
+  });
+
+  test("keeps a maximum unbroken local rest intention inside the mobile report", async ({ page }) => {
+    await openFirstNight(page);
+    const intention = "x".repeat(160);
+    await page.getByLabel("放下纸条").fill(intention);
+    await expect(page.getByRole("button", { name: /请 AI 替林渡选择晨间短笺风格/ })).toHaveAttribute("aria-pressed", "false");
+    await expectNoPageOverflow(page);
+    await page.getByRole("button", { name: /今晚交给你了/ }).click();
+    await page.getByRole("button", { name: /跳到清晨/ }).click();
+    await expect(page.locator(".rest-reflection-card")).toContainText("仅本机 · 固定回信");
+    await expect(page.locator(".rest-reflection-card")).toContainText(intention);
+    await expectNoPageOverflow(page);
   });
 
   test("keeps the sleep hardware panel touchable and contained on a phone", async ({ page }) => {

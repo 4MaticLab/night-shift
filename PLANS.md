@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有进行中的主计划。最近完成的 [[plans/0028-sleep-hardware-bridge]] 已用虚拟戒指、手表、床垫与枕头完成睡眠信号闭环，并以诚实的桥接预演为 Apple Health、Health Connect、Oura 与 Fitbit 保留真实接入位。
+当前没有进行中的主计划。最近完成的 [[plans/0029-ai-rest-intention-ritual]] 已为 Hack the Rest 黑客松交付“放下纸条 → 离开屏幕 → 晨间回信”闭环，并以显式授权、最小上下文和确定性本地回退加入第一个运行时 AI 触点。
 
 ## 计划清单
 
@@ -38,6 +38,7 @@
 | [[plans/0026-blackwater-creek-sandbox-adaptation]] | `completed` | `manual` | P0 | 12/12 | 已并入公开学习项目并由 Vercel 自动部署 |
 | [[plans/0027-sandbox-delayed-expedition-loop]] | `completed` | `manual` | P0 | 8/8 | 已完成沙盒延迟探索、v2 存档、真实恢复与跨设备验收 |
 | [[plans/0028-sleep-hardware-bridge]] | `completed` | `manual` | P0 | 8/8 | 已完成虚拟硬件闭环、双案件接入与跨设备验收 |
+| [[plans/0029-ai-rest-intention-ritual]] | `completed` | `manual` | P0 | 6/6 | 已完成 AI 休息仪式、v15 存档与全量回归 |
 
 ## 状态规则
 

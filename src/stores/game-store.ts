@@ -4,7 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { boardPositionSchema, cityWatchIdSchema, correspondenceRecordSchema, nightGrowthRecordSchema, opportunityRecordSchema, sleepModeSchema, sleepQualitySchema, wakeEchoIdSchema, wakeEchoRecordSchema, type BoardPosition, type CorrespondenceRecord, type NightGrowthRecord, type OpportunityRecord, type SleepMode, type SleepQuality, type SleepSession, type SocietyMemoryRecord, type SouvenirRecord } from "@/src/lib/game-engine/schema";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
-import { preparations, type PreparationId } from "@/src/content/preparations";
+import { getPreparation, preparations, type PreparationId } from "@/src/content/preparations";
 import { finishSleepSession, recordWakeEcho, startSleepSession } from "@/src/lib/game-engine/sleep-session";
 import { canChooseEnding, type EndingId } from "@/src/lib/game-engine/ending";
 import { createSocietyMemory } from "@/src/content/societies";
@@ -15,6 +15,7 @@ import { DEMO_CITY_WATCH_ID, getCityWatchId } from "@/src/content/watches";
 import { DEFAULT_CAMPAIGN_ID, getCampaign, isCampaignId, type CampaignId } from "@/src/content/campaigns/registry";
 import { getCampaignRouteDirection, getCampaignWakeEcho, matchCampaignEvidenceRelation, type CampaignManifest } from "@/src/content/campaigns/types";
 import { useSleepHardwareStore } from "@/src/stores/sleep-hardware-store";
+import { createRestRitualRecord, restReflectionResponseSchema, restRitualRecordSchema, type RestReflectionReason, type RestReflectionSource, type RestRitualInput, type RestRitualRecord } from "@/src/lib/rest-ritual";
 
 export type Phase = "day" | "ready" | "night" | "morning" | "ending";
 
@@ -38,6 +39,7 @@ export interface GameState {
   journeySeed: number;
   souvenirHistory: Partial<Record<number, SouvenirRecord>>;
   opportunityHistory: Partial<Record<number, OpportunityRecord>>;
+  restRitualHistory: Partial<Record<number, RestRitualRecord>>;
   unlockedClueIds: string[];
   receivedClueIds: string[];
   unlockedCollectibleIds: string[];
@@ -48,8 +50,9 @@ export interface GameState {
   endingId?: string;
   begin: () => void;
   selectChoice: (choice: string) => void;
-  startNight: (quality: SleepQuality, preparationId: PreparationId, mode: SleepMode) => void;
+  startNight: (quality: SleepQuality, preparationId: PreparationId, mode: SleepMode, restRitual?: RestRitualInput) => void;
   finishNight: () => void;
+  completeRestReflection: (campaignId: CampaignId, chapter: number, requestId: string, reflection: string, source: RestReflectionSource, reason: Exclude<RestReflectionReason, "local-only">) => boolean;
   recordWakeEcho: () => boolean;
   answerCorrespondence: (chapter: number, replyId: string) => boolean;
   resolveOpportunity: (noticeId: string, responseId: string) => boolean;
@@ -70,6 +73,7 @@ export type CampaignProgress = Pick<GameState,
   "started" | "chapter" | "phase" | "selectedChoice" | "selectedPreparationId" | "quality" | "sleepMode"
   | "activeSleepSession" | "lastSleepSession" | "preparationHistory" | "choiceHistory" | "growthHistory"
   | "societyHistory" | "correspondenceHistory" | "journeySeed" | "souvenirHistory" | "opportunityHistory"
+  | "restRitualHistory"
   | "unlockedClueIds" | "receivedClueIds" | "unlockedCollectibleIds" | "completedReports"
   | "confirmedRelations" | "boardPositions" | "nightSealIds" | "endingId"
 >;
@@ -92,6 +96,7 @@ const initialProgress: CampaignProgress = {
   journeySeed: 0,
   souvenirHistory: {} as Partial<Record<number, SouvenirRecord>>,
   opportunityHistory: {} as Partial<Record<number, OpportunityRecord>>,
+  restRitualHistory: {} as Partial<Record<number, RestRitualRecord>>,
   unlockedClueIds: [] as string[],
   receivedClueIds: [] as string[],
   unlockedCollectibleIds: [] as string[],
@@ -117,6 +122,7 @@ function createInitialProgress(): CampaignProgress {
     correspondenceHistory: {},
     souvenirHistory: {},
     opportunityHistory: {},
+    restRitualHistory: {},
     unlockedClueIds: [],
     receivedClueIds: [],
     unlockedCollectibleIds: [],
@@ -147,6 +153,7 @@ function snapshotCampaignProgress(state: GameState): CampaignProgress {
     journeySeed: state.journeySeed,
     souvenirHistory: state.souvenirHistory,
     opportunityHistory: state.opportunityHistory,
+    restRitualHistory: state.restRitualHistory,
     unlockedClueIds: state.unlockedClueIds,
     receivedClueIds: state.receivedClueIds,
     unlockedCollectibleIds: state.unlockedCollectibleIds,
@@ -162,9 +169,11 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   ...initial,
   begin: () => set({ started: true, phase: "day" }),
   selectChoice: (selectedChoice) => set({ selectedChoice, phase: "ready" }),
-  startNight: (quality, selectedPreparationId, sleepMode) => {
+  startNight: (quality, selectedPreparationId, sleepMode, restRitual) => {
     const state = get();
     const campaign = getCampaign(state.campaignId);
+    const direction = getCampaignRouteDirection(campaign, state.chapter, state.selectedChoice);
+    const preparation = getPreparation(selectedPreparationId);
     const session = startSleepSession(sleepMode, quality);
     const activeSleepSession = sleepMode === "demo" && quality === "interrupted"
       ? recordWakeEcho(session, getCampaignWakeEcho(campaign, state.chapter).id, new Date(session.startedAt))
@@ -176,8 +185,38 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
       sleepMode,
       journeySeed: state.journeySeed || (sleepMode === "demo" ? DEMO_JOURNEY_SEED : createJourneySeed()),
       activeSleepSession,
+      restRitualHistory: restRitual ? {
+        ...state.restRitualHistory,
+        [state.chapter]: createRestRitualRecord(state.chapter, restRitual, {
+          campaignTitle: campaign.case.title,
+          chapterTitle: campaign.case.chapters.find((item) => item.number === state.chapter)?.title ?? `第 ${state.chapter} 夜`,
+          direction: direction.dispatchTitle,
+          destination: direction.destination,
+          preparation: preparation?.shortTitle ?? "随身物",
+          detectiveName: campaign.presentation.detectiveName,
+        }),
+      } : state.restRitualHistory,
       phase: "night",
     });
+  },
+  completeRestReflection: (campaignId, chapter, requestId, reflection, source, reason) => {
+    const state = get();
+    if (state.campaignId !== campaignId) return false;
+    const current = state.restRitualHistory[chapter];
+    if (!current || current.requestId !== requestId || !current.aiRequested || current.status !== "pending") return false;
+    const response = restReflectionResponseSchema.safeParse({ reflection, source, reason });
+    if (!response.success) return false;
+    const updated = restRitualRecordSchema.safeParse({
+      ...current,
+      reflection: response.data.reflection,
+      source: response.data.source,
+      reason: response.data.reason,
+      status: response.data.source === "ai" ? "ai" : "unavailable",
+      reflectedAt: new Date().toISOString(),
+    });
+    if (!updated.success) return false;
+    set({ restRitualHistory: { ...state.restRitualHistory, [chapter]: updated.data } });
+    return true;
   },
   recordWakeEcho: () => {
     const state = get();
@@ -354,7 +393,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   },
 }), {
   name: "night-shift-save-v1",
-  version: 14,
+  version: 15,
   migrate: migrateGameState,
 }));
 
@@ -419,6 +458,7 @@ function migrateCampaignProgress(value: unknown, campaign: CampaignManifest): Ca
     journeySeed,
     souvenirHistory: createLegacySouvenirHistory(campaign, completedReports, preparationHistory, choiceHistory, journeySeed, growthHistory),
     opportunityHistory: sanitizeOpportunityHistory(persisted.opportunityHistory, validChapters),
+    restRitualHistory: sanitizeRestRitualHistory(persisted.restRitualHistory, validChapters),
     unlockedClueIds,
     receivedClueIds,
     unlockedCollectibleIds: (persisted.unlockedCollectibleIds ?? []).filter((itemId) => validCollectibleIds.has(itemId)),
@@ -471,6 +511,17 @@ function sanitizeOpportunityHistory(value: unknown, validChapters: Set<number>):
     const chapter = Number(rawChapter);
     const parsed = opportunityRecordSchema.safeParse(candidate);
     return validChapters.has(chapter) && chapter >= 2 && parsed.success && parsed.data.chapter === chapter
+      ? [[chapter, parsed.data]]
+      : [];
+  }));
+}
+
+function sanitizeRestRitualHistory(value: unknown, validChapters: Set<number>): Partial<Record<number, RestRitualRecord>> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value).flatMap(([rawChapter, candidate]) => {
+    const chapter = Number(rawChapter);
+    const parsed = restRitualRecordSchema.safeParse(candidate);
+    return validChapters.has(chapter) && parsed.success && parsed.data.chapter === chapter
       ? [[chapter, parsed.data]]
       : [];
   }));
