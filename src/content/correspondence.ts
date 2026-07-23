@@ -153,7 +153,7 @@ export function getLatestSocietyReply(
   beforeChapter = Number.POSITIVE_INFINITY,
 ): CorrespondenceRecord | undefined {
   return Object.values(history)
-    .filter((record): record is CorrespondenceRecord => Boolean(record) && record.societyId === societyId && record.chapter < beforeChapter)
+    .filter((record): record is CorrespondenceRecord => record !== undefined && record.societyId === societyId && record.chapter < beforeChapter)
     .sort((a, b) => b.chapter - a.chapter)[0];
 }
 

@@ -2,7 +2,9 @@
 
 ## 运行形态
 
-项目使用 Next App Router、React、TypeScript 与 Sites/Vinext 运行时。当前黑客松版本把游戏页面组织成一个客户端状态机，以减少现场演示中的切页等待；部署仍由服务端渲染首屏元数据和外壳。
+项目使用 Next App Router、React 与 TypeScript，并保留两套明确的生产目标：默认 `next build` 生成 Vercel 使用的 `.next/`；`build:sites` 通过 Vinext、Vite 与 Cloudflare 插件生成 Sites/Worker 使用的 `dist/`。当前黑客松版本把游戏页面组织成一个客户端状态机，以减少现场演示中的切页等待；两套目标都由服务端渲染首屏元数据和外壳。
+
+原生 Next 构建的 TypeScript 范围排除 `build/`、`db/`、`examples/`、`worker/` 与 `vite.config.ts`：这些文件只属于 Sites 脚手架、Cloudflare 绑定或未启用的 D1 示例，不被产品应用导入。它们仍由 Vinext/Vite 实际构建和 ESLint 检查，不能把 Cloudflare Worker 模块混入 Vercel 的 Node 运行时。
 
 ## 关键模块
 

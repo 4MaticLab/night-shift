@@ -41,6 +41,7 @@
 npm test
 npm run lint
 npm run build
+npm run build:sites
 npm run test:render
 npm run docs:check
 ```
@@ -50,7 +51,7 @@ Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：除 Demo 方向�
 ## 已知边界
 
 - 浏览器端尚未建立像素截图基线或多设备／多浏览器矩阵；当前响应式证据聚焦 390 × 844 Chrome 关键路径。
-- 直接运行原生 `tsc --noEmit` 会缺少 Cloudflare Worker 全局类型；项目正式的 Vinext 生产构建不受影响。
+- 默认 `npm run build` 验证原生 Next.js/Vercel 产物；`npm run build:sites` 与 `npm run test:render` 验证 Vinext/Cloudflare Worker 产物。仅供 Cloudflare 使用的目录不进入 Next 类型检查，但仍由 Vinext 构建和 ESLint 覆盖。
 
 完成的工程加固见 [[plans/0003-mvp-quality-hardening]]；当前时间成长升级见 [[plans/0007-night-greenhouse-and-time-growth]]。
 
