@@ -2747,6 +2747,66 @@ blockquote {
   font: 7px monospace;
 }
 
+.cipher-completion {
+  margin-top: 18px;
+  padding: 20px 22px;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #658b84;
+  color: #bcd1cb;
+  background: linear-gradient(110deg, #10282b, #172a36 62%, #22333c);
+  box-shadow: inset 0 0 32px #6ba09912, 0 16px 30px #0003;
+}
+
+.cipher-completion>svg {
+  width: 42px;
+  height: 42px;
+  padding: 9px;
+  border: 1px solid #638982;
+  color: #8eb0aa;
+}
+
+.cipher-completion>div {
+  min-width: 0;
+}
+
+.cipher-completion small {
+  color: #77a19a;
+  font: 7px monospace;
+  letter-spacing: .13em;
+}
+
+.cipher-completion h4 {
+  margin: 5px 0 4px;
+  color: #e2dac8;
+  font-size: 24px;
+}
+
+.cipher-completion p {
+  margin: 0;
+  color: #a8bbb7;
+  font-size: 9px;
+  line-height: 1.65;
+}
+
+.cipher-completion>span {
+  min-height: 44px;
+  padding: 8px 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #587c76;
+  color: #a9c5bf;
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+.cipher-completion>span svg {
+  width: 14px;
+}
+
 .cipher-desk>footer {
   margin-top: 13px;
   color: #667383;
@@ -2814,6 +2874,27 @@ blockquote {
   .cipher-answer>div>input {
     min-height: 44px;
     padding-block: 10px;
+  }
+
+  .cipher-completion {
+    padding: 17px 13px;
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 11px;
+  }
+
+  .cipher-completion>svg {
+    width: 36px;
+    height: 36px;
+    padding: 7px;
+  }
+
+  .cipher-completion h4 {
+    font-size: 20px;
+  }
+
+  .cipher-completion>span {
+    grid-column: 1 / -1;
+    justify-content: center;
   }
 
   .cipher-desk>footer {

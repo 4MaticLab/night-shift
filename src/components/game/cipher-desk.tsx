@@ -1,22 +1,27 @@
 "use client";
 
 import { useMemo, useState, type FormEvent } from "react";
-import { Check, ChevronRight, KeyRound, Lightbulb, LockKeyhole } from "lucide-react";
-import { getCampaignCipherChallenges, isCipherUnlocked } from "@/src/content/ciphers";
+import { Check, ChevronRight, KeyRound, Lightbulb, LockKeyhole, RadioTower } from "lucide-react";
+import { getCampaignCipherDesk, isCipherUnlocked } from "@/src/content/ciphers";
 import { useI18n } from "@/src/i18n/provider";
 import { useGameStore } from "@/src/stores/game-store";
 
 export function CipherDesk() {
   const { campaign, locale, localize, t } = useI18n();
   const { unlockedClueIds, solvedCipherIds, solveCipher } = useGameStore();
-  const challenges = useMemo(() => getCampaignCipherChallenges(campaign.id).map((challenge) => localize(challenge)), [campaign.id, localize]);
+  const desk = useMemo(() => {
+    const definition = getCampaignCipherDesk(campaign.id);
+    return definition ? localize(definition) : undefined;
+  }, [campaign.id, localize]);
+  const challenges = desk?.challenges ?? [];
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [feedback, setFeedback] = useState<Record<string, "incorrect" | "solved">>({});
 
-  if (!challenges.length) return null;
+  if (!desk || !challenges.length) return null;
 
   const solvedCount = challenges.filter((challenge) => solvedCipherIds.includes(challenge.id)).length;
   const unlockedCount = challenges.filter((challenge) => isCipherUnlocked(challenge, unlockedClueIds)).length;
+  const completed = solvedCount === challenges.length;
 
   const submit = (event: FormEvent<HTMLFormElement>, challengeId: string) => {
     event.preventDefault();
@@ -28,9 +33,9 @@ export function CipherDesk() {
     if (result === "incorrect") setFeedback((current) => ({ ...current, [challengeId]: "incorrect" }));
   };
 
-  return <section className="cipher-desk" aria-labelledby="cipher-desk-title">
+  return <section className={`cipher-desk ${completed ? "complete" : ""}`} aria-labelledby="cipher-desk-title">
     <header className="cipher-desk-heading">
-      <div><small>NIGHT CIPHER DESK · {t("夜班密文台")}</small><h3 id="cipher-desk-title">{t("城市把不能公开说的话，折进了票孔、花单和时刻表。")}</h3><p>{t("证物归档后，密文会逐段显影。答错不会扣除任何东西，提示也不影响结果。")}</p></div>
+      <div><small>{desk.archiveLabel}</small><h3 id="cipher-desk-title">{desk.title}</h3><p>{desk.description}</p></div>
       <span><b>{solvedCount}/{challenges.length}</b><small>{t("已解密")}</small></span>
     </header>
 
@@ -73,6 +78,7 @@ export function CipherDesk() {
         </article>;
       })}
     </div>
+    {completed && <aside className="cipher-completion" aria-live="polite"><RadioTower /><div><small>{desk.completionLabel}</small><h4>{desk.completionTitle}</h4><p>{desk.completionText}</p></div><span><Check /> {t("完整归档")}</span></aside>}
     <footer>{t("密文只展开补充旁注，不增加奖励、不替代联合推理，也不改变任何结局资格。")}</footer>
   </section>;
 }

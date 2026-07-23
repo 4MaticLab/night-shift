@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { LAST_TRAM_CAMPAIGN_ID } from "./campaigns/last-tram";
+import { RAIN_RADIO_CAMPAIGN_ID } from "./campaigns/rain-radio";
 
 const cipherChallengeSchema = z.object({
   id: z.string().min(1),
@@ -20,6 +21,27 @@ const cipherChallengeSchema = z.object({
 });
 
 export type CipherChallenge = z.infer<typeof cipherChallengeSchema>;
+
+const cipherDeskSchema = z.object({
+  campaignId: z.string().min(1),
+  archiveLabel: z.string().min(1),
+  title: z.string().min(1),
+  description: z.string().min(1),
+  completionLabel: z.string().min(1),
+  completionTitle: z.string().min(1),
+  completionText: z.string().min(1),
+  challenges: z.array(cipherChallengeSchema).min(1),
+}).superRefine((desk, ctx) => {
+  const ids = new Set(desk.challenges.map((challenge) => challenge.id));
+  const orders = new Set(desk.challenges.map((challenge) => challenge.order));
+  if (ids.size !== desk.challenges.length) ctx.addIssue({ code: "custom", path: ["challenges"], message: "Cipher challenge ids must be unique" });
+  if (orders.size !== desk.challenges.length) ctx.addIssue({ code: "custom", path: ["challenges"], message: "Cipher challenge orders must be unique" });
+  if (desk.challenges.some((challenge) => challenge.campaignId !== desk.campaignId)) {
+    ctx.addIssue({ code: "custom", path: ["challenges"], message: "Cipher challenges must belong to their desk campaign" });
+  }
+});
+
+export type CipherDeskDefinition = z.infer<typeof cipherDeskSchema>;
 
 const lastTramCiphers = [
   {
@@ -75,12 +97,89 @@ const lastTramCiphers = [
   },
 ].map((challenge) => cipherChallengeSchema.parse(challenge));
 
-const cipherRegistry: Record<string, readonly CipherChallenge[]> = {
-  [LAST_TRAM_CAMPAIGN_ID]: lastTramCiphers,
+const rainRadioCiphers = [
+  {
+    id: "rain-frequency-lock",
+    campaignId: RAIN_RADIO_CAMPAIGN_ID,
+    order: 1,
+    archiveLabel: "SIGNAL 01 · RAIN DIAL",
+    title: "雨滴调频锁",
+    subtitle: "停电控制台留下三组刻线，雨滴占据了本该属于小数点的位置。",
+    requiredClueIds: ["radio-warm-dial", "rain-frequency"],
+    cipherLabel: "旋钮刻线",
+    cipherTokens: ["19", "27", "雨滴", "13", "MHz"],
+    instruction: "每组数字只抄最后一位；把雨滴当作小数点，单位保留为兆赫。",
+    prompt: "电台在雨中锁定了哪个频率？",
+    answerAliases: ["97.3", "97.3MHz", "九十七点三"],
+    hints: ["19、27、13 的末位分别是 9、7、3。", "把雨滴放在 7 和 3 之间：97.3 MHz。"],
+    revealTitle: "97.3 MHz · 无人频率",
+    revealText: "旋钮并没有随机漂移。雨水每次都把控制台接回九十七点三兆赫——那是四十七户证词共同使用的入口。",
+  },
+  {
+    id: "silent-call-count",
+    campaignId: RAIN_RADIO_CAMPAIGN_ID,
+    order: 2,
+    archiveLabel: "SIGNAL 02 · SILENT LEDGER",
+    title: "沉默来电的户数",
+    subtitle: "计费簿记录了一百七十一次无声来电，其中三十次只是断线后的重拨。",
+    requiredClueIds: ["mute-reel", "caller-list", "tunnel-echo"],
+    cipherLabel: "接线员算式",
+    cipherTokens: ["171 次", "− 30 次重拨", "÷ 每户 3 次"],
+    instruction: "先扣掉断线重拨；剩余来电中，每一户都恰好留下三次呼吸波形。",
+    prompt: "有多少户居民共同维持这条沉默线路？",
+    answerAliases: ["47", "四十七", "四十七户"],
+    hints: ["真正属于住户的记录共有 171 − 30 = 141 次。", "141 ÷ 3 = 47。"],
+    revealTitle: "47 户仍在回答",
+    revealText: "沉默不是空白。计费簿、呼吸波形和防空管回声共同证明，地图上被删掉的四十七户居民仍在维护这条线路。",
+  },
+  {
+    id: "relay-morse-voice",
+    campaignId: RAIN_RADIO_CAMPAIGN_ID,
+    order: 3,
+    archiveLabel: "SIGNAL 03 · RELAY TAIL",
+    title: "雨中中继的尾音",
+    subtitle: "中继箱每次归零前都会敲出五组长短不一的雨声。",
+    requiredClueIds: ["demolition-map", "relay-seal", "numbered-key"],
+    cipherLabel: "摩尔斯尾音",
+    cipherTokens: ["...-", "---", "..", "-.-.", "."],
+    instruction: "把短雨点当作点、长排水声当作划，按国际摩尔斯字母表逐组翻译。",
+    prompt: "中继箱要求我们把什么还给居民？",
+    answerAliases: ["VOICE", "声音", "话语权"],
+    hints: ["第一组 ...- 是 V，最后一组 . 是 E。", "五组字母依次是 V、O、I、C、E。"],
+    revealTitle: "VOICE · 声音",
+    revealText: "中继箱保存的不是预言，而是一项请求：别替居民完成最后一次广播，把使用公共频率的声音还给他们。",
+  },
+].map((challenge) => cipherChallengeSchema.parse(challenge));
+
+const cipherRegistry: Record<string, CipherDeskDefinition> = {
+  [LAST_TRAM_CAMPAIGN_ID]: cipherDeskSchema.parse({
+    campaignId: LAST_TRAM_CAMPAIGN_ID,
+    archiveLabel: "NIGHT CIPHER DESK · 夜班密文台",
+    title: "城市把不能公开说的话，折进了票孔、花单和时刻表。",
+    description: "证物归档后，密文会逐段显影。答错不会扣除任何东西，提示也不影响结果。",
+    completionLabel: "ALL THREE CIPHERS FILED",
+    completionTitle: "隐藏站台已经显影",
+    completionText: "票孔、花单和时钟印章终于指向同一条被否认的路线。城市没有因此交出结论，但它再也无法声称站台不存在。",
+    challenges: lastTramCiphers,
+  }),
+  [RAIN_RADIO_CAMPAIGN_ID]: cipherDeskSchema.parse({
+    campaignId: RAIN_RADIO_CAMPAIGN_ID,
+    archiveLabel: "RAIN SIGNAL LAB · 雨中信号台",
+    title: "雨把四十七户的证词，藏进频率、计费簿和摩尔斯尾音。",
+    description: "每组信号都来自已经归档的证物。调错不会损坏频率，打开提示也不会让任何声音失去分量。",
+    completionLabel: "ALL THREE SIGNALS RESTORED",
+    completionTitle: "公共频率已经显影",
+    completionText: "九十七点三兆赫、四十七户来电和中继尾音已经互相作证：这不是无人广播，而是一座街区共同维护的声音出口。",
+    challenges: rainRadioCiphers,
+  }),
 };
 
+export function getCampaignCipherDesk(campaignId: string): CipherDeskDefinition | undefined {
+  return cipherRegistry[campaignId];
+}
+
 export function getCampaignCipherChallenges(campaignId: string): readonly CipherChallenge[] {
-  return cipherRegistry[campaignId] ?? [];
+  return getCampaignCipherDesk(campaignId)?.challenges ?? [];
 }
 
 export function getCampaignCipherChallenge(campaignId: string, challengeId: string): CipherChallenge | undefined {
