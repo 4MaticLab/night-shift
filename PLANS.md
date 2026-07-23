@@ -6,7 +6,6 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/fix-core-loop-reading-hierarchy]] | `fix/core-loop-reading-hierarchy` | `completed` | `auto` | 100% | 提交最终证据后退役计划并开 Draft PR |
 
 ## 使用规则
 
