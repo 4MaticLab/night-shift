@@ -1,10 +1,11 @@
 import { LAST_TRAM_CAMPAIGN_ID, lastTramCampaign } from "./last-tram";
 import { RAIN_RADIO_CAMPAIGN_ID, rainRadioCampaign } from "./rain-radio";
+import { THIRTEENTH_LOAF_CAMPAIGN_ID, thirteenthLoafCampaign } from "./thirteenth-loaf";
 import type { CampaignManifest } from "./types";
 
 export const DEFAULT_CAMPAIGN_ID = LAST_TRAM_CAMPAIGN_ID;
 
-export const campaignRegistry = [lastTramCampaign, rainRadioCampaign] as const satisfies readonly CampaignManifest[];
+export const campaignRegistry = [lastTramCampaign, rainRadioCampaign, thirteenthLoafCampaign] as const satisfies readonly CampaignManifest[];
 
 export type CampaignId = (typeof campaignRegistry)[number]["id"];
 
@@ -16,5 +17,5 @@ export function isCampaignId(value: unknown): value is CampaignId {
   return typeof value === "string" && campaignRegistry.some((campaign) => campaign.id === value);
 }
 
-export { LAST_TRAM_CAMPAIGN_ID, RAIN_RADIO_CAMPAIGN_ID };
+export { LAST_TRAM_CAMPAIGN_ID, RAIN_RADIO_CAMPAIGN_ID, THIRTEENTH_LOAF_CAMPAIGN_ID };
 export type { CampaignManifest } from "./types";

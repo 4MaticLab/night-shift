@@ -24,6 +24,8 @@
 
 睡眠硬件使用四张 1:1 暖纸设备档案画面：戒指、手表、床垫感应带和枕头保持深蓝器物、黄铜测量弧、旧酒红定位点与少量铜绿传感光。画面不使用电商白底、厂商品牌或健康 App 图表；连接状态、权限和指标继续由响应式 HTML/CSS 承担。具体提示词与源图见 [[docs/art-prompts/sleep-hardware-dossiers]]。
 
+《黎明前出炉的第十三个面包》保留全局深海军蓝、铜绿、旧纸与克制暖光，把电车票据换成面粉尘、旧搪瓷、公共热力管和黄铜持份环。构图反复出现“十二个有主单位围住一个开放空位”，但不要求生成图承担精确数数谜题；决定性数量与因果仍由证物文本表达。人物肖像保持编辑蚀刻距离，城区保持横向档案版画，植物与收藏沿用既有纸面媒介，因此切换案件时能明显换题材而不换产品。完整提示词组与 34 张运行时映射见 [[docs/art-prompts/thirteenth-loaf-visual-archive]]。
+
 参考 Fallen London 的文学密度与媒介气质，但不复制其角色、徽章、边框、地图构图或界面布局。原创边界与玩法合成原则见 [[docs/north-star]]。
 
 ## 相关文档
@@ -39,4 +41,5 @@
 - [[docs/art-prompts/four-act-headers]]
 - [[docs/art-prompts/lin-du-handoff-portrait]]
 - [[docs/art-prompts/sleep-hardware-dossiers]]
+- [[docs/art-prompts/thirteenth-loaf-visual-archive]]
 - [[docs/product-overview]]

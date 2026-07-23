@@ -31,7 +31,7 @@
 
 元数据只从编译期案件注册表和资产 manifest 生成，客户端不能自定义名称、描述、图片或属性。token URI 使用内嵌 JSON data URI，图片和回到游戏的链接使用部署 origin；部署在固定域名时应设置 `INJECTIVE_NFT_METADATA_ORIGIN`，避免预览域名进入永久元数据。
 
-第二案目前与首案复用部分收藏品画面，这是现有内容资产的公开边界；链上卡面应被理解为“当前原型档案版画”，不能宣称每案已有完全独立的收藏美术。新增案件应按 [[docs/campaign-authoring]] 与 [[docs/art-direction]] 提供专属资产。
+第二案目前与首案复用部分收藏品画面，这是现有内容资产的公开边界；第三案的八件收藏品则使用 `/art/cases/thirteenth-loaf/collectibles/` 中的专属画面。链上卡面应被理解为当前案件 manifest 绑定的档案版画，不能把第二案宣称为已有完全独立美术。新增案件应按 [[docs/campaign-authoring]] 与 [[docs/art-direction]] 提供专属资产。
 
 ## 本地部署
 

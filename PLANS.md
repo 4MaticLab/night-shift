@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/feat-thirteenth-loaf-case]] | `feat/thirteenth-loaf-case` | `in_progress` | `manual` | 0% | 固定故事事实并生成第三案专属美术 |
+| [[plans/feat-thirteenth-loaf-case]] | `feat/thirteenth-loaf-case` | `in_progress` | `manual` | 78% | 浏览器走完第三案五夜并运行全量门禁 |
 
 ## 使用规则
 
