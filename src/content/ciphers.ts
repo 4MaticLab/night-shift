@@ -2,6 +2,27 @@ import { z } from "zod";
 import { LAST_TRAM_CAMPAIGN_ID } from "./campaigns/last-tram";
 import { RAIN_RADIO_CAMPAIGN_ID } from "./campaigns/rain-radio";
 
+const cipherDialSchema = z.object({
+  min: z.number(),
+  max: z.number(),
+  step: z.number().positive(),
+  initial: z.number(),
+  target: z.number(),
+  precision: z.number().int().min(0).max(3),
+  mode: z.enum(["minutes", "frequency"]),
+  ariaLabel: z.string().min(1),
+  decreaseLabel: z.string().min(1),
+  increaseLabel: z.string().min(1),
+  lockLabel: z.string().min(1),
+  unit: z.string(),
+}).superRefine((dial, ctx) => {
+  if (dial.max <= dial.min) ctx.addIssue({ code: "custom", path: ["max"], message: "Dial max must exceed min" });
+  if (dial.initial < dial.min || dial.initial > dial.max) ctx.addIssue({ code: "custom", path: ["initial"], message: "Dial initial value is out of range" });
+  if (dial.target < dial.min || dial.target > dial.max) ctx.addIssue({ code: "custom", path: ["target"], message: "Dial target value is out of range" });
+});
+
+export type CipherDial = z.infer<typeof cipherDialSchema>;
+
 const cipherChallengeSchema = z.object({
   id: z.string().min(1),
   campaignId: z.string().min(1),
@@ -18,9 +39,32 @@ const cipherChallengeSchema = z.object({
   hints: z.tuple([z.string().min(1), z.string().min(1)]),
   revealTitle: z.string().min(1),
   revealText: z.string().min(1),
+  dial: cipherDialSchema.optional(),
 });
 
 export type CipherChallenge = z.infer<typeof cipherChallengeSchema>;
+
+const cipherRelaySchema = z.object({
+  id: z.string().min(1),
+  archiveLabel: z.string().min(1),
+  title: z.string().min(1),
+  description: z.string().min(1),
+  instruction: z.string().min(1),
+  fragments: z.array(z.object({ id: z.string().min(1), label: z.string().min(1), note: z.string().min(1) })).min(3),
+  solutionIds: z.array(z.string().min(1)).min(3),
+  hints: z.tuple([z.string().min(1), z.string().min(1)]),
+}).superRefine((relay, ctx) => {
+  const fragmentIds = relay.fragments.map((fragment) => fragment.id);
+  if (new Set(fragmentIds).size !== fragmentIds.length) ctx.addIssue({ code: "custom", path: ["fragments"], message: "Relay fragment ids must be unique" });
+  if (new Set(relay.solutionIds).size !== relay.solutionIds.length || relay.solutionIds.length !== fragmentIds.length) {
+    ctx.addIssue({ code: "custom", path: ["solutionIds"], message: "Relay solution must contain every fragment exactly once" });
+  }
+  if (relay.solutionIds.some((fragmentId) => !fragmentIds.includes(fragmentId))) {
+    ctx.addIssue({ code: "custom", path: ["solutionIds"], message: "Relay solution references an unknown fragment" });
+  }
+});
+
+export type CipherRelay = z.infer<typeof cipherRelaySchema>;
 
 const cipherDeskSchema = z.object({
   campaignId: z.string().min(1),
@@ -30,6 +74,7 @@ const cipherDeskSchema = z.object({
   completionLabel: z.string().min(1),
   completionTitle: z.string().min(1),
   completionText: z.string().min(1),
+  relay: cipherRelaySchema,
   challenges: z.array(cipherChallengeSchema).min(1),
 }).superRefine((desk, ctx) => {
   const ids = new Set(desk.challenges.map((challenge) => challenge.id));
@@ -60,6 +105,20 @@ const lastTramCiphers = [
     hints: ["先交换左右两组数字。", "答案使用 24 小时时刻；城市最常否认的那个时间已经在标题里出现过。"],
     revealTitle: "零点四十三分",
     revealText: "剪票孔不是车次，而是一枚约定的时刻。那张昨天打印的旧票，仍在等待一班只于 00:43 抵达的车。",
+    dial: {
+      min: 0,
+      max: 59,
+      step: 1,
+      initial: 34,
+      target: 43,
+      precision: 0,
+      mode: "minutes",
+      ariaLabel: "隐藏站钟分钟刻度",
+      decreaseLabel: "把站钟向前调一分钟",
+      increaseLabel: "把站钟向后调一分钟",
+      lockLabel: "核对站钟时刻",
+      unit: "",
+    },
   },
   {
     id: "florist-numbers",
@@ -114,6 +173,20 @@ const rainRadioCiphers = [
     hints: ["19、27、13 的末位分别是 9、7、3。", "把雨滴放在 7 和 3 之间：97.3 MHz。"],
     revealTitle: "97.3 MHz · 无人频率",
     revealText: "旋钮并没有随机漂移。雨水每次都把控制台接回九十七点三兆赫——那是四十七户证词共同使用的入口。",
+    dial: {
+      min: 96.8,
+      max: 97.8,
+      step: 0.1,
+      initial: 96.9,
+      target: 97.3,
+      precision: 1,
+      mode: "frequency",
+      ariaLabel: "雨中电台调频刻度",
+      decreaseLabel: "频率降低零点一兆赫",
+      increaseLabel: "频率升高零点一兆赫",
+      lockLabel: "锁定当前频率",
+      unit: "MHz",
+    },
   },
   {
     id: "silent-call-count",
@@ -160,6 +233,20 @@ const cipherRegistry: Record<string, CipherDeskDefinition> = {
     completionLabel: "ALL THREE CIPHERS FILED",
     completionTitle: "隐藏站台已经显影",
     completionText: "票孔、花单和时钟印章终于指向同一条被否认的路线。城市没有因此交出结论，但它再也无法声称站台不存在。",
+    relay: {
+      id: "last-tram-final-relay",
+      archiveLabel: "FINAL RELAY · 最终接线",
+      title: "把三份答案写成一封交接电报",
+      description: "林渡只留了三个字段：WHEN、WHO、WHERE。按字段顺序把已经解开的碎片接入发报机。",
+      instruction: "依次选择 WHEN（何时）、WHO（谁在维持联络）、WHERE（去哪里）。点已放入的碎片可以撤回。",
+      fragments: [
+        { id: "tram-hidden", label: "HIDDEN PLATFORM", note: "WHERE · 被档案刮掉的地点" },
+        { id: "tram-time", label: "00:43", note: "WHEN · 倒置剪票孔的时刻" },
+        { id: "tram-mina", label: "MINA", note: "WHO · 无名花单的保管人" },
+      ],
+      solutionIds: ["tram-time", "tram-mina", "tram-hidden"],
+      hints: ["第一个字段是时刻，不是人名。", "完整顺序是 WHEN → WHO → WHERE。"],
+    },
     challenges: lastTramCiphers,
   }),
   [RAIN_RADIO_CAMPAIGN_ID]: cipherDeskSchema.parse({
@@ -170,6 +257,20 @@ const cipherRegistry: Record<string, CipherDeskDefinition> = {
     completionLabel: "ALL THREE SIGNALS RESTORED",
     completionTitle: "公共频率已经显影",
     completionText: "九十七点三兆赫、四十七户来电和中继尾音已经互相作证：这不是无人广播，而是一座街区共同维护的声音出口。",
+    relay: {
+      id: "rain-radio-final-relay",
+      archiveLabel: "FINAL RELAY · 最终接线",
+      title: "把三段信号接回公共频率",
+      description: "中继箱要求按 SENDER、CHANNEL、MESSAGE 三个字段重新发报。每份解密答案只能使用一次。",
+      instruction: "依次选择 SENDER（谁在发报）、CHANNEL（使用什么频率）、MESSAGE（要求归还什么）。点已放入的碎片可以撤回。",
+      fragments: [
+        { id: "radio-voice", label: "VOICE", note: "MESSAGE · 摩尔斯尾音的请求" },
+        { id: "radio-frequency", label: "97.3 MHz", note: "CHANNEL · 雨水锁定的频率" },
+        { id: "radio-residents", label: "47 HOUSEHOLDS", note: "SENDER · 沉默线路的居民" },
+      ],
+      solutionIds: ["radio-residents", "radio-frequency", "radio-voice"],
+      hints: ["发报格式先写发送者，再写频道。", "完整顺序是 SENDER → CHANNEL → MESSAGE。"],
+    },
     challenges: rainRadioCiphers,
   }),
 };
@@ -186,6 +287,16 @@ export function getCampaignCipherChallenge(campaignId: string, challengeId: stri
   return getCampaignCipherChallenges(campaignId).find((challenge) => challenge.id === challengeId);
 }
 
+export function getCampaignCipherRelay(campaignId: string, relayId: string): CipherRelay | undefined {
+  const relay = getCampaignCipherDesk(campaignId)?.relay;
+  return relay?.id === relayId ? relay : undefined;
+}
+
+export function getCampaignCipherProgressIds(campaignId: string): string[] {
+  const desk = getCampaignCipherDesk(campaignId);
+  return desk ? [...desk.challenges.map((challenge) => challenge.id), desk.relay.id] : [];
+}
+
 export function isCipherUnlocked(challenge: CipherChallenge, unlockedClueIds: readonly string[]): boolean {
   return challenge.requiredClueIds.every((clueId) => unlockedClueIds.includes(clueId));
 }
@@ -193,6 +304,43 @@ export function isCipherUnlocked(challenge: CipherChallenge, unlockedClueIds: re
 export function matchesCipherAnswer(challenge: CipherChallenge, answer: string): boolean {
   const normalized = normalizeCipherAnswer(answer);
   return Boolean(normalized) && challenge.answerAliases.some((alias) => normalizeCipherAnswer(alias) === normalized);
+}
+
+export function isCipherRelayUnlocked(campaignId: string, solvedCipherIds: readonly string[]): boolean {
+  const challenges = getCampaignCipherChallenges(campaignId);
+  return Boolean(challenges.length) && challenges.every((challenge) => solvedCipherIds.includes(challenge.id));
+}
+
+export function matchesCipherRelay(relay: CipherRelay, fragmentIds: readonly string[]): boolean {
+  return fragmentIds.length === relay.solutionIds.length && relay.solutionIds.every((fragmentId, index) => fragmentIds[index] === fragmentId);
+}
+
+export function alignCipherDialValue(dial: CipherDial, value: number): number {
+  const clamped = Math.min(dial.max, Math.max(dial.min, value));
+  const steps = Math.round((clamped - dial.min) / dial.step);
+  return Number(Math.min(dial.max, dial.min + steps * dial.step).toFixed(dial.precision));
+}
+
+export function stepCipherDialValue(dial: CipherDial, value: number, direction: -1 | 1): number {
+  return alignCipherDialValue(dial, value + direction * dial.step);
+}
+
+export function formatCipherDialValue(dial: CipherDial, value: number): string {
+  const aligned = alignCipherDialValue(dial, value);
+  if (dial.mode === "minutes") return `00:${String(Math.round(aligned)).padStart(2, "0")}`;
+  return `${aligned.toFixed(dial.precision)}${dial.unit ? ` ${dial.unit}` : ""}`;
+}
+
+export function cipherDialAnswer(dial: CipherDial, value: number): string {
+  return formatCipherDialValue(dial, value);
+}
+
+export function getCipherDialSignal(dial: CipherDial, value: number): "silent" | "faint" | "clear" | "locked" {
+  const distanceInSteps = Math.round(Math.abs(alignCipherDialValue(dial, value) - dial.target) / dial.step);
+  if (distanceInSteps === 0) return "locked";
+  if (distanceInSteps <= 1) return "clear";
+  if (distanceInSteps <= 3) return "faint";
+  return "silent";
 }
 
 export function normalizeCipherAnswer(value: string): string {
