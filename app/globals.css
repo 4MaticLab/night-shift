@@ -628,7 +628,7 @@ blockquote {
   z-index: 5;
   left: 7%;
   top: 8%;
-  max-width: min(330px, 40%);
+  max-width: min(460px, 52%);
 }
 
 .scene-copy h2 {
@@ -1001,34 +1001,42 @@ blockquote {
 .preparation-list {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 7px;
+  gap: 16px;
 }
 
 .preparation {
-  min-height: 84px;
-  padding: 10px 8px;
+  min-height: 120px;
+  max-width: 110px;
+  margin: 0 auto;
+  padding: 14px 8px 10px;
   border: 1px solid #303b50;
   color: #788493;
   background: #10192b;
   cursor: pointer;
-  text-align: left;
+  text-align: center;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
 .preparation>span {
-  width: 28px;
-  height: 28px;
+  width: 84px;
+  height: 84px;
   display: grid;
   place-items: center;
-  margin-bottom: 7px;
   border: 1px solid #465267;
   color: var(--amber);
+  flex-shrink: 0;
 }
 
 .preparation div {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  text-align: center;
+  align-items: center;
 }
 
 .preparation b {
