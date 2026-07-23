@@ -4,7 +4,9 @@
 
 ## 当前 checkout
 
-当前没有活跃计划。
+| 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
+|---|---|---|---|---:|---|
+| [[plans/feat-injective-keepsake-mint]] | `feat/injective-keepsake-mint` | `in_progress` | `manual` | 1/8 | 固化 Injective EVM 契约、API 与收藏柜交互边界 |
 
 ## 使用规则
 
