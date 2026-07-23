@@ -25,7 +25,6 @@ const EmptyReport = dynamic(() => import("@/src/components/game/night-cycle").th
 const MorningReport = dynamic(() => import("@/src/components/game/night-cycle").then((module) => module.MorningReport), { loading: dynamicLoading });
 const NightRun = dynamic(() => import("@/src/components/game/night-cycle").then((module) => module.NightRun), { loading: dynamicLoading });
 const Tonight = dynamic(() => import("@/src/components/game/night-cycle").then((module) => module.Tonight), { loading: dynamicLoading });
-const SandboxCase = dynamic(() => import("@/src/components/game/sandbox-case").then((module) => module.SandboxCase), { loading: dynamicLoading });
 const SleepHardwarePanel = dynamic(() => import("@/src/components/game/sleep-hardware").then((module) => module.SleepHardwarePanel));
 
 export default function HomePage() {
@@ -37,7 +36,7 @@ export default function HomePage() {
 
 function GamePage() {
   const game = useGameStore();
-  const { campaign, localize, t } = useI18n();
+  const { localize, t } = useI18n();
   const hydrated = useSyncExternalStore(subscribeToHydration, () => true, () => false);
   const [intro, setIntro] = useState(false);
   const [view, setView] = useState<GameView>(game.phase === "morning" ? "report" : "tonight");
@@ -46,7 +45,6 @@ function GamePage() {
   const [clueGiftNotice, setClueGiftNotice] = useState<ClueGiftNoticeData | null>(null);
   const [hardwareOpen, setHardwareOpen] = useState(false);
   const processedClueQuery = useRef(false);
-  const sandboxContent = campaign.format === "sandbox-expedition" ? campaign.sandbox : undefined;
   const activeView: GameView = game.phase === "morning" && view === "tonight" ? "report" : view;
   const receiveSharedClue = game.receiveSharedClue;
   const switchCampaign = game.switchCampaign;
@@ -110,9 +108,8 @@ function GamePage() {
   const hardwarePanel = <AnimatePresence>{hardwareOpen && <SleepHardwarePanel onClose={() => setHardwareOpen(false)} />}</AnimatePresence>;
 
   if (libraryOpen || (!game.started && !intro)) {
-    return <>{clueNotice}<Hero interactive={hydrated} onStart={() => { setLibraryOpen(false); if (game.started || sandboxContent) { if (!game.started) game.begin(); setIntro(false); } else setIntro(true); }} onDemo={() => { game.begin(); setLibraryOpen(false); if (!sandboxContent) setDemo(true); }} /><AnimatePresence>{demo && !sandboxContent && <DemoDrawer onClose={() => setDemo(false)} setView={changeView} />}</AnimatePresence></>;
+    return <>{clueNotice}<Hero interactive={hydrated} onStart={() => { setLibraryOpen(false); if (game.started) setIntro(false); else setIntro(true); }} onDemo={() => { game.begin(); setLibraryOpen(false); setDemo(true); }} /><AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={changeView} />}</AnimatePresence></>;
   }
-  if (sandboxContent) return <>{clueNotice}<SandboxCase campaignId={campaign.id} content={sandboxContent} onHome={() => { setLibraryOpen(true); setIntro(false); }} onHardware={() => setHardwareOpen(true)} />{hardwarePanel}</>;
   if (intro && !game.started) return <>{clueNotice}<Intro onDone={() => { game.begin(); setIntro(false); }} /></>;
   if (game.phase === "night") return <>{clueNotice}<NightRun onFinish={game.finishNight} onHardware={() => setHardwareOpen(true)} />{hardwarePanel}</>;
   if (game.phase === "ending") return <>{clueNotice}<Ending onOpenLibrary={() => setLibraryOpen(true)} /></>;

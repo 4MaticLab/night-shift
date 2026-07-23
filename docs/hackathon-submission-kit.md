@@ -82,9 +82,7 @@ Night Shift 是一款 local-first 异步侦探游戏。玩家在睡前完成调�
 - Apple Health、Health Connect、Oura 与 Fitbit 是桥接预演，不宣称已经连接。
 - AI 只选择固定语气／意象，最终短笺由安全模板组成；它不生成案件事实。
 - 本项目不是医疗产品，不提供诊断、治疗或睡眠评分。
-- 《黑水溪》是有明确来源与边界的非商业本地原型，不作为原创商业剧本宣传。
-
-完整数据与健康边界见 [[docs/privacy-and-guardrails]]、[[docs/sleep-hardware-bridge]] 和 [[docs/blackwater-creek-adaptation-bible]]。
+完整数据与健康边界见 [[docs/privacy-and-guardrails]] 和 [[docs/sleep-hardware-bridge]]。
 
 ## 相关文档
 

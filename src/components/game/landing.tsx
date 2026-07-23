@@ -13,18 +13,15 @@ import { useI18n } from "@/src/i18n/provider";
 export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; onDemo: () => void; interactive: boolean }) {
   const { campaignId, campaignSaves, chapter, completedReports, started, switchCampaign } = useGameStore();
   const { campaign, locale, preferredLocale, setLocale, t } = useI18n();
-  const isSandbox = campaign.format === "sandbox-expedition";
   const heroAsset = getAsset(campaign.presentation.heroAssetId);
   const otherCampaigns = campaignRegistry.filter((item) => item.id !== campaignId);
-  const progressLabel = isSandbox
-    ? started ? t("异地卷宗调查中") : t("独立沙盒卷宗")
-    : started
-      ? locale === "en"
-        ? `Night ${Math.min(chapter, campaign.case.chapters.length)} of ${campaign.case.chapters.length}`
-        : `第 ${Math.min(chapter, campaign.case.chapters.length)} / ${campaign.case.chapters.length} 夜`
-      : locale === "en"
-        ? `${campaign.case.chapters.length}-night complete case`
-        : `${campaign.case.chapters.length} 夜完整案件`;
+  const progressLabel = started
+    ? locale === "en"
+      ? `Night ${Math.min(chapter, campaign.case.chapters.length)} of ${campaign.case.chapters.length}`
+      : `第 ${Math.min(chapter, campaign.case.chapters.length)} / ${campaign.case.chapters.length} 夜`
+    : locale === "en"
+      ? `${campaign.case.chapters.length}-night complete case`
+      : `${campaign.case.chapters.length} 夜完整案件`;
   const primaryLabel = started
     ? locale === "en" ? `Continue ${campaign.case.title}` : `继续《${campaign.case.title}》`
     : locale === "en" ? `Begin ${campaign.case.title}` : `开始《${campaign.case.title}》`;
@@ -42,7 +39,7 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
         <div className="landing-watch" aria-hidden="true"><i /><span>AGENCY WATCH</span><b>00:43</b></div>
         <div className="landing-nav-actions">
           <button className="ghost-button language-button" disabled={!interactive} onClick={() => setLocale(preferredLocale === "en" ? "zh-CN" : "en")}><Languages size={15} /> {preferredLocale === "en" ? "中文" : "ENGLISH"}</button>
-          <button className="ghost-button" disabled={!interactive} onClick={onDemo}><Zap size={15} /> {isSandbox ? "CASE FILE" : "DEMO MODE"}</button>
+          <button className="ghost-button" disabled={!interactive} onClick={onDemo}><Zap size={15} /> DEMO MODE</button>
         </div>
       </nav>
       <section className="hero-copy">
@@ -56,13 +53,13 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
             disabled={!interactive}
             onClick={onStart}
           >{primaryLabel} <ArrowRight size={18} /></button>
-          <button className="text-button" disabled={!interactive} onClick={onDemo}><BookOpen size={17} /> {isSandbox ? t("查看案件说明") : t("观看 90 秒演示")}</button>
+          <button className="text-button" disabled={!interactive} onClick={onDemo}><BookOpen size={17} /> {t("观看 90 秒演示")}</button>
         </div>
-        <div className="shift-rule"><span>{isSandbox ? t("你负责调度调查小队") : t("你负责白天推理")}</span><i /><span>{isSandbox ? t("山谷按行动改变") : t("林渡负责夜晚调查")}</span></div>
+        <div className="shift-rule"><span>{t("你负责白天推理")}</span><i /><span>{t("林渡负责夜晚调查")}</span></div>
       </section>
       <section className="campaign-shelf" aria-label={t("案件剧本选择")}>
         <header>
-          <div><small>CASE LIBRARY · 03 FILES</small><h2>{t("今晚从哪一宗开始？")}</h2></div>
+          <div><small>CASE LIBRARY · 02 FILES</small><h2>{t("今晚从哪一宗开始？")}</h2></div>
           <span>{t("本地独立存档")}</span>
         </header>
         <motion.article className="featured-case" key={campaign.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} aria-live="polite">

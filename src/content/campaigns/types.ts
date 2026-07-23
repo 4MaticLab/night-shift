@@ -11,8 +11,6 @@ import type {
   WakeEcho,
 } from "@/src/lib/game-engine/schema";
 import type { EndingId } from "@/src/lib/game-engine/ending";
-import { assertSandboxCampaign } from "@/src/lib/sandbox/engine";
-import type { SandboxCampaignContent } from "@/src/lib/sandbox/types";
 
 export interface CampaignRules {
   trueEndingId: EndingId;
@@ -40,8 +38,6 @@ export interface CampaignPresentation {
 export interface CampaignManifest {
   id: string;
   version: number;
-  format?: "linear-night" | "sandbox-expedition";
-  sandbox?: SandboxCampaignContent;
   case: CaseContent;
   routes: RouteDirection[];
   relations: EvidenceRelation[];
@@ -59,12 +55,6 @@ export interface CampaignManifest {
 export function defineCampaign<const T extends CampaignManifest>(manifest: T): T {
   if (manifest.id !== manifest.case.id) throw new Error(`Campaign id ${manifest.id} must match case id ${manifest.case.id}`);
   if (!Number.isInteger(manifest.version) || manifest.version < 1) throw new Error(`Campaign ${manifest.id} has an invalid version`);
-  if (manifest.format === "sandbox-expedition") {
-    if (!manifest.sandbox) throw new Error(`Campaign ${manifest.id} is missing sandbox content`);
-    assertSandboxCampaign(manifest.sandbox);
-  } else if (manifest.sandbox) {
-    throw new Error(`Linear campaign ${manifest.id} cannot include sandbox content`);
-  }
 
   const chapterNumbers = new Set(manifest.case.chapters.map((chapter) => chapter.number));
   const clueIds = new Set(manifest.case.clues.map((clue) => clue.id));

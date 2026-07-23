@@ -643,31 +643,6 @@ test("switches to the rain-radio campaign and completes its five-night story", a
   await expect(page.getByRole("button", { name: /继续当前案件/ })).toBeVisible();
 });
 
-test("restores a real Blackwater Creek expedition after reload and settles it once", async ({ page }) => {
-  await page.goto("/");
-  await page.getByRole("button", { name: /CASE 003/ }).click();
-  await page.getByRole("button", { name: /开始第 003 宗案件/ }).click();
-
-  const bootlegger = page.locator("article", { hasText: "波士顿私酒贩小队" });
-  await bootlegger.getByRole("button", { name: /以此身份进入山谷/ }).click();
-  await page.locator(".sandbox-map").getByRole("button", { name: /08 卡莫迪农场/ }).click();
-  const negotiation = page.locator("article", { hasText: "同达米恩谈一笔更大的生意" });
-  await negotiation.getByRole("button", { name: "安排今晚调查" }).click();
-  await page.getByRole("button", { name: "真实夜班" }).click();
-  await page.getByRole("button", { name: /今晚交给调查队/ }).click();
-
-  await expect(page.getByRole("heading", { name: "同达米恩谈一笔更大的生意" })).toBeVisible();
-  await page.reload();
-  await expect(page.getByRole("heading", { name: "同达米恩谈一笔更大的生意" })).toBeVisible();
-  await expect(page.getByRole("button", { name: /我回来了，拆开晨报/ })).toBeVisible();
-  await page.getByRole("button", { name: /我回来了，拆开晨报/ }).click();
-  await expect(page.getByText("昨夜调查完成")).toBeVisible();
-  await expect(page.getByText("每周驶向波士顿的货单")).toBeVisible();
-  await page.reload();
-  await expect(page.getByText("昨夜调查完成")).toBeVisible();
-  await expect(page.getByText("每周驶向波士顿的货单")).toHaveCount(1);
-});
-
 test.describe("tablet portrait 820x1180", () => {
   test.use({ viewport: { width: 820, height: 1180 } });
 
@@ -718,47 +693,6 @@ test.describe("mobile 390x844", () => {
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /CASE 001/ }).click();
     await expect(page.getByRole("button", { name: /开始第 001 宗案件/ })).toBeVisible();
-  });
-
-  test("plays the Blackwater Creek bootlegger route through a stateful ending", async ({ page }) => {
-    await page.goto("/");
-    await page.getByRole("button", { name: /CASE 003/ }).click();
-    await page.getByRole("button", { name: /开始第 003 宗案件/ }).click();
-
-    const bootlegger = page.locator("article", { hasText: "波士顿私酒贩小队" });
-    await bootlegger.getByRole("button", { name: /以此身份进入山谷/ }).click();
-    await page.getByRole("button", { name: /打开睡眠硬件中心/ }).click();
-    await page.getByRole("button", { name: /静默枕/ }).click();
-    await page.getByRole("button", { name: /授权并连接 静默枕/ }).click();
-    await page.getByRole("button", { name: "关闭", exact: true }).click();
-    await page.locator(".sandbox-map").getByRole("button", { name: /08 卡莫迪农场/ }).click();
-
-    const negotiation = page.locator("article", { hasText: "同达米恩谈一笔更大的生意" });
-    await negotiation.getByRole("button", { name: "安排今晚调查" }).click();
-    await expect(page.getByRole("heading", { name: "把这一程交给夜班。" })).toBeVisible();
-    await expectNoPageOverflow(page);
-    await page.getByRole("button", { name: /今晚交给调查队/ }).click();
-    await expect(page.getByRole("heading", { name: "同达米恩谈一笔更大的生意" })).toBeVisible();
-    await expect(page.locator(".sleep-live-telemetry")).toContainText("静默枕正在记录");
-    await expectNoPageOverflow(page);
-    await page.getByRole("button", { name: /跳到清晨/ }).click();
-    await expect(page.getByText("昨夜调查完成")).toBeVisible();
-    await expect(page.getByText("每周驶向波士顿的货单")).toBeVisible();
-    await expect(page.locator(".sleep-morning-receipt")).toContainText("静默枕留下的一夜");
-    await expectNoPageOverflow(page);
-    await page.getByRole("button", { name: /归档晨报，准备下一夜/ }).click();
-    await page.getByRole("navigation", { name: "黑水溪卷宗导航" }).getByRole("button", { name: /收场/ }).click();
-    await expect(page.getByRole("heading", { name: "接管威士忌生意" })).toBeVisible();
-
-    await page.getByRole("button", { name: "以此收场" }).click();
-    await expect(page.getByRole("heading", { name: "接管威士忌生意" })).toBeVisible();
-    await expect(page.getByText(/原作者 Scott Dorward/)).toBeVisible();
-    await expectNoPageOverflow(page);
-
-    await page.getByRole("button", { name: "重看证物" }).click();
-    await expect(page.getByRole("heading", { name: "证物与展示材料" })).toBeVisible();
-    await page.getByRole("navigation", { name: "黑水溪卷宗导航" }).getByRole("button", { name: /收场/ }).click();
-    await expect(page.getByRole("heading", { name: "接管威士忌生意" })).toBeVisible();
   });
 
   test("keeps the first-night loop touchable without page overflow", async ({ page }) => {
