@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前进行中的主计划是 [[plans/0037-primary-case-city-storylines]]：取消固定五夜公开循环与旧存档兼容，把《末班车》与《潮汐不肯归档》改成同一张雾灯城地图里可并发、按时间推进并各自完结的主／支线；不兼容升级按存档 epoch 直接重开，《黑水溪》保留为唯一独立结构样板。
+当前没有 `in_progress` 主计划。[[plans/0037-primary-case-city-storylines]] 已完成：公开产品改为一座可持续更新的雾灯城、可并发且各自完结的主／支线、破坏性存档 epoch 与唯一《黑水溪》结构样板；实现已推送到 Draft PR #14。
 
 ## 计划清单
 
@@ -46,7 +46,7 @@
 | [[plans/0034-night-cipher-desk]] | `completed` | `manual` | P0 | 6/6 | 已完成三段密文、v16 存档、中英文与移动端验收 |
 | [[plans/0035-original-sandbox-case-content-pilot]] | `completed` | `manual` | P1 | 9/9 | Draft PR #14 等待评审 |
 | [[plans/0036-evidence-board-drag-e2e-reliability]] | `cancelled` | `auto` | P1 | 0/4 | 旧五夜案件板已退出公开产品，不再修复其专属回归 |
-| [[plans/0037-primary-case-city-storylines]] | `in_progress` | `manual` | P0 | 7/8 | 提交并推送主体变更，更新 Draft PR #14 |
+| [[plans/0037-primary-case-city-storylines]] | `completed` | `manual` | P0 | 8/8 | Draft PR #14 等待评审 |
 
 ## 状态规则
 

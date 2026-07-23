@@ -1,6 +1,6 @@
 # 0037 — 主案城市地图与河下区支线
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P0
 - 创建：2026-07-24
 - 更新：2026-07-24
@@ -42,7 +42,7 @@
 - [x] 将公开案件书架收敛为“一个主案 + 一个结构样板”，不再挂载退役线性入口。
 - [x] 增加破坏性存档 epoch，移除旧五夜入口和迁移承诺。
 - [x] 更新内容／存档／桌面与移动端测试及稳定文档。
-- [ ] 运行质量门禁，提交并更新 Draft PR #14。
+- [x] 运行质量门禁，提交并更新 Draft PR #14。
 
 ## 验收标准
 
@@ -75,6 +75,7 @@
 - 2026-07-24：用户进一步取消五夜公开循环；决定把每条主／支线都建模为独立计时 story thread，以 `case-001:<storyline-id>` 并发保存。旧五夜 store 只保留迁移兼容，不再控制主案首页。
 - 2026-07-24：用户明确早期开发不需要向下兼容；撤销上一条的兼容决定。新增全局 save epoch，不匹配即定点清空 Night Shift 存档，`?legacy=1` 不再改变入口。
 - 2026-07-24：`npm test`（77）、`npm run lint`、`npm run build`、`npm run docs:check` 与 7 条当前 Playwright 路径通过；Sites 构建和服务端渲染检查亦通过。英文路径从城市纪事进入《末班车》首份晨报逐屏无汉字，内容测试扫描主线全文无汉字。
+- 2026-07-24：主体提交 `b2568c6` 已推送到 `codex/blackwater-inspired-content`；Draft PR #14 已改名为 “Build concurrent Foglight City storylines” 并更新范围、影响与验证记录。
 
 ## 相关文档
 
