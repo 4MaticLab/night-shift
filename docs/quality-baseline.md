@@ -98,6 +98,8 @@ Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：除 Demo 方向�
 
 第二十二个私密版本为五夜补齐确定性睡隙回声；真实夜班可以记录一次短暂醒转并继续，断续 Demo 自动形成回声，晨报、睡隙回声簿与结案总账保存结果。v12 校验可选回声快照，同夜不可重复，回声不参与线索、植物、睡眠评价或结局资格，完成 [[plans/0020-sleep-gap-echoes-and-gentle-wake-check-in]]。
 
+第二十三个私密版本完成桌面／移动端交互整修：视图切换与重复点击当前导航会回顶，晨报不再锁死其他视图；桌面交接改为稳定场景、独立计划滚动区与常驻主操作，移动交接恢复紧凑的两列／三列选择；底部导航支持安全区、`aria-current` 与 44 px 触摸护栏，可选项补齐 `aria-pressed`。本机浏览器实际覆盖 1440 × 900 与 390 × 844，完成 [[plans/0021-cross-device-interaction-pass]]。
+
 ## 相关文档
 
 - [[docs/architecture]]
