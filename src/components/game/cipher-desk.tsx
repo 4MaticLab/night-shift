@@ -5,6 +5,7 @@ import { Cable, Check, ChevronRight, KeyRound, Lightbulb, LockKeyhole, RadioTowe
 import { getCampaignCipherDesk, isCipherUnlocked } from "@/src/content/ciphers";
 import { useI18n } from "@/src/i18n/provider";
 import { useGameStore } from "@/src/stores/game-store";
+import { CipherDialControl } from "./cipher-dial";
 
 export function CipherDesk() {
   const { campaign, locale, localize, t } = useI18n();
@@ -16,6 +17,7 @@ export function CipherDesk() {
   const challenges = desk?.challenges ?? [];
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [feedback, setFeedback] = useState<Record<string, "incorrect" | "solved">>({});
+  const [dialValues, setDialValues] = useState<Record<string, number>>({});
   const [relaySequences, setRelaySequences] = useState<Record<string, string[]>>({});
   const [relayFeedback, setRelayFeedback] = useState<Record<string, "incorrect">>({});
 
@@ -31,6 +33,15 @@ export function CipherDesk() {
   const submit = (event: FormEvent<HTMLFormElement>, challengeId: string) => {
     event.preventDefault();
     const result = solveCipher(challengeId, answers[challengeId] ?? "");
+    if (result === "solved" || result === "already-solved") {
+      setFeedback((current) => ({ ...current, [challengeId]: "solved" }));
+      return;
+    }
+    if (result === "incorrect") setFeedback((current) => ({ ...current, [challengeId]: "incorrect" }));
+  };
+
+  const submitAnswer = (challengeId: string, answer: string) => {
+    const result = solveCipher(challengeId, answer);
     if (result === "solved" || result === "already-solved") {
       setFeedback((current) => ({ ...current, [challengeId]: "solved" }));
       return;
@@ -93,7 +104,13 @@ export function CipherDesk() {
               <p className="cipher-instruction">{challenge.instruction}</p>
             </>}
 
-            {unlocked && !solved && <form className="cipher-answer" onSubmit={(event) => submit(event, challenge.id)}>
+            {unlocked && !solved && challenge.dial && <>
+              <CipherDialControl challenge={challenge} value={dialValues[challenge.id] ?? challenge.dial.initial} onChange={(value) => { setDialValues((current) => ({ ...current, [challenge.id]: value })); setFeedback((current) => { const next = { ...current }; delete next[challenge.id]; return next; }); }} onLock={(answer) => submitAnswer(challenge.id, answer)} />
+              {feedback[challenge.id] === "incorrect" && <p className="cipher-feedback error" role="status">{t("密文没有回应。再检查排列、时刻或字母对应；错误不会被记录。")}</p>}
+              <details className="cipher-hints"><summary><Lightbulb /> {t("展开提示")}</summary><ol>{challenge.hints.map((hint) => <li key={hint}>{hint}</li>)}</ol></details>
+            </>}
+
+            {unlocked && !solved && !challenge.dial && <form className="cipher-answer" onSubmit={(event) => submit(event, challenge.id)}>
               <label htmlFor={`cipher-${challenge.id}`}>{challenge.prompt}</label>
               <div><input id={`cipher-${challenge.id}`} value={answers[challenge.id] ?? ""} maxLength={48} autoComplete="off" onChange={(event) => { setAnswers((current) => ({ ...current, [challenge.id]: event.target.value })); setFeedback((current) => { const next = { ...current }; delete next[challenge.id]; return next; }); }} placeholder={t("在此写下解码结果")} /><button type="submit" disabled={!answers[challenge.id]?.trim()}>{t("核对密文")} <ChevronRight /></button></div>
               {feedback[challenge.id] === "incorrect" && <p className="cipher-feedback error" role="status">{t("密文没有回应。再检查排列、时刻或字母对应；错误不会被记录。")}</p>}

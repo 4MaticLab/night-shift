@@ -2618,6 +2618,174 @@ blockquote {
   color: #a5acb5 !important;
 }
 
+.cipher-dial {
+  margin: 10px 0 0;
+  padding: 13px;
+  border: 1px solid #465267;
+  background: radial-gradient(circle at 50% 0, #24354b, #0b1421 68%);
+  box-shadow: inset 0 0 24px #0007;
+}
+
+.cipher-dial header {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+}
+
+.cipher-dial header>svg {
+  width: 32px;
+  height: 32px;
+  padding: 7px;
+  border: 1px solid #536175;
+  color: var(--amber);
+}
+
+.cipher-dial header>div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cipher-dial header small {
+  color: #8290a0;
+  font: 7px monospace;
+  letter-spacing: .1em;
+}
+
+.cipher-dial header b {
+  color: #e3d8c1;
+  font: 22px var(--font-newsreader);
+  line-height: 1;
+}
+
+.cipher-dial header>span {
+  padding: 5px 7px;
+  border: 1px solid #3f4c5d;
+  color: #768493;
+  font: 7px monospace;
+  white-space: nowrap;
+}
+
+.cipher-dial.signal-faint header>span {
+  border-color: #806d4f;
+  color: #a6906c;
+}
+
+.cipher-dial.signal-clear header>span,
+.cipher-dial.signal-locked header>span {
+  border-color: #5e8780;
+  color: #8db0aa;
+  background: #183036;
+}
+
+.cipher-dial-scale {
+  height: 32px;
+  margin: 13px 8px 3px;
+  position: relative;
+  border-bottom: 2px solid #536175;
+  background: linear-gradient(90deg, transparent, #688a8512, transparent);
+}
+
+.cipher-dial-scale>span {
+  width: 1px;
+  height: 9px;
+  position: absolute;
+  bottom: -2px;
+  background: #657286;
+}
+
+.cipher-dial-scale>i {
+  width: 3px;
+  height: 27px;
+  position: absolute;
+  z-index: 2;
+  bottom: -2px;
+  transform: translateX(-50%);
+  background: var(--amber);
+  box-shadow: 0 0 12px #c59a5a88;
+  transition: left .16s ease, background-color .16s ease;
+}
+
+.cipher-dial.signal-clear .cipher-dial-scale>i,
+.cipher-dial.signal-locked .cipher-dial-scale>i {
+  background: #7eaaa2;
+  box-shadow: 0 0 15px #7eaaa2aa;
+}
+
+.cipher-dial-controls {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 8px;
+}
+
+.cipher-dial-controls button,
+.cipher-dial-lock {
+  min-height: 44px;
+  border: 1px solid #4b586b;
+  color: #aeb9c3;
+  background: #192537;
+  cursor: pointer;
+}
+
+.cipher-dial-controls button {
+  display: grid;
+  place-items: center;
+}
+
+.cipher-dial-controls button:disabled {
+  opacity: .34;
+}
+
+.cipher-dial-controls button svg {
+  width: 16px;
+}
+
+.cipher-dial-controls input[type="range"] {
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  accent-color: var(--amber);
+  cursor: pointer;
+}
+
+.cipher-dial.signal-clear .cipher-dial-controls input,
+.cipher-dial.signal-locked .cipher-dial-controls input {
+  accent-color: var(--teal);
+}
+
+.cipher-dial-lock {
+  width: 100%;
+  margin-top: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #ddd2bb;
+  background: #27364a;
+  font-size: 9px;
+}
+
+.cipher-dial.signal-clear .cipher-dial-lock,
+.cipher-dial.signal-locked .cipher-dial-lock {
+  border-color: #608981;
+  background: #1c383c;
+}
+
+.cipher-dial-lock svg {
+  width: 15px;
+}
+
+.cipher-dial>p {
+  min-height: 0 !important;
+  margin: 7px 0 0 !important;
+  color: #657383 !important;
+  font-size: 7px !important;
+  text-align: center;
+}
+
 .cipher-answer label {
   display: block;
   margin-bottom: 7px;
@@ -3087,6 +3255,27 @@ blockquote {
 
   .cipher-answer>div {
     grid-template-columns: 1fr;
+  }
+
+  .cipher-dial {
+    padding: 11px 9px;
+  }
+
+  .cipher-dial header {
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+
+  .cipher-dial header>svg {
+    width: 29px;
+    height: 29px;
+    padding: 6px;
+  }
+
+  .cipher-dial header>span {
+    grid-column: 1 / -1;
+    min-height: 30px;
+    display: grid;
+    place-items: center;
   }
 
   .cipher-answer button {

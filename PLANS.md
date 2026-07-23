@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有进行中的主计划。最近完成的 [[plans/0036-cipher-relay-sequencing]] 已让前两案的三段密文汇入可点击排序的最终接线拼图，恢复隐藏路线与公共频率。
+当前没有进行中的主计划。最近完成的 [[plans/0037-interactive-cipher-dials]] 已为前两案第一关加入可亲手调准的时刻轮与雨中调频仪。
 
 ## 计划清单
 
@@ -46,6 +46,7 @@
 | [[plans/0034-night-cipher-desk]] | `completed` | `manual` | P0 | 6/6 | 已完成三段密文、v16 存档、中英文与移动端验收 |
 | [[plans/0035-rain-radio-signal-lab]] | `completed` | `manual` | P0 | 6/6 | 已完成第二案三段信号谜题、全关回执与移动端验收 |
 | [[plans/0036-cipher-relay-sequencing]] | `completed` | `manual` | P0 | 6/6 | 已完成两案最终接线、v16 持久化、英文与移动端验收 |
+| [[plans/0037-interactive-cipher-dials]] | `completed` | `manual` | P0 | 6/6 | 已完成通用刻度盘、两案配置、英文与移动端验收 |
 
 ## 状态规则
 

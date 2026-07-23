@@ -2,6 +2,27 @@ import { z } from "zod";
 import { LAST_TRAM_CAMPAIGN_ID } from "./campaigns/last-tram";
 import { RAIN_RADIO_CAMPAIGN_ID } from "./campaigns/rain-radio";
 
+const cipherDialSchema = z.object({
+  min: z.number(),
+  max: z.number(),
+  step: z.number().positive(),
+  initial: z.number(),
+  target: z.number(),
+  precision: z.number().int().min(0).max(3),
+  mode: z.enum(["minutes", "frequency"]),
+  ariaLabel: z.string().min(1),
+  decreaseLabel: z.string().min(1),
+  increaseLabel: z.string().min(1),
+  lockLabel: z.string().min(1),
+  unit: z.string(),
+}).superRefine((dial, ctx) => {
+  if (dial.max <= dial.min) ctx.addIssue({ code: "custom", path: ["max"], message: "Dial max must exceed min" });
+  if (dial.initial < dial.min || dial.initial > dial.max) ctx.addIssue({ code: "custom", path: ["initial"], message: "Dial initial value is out of range" });
+  if (dial.target < dial.min || dial.target > dial.max) ctx.addIssue({ code: "custom", path: ["target"], message: "Dial target value is out of range" });
+});
+
+export type CipherDial = z.infer<typeof cipherDialSchema>;
+
 const cipherChallengeSchema = z.object({
   id: z.string().min(1),
   campaignId: z.string().min(1),
@@ -18,6 +39,7 @@ const cipherChallengeSchema = z.object({
   hints: z.tuple([z.string().min(1), z.string().min(1)]),
   revealTitle: z.string().min(1),
   revealText: z.string().min(1),
+  dial: cipherDialSchema.optional(),
 });
 
 export type CipherChallenge = z.infer<typeof cipherChallengeSchema>;
@@ -83,6 +105,20 @@ const lastTramCiphers = [
     hints: ["先交换左右两组数字。", "答案使用 24 小时时刻；城市最常否认的那个时间已经在标题里出现过。"],
     revealTitle: "零点四十三分",
     revealText: "剪票孔不是车次，而是一枚约定的时刻。那张昨天打印的旧票，仍在等待一班只于 00:43 抵达的车。",
+    dial: {
+      min: 0,
+      max: 59,
+      step: 1,
+      initial: 34,
+      target: 43,
+      precision: 0,
+      mode: "minutes",
+      ariaLabel: "隐藏站钟分钟刻度",
+      decreaseLabel: "把站钟向前调一分钟",
+      increaseLabel: "把站钟向后调一分钟",
+      lockLabel: "核对站钟时刻",
+      unit: "",
+    },
   },
   {
     id: "florist-numbers",
@@ -137,6 +173,20 @@ const rainRadioCiphers = [
     hints: ["19、27、13 的末位分别是 9、7、3。", "把雨滴放在 7 和 3 之间：97.3 MHz。"],
     revealTitle: "97.3 MHz · 无人频率",
     revealText: "旋钮并没有随机漂移。雨水每次都把控制台接回九十七点三兆赫——那是四十七户证词共同使用的入口。",
+    dial: {
+      min: 96.8,
+      max: 97.8,
+      step: 0.1,
+      initial: 96.9,
+      target: 97.3,
+      precision: 1,
+      mode: "frequency",
+      ariaLabel: "雨中电台调频刻度",
+      decreaseLabel: "频率降低零点一兆赫",
+      increaseLabel: "频率升高零点一兆赫",
+      lockLabel: "锁定当前频率",
+      unit: "MHz",
+    },
   },
   {
     id: "silent-call-count",
@@ -263,6 +313,34 @@ export function isCipherRelayUnlocked(campaignId: string, solvedCipherIds: reado
 
 export function matchesCipherRelay(relay: CipherRelay, fragmentIds: readonly string[]): boolean {
   return fragmentIds.length === relay.solutionIds.length && relay.solutionIds.every((fragmentId, index) => fragmentIds[index] === fragmentId);
+}
+
+export function alignCipherDialValue(dial: CipherDial, value: number): number {
+  const clamped = Math.min(dial.max, Math.max(dial.min, value));
+  const steps = Math.round((clamped - dial.min) / dial.step);
+  return Number(Math.min(dial.max, dial.min + steps * dial.step).toFixed(dial.precision));
+}
+
+export function stepCipherDialValue(dial: CipherDial, value: number, direction: -1 | 1): number {
+  return alignCipherDialValue(dial, value + direction * dial.step);
+}
+
+export function formatCipherDialValue(dial: CipherDial, value: number): string {
+  const aligned = alignCipherDialValue(dial, value);
+  if (dial.mode === "minutes") return `00:${String(Math.round(aligned)).padStart(2, "0")}`;
+  return `${aligned.toFixed(dial.precision)}${dial.unit ? ` ${dial.unit}` : ""}`;
+}
+
+export function cipherDialAnswer(dial: CipherDial, value: number): string {
+  return formatCipherDialValue(dial, value);
+}
+
+export function getCipherDialSignal(dial: CipherDial, value: number): "silent" | "faint" | "clear" | "locked" {
+  const distanceInSteps = Math.round(Math.abs(alignCipherDialValue(dial, value) - dial.target) / dial.step);
+  if (distanceInSteps === 0) return "locked";
+  if (distanceInSteps <= 1) return "clear";
+  if (distanceInSteps <= 3) return "faint";
+  return "silent";
 }
 
 export function normalizeCipherAnswer(value: string): string {
