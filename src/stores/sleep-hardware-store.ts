@@ -23,6 +23,7 @@ interface SleepHardwareStore {
   activeCapture: ActiveSleepCapture | null;
   history: Record<string, SleepSignalSummary>;
   selectVirtualDevice: (deviceId: VirtualDeviceId) => void;
+  authorizeVirtualDevice: (deviceId: VirtualDeviceId, permissions: SleepPermissionId[]) => boolean;
   selectBridge: (bridgeId: SleepBridgeId) => void;
   grantConsent: (permissions: SleepPermissionId[]) => boolean;
   revokeConsent: () => void;
@@ -51,6 +52,28 @@ export const useSleepHardwareStore = create<SleepHardwareStore>()(persist((set, 
       consent: keepConsent ? state.consent : null,
       activeCapture: keepConsent ? state.activeCapture : null,
     });
+  },
+  authorizeVirtualDevice: (selectedDeviceId, requestedPermissions) => {
+    const state = get();
+    if (state.activeCapture) return false;
+    const device = getVirtualSleepDevice(selectedDeviceId);
+    if (!device) return false;
+    const permissions = Array.from(new Set([
+      "sleep-window" as const,
+      ...requestedPermissions.filter((permission) => device.permissions.includes(permission)),
+    ]));
+    set({
+      mode: "virtual",
+      selectedDeviceId,
+      consent: {
+        sourceId: device.id,
+        permissions,
+        grantedAt: new Date().toISOString(),
+        localOnly: true,
+      },
+      activeCapture: null,
+    });
+    return true;
   },
   selectBridge: (selectedBridgeId) => set({
     mode: "bridge",
@@ -115,4 +138,3 @@ export const useSleepHardwareStore = create<SleepHardwareStore>()(persist((set, 
     history,
   }),
 }));
-

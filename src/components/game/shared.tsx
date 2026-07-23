@@ -35,14 +35,17 @@ export function CityRoute({ progress = 100, compact = false, routeNodes = ["事�
   const stops = Array.from({ length: 4 }, (_, index) => routeNodes[index] ?? "未抵达");
   const points = ROUTE_STOPS[variant] ?? ROUTE_STOPS.river;
   const pathRef = useRef<SVGPathElement>(null);
-  const [pathLen, setPathLen] = useState(0);
+  const [marker, setMarker] = useState(points[0]);
   const d = useMemo(() => points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x} ${p.y}`).join(" "), [points]);
-  useEffect(() => { if (pathRef.current) setPathLen(pathRef.current.getTotalLength()); }, [d]);
-  const marker = useMemo(() => {
-    if (!pathLen || !pathRef.current) return { x: points[0].x, y: points[0].y };
-    const pt = pathRef.current.getPointAtLength((Math.max(0, Math.min(100, progress)) / 100) * pathLen);
-    return { x: pt.x, y: pt.y };
-  }, [pathLen, progress, points]);
+  useEffect(() => {
+    const path = pathRef.current;
+    if (!path) {
+      setMarker(points[0]);
+      return;
+    }
+    const point = path.getPointAtLength((Math.max(0, Math.min(100, progress)) / 100) * path.getTotalLength());
+    setMarker({ x: point.x, y: point.y });
+  }, [d, progress, points]);
   return (
     <div className={`city-map route-${variant} ${compact ? "compact" : ""}`}>
       <div className="river" />
