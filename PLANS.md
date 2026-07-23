@@ -6,6 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
+| [[plans/feat-thirteenth-loaf-case]] | `feat/thirteenth-loaf-case` | `in_progress` | `manual` | 0% | 固定故事事实并生成第三案专属美术 |
 
 ## 使用规则
 
