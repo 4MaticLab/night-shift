@@ -40,6 +40,14 @@ async function expectNoVisibleHan(page: import("@playwright/test").Page) {
   expect(visibleText).not.toMatch(/\p{Script=Han}/u);
 }
 
+async function openMintableCollection(page: import("@playwright/test").Page) {
+  await page.goto("/");
+  await page.getByRole("button", { name: /DEMO MODE/ }).click();
+  await page.getByRole("button", { name: /跳到真结局条件/ }).click();
+  await page.getByRole("button", { name: "收藏", exact: true }).click();
+  await expect(page.locator(".collection-page")).toBeVisible();
+}
+
 test("holds the first interaction behind a real hero-art loading screen", async ({ page }) => {
   await page.route("**/art/headers/shift-handoff-v2.webp", async (route) => {
     await new Promise((resolve) => setTimeout(resolve, 900));
@@ -353,7 +361,7 @@ test("keeps returned postcards in the journey album", async ({ page }) => {
   await expect(page.getByText("让错字继续保护地址")).toBeVisible();
   await expect(page.getByRole("heading", { name: "票根灯蕨" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "四十三日夜香" })).toBeVisible();
-  await page.getByRole("button", { name: "档案" }).click();
+  await page.getByRole("button", { name: "档案", exact: true }).click();
   await expect(page.getByText("雾灯城分区志")).toBeVisible();
   await expect(page.getByRole("heading", { name: "灯港区" })).toBeVisible();
   await expect(page.locator(".district-entry.unlocked")).toHaveCount(1);
@@ -362,6 +370,128 @@ test("keeps returned postcards in the journey album", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "米娜·索莱尔" })).toBeVisible();
   await expect(page.locator(".person-dossier.encountered")).toHaveCount(1);
   await expect(page.locator(".person-dossier.locked")).toHaveCount(3);
+});
+
+test("keeps the Injective keepsake desk honest and responsive when deployment is unconfigured", async ({ page }) => {
+  await page.route("**/api/injective/mint-authorization", async (route) => {
+    if (route.request().method() !== "GET") return route.continue();
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        configured: false,
+        chainId: 1439,
+        chainName: "Injective EVM Testnet",
+        rpcUrl: "https://k8s.testnet.json-rpc.injective.network/",
+        explorerUrl: "https://testnet.blockscout.injective.network",
+      }),
+    });
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openMintableCollection(page);
+  await expect(page.locator(".collectible-card.locked .collectible-mint-trigger")).toHaveCount(0);
+  await page.getByRole("button", { name: "封进 Injective 链上档案" }).first().click();
+
+  const dialog = page.getByRole("dialog", { name: "把这件夜班藏品封进链上档案" });
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText("链上档案尚未开门");
+  await expect(dialog).toContainText("本地收藏和主线不受影响");
+  await expectNoPageOverflow(page);
+  await expectMinimumTapTargets(dialog.getByRole("button"));
+  const mobileGeometry = await dialog.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return {
+      width: rect.width,
+      scrollWidth: element.scrollWidth,
+      clientWidth: element.clientWidth,
+      maxHeight: Number.parseFloat(getComputedStyle(element).maxHeight),
+    };
+  });
+  expect(mobileGeometry.width).toBeGreaterThanOrEqual(380);
+  expect(mobileGeometry.width).toBeLessThanOrEqual(390);
+  expect(mobileGeometry.scrollWidth).toBe(mobileGeometry.clientWidth);
+
+  await page.setViewportSize({ width: 820, height: 1180 });
+  await expect.poll(() => dialog.evaluate((element) => getComputedStyle(element).gridTemplateColumns)).not.toBe("none");
+  await expectNoPageOverflow(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const desktopWidth = await dialog.evaluate((element) => element.getBoundingClientRect().width);
+  expect(desktopWidth).toBeLessThanOrEqual(960);
+  expect(desktopWidth).toBeGreaterThanOrEqual(900);
+
+  await dialog.getByRole("button", { name: "关闭链上归档" }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.body).overflow)).not.toBe("hidden");
+});
+
+test("stores an Injective explorer receipt after the wallet finds an existing mint", async ({ page }) => {
+  const wallet = "0x2222222222222222222222222222222222222222";
+  const contract = "0x1111111111111111111111111111111111111111";
+  const explorerUrl = `https://testnet.blockscout.injective.network/token/${contract}/instance/7`;
+  await page.addInitScript((address) => {
+    const provider = {
+      request: async ({ method }: { method: string }) => {
+        if (method === "eth_requestAccounts" || method === "eth_accounts") return [address];
+        if (method === "eth_chainId") return "0x59f";
+        if (method === "wallet_switchEthereumChain") return null;
+        throw new Error(`Unexpected wallet method: ${method}`);
+      },
+    };
+    (window as Window & { ethereum?: typeof provider }).ethereum = provider;
+  }, wallet);
+  await page.route("**/api/injective/mint-authorization", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          configured: true,
+          chainId: 1439,
+          chainName: "Injective EVM Testnet",
+          rpcUrl: "https://k8s.testnet.json-rpc.injective.network/",
+          explorerUrl: "https://testnet.blockscout.injective.network",
+          contractAddress: contract,
+        }),
+      });
+      return;
+    }
+    const request = route.request().postDataJSON();
+    expect(request).toMatchObject({ recipient: wallet, campaignId: "case-001" });
+    expect(request.requestId).toEqual(expect.any(String));
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        status: "already-minted",
+        campaignId: request.campaignId,
+        collectibleId: request.collectibleId,
+        recipient: wallet,
+        tokenId: "7",
+        explorerUrl,
+        contractAddress: contract,
+        chainId: 1439,
+      }),
+    });
+  });
+
+  await openMintableCollection(page);
+  const trigger = page.getByRole("button", { name: "封进 Injective 链上档案" }).first();
+  await trigger.click();
+  const dialog = page.getByRole("dialog", { name: "把这件夜班藏品封进链上档案" });
+  await dialog.getByRole("button", { name: "连接钱包，准备归档" }).click();
+  await expect(dialog).toContainText("0x2222…2222");
+  await dialog.getByRole("button", { name: "领取签章并铸造" }).click();
+  await expect(dialog).toContainText("ARCHIVE RECEIPT · TOKEN #7");
+  await expect(dialog.getByRole("link", { name: /在 Injective 浏览器查看回执/ })).toHaveAttribute("href", explorerUrl);
+  const savedReceipts = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-injective-mints-v1") ?? "{}"));
+  expect(Object.values(savedReceipts)).toHaveLength(1);
+  expect(JSON.stringify(savedReceipts)).not.toContain("private");
+
+  await dialog.getByRole("button", { name: "收好回执" }).click();
+  await expect(page.getByRole("button", { name: "此浏览器已有链上回执" }).first()).toBeVisible();
+  await page.reload();
+  await page.getByRole("button", { name: "收藏", exact: true }).click();
+  await expect(page.getByRole("button", { name: "此浏览器已有链上回执" }).first()).toBeVisible();
 });
 
 test("returns a prior society answer in a later letter", async ({ page }) => {

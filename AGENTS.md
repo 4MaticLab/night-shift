@@ -9,6 +9,7 @@
 - 北极星与参考原则：[[docs/north-star]]
 - 工程与状态模型：[[docs/architecture]]
 - 睡眠硬件与隐私：[[docs/sleep-hardware-bridge]]、[[docs/privacy-and-guardrails]]
+- 链上藏品：[[docs/injective-keepsake-mint]]
 - 视觉与素材：[[docs/art-direction]]、[[docs/asset-list]]、[[docs/art-prompts/global-style]]、[[docs/art-prompts/lin-du-handoff-portrait]]、[[docs/art-prompts/city-witness-portraits]]、[[docs/art-prompts/foglight-districts]]、[[docs/art-prompts/four-act-headers]]
 - 演示与验收：[[docs/demo-script]]、[[docs/quality-baseline]]
 - 文档维护规范：[[docs/documentation-guide]]

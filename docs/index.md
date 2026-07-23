@@ -15,6 +15,7 @@
 - [[docs/viewport-checklist]] — 桌面与移动端关键页面的交互检查清单。
 - [[docs/sleep-hardware-bridge]] — 虚拟睡眠设备、真实桥接预演与游戏生命周期。
 - [[docs/privacy-and-guardrails]] — 健康数据最小化、授权、撤销和非医疗边界。
+- [[docs/injective-keepsake-mint]] — Injective EVM Testnet 藏品领取、合约、部署与真实边界。
 
 ## 工程
 

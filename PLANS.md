@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/feat-injective-keepsake-mint]] | `feat/injective-keepsake-mint` | `in_progress` | `manual` | 1/8 | 固化 Injective EVM 契约、API 与收藏柜交互边界 |
+| [[plans/feat-injective-keepsake-mint]] | `feat/injective-keepsake-mint` | `in_progress` | `manual` | 7/8 | 在实现提交上完成最终全量 E2E，再记录证据并退役计划 |
 
 ## 使用规则
 
