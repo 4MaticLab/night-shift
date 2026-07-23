@@ -4,19 +4,16 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
 import { ArrowRight, Check, ChevronRight, Clock3, Coffee, Ear, FileText, Lightbulb, Moon, Radio, Zap } from "lucide-react";
-import { nightShiftCase } from "@/src/content/case";
-import { getAsset, getNightSealAsset, getPostcardAsset } from "@/src/content/assets";
-import { getJourneyPostcard, getPostcardPreparationNote } from "@/src/content/postcards";
-import { getNightBotanical, growthStageFromProgress } from "@/src/content/botany";
+import { getAsset } from "@/src/content/assets";
+import { growthStageFromProgress } from "@/src/content/botany";
 import { getPreparation, preparations, type PreparationId } from "@/src/content/preparations";
-import { getRouteDirection } from "@/src/content/routes";
 import { getCitySociety, getSocietyLetter, getSocietyTitle } from "@/src/content/societies";
 import { getCorrespondencePrompt, getCorrespondenceReply, getLatestSocietyReply } from "@/src/content/correspondence";
 import { getSouvenir } from "@/src/content/souvenirs";
 import { getOpportunityCandidates, getOpportunityNotice, getOpportunityResponse } from "@/src/content/opportunities";
-import { getChapterCharacter } from "@/src/content/characters";
-import { DEMO_CITY_WATCH_ID, getCityWatch, getCityWatchEcho, getCityWatchId } from "@/src/content/watches";
-import { getWakeEchoById } from "@/src/content/wake-echoes";
+import { DEMO_CITY_WATCH_ID, getCityWatch, getCityWatchId } from "@/src/content/watches";
+import { getCampaign } from "@/src/content/campaigns/registry";
+import { getCampaignBotanical, getCampaignNightSealAssetId, getCampaignPostcard, getCampaignRouteDirection, getCampaignWakeEchoById, getCampaignWatchEcho } from "@/src/content/campaigns/types";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import type { SleepMode, SleepQuality, WakeEcho } from "@/src/lib/game-engine/schema";
 import { elapsedSessionMinutes, formatSleepDuration, nightSealProgress } from "@/src/lib/game-engine/sleep-session";
@@ -25,12 +22,13 @@ import { BotanicalSpecimen, CityRoute, PaperCard, qualityCopy, Seal, SocietyCres
 import type { GameView } from "./types";
 
 export function Tonight({ onLaunch }: { onLaunch: (quality: SleepQuality, preparationId: PreparationId, mode: SleepMode) => void }) {
-  const { chapter, selectedChoice, selectChoice, phase } = useGameStore();
-  const current = nightShiftCase.chapters[chapter - 1];
+  const { campaignId, chapter, selectedChoice, selectChoice, phase } = useGameStore();
+  const campaign = getCampaign(campaignId);
+  const current = campaign.case.chapters.find((item) => item.number === chapter)!;
   const [quality, setQuality] = useState<SleepQuality>("regular");
   const [preparationId, setPreparationId] = useState<PreparationId>("side-lamp");
   const [sleepMode, setSleepMode] = useState<SleepMode>("demo");
-  const selectedDirection = selectedChoice ? getRouteDirection(chapter, selectedChoice) : null;
+  const selectedDirection = selectedChoice ? getCampaignRouteDirection(campaign, chapter, selectedChoice) : null;
   const selectedPreparation = getPreparation(preparationId);
   const handoffPortrait = getAsset("character.lin-du-handoff");
   const previewWatch = getCityWatch(sleepMode === "demo" ? DEMO_CITY_WATCH_ID : getCityWatchId(new Date()));
@@ -50,7 +48,7 @@ export function Tonight({ onLaunch }: { onLaunch: (quality: SleepQuality, prepar
         <div className="section-label"><span>夜 {chapter}</span><small>{current.title}</small></div>
         <h3>{current.question}</h3>
         <p className="city-aside">“{current.cityAside}”</p>
-        <div className="choice-list">{current.choices.map((choice, i) => { const direction = getRouteDirection(chapter, choice.id); const society = getCitySociety(direction.societyId); return <button type="button" aria-pressed={selectedChoice === choice.id} key={choice.id} className={selectedChoice === choice.id ? "choice selected" : "choice"} onClick={() => selectChoice(choice.id)}><span>0{i + 1}</span><div><b>{choice.label}</b><small>{choice.note}</small><em>可能惊动 · {society.name}</em></div>{selectedChoice === choice.id ? <Check /> : <ChevronRight />}</button>; })}</div>
+        <div className="choice-list">{current.choices.map((choice, i) => { const direction = getCampaignRouteDirection(campaign, chapter, choice.id); const society = getCitySociety(direction.societyId); return <button type="button" aria-pressed={selectedChoice === choice.id} key={choice.id} className={selectedChoice === choice.id ? "choice selected" : "choice"} onClick={() => selectChoice(choice.id)}><span>0{i + 1}</span><div><b>{choice.label}</b><small>{choice.note}</small><em>可能惊动 · {society.name}</em></div>{selectedChoice === choice.id ? <Check /> : <ChevronRight />}</button>; })}</div>
         <div className="preparation-box"><div className="preparation-heading"><small>PACK ONE THING · 随身物</small><b>准备，然后放手</b></div><div className="preparation-list">{preparations.map((item) => { const Icon = item.icon; return <button type="button" aria-pressed={preparationId === item.id} key={item.id} className={preparationId === item.id ? "preparation selected" : "preparation"} onClick={() => setPreparationId(item.id)}><span><Icon size={19} /></span><div><b>{item.title}</b><small>{item.promise}</small></div>{preparationId === item.id && <Check size={15} />}</button>; })}</div><p>{getPreparation(preparationId)?.description}</p></div>
         <div className="quality-box">
           <div><small>NIGHT HANDOFF</small><b>选择交接方式</b></div>
@@ -81,15 +79,16 @@ function DaytimeNotices() {
 }
 
 export function NightRun({ onFinish }: { onFinish: () => void }) {
-  const { chapter, quality, selectedChoice, selectedPreparationId, sleepMode, activeSleepSession, recordWakeEcho } = useGameStore();
-  const current = nightShiftCase.chapters[chapter - 1];
-  const result = resolveNight(chapter, quality, selectedPreparationId, selectedChoice);
+  const { campaignId, chapter, quality, selectedChoice, selectedPreparationId, sleepMode, activeSleepSession, recordWakeEcho } = useGameStore();
+  const campaign = getCampaign(campaignId);
+  const current = campaign.case.chapters.find((item) => item.number === chapter)!;
+  const result = resolveNight(campaign, chapter, quality, selectedPreparationId, selectedChoice);
   const direction = result.direction;
   const preparation = getPreparation(selectedPreparationId);
-  const nightSeal = getNightSealAsset(chapter);
-  const nightHeader = getAsset("header.night-expedition");
+  const nightSeal = getAsset(getCampaignNightSealAssetId(campaign, chapter));
+  const nightHeader = getAsset(campaign.presentation.nightAssetId);
   const watch = getCityWatch(activeSleepSession?.watchId ?? DEMO_CITY_WATCH_ID);
-  const watchEcho = getCityWatchEcho(chapter, watch.id);
+  const watchEcho = getCampaignWatchEcho(campaign, chapter, watch.id);
   const [seconds, setSeconds] = useState(12);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -104,9 +103,9 @@ export function NightRun({ onFinish }: { onFinish: () => void }) {
   }, [onFinish, sleepMode]);
   const elapsedMinutes = elapsedSessionMinutes(activeSleepSession, new Date(now));
   const progress = sleepMode === "demo" ? ((12 - seconds) / 12) * 100 : nightSealProgress(activeSleepSession, new Date(now));
-  const wakeEcho = activeSleepSession?.wakeEcho ? getWakeEchoById(activeSleepSession.wakeEcho.echoId) : null;
+  const wakeEcho = activeSleepSession?.wakeEcho ? getCampaignWakeEchoById(campaign, activeSleepSession.wakeEcho.echoId) : null;
   const wakeEchoVisible = Boolean(wakeEcho && (sleepMode === "real" || progress >= 35));
-  const botanical = getNightBotanical(chapter);
+  const botanical = getCampaignBotanical(campaign, chapter);
   const growthStage = growthStageFromProgress(progress);
   const eventCount = sleepMode === "demo" ? Math.max(1, Math.ceil(progress / 20)) : Math.min(result.events.length, Math.max(1, Math.floor(elapsedMinutes / 90) + 1));
   const sessionLine = sleepMode === "real"
@@ -134,24 +133,25 @@ function WakeEchoSlip({ echo, recordedAt, mode }: { echo: WakeEcho; recordedAt?:
 }
 
 export function MorningReport({ onContinue }: { onContinue: () => void }) {
-  const { chapter, quality, selectedChoice, selectedPreparationId, lastSleepSession, societyHistory, correspondenceHistory, souvenirHistory, opportunityHistory, answerCorrespondence } = useGameStore();
-  const current = nightShiftCase.chapters[chapter - 1];
-  const result = resolveNight(chapter, quality, selectedPreparationId, selectedChoice);
+  const { campaignId, chapter, quality, selectedChoice, selectedPreparationId, lastSleepSession, societyHistory, correspondenceHistory, souvenirHistory, opportunityHistory, answerCorrespondence } = useGameStore();
+  const campaign = getCampaign(campaignId);
+  const current = campaign.case.chapters.find((item) => item.number === chapter)!;
+  const result = resolveNight(campaign, chapter, quality, selectedPreparationId, selectedChoice);
   const preparation = getPreparation(selectedPreparationId);
-  const nightSeal = getNightSealAsset(chapter);
-  const morningHeader = getAsset("header.morning-report");
-  const postcard = getJourneyPostcard(chapter);
-  const postcardArt = getPostcardAsset(chapter);
+  const nightSeal = getAsset(getCampaignNightSealAssetId(campaign, chapter));
+  const morningHeader = getAsset(campaign.presentation.morningAssetId);
+  const postcard = getCampaignPostcard(campaign, chapter);
+  const postcardArt = getAsset(postcard.assetId);
   const postcardPreparationId = selectedPreparationId || "side-lamp";
-  const postcardPreparationNote = getPostcardPreparationNote(chapter, postcardPreparationId);
-  const botanical = getNightBotanical(chapter);
+  const postcardPreparationNote = postcard.preparationNotes[postcardPreparationId];
+  const botanical = getCampaignBotanical(campaign, chapter);
   const souvenirRecord = souvenirHistory[chapter];
   const souvenir = souvenirRecord ? getSouvenir(souvenirRecord.souvenirId) : null;
   const souvenirArt = souvenir ? getAsset(souvenir.assetId) : null;
   const opportunityRecord = opportunityHistory[chapter];
   const opportunityNotice = opportunityRecord?.noticeId ? getOpportunityNotice(opportunityRecord.noticeId) : null;
   const opportunityResponse = opportunityRecord ? getOpportunityResponse(opportunityRecord) : null;
-  const encounteredCharacter = getChapterCharacter(chapter);
+  const encounteredCharacter = campaign.characters.find((character) => character.encounterChapter === chapter);
   const characterArt = encounteredCharacter ? getAsset(encounteredCharacter.assetId) : null;
   const societyRecord = societyHistory[chapter];
   const society = societyRecord ? getCitySociety(societyRecord.societyId) : null;
@@ -160,17 +160,17 @@ export function MorningReport({ onContinue }: { onContinue: () => void }) {
   const selectedReply = correspondenceRecord ? getCorrespondenceReply(correspondenceRecord) : null;
   const priorCorrespondence = societyRecord ? getLatestSocietyReply(correspondenceHistory, societyRecord.societyId, chapter) : undefined;
   const priorReply = priorCorrespondence ? getCorrespondenceReply(priorCorrespondence) : null;
-  const foundClues = nightShiftCase.clues.filter((item) => result.clueIds.includes(item.id));
-  const foundItems = nightShiftCase.collectibles.filter((item) => result.collectibleIds.includes(item.id));
+  const foundClues = campaign.case.clues.filter((item) => result.clueIds.includes(item.id));
+  const foundItems = campaign.case.collectibles.filter((item) => result.collectibleIds.includes(item.id));
   const watch = getCityWatch(lastSleepSession?.watchId ?? DEMO_CITY_WATCH_ID);
-  const watchEcho = getCityWatchEcho(chapter, watch.id);
-  const wakeEcho = lastSleepSession?.wakeEcho ? getWakeEchoById(lastSleepSession.wakeEcho.echoId) : null;
+  const watchEcho = getCampaignWatchEcho(campaign, chapter, watch.id);
+  const wakeEcho = lastSleepSession?.wakeEcho ? getCampaignWakeEchoById(campaign, lastSleepSession.wakeEcho.echoId) : null;
   const reportClock = lastSleepSession?.mode === "real" && lastSleepSession.endedAt
     ? new Intl.DateTimeFormat("zh-CN", { hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(lastSleepSession.endedAt))
     : "05:28";
   return (
     <div className="report-wrap">
-      <section className="report-hero"><Image className="report-hero-art" src={morningHeader.src} alt={morningHeader.alt} fill priority sizes="100vw" /><div><Seal>调查报告 · 0{chapter}</Seal><p>昨夜调查完成</p><h2>{current.title}</h2><small>记录人：林渡 · 雾灯城 · {reportClock}</small></div></section>
+      <section className="report-hero"><Image className="report-hero-art" src={morningHeader.src} alt={morningHeader.alt} fill priority sizes="100vw" /><div><Seal>调查报告 · 0{chapter}</Seal><p>昨夜调查完成</p><h2>{current.title}</h2><small>记录人：{campaign.presentation.detectiveName} · {campaign.presentation.cityName} · {reportClock}</small></div></section>
       <section className="return-postcard" aria-label={`第${chapter}夜归来明信片`}>
         <div className="postcard-picture"><Image src={postcardArt.src} alt={postcardArt.alt} fill sizes="(max-width: 900px) 100vw, 58vw" /><span>RETURNED · NIGHT 0{chapter}</span></div>
         <PaperCard className="postcard-back"><div className="paper-heading"><small>01 · POSTCARD FROM LAST NIGHT</small><b>{postcard.title}</b></div><small className="postcard-location">{postcard.location}</small><p className="postcard-rumor">“{postcard.cityRumor}”</p><p>{postcard.message}</p><div className="route-letter"><small>ROUTE LETTER · {result.direction.dispatchTitle}</small><b>{result.direction.destination}</b><p>“{result.returnLetter}”</p><span>{result.cityEncounter}</span></div><div className="postcard-preparation-note"><b>{preparation?.shortTitle ?? "随身物"}留下的痕迹</b><span>{postcardPreparationNote}</span></div></PaperCard>
@@ -190,7 +190,7 @@ export function MorningReport({ onContinue }: { onContinue: () => void }) {
       <section className="route-report"><div className="dark-heading"><span>05</span><div><small>LAST NIGHT ROUTE · {result.direction.dispatchTitle}</small><h3>昨夜路线</h3></div></div><CityRoute compact routeNodes={result.direction.routeNodes} variant={result.direction.mapVariant} /></section>
       <section className="discoveries"><div className="dark-heading"><span>06</span><div><small>NEW EVIDENCE</small><h3>新发现</h3></div></div><div className="evidence-row">{foundClues.map((clue) => <PaperCard key={clue.id} className="evidence-card"><div className="evidence-icon">{clue.type === "contradiction" ? <Lightbulb /> : <FileText />}</div><Seal>{clue.type === "contradiction" ? "矛盾" : "线索"}</Seal><h4>{clue.title}</h4><p>{clue.detail}</p></PaperCard>)}{foundItems.map((item) => { const art = getAsset(item.assetId); return <PaperCard key={item.id} className="evidence-card collectible"><div className="evidence-art"><Image src={art.src} alt={art.alt} width={180} height={180} /></div><Seal>收藏 · {item.rarity}</Seal><h4>{item.title}</h4><p>{item.surfaceDescription}</p></PaperCard>; })}</div></section>
       <PaperCard className="contradiction"><span>NEW QUESTION · 新的矛盾</span><blockquote>“{current.contradiction}”</blockquote><p>把它带回案件板。白天的推理由你完成。</p></PaperCard>
-      <div className="report-action"><button className="primary-button" onClick={onContinue}>{chapter === 5 ? "做出最终决定" : "整理线索，准备下一夜"}<ArrowRight size={18} /></button></div>
+      <div className="report-action"><button className="primary-button" onClick={onContinue}>{chapter === campaign.case.chapters.at(-1)!.number ? "做出最终决定" : "整理线索，准备下一夜"}<ArrowRight size={18} /></button></div>
     </div>
   );
 }

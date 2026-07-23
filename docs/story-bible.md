@@ -18,6 +18,8 @@
 
 ## 相关文档
 
+- [[docs/campaign-authoring]]
+- [[docs/rain-radio-story-bible]]
 - [[docs/product-overview]]
 - [[docs/architecture]]
 - [[docs/decision-log#ADR-002：故事事实完全确定性]]

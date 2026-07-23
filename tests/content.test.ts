@@ -24,12 +24,43 @@ import { endingEpilogues, getEndingEpilogue } from "@/src/content/endings";
 import { cityWatchEchoes, cityWatches, DEMO_CITY_WATCH_ID, getCityWatch, getCityWatchEcho, getCityWatchId } from "@/src/content/watches";
 import { getWakeEcho, getWakeEchoById, wakeEchoes } from "@/src/content/wake-echoes";
 import { createClueShareUrl, readSharedClueQuery, removeSharedClueQuery } from "@/src/lib/game-engine/clue-sharing";
+import { campaignRegistry, DEFAULT_CAMPAIGN_ID, RAIN_RADIO_CAMPAIGN_ID } from "@/src/content/campaigns/registry";
+import { lastTramCampaign } from "@/src/content/campaigns/last-tram";
+import { rainRadioCampaign } from "@/src/content/campaigns/rain-radio";
+import { getCampaignRouteDirection, matchCampaignEvidenceRelation } from "@/src/content/campaigns/types";
 
 describe("Night Shift case content", () => {
   it("contains the complete five-night mystery", () => {
     expect(nightShiftCase.chapters).toHaveLength(5);
     expect(nightShiftCase.clues).toHaveLength(12);
     expect(nightShiftCase.collectibles).toHaveLength(8);
+  });
+
+  it("registers two complete and distinct playable campaigns", () => {
+    expect(campaignRegistry.map((campaign) => campaign.id)).toEqual(["case-001", "case-002"]);
+    expect(new Set(campaignRegistry.map((campaign) => campaign.case.title))).toHaveLength(2);
+    expect(new Set(campaignRegistry.flatMap((campaign) => campaign.case.clues.map((clue) => clue.id))).size)
+      .toBe(campaignRegistry.reduce((total, campaign) => total + campaign.case.clues.length, 0));
+
+    for (const campaign of campaignRegistry) {
+      expect(campaign.case.chapters).toHaveLength(5);
+      expect(campaign.routes).toHaveLength(15);
+      expect(campaign.endings).toHaveLength(3);
+      expect(campaign.postcards).toHaveLength(campaign.case.chapters.length);
+      expect(campaign.botanicals).toHaveLength(campaign.case.chapters.length);
+      expect(campaign.wakeEchoes).toHaveLength(campaign.case.chapters.length);
+      expect(campaign.presentation.nightSealAssetIds).toHaveLength(campaign.case.chapters.length);
+      for (const chapter of campaign.case.chapters) {
+        for (const quality of ["interrupted", "regular", "restful"] as const) {
+          expect(resolveNight(campaign, chapter.number, quality).clueIds.length).toBeGreaterThan(0);
+        }
+        for (const choice of chapter.choices) {
+          expect(getCampaignRouteDirection(campaign, chapter.number, choice.id).choiceId).toBe(choice.id);
+        }
+      }
+    }
+    expect(rainRadioCampaign.case.title).toBe("只在雨中播出的电台");
+    expect(lastTramCampaign.case.clues.some((clue) => rainRadioCampaign.case.clues.some((other) => other.id === clue.id))).toBe(false);
   });
 
   it("gives every clue a literary dossier without changing fixed facts", () => {
@@ -53,20 +84,20 @@ describe("Night Shift case content", () => {
 
   it("always advances the main story without punishing short sleep", () => {
     for (let chapter = 1; chapter <= 5; chapter += 1) {
-      expect(resolveNight(chapter, "interrupted").clueIds.length).toBeGreaterThan(0);
-      expect(resolveNight(chapter, "regular").clueIds.length).toBeGreaterThan(0);
-      expect(resolveNight(chapter, "restful").clueIds.length).toBeGreaterThan(0);
+      expect(resolveNight(lastTramCampaign, chapter, "interrupted").clueIds.length).toBeGreaterThan(0);
+      expect(resolveNight(lastTramCampaign, chapter, "regular").clueIds.length).toBeGreaterThan(0);
+      expect(resolveNight(lastTramCampaign, chapter, "restful").clueIds.length).toBeGreaterThan(0);
     }
   });
 
   it("gives restful nights a route at least as rich as interrupted nights", () => {
-    expect(resolveNight(1, "restful").route.length).toBeGreaterThanOrEqual(resolveNight(1, "interrupted").route.length);
-    expect(resolveNight(1, "restful").observation).toBeTruthy();
-    expect(resolveNight(1, "interrupted").echo).toBeTruthy();
+    expect(resolveNight(lastTramCampaign, 1, "restful").route.length).toBeGreaterThanOrEqual(resolveNight(lastTramCampaign, 1, "interrupted").route.length);
+    expect(resolveNight(lastTramCampaign, 1, "restful").observation).toBeTruthy();
+    expect(resolveNight(lastTramCampaign, 1, "interrupted").echo).toBeTruthy();
   });
 
   it("lets preparation change atmosphere without changing fixed clues", () => {
-    const results = preparations.map((item) => resolveNight(1, "regular", item.id));
+    const results = preparations.map((item) => resolveNight(lastTramCampaign, 1, "regular", item.id));
     expect(new Set(results.map((result) => result.preparationEcho)).size).toBe(3);
     expect(results.map((result) => result.clueIds)).toEqual([
       results[0].clueIds,
@@ -90,7 +121,7 @@ describe("Night Shift case content", () => {
 
   it("lets direction change the journey without changing fixed rewards", () => {
     for (const chapter of nightShiftCase.chapters) {
-      const results = chapter.choices.map((choice) => resolveNight(chapter.number, "regular", "side-lamp", choice.id));
+      const results = chapter.choices.map((choice) => resolveNight(lastTramCampaign, chapter.number, "regular", "side-lamp", choice.id));
       expect(results.map((result) => result.clueIds)).toEqual([results[0].clueIds, results[0].clueIds, results[0].clueIds]);
       expect(results.map((result) => result.collectibleIds)).toEqual([results[0].collectibleIds, results[0].collectibleIds, results[0].collectibleIds]);
       expect(new Set(results.map((result) => result.returnLetter))).toHaveLength(3);
@@ -153,8 +184,8 @@ describe("Night Shift case content", () => {
   });
 
   it("defaults legacy nights to the first direction and rejects invalid choices", () => {
-    expect(resolveNight(1, "regular").choiceId).toBe(getDefaultChoiceId(1));
-    expect(() => resolveNight(1, "regular", "", "not-a-route")).toThrow(/Unknown choice/);
+    expect(resolveNight(lastTramCampaign, 1, "regular").choiceId).toBe(getDefaultChoiceId(1));
+    expect(() => resolveNight(lastTramCampaign, 1, "regular", "", "not-a-route")).toThrow(/Unknown choice/);
   });
 
   it("resolves every collectible and night seal through the asset manifest", () => {
@@ -350,8 +381,8 @@ describe("Night Shift case content", () => {
 
   it("records at most one sleep-gap echo without ending a session", () => {
     const session = startSleepSession("real", "regular", new Date("2026-07-22T22:00:00.000Z"));
-    const first = recordWakeEcho(session, 1, new Date("2026-07-23T00:43:00.000Z"));
-    const second = recordWakeEcho(first, 1, new Date("2026-07-23T01:18:00.000Z"));
+    const first = recordWakeEcho(session, "sleep-gap-01", new Date("2026-07-23T00:43:00.000Z"));
+    const second = recordWakeEcho(first, "sleep-gap-01", new Date("2026-07-23T01:18:00.000Z"));
 
     expect(first.wakeEcho).toEqual({ echoId: "sleep-gap-01", recordedAt: "2026-07-23T00:43:00.000Z" });
     expect(first.endedAt).toBeUndefined();
@@ -367,7 +398,7 @@ describe("Night Shift case content", () => {
     expect(completed.quality).toBe("regular");
     expect(completed.endedAt).toBe("2026-07-23T04:30:00.000Z");
     expect(session.watchId).toBe(getCityWatchId(startedAt));
-    expect(resolveNight(1, completed.quality).clueIds.length).toBeGreaterThan(0);
+    expect(resolveNight(lastTramCampaign, 1, completed.quality).clueIds.length).toBeGreaterThan(0);
   });
 
   it("keeps demo quality deterministic and compresses seal progress", () => {
@@ -403,12 +434,24 @@ describe("Night Shift case content", () => {
   });
 
   it("builds and validates a single-clue share link", () => {
-    const shareUrl = createClueShareUrl("https://night-shift-zeta.vercel.app/?old=1#desk", "flower-cycle");
+    const shareUrl = createClueShareUrl("https://night-shift-zeta.vercel.app/?old=1#desk", DEFAULT_CAMPAIGN_ID, "flower-cycle");
 
-    expect(shareUrl).toBe("https://night-shift-zeta.vercel.app/?clue=flower-cycle");
-    expect(readSharedClueQuery("?clue=flower-cycle")).toEqual({ present: true, clue: nightShiftCase.clues.find((clue) => clue.id === "flower-cycle") });
-    expect(readSharedClueQuery("?clue=unknown")).toEqual({ present: true, clue: undefined });
+    expect(shareUrl).toBe("https://night-shift-zeta.vercel.app/?case=case-001&clue=flower-cycle");
+    expect(readSharedClueQuery("?clue=flower-cycle")).toEqual({ present: true, campaignId: DEFAULT_CAMPAIGN_ID, clue: nightShiftCase.clues.find((clue) => clue.id === "flower-cycle") });
+    expect(readSharedClueQuery(`?case=${RAIN_RADIO_CAMPAIGN_ID}&clue=radio-warm-dial`)).toEqual({
+      present: true,
+      campaignId: RAIN_RADIO_CAMPAIGN_ID,
+      clue: rainRadioCampaign.case.clues.find((clue) => clue.id === "radio-warm-dial"),
+    });
+    expect(readSharedClueQuery("?clue=unknown")).toEqual({ present: true, campaignId: DEFAULT_CAMPAIGN_ID, clue: undefined });
+    expect(readSharedClueQuery("?case=case-404&clue=flower-cycle")).toEqual({ present: true });
     expect(readSharedClueQuery("?chapter=2")).toEqual({ present: false });
-    expect(removeSharedClueQuery("https://night-shift-zeta.vercel.app/?clue=flower-cycle&from=qr#desk")).toBe("/?from=qr#desk");
+    expect(removeSharedClueQuery("https://night-shift-zeta.vercel.app/?case=case-001&clue=flower-cycle&from=qr#desk")).toBe("/?from=qr#desk");
+  });
+
+  it("matches evidence only inside the selected campaign", () => {
+    const relation = rainRadioCampaign.relations[0];
+    expect(matchCampaignEvidenceRelation(rainRadioCampaign, relation.clueIds[0], relation.clueIds[1])).toEqual(relation);
+    expect(matchCampaignEvidenceRelation(rainRadioCampaign, "flower-cycle", "postcard")).toBeUndefined();
   });
 });

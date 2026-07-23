@@ -5,9 +5,12 @@ import Image from "next/image";
 import { motion } from "motion/react";
 import { Footprints } from "lucide-react";
 import type { RouteDirection, SleepQuality, SocietyId } from "@/src/lib/game-engine/schema";
-import { getNightBotanical, growthStageFromProgress } from "@/src/content/botany";
-import { getAsset, getBotanicalAsset } from "@/src/content/assets";
+import { growthStageFromProgress } from "@/src/content/botany";
+import { getAsset } from "@/src/content/assets";
 import { getCitySociety } from "@/src/content/societies";
+import { getCampaign } from "@/src/content/campaigns/registry";
+import { getCampaignBotanical } from "@/src/content/campaigns/types";
+import { useGameStore } from "@/src/stores/game-store";
 
 export const qualityCopy: Record<SleepQuality, { label: string; time: string; note: string }> = {
   interrupted: { label: "4小时 · 断续", time: "短程调查", note: "会听见一次特别的城市回声" },
@@ -25,12 +28,13 @@ export function PaperCard({ children, className = "" }: { children: ReactNode; c
 
 export function CityRoute({ progress = 100, compact = false, routeNodes = ["事务所", "灯港", "旧子午", "玻璃丘"], variant = "river" }: { progress?: number; compact?: boolean; routeNodes?: string[]; variant?: RouteDirection["mapVariant"] }) {
   const stops = Array.from({ length: 4 }, (_, index) => routeNodes[index] ?? "未抵达");
-  return <div className={`city-map route-${variant} ${compact ? "compact" : ""}`}><div className="river" /><div className="tram-line"><span style={{ width: `${progress}%` }} /></div>{stops.map((stop, index) => <div className={`route-stop s${index + 1}`} key={`${stop}-${index}`}><i />{stop}</div>)}<motion.div className="detective-marker" animate={{ left: `${Math.max(4, Math.min(90, progress))}%` }} transition={{ duration: 1.2 }}><Footprints /></motion.div><span className="map-label ml1">LANTERN WHARF</span><span className="map-label ml2">OLD MERIDIAN</span><span className="map-label ml3">GLASS HILL</span></div>;
+  return <div className={`city-map route-${variant} ${compact ? "compact" : ""}`}><div className="river" /><div className="tram-line"><span style={{ width: `${progress}%` }} /></div>{stops.map((stop, index) => <div className={`route-stop s${index + 1}`} key={`${stop}-${index}`}><i />{stop}</div>)}<motion.div className="detective-marker" animate={{ left: `${Math.max(4, Math.min(90, progress))}%` }} transition={{ duration: 1.2 }}><Footprints /></motion.div><span className="map-label ml1">{stops[0]}</span><span className="map-label ml2">{stops[1]}</span><span className="map-label ml3">{stops[3]}</span></div>;
 }
 
 export function BotanicalSpecimen({ chapter, progress = 100, compact = false }: { chapter: number; progress?: number; compact?: boolean }) {
-  const botanical = getNightBotanical(chapter);
-  const art = getBotanicalAsset(chapter);
+  const campaign = getCampaign(useGameStore((state) => state.campaignId));
+  const botanical = getCampaignBotanical(campaign, chapter);
+  const art = getAsset(botanical.assetId);
   const normalizedProgress = Math.max(0, Math.min(100, progress));
   const visibleProgress = Math.max(7, normalizedProgress);
   const stage = growthStageFromProgress(normalizedProgress);

@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { Check, Copy, QrCode, Send, X } from "lucide-react";
 import type { Clue } from "@/src/lib/game-engine/schema";
 import { createClueShareUrl } from "@/src/lib/game-engine/clue-sharing";
+import { useGameStore } from "@/src/stores/game-store";
 
 export interface ClueGiftNoticeData {
   kind: "success" | "info" | "error";
@@ -14,9 +15,10 @@ export interface ClueGiftNoticeData {
 }
 
 export function ClueShareDialog({ clue, onClose }: { clue: Clue; onClose: () => void }) {
+  const campaignId = useGameStore((state) => state.campaignId);
   const [qrDataUrl, setQrDataUrl] = useState("");
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
-  const shareUrl = typeof window === "undefined" ? "" : createClueShareUrl(`${window.location.origin}${window.location.pathname}`, clue.id);
+  const shareUrl = typeof window === "undefined" ? "" : createClueShareUrl(`${window.location.origin}${window.location.pathname}`, campaignId, clue.id);
 
   useEffect(() => {
     let cancelled = false;

@@ -1,6 +1,6 @@
 import { getRouteDirection } from "@/src/content/routes";
 import type { PreparationId } from "@/src/content/preparations";
-import { souvenirRecordSchema, souvenirSchema, type Souvenir, type SouvenirRecord } from "@/src/lib/game-engine/schema";
+import { souvenirRecordSchema, souvenirSchema, type SocietyId, type Souvenir, type SouvenirRecord } from "@/src/lib/game-engine/schema";
 
 export const DEMO_JOURNEY_SEED = 430043;
 
@@ -118,8 +118,9 @@ export function selectSouvenir(
   preparationId: PreparationId,
   journeySeed: number,
   history: Partial<Record<number, SouvenirRecord>>,
+  resolvedSocietyId?: SocietyId,
 ): Souvenir {
-  const societyId = getRouteDirection(chapter, choiceId).societyId;
+  const societyId = resolvedSocietyId ?? getRouteDirection(chapter, choiceId).societyId;
   const usedIds = new Set(Object.values(history).flatMap((record) => record ? [record.souvenirId] : []));
   const available = souvenirs.filter((item) => !usedIds.has(item.id));
   if (!available.length) throw new Error("No unclaimed souvenirs remain");
@@ -139,10 +140,11 @@ export function createSouvenirRecord(
   journeySeed: number,
   history: Partial<Record<number, SouvenirRecord>>,
   foundAt: string,
+  resolvedSocietyId?: SocietyId,
 ): SouvenirRecord {
   const existing = history[chapter];
   if (existing) return existing;
-  const souvenir = selectSouvenir(chapter, choiceId, preparationId, journeySeed, history);
+  const souvenir = selectSouvenir(chapter, choiceId, preparationId, journeySeed, history, resolvedSocietyId);
   return souvenirRecordSchema.parse({ chapter, souvenirId: souvenir.id, choiceId, preparationId, journeySeed, foundAt });
 }
 

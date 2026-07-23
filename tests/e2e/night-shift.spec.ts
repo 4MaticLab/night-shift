@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 async function openFirstNight(page: import("@playwright/test").Page) {
   await page.goto("/");
-  await page.getByRole("button", { name: /开始第一宗案件/ }).click();
+  await page.getByRole("button", { name: /开始第 001 宗案件/ }).click();
   await page.getByRole("button", { name: "继续" }).click();
   await page.getByRole("button", { name: "继续" }).click();
   await page.getByRole("button", { name: /进入事务所/ }).click();
@@ -110,7 +110,7 @@ test("keeps returned postcards in the journey album", async ({ page }) => {
   await expect(page.getByText("灯港拒收件")).toBeVisible();
   await expect(page.getByText("寄往无人之处")).toBeVisible();
   await expect(page.getByText(/第二版回答 · 灯港花店后室/)).toBeVisible();
-  await expect(page.getByText("雾灯城寄回的五个夜晚")).toBeVisible();
+  await expect(page.getByText("雾灯城寄回的 5 个夜晚")).toBeVisible();
   await expect(page.getByText("雾灯温室")).toBeVisible();
   await expect(page.getByText("城市人情簿")).toBeVisible();
   await expect(page.getByText("城市值更簿")).toBeVisible();
@@ -232,7 +232,7 @@ test("shares one clue as a QR deep link", async ({ page }) => {
   const dialog = page.getByRole("dialog", { name: /把「四十三天」/ });
   await expect(dialog).toBeVisible();
   await expect(dialog.getByText(/不会附带你的夜班进度/)).toBeVisible();
-  await expect(dialog.getByLabel("好友线索链接")).toHaveValue("http://localhost:3000/?clue=flower-cycle");
+  await expect(dialog.getByLabel("好友线索链接")).toHaveValue("http://localhost:3000/?case=case-001&clue=flower-cycle");
   await expect(dialog.getByRole("img", { name: /分享线索「四十三天」的二维码/ })).toHaveAttribute("src", /^data:image\/png;base64,/);
   await dialog.getByRole("button", { name: "复制链接" }).click();
   await expect(dialog.getByRole("button", { name: "链接已复制" })).toBeVisible();
@@ -263,6 +263,27 @@ test("receives a friend clue from a validated query without advancing the case",
   await expect(page.locator(".clue-gift-notice")).toContainText("已经收过");
   const repeatedState = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state);
   expect(repeatedState.receivedClueIds).toEqual(["postcard"]);
+});
+
+test("routes a shared clue to its campaign and keeps the other save isolated", async ({ page }) => {
+  await page.goto("/?case=case-002&clue=radio-warm-dial");
+
+  await expect(page.locator(".clue-gift-notice")).toContainText("好友送来「仍有余温的旋钮」");
+  await expect(page).toHaveURL("/");
+  await expect(page.getByRole("heading", { name: /把城市说过的谎/ })).toBeVisible();
+  await expect(page.locator('.react-flow__node[data-id="radio-warm-dial"] .board-node.received')).toBeVisible();
+  const importedState = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state);
+  expect(importedState).toMatchObject({
+    campaignId: "case-002",
+    receivedClueIds: ["radio-warm-dial"],
+    unlockedClueIds: ["radio-warm-dial"],
+  });
+
+  await page.getByRole("button", { name: /夜班侦探/ }).click();
+  await page.getByRole("button", { name: /CASE 001/ }).click();
+  await expect(page.getByRole("button", { name: /开始第 001 宗案件/ })).toBeVisible();
+  await page.getByRole("button", { name: /CASE 002/ }).click();
+  await expect(page.getByRole("button", { name: /继续当前案件/ })).toBeVisible();
 });
 
 test("rejects an unknown friend clue without starting a save", async ({ page }) => {
@@ -311,16 +332,16 @@ test("carries the hidden-platform tableau through final choice and ending", asyn
   await expect(page.getByRole("heading", { name: "公开档案" })).toBeVisible();
   await expect(page.locator(".ending-background")).toHaveAttribute("src", /hidden-platform-tableau-v1/);
   await expect(page.getByText("FINAL LETTER · 林渡终函")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "五夜归来总账" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "5 夜归来总账" })).toBeVisible();
   await expect(page.locator(".ending-night-entry")).toHaveCount(5);
   await expect(page.locator(".ending-evidence-item")).toHaveCount(8);
-  await expect(page.getByRole("button", { name: /下一宗案件/ })).toBeDisabled();
+  await expect(page.getByRole("button", { name: /选择其他案件/ })).toBeEnabled();
 
   await page.getByRole("button", { name: /重看档案/ }).click();
   await expect(page.getByRole("heading", { name: /零点四十三分/ })).toBeVisible();
   await expect(page.getByText("雾灯城分区志")).toBeVisible();
   await page.getByRole("button", { name: /回到结案页/ }).click();
-  await expect(page.getByRole("heading", { name: "五夜归来总账" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "5 夜归来总账" })).toBeVisible();
 });
 
 test("completes all five nights from a new save without chapter jumps", async ({ page }) => {
@@ -346,8 +367,50 @@ test("completes all five nights from a new save without chapter jumps", async ({
   await expect(page.getByRole("heading", { name: "保护证人" })).toBeVisible();
 });
 
+test("switches to the rain-radio campaign and completes its five-night story", async ({ page }) => {
+  const reportTitles = ["无人频率", "比明天早一天的新闻", "沉默的接线间", "被蓝笔删掉的街区", "把频率还给谁"];
+  await page.goto("/");
+  await page.getByRole("button", { name: /CASE 002/ }).click();
+  await page.getByRole("button", { name: /开始第 002 宗案件/ }).click();
+  await page.getByRole("button", { name: "继续" }).click();
+  await page.getByRole("button", { name: "继续" }).click();
+  await page.getByRole("button", { name: /进入事务所/ }).click();
+  await page.getByRole("button", { name: /拆开仍有余温的旋钮/ }).click();
+
+  for (let chapter = 1; chapter <= 5; chapter += 1) {
+    if (chapter > 1) {
+      await page.getByRole("button", { name: /^今晚$/ }).click();
+      await page.getByRole("button", { name: /全部收起，不拆/ }).click();
+      await page.locator(".choice-list .choice").first().click();
+    }
+    await page.getByRole("button", { name: /今晚交给你了/ }).click();
+    await page.getByRole("button", { name: /跳到清晨/ }).click();
+    await expect(page.locator(".report-hero").getByRole("heading", { name: reportTitles[chapter - 1] })).toBeVisible();
+    await page.getByRole("button", { name: chapter === 5 ? /做出最终决定/ : /整理线索，准备下一夜/ }).click();
+  }
+
+  await expect(page.getByRole("heading", { name: /最后一次广播/ })).toBeVisible();
+  await page.getByRole("button", { name: /封存证词/ }).click();
+  await expect(page.getByRole("heading", { name: "封存证词" })).toBeVisible();
+  await expect(page.getByText(/雨已经停了/)).toBeVisible();
+  await page.getByRole("button", { name: /选择其他案件/ }).click();
+  await expect(page.getByRole("button", { name: /CASE 001/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /继续当前案件/ })).toBeVisible();
+});
+
 test.describe("mobile 390x844", () => {
   test.use({ viewport: { width: 390, height: 844 } });
+
+  test("switches campaign cards without overflow on the landing page", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator(".campaign-shelf")).toBeVisible();
+    await expectMinimumTapTargets(page.locator(".campaign-shelf button"));
+    await page.getByRole("button", { name: /CASE 002/ }).click();
+    await expect(page.getByRole("button", { name: /开始第 002 宗案件/ })).toBeVisible();
+    await expectNoPageOverflow(page);
+    await page.getByRole("button", { name: /CASE 001/ }).click();
+    await expect(page.getByRole("button", { name: /开始第 001 宗案件/ })).toBeVisible();
+  });
 
   test("keeps the first-night loop touchable without page overflow", async ({ page }) => {
     await openFirstNight(page);
@@ -413,14 +476,14 @@ test.describe("mobile 390x844", () => {
     await expect(page.getByRole("heading", { name: "保护证人" })).toBeVisible();
     await expect(page.locator(".ending-night-entry")).toHaveCount(5);
     await expect(page.locator(".ending-evidence-item")).toHaveCount(8);
-    await expect(page.getByRole("button", { name: /下一宗案件/ })).toBeDisabled();
+    await expect(page.getByRole("button", { name: /选择其他案件/ })).toBeEnabled();
     await expectNoPageOverflow(page);
 
     await page.getByRole("button", { name: /重看档案/ }).click();
     await expect(page.getByRole("button", { name: /回到结案页/ })).toBeVisible();
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /回到结案页/ }).click();
-    await expect(page.getByRole("heading", { name: "五夜归来总账" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "5 夜归来总账" })).toBeVisible();
     await expectNoPageOverflow(page);
   });
 });

@@ -2,7 +2,7 @@
 
 ## 运行形态
 
-项目使用 Next App Router、React 与 TypeScript，并保留两套明确的生产目标：默认 `next build` 生成 Vercel 使用的 `.next/`；`build:sites` 通过 Vinext、Vite 与 Cloudflare 插件生成 Sites/Worker 使用的 `dist/`。当前黑客松版本把游戏页面组织成一个客户端状态机，以减少现场演示中的切页等待；两套目标都由服务端渲染首屏元数据和外壳。
+项目使用 Next App Router、React 与 TypeScript，并保留两套明确的生产目标：默认 `next build` 生成 Vercel 使用的 `.next/`；`build:sites` 通过 Vinext、Vite 与 Cloudflare 插件生成 Sites/Worker 使用的 `dist/`。游戏页面组织成一个客户端状态机，以减少阶段切换等待；案件书架在同一外壳内选择编译期注册的 `CampaignManifest`，两套目标都由服务端渲染首屏元数据和外壳。
 
 原生 Next 构建的 TypeScript 范围排除 `build/`、`db/`、`examples/`、`worker/` 与 `vite.config.ts`：这些文件只属于 Sites 脚手架、Cloudflare 绑定或未启用的 D1 示例，不被产品应用导入。它们仍由 Vinext/Vite 实际构建和 ESLint 检查，不能把 Cloudflare Worker 模块混入 Vercel 的 Node 运行时。
 
@@ -10,7 +10,11 @@
 
 | 模块 | 位置 | 职责 |
 |---|---|---|
-| 案件内容 | `src/content/case.ts` | 五夜章节、12 条线索、8 件藏品与固定报告文本 |
+| 案件包契约 | `src/content/campaigns/types.ts` | `CampaignManifest`、引用完整性校验与案件内容查询 |
+| 案件注册表 | `src/content/campaigns/registry.ts` | 当前两案、默认案件和合法 `campaignId` 白名单 |
+| 首案内容包 | `src/content/campaigns/last-tram.ts` | 组合既有首案模块与视觉／结局规则 |
+| 第二案内容包 | `src/content/campaigns/rain-radio.ts` | 《只在雨中播出的电台》的五夜完整内容 |
+| 首案核心内容 | `src/content/case.ts` | 首案五夜章节、12 条线索、8 件藏品与固定报告文本 |
 | 随身物内容 | `src/content/preparations.ts` | 三件准备物、五夜各自的确定性环境回响 |
 | 归来明信片 | `src/content/postcards.ts` | 五夜地点、城市传闻、背面短笺与三种随身物附言 |
 | 调查方向 | `src/content/routes.ts` | 五夜十五条确定性路线、夜间事件、城市遭遇与归来来信 |
@@ -43,7 +47,9 @@
 
 ## 状态模型
 
-主要阶段为 `day → ready → night → morning → ending`。章节结算只通过确定性内容函数产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 13；迁移会为旧存档补齐睡眠模式、会话、夜印、随身物历史、方向历史、温室成长记录、城市关系历史、问函答复历史、口袋纪念物、机会告示历史、案件板坐标、城市时辰、可选睡隙快照与好友送达线索 ID。
+主要阶段为 `day → ready → night → morning → ending`。章节结算只通过当前案件 manifest 的确定性内容函数产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 14。`campaignId` 标识活动案件，活动进度仍保持扁平供组件读取；切换时先把它快照到 `campaignSaves[campaignId]`，再恢复目标案件或创建新档。章节、线索、关系、结局、案板坐标和夜间历史因此按案隔离。v13 及更早的单案件存档默认归入 `case-001`，原有数据无需清除。
+
+案件 manifest 同时提供章节数、线索数、藏品数、真结局门槛、档案标题和逐夜视觉。`resolveNight`、关系匹配、结局资格、迁移过滤和页面投影都显式接收当前 manifest；通用模块不按 `case-001`／`case-002` 写分支。`defineCampaign` 要求章节从 1 连续排列、每个 choice 有路线、每夜拥有明信片／植物／四时辰回声／睡隙回声／夜印，并拒绝跨案件线索引用和不可达门槛。
 
 睡眠质量为 `interrupted`、`regular`、`restful`：三者都至少解锁一条主线线索；差异只体现在路线长度、收藏数量、回声事件和环境观察。`selectedPreparationId` 记录当前随身物，`preparationHistory` 按章节保存已经归来的准备；`selectedChoice` 记录当前方向，`choiceHistory` 按章节保存路线履历。方向决定四个路线节点、五段夜间事件、城市遭遇与归来来信，但同章节三个方向的线索和藏品结果保持一致。完成一夜后，章节编号会加入持久化的 `nightSealIds` 与 `completedReports`，旅程册据此解锁明信片与路线履历。
 
@@ -73,7 +79,7 @@ React Flow 使用本地受控节点承接拖动过程，只在桌面端从图钉
 
 案件板由常驻联合推理台、明确尺寸的证物画布和证物侧页组成：桌面端侧页叠放在画布右侧，390 px 手机端则顺序排列到画布下方。推理动作始终在画布上方完成，侧页只负责阅档和展示已确认推论；这样玩家无需在长档案末尾寻找提交按钮，React Flow 也不会拦截移动页面滚动。
 
-好友线索使用 `?clue=<稳定线索 ID>` 的 local-first 深链接。分享端只从案件内容白名单生成链接和二维码；接收端在 hydration 后重新查同一白名单，合法 ID 才能经 `receiveSharedClue` 写入 `unlockedClueIds` 与 `receivedClueIds`，随后立即从地址栏移除该 query，未知 ID 不创建存档。重复链接保持幂等，不传送其他进度，也不会确认关系或推进章节。赠送线索可参与普通阅档与联合推理，但真结局只计算非 `receivedClueIds` 的亲自取得线索；玩家后来完成对应夜班时，该 ID 会从好友来源表移除，转为亲自取得。
+好友线索使用 `?case=<案件 ID>&clue=<稳定线索 ID>` 的 local-first 深链接。分享端只从当前案件白名单生成链接和二维码；接收端在 hydration 后先验证案件，再验证该案线索，切换到对应存档后才经 `receiveSharedClue` 写入 `unlockedClueIds` 与 `receivedClueIds`，随后从地址栏移除两个 query。跨案件组合与未知 ID 不创建或污染存档，旧的仅含 `clue` 链接继续默认解释为 `case-001`。重复链接保持幂等，不传送其他进度，也不会确认关系或推进章节。赠送线索可参与普通阅档与联合推理，但真结局只计算非 `receivedClueIds` 的亲自取得线索；玩家后来完成对应夜班时，该 ID 会从好友来源表移除，转为亲自取得。
 
 真结局资格由 `canUnlockTrueEnding` 统一判断，界面锁定与存档动作共用同一规则；因此不能通过绕开按钮直接写入未满足条件的真结局。旧存档迁移由可独立测试的 `migrateGameState` 提供。
 
@@ -91,7 +97,7 @@ React Flow 使用本地受控节点承接拖动过程，只在桌面端从图钉
 
 分区志只用 `completedReports` 判断地区是否已经被走过：第 1、3、4 夜分别展开灯港区、旧子午区与玻璃丘。地区内容不写存档，不替换路线图，也不进入任何结算或资格判断。
 
-结案卷宗同样是只读投影，不增加新的持久化结构：它按 `completedReports` 排列五夜，再从 `choiceHistory`、`preparationHistory`、`growthHistory` 与 `souvenirHistory` 读取当夜真实履历；核心物证只过滤 `unlockedCollectibleIds`。三封终函由 `src/content/endings.ts` 的 schema 校验内容选择，城市附言仍独立取自问函总体姿态。“重看档案”只切换结局页内的本地视图，不清除 `endingId`；只有“重新调查”调用既有重置动作。
+结案卷宗同样是只读投影，不增加新的持久化结构：它按当前 manifest 的章节和 `completedReports` 排列旅程，再从 `choiceHistory`、`preparationHistory`、`growthHistory` 与 `souvenirHistory` 读取当夜真实履历；核心物证只过滤本案 `unlockedCollectibleIds`。三封终函与真结局门槛来自当前 manifest，城市附言仍独立取自问函总体姿态。“重看档案”只切换结局页内的本地视图，不清除 `endingId`；“选择其他案件”回到书架并保留本案结局，“重新调查”只重置当前案件。
 
 ## 交互基线与组件边界
 
@@ -100,9 +106,9 @@ React Flow 使用本地受控节点承接拖动过程，只在桌面端从图钉
 当前组件按以下功能边界拆分：
 
 - `app/page.tsx`：阶段与视图编排，并统一承担视图切换／重复点击导航时的页面回顶；不拥有章节结算或功能域展示细节。
-- `landing.tsx`：落地页与开场，不读取游戏结算规则。
+- `landing.tsx`：落地页、案件书架与开场，不读取游戏结算规则。
 - `night-cycle.tsx`：调查方向、随身物、林渡交接肖像与交接单、Demo／真实模式、夜印显影、归来明信片和晨报。
-- `investigation.tsx`：案件板、明信片旅程册、夜印收藏、物证档案、三结局与五夜结案卷宗。
+- `investigation.tsx`：案件板、明信片旅程册、夜印收藏、物证档案与 manifest 驱动的结案卷宗。
 - `clue-sharing.tsx`：单条证物二维码、复制链接与接收结果提示；不拥有存档校验规则。
 - `shell.tsx`：跨视图导航与 Demo 控制台。
 - `shared.tsx`：跨功能域复用的纸张、印章和路线视觉原语。
@@ -114,6 +120,7 @@ React Flow 使用本地受控节点承接拖动过程，只在桌面端从图钉
 ## 相关文档
 
 - [[docs/product-overview]]
+- [[docs/campaign-authoring]]
 - [[docs/decision-log]]
 - [[docs/quality-baseline]]
 - [[plans/0001-hackathon-mvp]]

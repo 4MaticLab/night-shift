@@ -6,6 +6,7 @@ import {
   type SocietyId,
   type SocietyMemoryRecord,
   type SocietyStanding,
+  type RouteDirection,
 } from "@/src/lib/game-engine/schema";
 
 export const citySocieties: CitySociety[] = [
@@ -76,8 +77,9 @@ export function createSocietyMemory(
   choiceId: string,
   existingHistory: Partial<Record<number, SocietyMemoryRecord>>,
   completedAt: string,
+  resolvedDirection?: RouteDirection,
 ): SocietyMemoryRecord {
-  const direction = getRouteDirection(chapter, choiceId);
+  const direction = resolvedDirection ?? getRouteDirection(chapter, choiceId);
   const priorAttention = Object.values(existingHistory).filter((record) => record?.societyId === direction.societyId).length;
   return societyMemoryRecordSchema.parse({
     chapter,

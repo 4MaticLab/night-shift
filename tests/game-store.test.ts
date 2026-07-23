@@ -3,6 +3,8 @@ import { nightShiftCase } from "@/src/content/case";
 import { getCorrespondencePrompt } from "@/src/content/correspondence";
 import { DEMO_JOURNEY_SEED } from "@/src/content/souvenirs";
 import { getOpportunityCandidates } from "@/src/content/opportunities";
+import { DEFAULT_CAMPAIGN_ID, RAIN_RADIO_CAMPAIGN_ID } from "@/src/content/campaigns/registry";
+import { rainRadioCampaign } from "@/src/content/campaigns/rain-radio";
 
 type StoreModule = typeof import("@/src/stores/game-store");
 let storeModule: StoreModule;
@@ -25,6 +27,8 @@ beforeAll(async () => {
 
 beforeEach(() => {
   memoryStorage.clear();
+  storeModule.useGameStore.getState().switchCampaign(DEFAULT_CAMPAIGN_ID);
+  storeModule.useGameStore.setState({ campaignSaves: {} });
   storeModule.useGameStore.getState().reset();
 });
 
@@ -96,6 +100,48 @@ describe("Night Shift game store", () => {
     expect(completed.unlockedClueIds).toHaveLength(12);
   });
 
+  it("completes the second campaign and reaches its own ending", () => {
+    expect(storeModule.useGameStore.getState().switchCampaign(RAIN_RADIO_CAMPAIGN_ID)).toBe(true);
+    storeModule.useGameStore.getState().begin();
+
+    for (const chapter of rainRadioCampaign.case.chapters) {
+      const state = storeModule.useGameStore.getState();
+      state.selectChoice(chapter.choices[0].id);
+      storeModule.useGameStore.getState().startNight("restful", "side-lamp", "demo");
+      storeModule.useGameStore.getState().finishNight();
+      storeModule.useGameStore.getState().continueDay();
+    }
+
+    const completed = storeModule.useGameStore.getState();
+    expect(completed.campaignId).toBe(RAIN_RADIO_CAMPAIGN_ID);
+    expect(completed.phase).toBe("ending");
+    expect(completed.completedReports).toHaveLength(rainRadioCampaign.case.chapters.length);
+    expect(completed.unlockedClueIds).toEqual(rainRadioCampaign.case.clues.map((clue) => clue.id));
+    completed.chooseEnding("protect");
+    expect(storeModule.useGameStore.getState().endingId).toBe("protect");
+  });
+
+  it("keeps progress and received clues isolated while switching campaigns", () => {
+    const first = storeModule.useGameStore.getState();
+    first.begin();
+    first.receiveSharedClue("flower-cycle");
+    expect(first.switchCampaign(RAIN_RADIO_CAMPAIGN_ID)).toBe(true);
+
+    const second = storeModule.useGameStore.getState();
+    expect(second.started).toBe(false);
+    expect(second.unlockedClueIds).toEqual([]);
+    expect(second.receiveSharedClue("radio-warm-dial")).toBe("received");
+    expect(second.receiveSharedClue("flower-cycle")).toBe("invalid");
+    expect(second.switchCampaign(DEFAULT_CAMPAIGN_ID)).toBe(true);
+
+    const restoredFirst = storeModule.useGameStore.getState();
+    expect(restoredFirst.started).toBe(true);
+    expect(restoredFirst.receivedClueIds).toEqual(["flower-cycle"]);
+    expect(restoredFirst.unlockedClueIds).toEqual(["flower-cycle"]);
+    expect(restoredFirst.switchCampaign(RAIN_RADIO_CAMPAIGN_ID)).toBe(true);
+    expect(storeModule.useGameStore.getState().receivedClueIds).toEqual(["radio-warm-dial"]);
+  });
+
   it("persists and rehydrates an active real night", async () => {
     const state = storeModule.useGameStore.getState();
     state.begin();
@@ -152,6 +198,8 @@ describe("Night Shift game store", () => {
     });
 
     expect(migrated.sleepMode).toBe("demo");
+    expect(migrated.campaignId).toBe(DEFAULT_CAMPAIGN_ID);
+    expect(migrated.campaignSaves).toEqual({});
     expect(migrated.activeSleepSession).toBeNull();
     expect(migrated.lastSleepSession).toBeNull();
     expect(migrated.preparationHistory).toEqual({});
@@ -200,6 +248,42 @@ describe("Night Shift game store", () => {
     expect(migrated.growthHistory[1]?.watchId).toBe("midnight");
     expect(migrated.activeSleepSession?.wakeEcho).toBeUndefined();
     expect(migrated.growthHistory[1]?.wakeEchoId).toBeUndefined();
+  });
+
+  it("filters cross-campaign data while migrating a campaign save", () => {
+    const migrated = storeModule.migrateGameState({
+      campaignId: RAIN_RADIO_CAMPAIGN_ID,
+      completedReports: [1],
+      unlockedClueIds: ["ticket-date", "radio-warm-dial"],
+      receivedClueIds: ["postcard", "radio-warm-dial"],
+      unlockedCollectibleIds: ["torn-ticket", "radio-dial"],
+      confirmedRelations: ["mina-evelyn", rainRadioCampaign.relations[0].id],
+      choiceHistory: { 1: "source" },
+      boardPositions: {
+        "ticket-date": { x: 100, y: 100 },
+        "radio-warm-dial": { x: 200, y: 140 },
+      },
+      growthHistory: {
+        1: {
+          chapter: 1,
+          quality: "regular",
+          durationMinutes: 390,
+          choiceId: "source",
+          preparationId: "side-lamp",
+          watchId: "midnight",
+          completedAt: "2026-07-11T05:28:00.000Z",
+        },
+      },
+    });
+
+    expect(migrated.campaignId).toBe(RAIN_RADIO_CAMPAIGN_ID);
+    expect(migrated.unlockedClueIds).toEqual(["radio-warm-dial"]);
+    expect(migrated.receivedClueIds).toEqual(["radio-warm-dial"]);
+    expect(migrated.unlockedCollectibleIds).toEqual(["radio-dial"]);
+    expect(migrated.confirmedRelations).toEqual([rainRadioCampaign.relations[0].id]);
+    expect(migrated.choiceHistory).toEqual({});
+    expect(migrated.growthHistory[1]?.choiceId).toBe("dial");
+    expect(migrated.boardPositions).toEqual({ "radio-warm-dial": { x: 200, y: 140 } });
   });
 
   it("persists valid evidence positions and can restore the default desk", () => {

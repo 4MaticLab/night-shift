@@ -10,6 +10,7 @@ import type { GameView } from "@/src/components/game/types";
 import { useGameStore } from "@/src/stores/game-store";
 import { ClueGiftNotice, type ClueGiftNoticeData } from "@/src/components/game/clue-sharing";
 import { readSharedClueQuery, removeSharedClueQuery } from "@/src/lib/game-engine/clue-sharing";
+import { getCampaign } from "@/src/content/campaigns/registry";
 
 const subscribeToHydration = () => () => undefined;
 
@@ -19,10 +20,12 @@ export default function HomePage() {
   const [intro, setIntro] = useState(false);
   const [view, setView] = useState<GameView>(game.phase === "morning" ? "report" : "tonight");
   const [demo, setDemo] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
   const [clueGiftNotice, setClueGiftNotice] = useState<ClueGiftNoticeData | null>(null);
   const processedClueQuery = useRef(false);
   const activeView: GameView = game.phase === "morning" && view === "tonight" ? "report" : view;
   const receiveSharedClue = game.receiveSharedClue;
+  const switchCampaign = game.switchCampaign;
 
   const changeView = (nextView: GameView) => {
     if (nextView === activeView) window.scrollTo({ top: 0, left: 0 });
@@ -53,9 +56,10 @@ export default function HomePage() {
     queueMicrotask(() => {
       if (cancelled || processedClueQuery.current) return;
       processedClueQuery.current = true;
-      if (!shared.clue) {
+      if (!shared.clue || !shared.campaignId) {
         setClueGiftNotice({ kind: "error", title: "这封线索无法归档", message: "链接中的线索编号不存在或已经失效；你的存档没有发生变化。" });
       } else {
+        switchCampaign(shared.campaignId);
         const result = receiveSharedClue(shared.clue.id);
         const notices: Record<typeof result, ClueGiftNoticeData> = {
           received: { kind: "success", title: `好友送来「${shared.clue.title}」`, message: "证物已经放进案件板，并标记为“好友送达”。" },
@@ -66,6 +70,7 @@ export default function HomePage() {
         setClueGiftNotice(notices[result]);
         if (result !== "invalid") {
           setIntro(false);
+          setLibraryOpen(false);
           setView("board");
         }
       }
@@ -74,23 +79,23 @@ export default function HomePage() {
     return () => {
       cancelled = true;
     };
-  }, [hydrated, receiveSharedClue]);
+  }, [hydrated, receiveSharedClue, switchCampaign]);
 
   const clueNotice = <AnimatePresence>{clueGiftNotice && <ClueGiftNotice notice={clueGiftNotice} onClose={() => setClueGiftNotice(null)} />}</AnimatePresence>;
 
-  if (!game.started && !intro) {
-    return <>{clueNotice}<Hero interactive={hydrated} onStart={() => setIntro(true)} onDemo={() => { game.begin(); setDemo(true); }} /><AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={changeView} />}</AnimatePresence></>;
+  if (libraryOpen || (!game.started && !intro)) {
+    return <>{clueNotice}<Hero interactive={hydrated} onStart={() => { if (game.started) setLibraryOpen(false); else setIntro(true); }} onDemo={() => { game.begin(); setLibraryOpen(false); setDemo(true); }} /><AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={changeView} />}</AnimatePresence></>;
   }
   if (intro && !game.started) return <>{clueNotice}<Intro onDone={() => { game.begin(); setIntro(false); }} /></>;
   if (game.phase === "night") return <>{clueNotice}<NightRun onFinish={game.finishNight} /></>;
-  if (game.phase === "ending") return <>{clueNotice}<Ending /></>;
+  if (game.phase === "ending") return <>{clueNotice}<Ending onOpenLibrary={() => setLibraryOpen(true)} /></>;
 
   return (
     <><div className="app-shell">
-      <TopBar chapter={game.chapter} onDemo={() => setDemo(true)} onHome={() => { game.reset(); setIntro(false); }} />
+      <TopBar chapter={game.chapter} onDemo={() => setDemo(true)} onHome={() => { setLibraryOpen(true); setIntro(false); }} />
       <main className="app-content">
         {activeView === "tonight" && <Tonight onLaunch={game.startNight} />}
-        {activeView === "report" && (game.phase === "morning" ? <MorningReport onContinue={() => { game.continueDay(); changeView(game.chapter >= 5 ? "tonight" : "board"); }} /> : <EmptyReport setView={changeView} />)}
+        {activeView === "report" && (game.phase === "morning" ? <MorningReport onContinue={() => { game.continueDay(); changeView(game.chapter >= getCampaign(game.campaignId).case.chapters.at(-1)!.number ? "tonight" : "board"); }} /> : <EmptyReport setView={changeView} />)}
         {activeView === "board" && <CaseBoard />}
         {activeView === "collection" && <Collection />}
         {activeView === "archive" && <ArchivePage />}

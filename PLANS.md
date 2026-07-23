@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有进行中的主计划。下一项改进从实际游玩中的不满意点进入提案，再按优先级启动。
+当前主计划是 [[plans/0025-multi-campaign-runtime]]：把单案件应用改造成可切换、独立存档、可继续扩展的多案件运行时，并用第二个完整案件证明。
 
 ## 计划清单
 
@@ -34,6 +34,7 @@
 | [[plans/0022-vercel-dual-target-deployment]] | `completed` | `manual` | P0 | 5/5 | Vercel 生产部署成功，Sites 双目标保留 |
 | [[plans/0023-mobile-case-board-inference]] | `completed` | `manual` | P0 | 5/5 | 已发布移动案板逃生手势与三步联合推理台 |
 | [[plans/0024-friend-clue-sharing]] | `completed` | `manual` | P0 | 5/5 | 已发布好友线索二维码、白名单深链接与本地接收 |
+| [[plans/0025-multi-campaign-runtime]] | `in_progress` | `manual` | P0 | 6/7 | 提交、推送并确认 Vercel 生产部署 |
 
 ## 状态规则
 

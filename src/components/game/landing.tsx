@@ -4,13 +4,18 @@ import { useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, BookOpen, ChevronRight, Moon, TramFront, Zap } from "lucide-react";
-import { assets } from "@/src/content/assets";
+import { getAsset } from "@/src/content/assets";
+import { campaignRegistry, getCampaign } from "@/src/content/campaigns/registry";
+import { useGameStore } from "@/src/stores/game-store";
 
 export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; onDemo: () => void; interactive: boolean }) {
+  const { campaignId, started, switchCampaign } = useGameStore();
+  const campaign = getCampaign(campaignId);
+  const heroAsset = getAsset(campaign.presentation.heroAssetId);
   return (
     <main className="hero-shell">
       <div className="rain" aria-hidden="true" />
-      <Image className="hero-art" src={assets.nightShiftHero.src} alt={assets.nightShiftHero.alt} fill priority sizes="100vw" />
+      <Image className="hero-art" src={heroAsset.src} alt={heroAsset.alt} fill priority sizes="100vw" />
       <div className="hero-vignette" />
       <nav className="landing-nav">
         <div className="brand-mark"><span>NS</span><div><b>夜班侦探</b><small>NIGHT SHIFT</small></div></div>
@@ -21,21 +26,26 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
         <h1>你睡着以后，<br /><em>他才开始工作。</em></h1>
         <p className="hero-lede">白天分析线索，晚上把调查交给侦探。等你醒来，雾灯城会留下一份新的报告。</p>
         <div className="hero-actions">
-          <button className="primary-button" disabled={!interactive} onClick={onStart}>开始第一宗案件 <ArrowRight size={18} /></button>
+          <button className="primary-button" disabled={!interactive} onClick={onStart}>{started ? "继续当前案件" : `开始第 ${campaign.presentation.archiveNumber} 宗案件`} <ArrowRight size={18} /></button>
           <button className="text-button" disabled={!interactive} onClick={onDemo}><BookOpen size={17} /> 观看 90 秒演示</button>
         </div>
         <div className="shift-rule"><span>你负责白天推理</span><i /><span>林渡负责夜晚调查</span></div>
       </section>
-      <div className="case-teaser"><span className="case-index">CASE 001</span><b>零点四十三分的末班车</b><small>一辆不存在的电车，每晚仍在穿过这座城市。</small></div>
+      <section className="campaign-shelf" aria-label="案件剧本选择">
+        <small>CASE LIBRARY · 选择剧本</small>
+        <div>{campaignRegistry.map((item) => <button type="button" aria-pressed={item.id === campaignId} className={item.id === campaignId ? "active" : ""} key={item.id} onClick={() => switchCampaign(item.id)}><span>CASE {item.presentation.archiveNumber}</span><b>{item.case.title}</b><p>{item.presentation.teaser}</p></button>)}</div>
+      </section>
+      <div className="case-teaser"><span className="case-index">CASE {campaign.presentation.archiveNumber}</span><b>{campaign.case.title}</b><small>{campaign.presentation.teaser}</small></div>
     </main>
   );
 }
 
 export function Intro({ onDone }: { onDone: () => void }) {
+  const campaign = getCampaign(useGameStore((state) => state.campaignId));
   const [step, setStep] = useState(0);
   const lines = [
     ["你们从未同时醒着。", "当你合上眼睛，林渡才穿上外套。"],
-    ["白天，你整理他带回的线索。", "旧车票、花粉、被刮掉的地图，都在等你连接。"],
+    ["白天，你整理他带回的线索。", `${campaign.case.title}的证物与矛盾，都在等你连接。`],
     ["夜晚，他替你进入城市。", "今晚的调查，交给他吧。"],
   ];
   return (

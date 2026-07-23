@@ -1,12 +1,11 @@
-import { nightShiftCase } from "@/src/content/case";
 import { getPreparation, type PreparationId } from "@/src/content/preparations";
-import { getRouteDirection } from "@/src/content/routes";
+import { getCampaignRouteDirection, type CampaignManifest } from "@/src/content/campaigns/types";
 import type { SleepQuality } from "./schema";
 
-export function resolveNight(chapterNumber: number, quality: SleepQuality, preparationId: PreparationId | "" = "", choiceId = "") {
-  const chapter = nightShiftCase.chapters[chapterNumber - 1];
+export function resolveNight(campaign: CampaignManifest, chapterNumber: number, quality: SleepQuality, preparationId: PreparationId | "" = "", choiceId = "") {
+  const chapter = campaign.case.chapters.find((item) => item.number === chapterNumber);
   if (!chapter) throw new Error(`Unknown chapter ${chapterNumber}`);
-  const direction = getRouteDirection(chapterNumber, choiceId);
+  const direction = getCampaignRouteDirection(campaign, chapterNumber, choiceId);
   const clueCount = quality === "restful" ? chapter.clueIds.length : Math.min(2, chapter.clueIds.length);
   const collectibleCount = quality === "interrupted" ? 1 : quality === "regular" ? 1 : 2;
   return {

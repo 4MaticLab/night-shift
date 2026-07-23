@@ -19,7 +19,7 @@ export const cityWatchSchema = z.object({
 export type CityWatch = z.infer<typeof cityWatchSchema>;
 
 export const cityWatchEchoSchema = z.object({
-  chapter: z.number().int().min(1).max(5),
+  chapter: z.number().int().positive(),
   watchId: cityWatchIdSchema,
   scene: z.string().min(20),
   encounter: z.string().min(15),
@@ -27,12 +27,12 @@ export const cityWatchEchoSchema = z.object({
 });
 export type CityWatchEcho = z.infer<typeof cityWatchEchoSchema>;
 
-export const wakeEchoIdSchema = z.enum(["sleep-gap-01", "sleep-gap-02", "sleep-gap-03", "sleep-gap-04", "sleep-gap-05"]);
+export const wakeEchoIdSchema = z.string().min(1);
 export type WakeEchoId = z.infer<typeof wakeEchoIdSchema>;
 
 export const wakeEchoSchema = z.object({
   id: wakeEchoIdSchema,
-  chapter: z.number().int().min(1).max(5),
+  chapter: z.number().int().positive(),
   title: z.string().min(4),
   sound: z.string().min(15),
   glimpse: z.string().min(20),
@@ -66,7 +66,7 @@ export const clueSchema = z.object({
   cityObjection: z.string().min(20),
   marginNote: z.string().min(12),
   type: z.enum(["person", "place", "object", "event", "contradiction"]),
-  chapter: z.number().int().min(1).max(5),
+  chapter: z.number().int().positive(),
   relatedIds: z.array(z.string()),
 });
 export type Clue = z.infer<typeof clueSchema>;
@@ -98,7 +98,7 @@ export type EndingEpilogue = z.infer<typeof endingEpilogueSchema>;
 
 export const journeyPostcardSchema = z.object({
   id: z.string(),
-  chapter: z.number().int().min(1).max(5),
+  chapter: z.number().int().positive(),
   assetId: z.string(),
   title: z.string(),
   location: z.string(),
@@ -114,7 +114,7 @@ export type JourneyPostcard = z.infer<typeof journeyPostcardSchema>;
 
 export const routeDirectionSchema = z.object({
   id: z.string(),
-  chapter: z.number().int().min(1).max(5),
+  chapter: z.number().int().positive(),
   choiceId: z.string(),
   dispatchTitle: z.string(),
   departureIntent: z.string(),
@@ -150,7 +150,7 @@ export const citySocietySchema = z.object({
 export type CitySociety = z.infer<typeof citySocietySchema>;
 
 export const societyMemoryRecordSchema = z.object({
-  chapter: z.number().int().min(1).max(5),
+  chapter: z.number().int().positive(),
   choiceId: z.string(),
   societyId: societyIdSchema,
   standing: societyStandingSchema,
@@ -182,7 +182,7 @@ export const correspondencePromptSchema = z.object({
 export type CorrespondencePrompt = z.infer<typeof correspondencePromptSchema>;
 
 export const correspondenceRecordSchema = z.object({
-  chapter: z.number().int().min(1).max(5),
+  chapter: z.number().int().positive(),
   promptId: z.string(),
   societyId: societyIdSchema,
   standing: societyStandingSchema,
@@ -206,7 +206,7 @@ export const souvenirSchema = z.object({
 export type Souvenir = z.infer<typeof souvenirSchema>;
 
 export const souvenirRecordSchema = z.object({
-  chapter: z.number().int().min(1).max(5),
+  chapter: z.number().int().positive(),
   souvenirId: z.string(),
   choiceId: z.string(),
   preparationId: z.enum(["side-lamp", "flower-note", "tram-fare"]),
@@ -237,7 +237,7 @@ export const opportunityNoticeSchema = z.object({
 export type OpportunityNotice = z.infer<typeof opportunityNoticeSchema>;
 
 export const opportunityRecordSchema = z.object({
-  chapter: z.number().int().min(2).max(5),
+  chapter: z.number().int().min(2),
   offeredIds: z.tuple([z.string(), z.string(), z.string()]),
   noticeId: z.string().optional(),
   responseId: z.string().optional(),
@@ -253,7 +253,7 @@ export const caseCharacterSchema = z.object({
   archiveName: z.string(),
   role: z.string(),
   district: z.string(),
-  encounterChapter: z.number().int().min(2).max(5),
+  encounterChapter: z.number().int().min(2),
   publicRumor: z.string(),
   knownFact: z.string(),
   withheld: z.string(),
@@ -268,7 +268,7 @@ export const cityDistrictSchema = z.object({
   name: z.string(),
   archiveName: z.string(),
   subtitle: z.string(),
-  introducedChapter: z.number().int().min(1).max(5),
+  introducedChapter: z.number().int().positive(),
   publicVersion: z.string(),
   cityRule: z.string(),
   landmarks: z.array(z.string()).length(3),
@@ -280,7 +280,7 @@ export type GrowthStage = z.infer<typeof growthStageSchema>;
 
 export const nightBotanicalSchema = z.object({
   id: z.string(),
-  chapter: z.number().int().min(1).max(5),
+  chapter: z.number().int().positive(),
   assetId: z.string(),
   name: z.string(),
   archiveName: z.string(),
@@ -293,7 +293,7 @@ export const nightBotanicalSchema = z.object({
 export type NightBotanical = z.infer<typeof nightBotanicalSchema>;
 
 export const nightGrowthRecordSchema = z.object({
-  chapter: z.number().int().min(1).max(5),
+  chapter: z.number().int().positive(),
   quality: sleepQualitySchema,
   durationMinutes: z.number().int().nonnegative(),
   choiceId: z.string(),
@@ -313,12 +313,12 @@ export const collectibleSchema = z.object({
   revealedDescription: z.string(),
   district: z.string(),
   rarity: z.enum(["common", "unusual", "rare"]),
-  chapter: z.number().int().min(1).max(5),
+  chapter: z.number().int().positive(),
 });
 export type Collectible = z.infer<typeof collectibleSchema>;
 
 export const chapterSchema = z.object({
-  number: z.number().int().min(1).max(5),
+  number: z.number().int().positive(),
   title: z.string(),
   subtitle: z.string(),
   cityAside: z.string(),
@@ -337,9 +337,9 @@ export const caseSchema = z.object({
   id: z.string(),
   title: z.string(),
   englishTitle: z.string(),
-  chapters: z.array(chapterSchema).length(5),
-  clues: z.array(clueSchema).length(12),
-  collectibles: z.array(collectibleSchema).length(8),
+  chapters: z.array(chapterSchema).min(1),
+  clues: z.array(clueSchema).min(1),
+  collectibles: z.array(collectibleSchema).min(1),
 }).superRefine((data, ctx) => {
   const clueIds = new Set(data.clues.map((item) => item.id));
   const collectibleIds = new Set(data.collectibles.map((item) => item.id));
@@ -352,3 +352,4 @@ export const caseSchema = z.object({
     });
   });
 });
+export type CaseContent = z.infer<typeof caseSchema>;
