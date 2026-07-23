@@ -28,7 +28,7 @@ export function PaperCard({ children, className = "" }: { children: ReactNode; c
 
 export function CityRoute({ progress = 100, compact = false, routeNodes = ["事务所", "灯港", "旧子午", "玻璃丘"], variant = "river" }: { progress?: number; compact?: boolean; routeNodes?: string[]; variant?: RouteDirection["mapVariant"] }) {
   const stops = Array.from({ length: 4 }, (_, index) => routeNodes[index] ?? "未抵达");
-  return <div className={`city-map route-${variant} ${compact ? "compact" : ""}`}><div className="river" /><div className="tram-line"><span style={{ width: `${progress}%` }} /></div>{stops.map((stop, index) => <div className={`route-stop s${index + 1}`} key={`${stop}-${index}`}><i />{stop}</div>)}<motion.div className="detective-marker" animate={{ left: `${Math.max(4, Math.min(90, progress))}%` }} transition={{ duration: 1.2 }}><Footprints /></motion.div><span className="map-label ml1">{stops[0]}</span><span className="map-label ml2">{stops[1]}</span><span className="map-label ml3">{stops[3]}</span></div>;
+  return <div className={`city-map route-${variant} ${compact ? "compact" : ""}`}><div className="river" /><div className="tram-line"><span style={{ width: `${progress}%` }} /><div className="detective-marker" style={{ left: `${Math.max(0, Math.min(100, progress))}%` }}><Footprints /></div></div>{stops.map((stop, index) => <div className={`route-stop s${index + 1}`} key={`${stop}-${index}`}><i />{stop}</div>)}<span className="map-label ml1">{stops[0]}</span><span className="map-label ml2">{stops[1]}</span><span className="map-label ml3">{stops[3]}</span></div>;
 }
 
 export function BotanicalSpecimen({ chapter, progress = 100, compact = false }: { chapter: number; progress?: number; compact?: boolean }) {
