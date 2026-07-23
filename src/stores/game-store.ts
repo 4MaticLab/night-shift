@@ -16,6 +16,7 @@ import { DEFAULT_CAMPAIGN_ID, getCampaign, isCampaignId, type CampaignId } from 
 import { getCampaignRouteDirection, getCampaignWakeEcho, matchCampaignEvidenceRelation, type CampaignManifest } from "@/src/content/campaigns/types";
 import { useSleepHardwareStore } from "@/src/stores/sleep-hardware-store";
 import { createRestRitualRecord, restReflectionResponseSchema, restRitualRecordSchema, type RestReflectionReason, type RestReflectionSource, type RestRitualInput, type RestRitualRecord } from "@/src/lib/rest-ritual";
+import { getCampaignCipherChallenge, getCampaignCipherChallenges, isCipherUnlocked, matchesCipherAnswer } from "@/src/content/ciphers";
 
 export type Phase = "day" | "ready" | "night" | "morning" | "ending";
 
@@ -45,6 +46,7 @@ export interface GameState {
   unlockedCollectibleIds: string[];
   completedReports: number[];
   confirmedRelations: string[];
+  solvedCipherIds: string[];
   boardPositions: Record<string, BoardPosition>;
   nightSealIds: number[];
   endingId?: string;
@@ -59,6 +61,7 @@ export interface GameState {
   dismissOpportunities: () => boolean;
   continueDay: () => void;
   connectClues: (firstClueId: string, secondClueId: string) => string | null;
+  solveCipher: (challengeId: string, answer: string) => "solved" | "already-solved" | "locked" | "incorrect" | "invalid";
   receiveSharedClue: (clueId: string) => "received" | "already-received" | "already-owned" | "invalid";
   switchCampaign: (campaignId: CampaignId) => boolean;
   setBoardPosition: (clueId: string, position: BoardPosition) => boolean;
@@ -75,7 +78,7 @@ export type CampaignProgress = Pick<GameState,
   | "societyHistory" | "correspondenceHistory" | "journeySeed" | "souvenirHistory" | "opportunityHistory"
   | "restRitualHistory"
   | "unlockedClueIds" | "receivedClueIds" | "unlockedCollectibleIds" | "completedReports"
-  | "confirmedRelations" | "boardPositions" | "nightSealIds" | "endingId"
+  | "confirmedRelations" | "solvedCipherIds" | "boardPositions" | "nightSealIds" | "endingId"
 >;
 
 const initialProgress: CampaignProgress = {
@@ -102,6 +105,7 @@ const initialProgress: CampaignProgress = {
   unlockedCollectibleIds: [] as string[],
   completedReports: [] as number[],
   confirmedRelations: [] as string[],
+  solvedCipherIds: [] as string[],
   boardPositions: {} as Record<string, BoardPosition>,
   nightSealIds: [] as number[],
 };
@@ -128,6 +132,7 @@ function createInitialProgress(): CampaignProgress {
     unlockedCollectibleIds: [],
     completedReports: [],
     confirmedRelations: [],
+    solvedCipherIds: [],
     boardPositions: {},
     nightSealIds: [],
     endingId: undefined,
@@ -159,6 +164,7 @@ function snapshotCampaignProgress(state: GameState): CampaignProgress {
     unlockedCollectibleIds: state.unlockedCollectibleIds,
     completedReports: state.completedReports,
     confirmedRelations: state.confirmedRelations,
+    solvedCipherIds: state.solvedCipherIds,
     boardPositions: state.boardPositions,
     nightSealIds: state.nightSealIds,
     endingId: state.endingId,
@@ -328,6 +334,16 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
     set({ confirmedRelations: Array.from(new Set([...state.confirmedRelations, relation.id])) });
     return relation.id;
   },
+  solveCipher: (challengeId, answer) => {
+    const state = get();
+    const challenge = getCampaignCipherChallenge(state.campaignId, challengeId);
+    if (!challenge) return "invalid";
+    if (state.solvedCipherIds.includes(challenge.id)) return "already-solved";
+    if (!isCipherUnlocked(challenge, state.unlockedClueIds)) return "locked";
+    if (!matchesCipherAnswer(challenge, answer)) return "incorrect";
+    set({ solvedCipherIds: [...state.solvedCipherIds, challenge.id] });
+    return "solved";
+  },
   receiveSharedClue: (clueId) => {
     const clue = getCampaign(get().campaignId).case.clues.find((item) => item.id === clueId);
     if (!clue) return "invalid";
@@ -393,7 +409,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   },
 }), {
   name: "night-shift-save-v1",
-  version: 15,
+  version: 16,
   migrate: migrateGameState,
 }));
 
@@ -463,6 +479,7 @@ function migrateCampaignProgress(value: unknown, campaign: CampaignManifest): Ca
     receivedClueIds,
     unlockedCollectibleIds: (persisted.unlockedCollectibleIds ?? []).filter((itemId) => validCollectibleIds.has(itemId)),
     confirmedRelations: (persisted.confirmedRelations ?? []).filter((relationId) => validRelationIds.has(relationId)),
+    solvedCipherIds: sanitizeSolvedCipherIds(persisted.solvedCipherIds, campaign),
     boardPositions: sanitizeBoardPositions(persisted.boardPositions, validClueIds),
     nightSealIds: (persisted.nightSealIds ?? []).filter((item) => validChapters.has(item)),
     endingId: campaign.endings.some((ending) => ending.id === persisted.endingId) ? persisted.endingId : undefined,
@@ -531,6 +548,12 @@ function sanitizeReceivedClueIds(value: unknown, campaign: CampaignManifest): st
   if (!Array.isArray(value)) return [];
   const validIds = new Set(campaign.case.clues.map((clue) => clue.id));
   return Array.from(new Set(value.filter((clueId): clueId is string => typeof clueId === "string" && validIds.has(clueId))));
+}
+
+function sanitizeSolvedCipherIds(value: unknown, campaign: CampaignManifest): string[] {
+  if (!Array.isArray(value)) return [];
+  const validIds = new Set(getCampaignCipherChallenges(campaign.id).map((challenge) => challenge.id));
+  return Array.from(new Set(value.filter((challengeId): challengeId is string => typeof challengeId === "string" && validIds.has(challengeId))));
 }
 
 function sanitizeBoardPositions(value: unknown, validClueIds?: Set<string>): Record<string, BoardPosition> {

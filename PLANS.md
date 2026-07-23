@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有进行中的主计划。最近完成的 [[plans/0033-hackathon-submission-kit]] 已交付 Hack the Rest 提交作战卡与独立 GitHub 质量门禁；此前的 [[plans/0032-ai-rest-intention-ritual]]、[[plans/0031-night-shift-logo]]、[[plans/0030-last-tram-english-i18n]] 与 [[plans/0029-sleep-hardware-ux-pass]] 继续保留 AI 休息仪式、Logo、案件 001 英文化和睡眠硬件体验成果。
+当前没有进行中的主计划。最近完成的 [[plans/0034-night-cipher-desk]] 已为首案交付根据既有证物逐段开放、无失败惩罚的夜班密文台与三段解密关卡。
 
 ## 计划清单
 
@@ -42,7 +42,8 @@
 | [[plans/0030-last-tram-english-i18n]] | `completed` | `manual` | P0 | 7/7 | 已整合英文版、当前硬件 UX 与最新 main |
 | [[plans/0031-night-shift-logo]] | `completed` | `auto` | P1 | 4/4 | Logo、favicon、文档与最新主线接入已完成 |
 | [[plans/0032-ai-rest-intention-ritual]] | `completed` | `manual` | P0 | 6/6 | 已完成 AI 休息仪式、v15 存档与全量回归 |
-| [[plans/0033-hackathon-submission-kit]] | `completed` | `manual` | P0 | 6/6 | 已完成提交作战卡、真实边界与独立质量门禁 |
+| [[plans/0033-hackathon-submission-kit]] | `completed` | `manual` | P0 | 4/4 | 已完成提交作战卡、演示节拍与真实边界 |
+| [[plans/0034-night-cipher-desk]] | `completed` | `manual` | P0 | 6/6 | 已完成三段密文、v16 存档、中英文与移动端验收 |
 
 ## 状态规则
 
