@@ -56,10 +56,14 @@ export function nightSealProgress(session: SleepSession | null, now = new Date()
   return Math.min(100, Math.max(3, (elapsedSessionMinutes(session, now) / 480) * 100));
 }
 
-export function formatSleepDuration(durationMinutes?: number): string {
-  if (durationMinutes === undefined) return "尚未结束";
+export function formatSleepDuration(durationMinutes?: number, locale: "zh-CN" | "en" = "zh-CN"): string {
+  if (durationMinutes === undefined) return locale === "en" ? "Not yet complete" : "尚未结束";
   const hours = Math.floor(durationMinutes / 60);
   const minutes = durationMinutes % 60;
+  if (locale === "en") {
+    if (!hours) return `${minutes} min`;
+    return `${hours} hr ${minutes.toString().padStart(2, "0")} min`;
+  }
   if (!hours) return `${minutes} 分钟`;
   return `${hours} 小时 ${minutes.toString().padStart(2, "0")} 分`;
 }

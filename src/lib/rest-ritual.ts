@@ -6,6 +6,7 @@ export const REST_REFLECTION_MAX_LENGTH = 240;
 export const restRitualInputSchema = z.object({
   intention: z.string().trim().min(1).max(REST_INTENTION_MAX_LENGTH),
   aiRequested: z.boolean().default(false),
+  locale: z.enum(["zh-CN", "en"]).default("zh-CN"),
 });
 export type RestRitualInput = z.infer<typeof restRitualInputSchema>;
 
@@ -23,6 +24,7 @@ export const restRitualRecordSchema = z.object({
   chapter: z.number().int().positive(),
   intention: z.string().trim().min(1).max(REST_INTENTION_MAX_LENGTH),
   aiRequested: z.boolean(),
+  locale: z.enum(["zh-CN", "en"]).default("zh-CN"),
   reflection: z.string().trim().min(1).max(REST_REFLECTION_MAX_LENGTH),
   source: restReflectionSourceSchema,
   status: restReflectionStatusSchema,
@@ -47,6 +49,7 @@ export type RestRitualRecord = z.infer<typeof restRitualRecordSchema>;
 
 export const restReflectionRequestSchema = z.object({
   requestId: z.string().uuid(),
+  locale: z.enum(["zh-CN", "en"]).default("zh-CN"),
   intention: z.string().trim().min(1).max(REST_INTENTION_MAX_LENGTH),
   campaignTitle: z.string().trim().min(1).max(120),
   chapterTitle: z.string().trim().min(1).max(120),
@@ -76,10 +79,12 @@ export function createLocalRestReflection(input: RestReflectionContext): string 
   const detectiveName = truncateText(parsed.detectiveName, 20);
   const preparation = truncateText(parsed.preparation, 24);
   const destination = truncateText(parsed.destination, 36);
-  return `纸条已经夹进交接单。今晚不必把它解决；${detectiveName}会带着${preparation}守住这段空白，清晨只把${destination}确实找到的东西带回来。`;
+  return parsed.locale === "en"
+    ? `The note is tucked into the handoff. It does not need an answer tonight; ${detectiveName} will carry ${preparation} through the blank hours and bring back only what ${destination} truly yields.`
+    : `纸条已经夹进交接单。今晚不必把它解决；${detectiveName}会带着${preparation}守住这段空白，清晨只把${destination}确实找到的东西带回来。`;
 }
 
-export function createRestRitualRecord(chapter: number, input: RestRitualInput, context: Omit<RestReflectionContext, "intention">, now = new Date()): RestRitualRecord {
+export function createRestRitualRecord(chapter: number, input: RestRitualInput, context: Omit<RestReflectionContext, "intention" | "locale">, now = new Date()): RestRitualRecord {
   const ritual = restRitualInputSchema.parse(input);
   const timestamp = now.toISOString();
   return restRitualRecordSchema.parse({
@@ -87,7 +92,8 @@ export function createRestRitualRecord(chapter: number, input: RestRitualInput, 
     requestId: crypto.randomUUID(),
     intention: ritual.intention,
     aiRequested: ritual.aiRequested,
-    reflection: createLocalRestReflection({ ...context, intention: ritual.intention }),
+    locale: ritual.locale,
+    reflection: createLocalRestReflection({ ...context, intention: ritual.intention, locale: ritual.locale }),
     source: "local",
     status: ritual.aiRequested ? "pending" : "local",
     reason: ritual.aiRequested ? undefined : "local-only",
@@ -99,6 +105,19 @@ export function createRestRitualRecord(chapter: number, input: RestRitualInput, 
 export function createAiRestReflection(input: RestReflectionContext, style: RestReflectionStyle): string {
   const parsed = restReflectionRequestSchema.omit({ requestId: true }).parse(input);
   const selected = restReflectionStyleSchema.parse(style);
+  if (parsed.locale === "en") {
+    const opening = {
+      gentle: "I have the note. It does not need to become an answer tonight",
+      quiet: "The note is resting quietly in the night ledger. What remains unfinished can stop here for now",
+      steady: "The night shift will hold this note for a while. You do not need to keep chasing it",
+    }[selected.tone];
+    const image = {
+      lamp: `I will carry ${truncateText(parsed.preparation, 24)} and leave a lamp beside the blank hours`,
+      paper: `I will let the pages of ${truncateText(parsed.destination, 36)} keep it until morning`,
+      rain: `I will listen to the rain at ${truncateText(parsed.destination, 36)} and keep the investigation moving`,
+    }[selected.image];
+    return `${opening}. ${image}; at dawn, the next step is still yours to choose.`;
+  }
   const opening = {
     gentle: "纸条收到了。今晚不必把它变成答案",
     quiet: "纸条已经安静地夹进夜班簿。未完成的事可以先停在这里",

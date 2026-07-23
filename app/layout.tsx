@@ -11,13 +11,13 @@ export async function generateMetadata(): Promise<Metadata> {
   const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "localhost:3000";
   const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https");
   const origin = `${protocol}://${host}`;
-  const title = "夜班侦探 Night Shift — 你睡着以后，他才开始工作";
-  const description = "白天分析线索，晚上把调查交给侦探。与你轮班生活的异步侦探游戏。";
+  const title = "夜班侦探 Night Shift — When You Sleep, He Works";
+  const description = "An asynchronous detective game that keeps your hours. 白天分析线索，晚上把调查交给侦探。";
   return {
     metadataBase: new URL(origin),
     title,
     description,
-    icons: { icon: "/art/headers/night-shift-hero.png", shortcut: "/art/headers/night-shift-hero.png" },
+    icons: { icon: "/favicon.png", shortcut: "/favicon.png", apple: "/art/brand/night-shift-logo-v1.png" },
     openGraph: { title, description, type: "website", url: origin, images: [{ url: `${origin}/og.png`, width: 1672, height: 941, alt: "夜班侦探 Night Shift" }] },
     twitter: { card: "summary_large_image", title, description, images: [`${origin}/og.png`] },
   };

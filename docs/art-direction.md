@@ -16,6 +16,8 @@
 
 核心流程使用四张 2:1 横幅建立分幕：交接保留左侧深色文案区，夜行保留中央路线叠层区，归来让黎明暖纸天空承载报告标题，裁决用无人站台和等待归还的证据承载选择。四张图保持林渡造型与蚀刻媒介连续，但不让插画替代交互；具体提示词见 [[docs/art-prompts/four-act-headers]]。
 
+品牌 Logo 使用无文字的弯月电车正面：弯月承担夜班信号，三格车窗与中央琥珀灯保持旧电车意象，并在 34–42 像素导航尺寸中保留清晰轮廓。中英文品牌名由 HTML 排版，不写入图像；文件与生成记录见 [[docs/art-prompts/night-shift-logo]]。
+
 睡前桌另使用一张 4:5 林渡交接肖像，把横幅中的同一张脸、深蓝外套、灰蓝围巾、肩包、手套、笔记本与黄铜手电拉近到可辨认距离。图像保持无文字的暖纸蚀刻，姓名、方向、随身物与目的地由 HTML/CSS 组成“今晚交接单”；选择只改变灯光和排版状态，不生成换装或好感表情。具体提示词见 [[docs/art-prompts/lin-du-handoff-portrait]]。
 
 睡眠硬件使用四张 1:1 暖纸设备档案画面：戒指、手表、床垫感应带和枕头保持深蓝器物、黄铜测量弧、旧酒红定位点与少量铜绿传感光。画面不使用电商白底、厂商品牌或健康 App 图表；连接状态、权限和指标继续由响应式 HTML/CSS 承担。具体提示词与源图见 [[docs/art-prompts/sleep-hardware-dossiers]]。
@@ -26,6 +28,7 @@
 
 - [[docs/asset-list]]
 - [[docs/art-prompts/global-style]]
+- [[docs/art-prompts/night-shift-logo]]
 - [[docs/art-prompts/city-postcards]]
 - [[docs/art-prompts/night-greenhouse]]
 - [[docs/art-prompts/city-societies]]
