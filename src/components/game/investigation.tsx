@@ -64,7 +64,9 @@ export function CaseBoard() {
   }, [selectedClueIds, t]);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 600px)");
+    const mediaQuery = window.matchMedia(
+      "(max-width: 600px), (max-width: 1024px) and (orientation: portrait)",
+    );
     const syncBoardMode = () => setIsCompactBoard(mediaQuery.matches);
     syncBoardMode();
     mediaQuery.addEventListener("change", syncBoardMode);
