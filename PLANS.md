@@ -6,6 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
+| [[plans/fix-core-loop-reading-hierarchy]] | `fix/core-loop-reading-hierarchy` | `in_progress` | `auto` | 0% | 测量晨报与案件板的主操作可达距离 |
 
 ## 使用规则
 
