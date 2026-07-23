@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
-import { ArrowRight, BriefcaseBusiness, Check, ChevronRight, Clock3, Coffee, FileText, Lightbulb, Moon, Zap } from "lucide-react";
+import { ArrowRight, Check, ChevronRight, Clock3, Coffee, FileText, Lightbulb, Moon, Zap } from "lucide-react";
 import { nightShiftCase } from "@/src/content/case";
 import { getAsset, getNightSealAsset, getPostcardAsset } from "@/src/content/assets";
 import { getJourneyPostcard, getPostcardPreparationNote } from "@/src/content/postcards";
@@ -28,12 +28,18 @@ export function Tonight({ onLaunch }: { onLaunch: (quality: SleepQuality, prepar
   const [quality, setQuality] = useState<SleepQuality>("regular");
   const [preparationId, setPreparationId] = useState<PreparationId>("side-lamp");
   const [sleepMode, setSleepMode] = useState<SleepMode>("demo");
+  const selectedDirection = selectedChoice ? getRouteDirection(chapter, selectedChoice) : null;
+  const selectedPreparation = getPreparation(preparationId);
+  const handoffPortrait = getAsset("character.lin-du-handoff");
   return (
     <div className="content-grid tonight-page">
-      <section className="desk-scene">
+      <section className={selectedDirection ? "desk-scene handoff-ready" : "desk-scene"}>
         <div className="scene-copy"><p className="eyebrow"><Clock3 size={14} /> 今晚的任务 · 23:40 前交接</p><h2>林渡正在整理<br />今晚的装备。</h2><p>选择一个调查方向。无论你今晚睡得如何，故事都会继续。</p></div>
-        <div className="detective-cutout" aria-label="正在桌边整理装备的侦探林渡"><div className="head" /><div className="coat" /><div className="lamp-cone" /><BriefcaseBusiness /></div>
-        <div className="desk-props"><span className="notebook">FIELD<br />NOTES</span><span className="flashlight" /><span className="cup" /></div>
+        <motion.figure className="handoff-portrait" initial={{ opacity: 0, y: 12, rotate: 1.4 }} animate={{ opacity: 1, y: 0, rotate: selectedDirection ? .35 : 1.15 }} transition={{ duration: .7, ease: "easeOut" }}>
+          <div className="handoff-portrait-image"><Image src={handoffPortrait.src} alt={handoffPortrait.alt} fill priority sizes="(max-width: 600px) 44vw, (max-width: 900px) 34vw, 24vw" /></div>
+          <figcaption><small>LIN DU · NIGHT DETECTIVE</small><b>林渡</b><span>{selectedDirection ? "已收到今晚的方向" : "在等你写下方向"}</span></figcaption>
+        </motion.figure>
+        <aside className="handoff-docket" aria-live="polite"><small>TONIGHT&apos;S HANDOFF · 今晚交接单</small><b>{selectedDirection?.dispatchTitle ?? "方向尚未落笔"}</b><span>{selectedDirection ? `${selectedPreparation?.shortTitle ?? "随身物"} · ${selectedDirection.destination}` : "从右侧选择一条调查方向；林渡会负责怎样抵达。"}</span></aside>
       </section>
       <section className="plan-panel">
         {chapter > 1 && <DaytimeNotices />}

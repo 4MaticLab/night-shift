@@ -22,6 +22,7 @@
 - [[docs/art-direction]] — Cozy Storybook Noir 视觉规则。
 - [[docs/asset-list]] — 资产清单与使用位置。
 - [[docs/art-prompts/global-style]] — 图像生成的全局风格约束。
+- [[docs/art-prompts/lin-du-handoff-portrait]] — 林渡交接肖像的身份连续性、最终提示词与源图映射。
 - [[docs/art-prompts/archive-assets]] — 物证、夜印与分享封面的资产生成规范。
 - [[docs/art-prompts/city-societies]] — 三个地下社团的原创纹章提示词与运行时规则。
 - [[docs/art-prompts/pocket-souvenirs]] — 九件口袋纪念物的共用媒介、变体与运行时文件。

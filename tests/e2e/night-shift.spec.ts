@@ -13,6 +13,13 @@ async function expectNoPageOverflow(page: import("@playwright/test").Page) {
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 }
 
+async function expectNoOverlap(first: import("@playwright/test").Locator, second: import("@playwright/test").Locator) {
+  const [a, b] = await Promise.all([first.boundingBox(), second.boundingBox()]);
+  expect(a).not.toBeNull();
+  expect(b).not.toBeNull();
+  expect(a!.x + a!.width <= b!.x || b!.x + b!.width <= a!.x || a!.y + a!.height <= b!.y || b!.y + b!.height <= a!.y).toBe(true);
+}
+
 async function reachFinalDecision(page: import("@playwright/test").Page) {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
@@ -25,6 +32,11 @@ async function reachFinalDecision(page: import("@playwright/test").Page) {
 
 test("starts a case and reaches the first morning report", async ({ page }) => {
   await openFirstNight(page);
+  await expect(page.locator(".handoff-portrait img")).toHaveAttribute("src", /lin-du-handoff-portrait-v1/);
+  await expect(page.locator(".handoff-docket")).toContainText("纸张的证词");
+  await expect(page.locator(".handoff-docket")).toContainText("侧照灯 · 灯港旧票据工坊");
+  await expectNoOverlap(page.locator(".scene-copy"), page.locator(".handoff-portrait"));
+  await expectNoOverlap(page.locator(".handoff-docket"), page.locator(".handoff-portrait"));
   await expect(page.getByText(/可能惊动 · 错页登记处/)).toBeVisible();
   await page.getByRole("button", { name: /今晚交给你了/ }).click();
   await expect(page.locator(".night-expedition-art")).toHaveAttribute("src", /night-expedition-v1/);
@@ -230,6 +242,10 @@ test.describe("mobile 390x844", () => {
 
   test("keeps the first-night loop touchable without page overflow", async ({ page }) => {
     await openFirstNight(page);
+    await expect(page.locator(".handoff-portrait img")).toBeVisible();
+    await expect(page.locator(".handoff-docket")).toContainText("纸张的证词");
+    await expectNoOverlap(page.locator(".scene-copy"), page.locator(".handoff-portrait"));
+    await expectNoOverlap(page.locator(".handoff-docket"), page.locator(".handoff-portrait"));
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /今晚交给你了/ }).click();
     await expectNoPageOverflow(page);

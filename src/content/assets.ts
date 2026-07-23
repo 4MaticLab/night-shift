@@ -275,6 +275,9 @@ export const assets = {
     category: "souvenir",
     status: "complete",
   },
+  characterLinDuHandoff: {
+    id: "character.lin-du-handoff", src: "/art/characters/lin-du-handoff-portrait-v1.webp", alt: "林渡戴着灰蓝围巾坐在交接桌前，一手压住空白笔记本，一手握着黄铜手电", category: "character-portrait", status: "complete",
+  },
   characterMinaSolair: {
     id: "character.mina-solair", src: "/art/characters/mina-solair-portrait-v1.webp", alt: "手持空白明信片、衣襟别着夜香花的米娜·索莱尔档案肖像", category: "character-portrait", status: "complete",
   },

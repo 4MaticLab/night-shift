@@ -7,7 +7,7 @@
 - 产品与世界观：[[docs/product-overview]]、[[docs/story-bible]]
 - 北极星与参考原则：[[docs/north-star]]
 - 工程与状态模型：[[docs/architecture]]
-- 视觉与素材：[[docs/art-direction]]、[[docs/asset-list]]、[[docs/art-prompts/global-style]]、[[docs/art-prompts/city-witness-portraits]]、[[docs/art-prompts/foglight-districts]]、[[docs/art-prompts/four-act-headers]]
+- 视觉与素材：[[docs/art-direction]]、[[docs/asset-list]]、[[docs/art-prompts/global-style]]、[[docs/art-prompts/lin-du-handoff-portrait]]、[[docs/art-prompts/city-witness-portraits]]、[[docs/art-prompts/foglight-districts]]、[[docs/art-prompts/four-act-headers]]
 - 演示与验收：[[docs/demo-script]]、[[docs/quality-baseline]]
 - 文档维护规范：[[docs/documentation-guide]]
 - 全部计划与进度：[[PLANS]]

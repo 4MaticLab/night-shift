@@ -167,6 +167,7 @@ describe("Night Shift case content", () => {
     expect(headers.every((asset) => asset.category === "header")).toBe(true);
     expect(new Set(headers.map((asset) => asset.src))).toHaveLength(3);
     expect(getAsset("ending.hidden-platform").category).toBe("ending");
+    expect(getAsset("character.lin-du-handoff")).toMatchObject({ category: "character-portrait", status: "complete" });
   });
 
   it("defines one distinct journey postcard and three preparation notes per night", () => {
