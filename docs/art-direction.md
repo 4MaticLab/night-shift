@@ -22,6 +22,8 @@
 
 睡眠硬件使用四张 1:1 暖纸设备档案画面：戒指、手表、床垫感应带和枕头保持深蓝器物、黄铜测量弧、旧酒红定位点与少量铜绿传感光。画面不使用电商白底、厂商品牌或健康 App 图表；连接状态、权限和指标继续由响应式 HTML/CSS 承担。具体提示词与源图见 [[docs/art-prompts/sleep-hardware-dossiers]]。
 
+《潮汐不肯归档》用一张 2:1 低潮主视觉、三张 3:2 地点版画与三张 4:5 人物肖像验证沙盒的混合语法：主视觉保留左侧标题区，地点图只增强机械、档案与空间感，人物用职业道具区分立场；地图、行动条件、回潮与人物状态仍由 HTML/CSS 承担。红色屋顶粉线和盐晶海绿是本案局部识别色，不改变全局深蓝、暖纸和旧金体系。提示词与文件映射见 [[docs/art-prompts/tide-refused-assets]]。
+
 参考 Fallen London 的文学密度与媒介气质，但不复制其角色、徽章、边框、地图构图或界面布局。原创边界与玩法合成原则见 [[docs/north-star]]。
 
 ## 相关文档
@@ -37,4 +39,5 @@
 - [[docs/art-prompts/four-act-headers]]
 - [[docs/art-prompts/lin-du-handoff-portrait]]
 - [[docs/art-prompts/sleep-hardware-dossiers]]
+- [[docs/art-prompts/tide-refused-assets]]
 - [[docs/product-overview]]

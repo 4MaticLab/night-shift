@@ -24,11 +24,12 @@ import { endingEpilogues, getEndingEpilogue } from "@/src/content/endings";
 import { cityWatchEchoes, cityWatches, DEMO_CITY_WATCH_ID, getCityWatch, getCityWatchEcho, getCityWatchId } from "@/src/content/watches";
 import { getWakeEcho, getWakeEchoById, wakeEchoes } from "@/src/content/wake-echoes";
 import { createClueShareUrl, readSharedClueQuery, removeSharedClueQuery } from "@/src/lib/game-engine/clue-sharing";
-import { BLACKWATER_CREEK_CAMPAIGN_ID, campaignRegistry, DEFAULT_CAMPAIGN_ID, RAIN_RADIO_CAMPAIGN_ID } from "@/src/content/campaigns/registry";
+import { BLACKWATER_CREEK_CAMPAIGN_ID, campaignRegistry, DEFAULT_CAMPAIGN_ID, RAIN_RADIO_CAMPAIGN_ID, TIDE_REFUSED_CAMPAIGN_ID } from "@/src/content/campaigns/registry";
 import { lastTramCampaign } from "@/src/content/campaigns/last-tram";
 import { rainRadioCampaign } from "@/src/content/campaigns/rain-radio";
 import { getCampaignRouteDirection, matchCampaignEvidenceRelation } from "@/src/content/campaigns/types";
 import { blackwaterCreekCampaign } from "@/src/content/campaigns/blackwater-creek";
+import { tideRefusedCampaign } from "@/src/content/campaigns/tide-refused";
 import { availableSandboxEndings, resolveSandboxAction, startSandboxCampaign } from "@/src/lib/sandbox/engine";
 import { normalizeSandboxProgress, useSandboxStore } from "@/src/stores/sandbox-store";
 import { campaignSupportsLocale, localizeCampaign } from "@/src/i18n/core";
@@ -67,9 +68,9 @@ describe("Night Shift case content", () => {
     expect(nightShiftCase.collectibles).toHaveLength(8);
   });
 
-  it("registers two linear campaigns and one distinct sandbox campaign", () => {
-    expect(campaignRegistry.map((campaign) => campaign.id)).toEqual(["case-001", "case-002", "case-003"]);
-    expect(new Set(campaignRegistry.map((campaign) => campaign.case.title))).toHaveLength(3);
+  it("registers two linear campaigns and two distinct sandbox campaigns", () => {
+    expect(campaignRegistry.map((campaign) => campaign.id)).toEqual(["case-001", "case-002", "case-003", "case-004"]);
+    expect(new Set(campaignRegistry.map((campaign) => campaign.case.title))).toHaveLength(4);
     expect(new Set(campaignRegistry.flatMap((campaign) => campaign.case.clues.map((clue) => clue.id))).size)
       .toBe(campaignRegistry.reduce((total, campaign) => total + campaign.case.clues.length, 0));
 
@@ -93,6 +94,9 @@ describe("Night Shift case content", () => {
     expect(blackwaterCreekCampaign.id).toBe(BLACKWATER_CREEK_CAMPAIGN_ID);
     expect(blackwaterCreekCampaign.format).toBe("sandbox-expedition");
     expect(blackwaterCreekCampaign.sandbox?.locations).toHaveLength(9);
+    expect(tideRefusedCampaign.id).toBe(TIDE_REFUSED_CAMPAIGN_ID);
+    expect(tideRefusedCampaign.format).toBe("sandbox-expedition");
+    expect(tideRefusedCampaign.sandbox?.locations).toHaveLength(7);
     expect(rainRadioCampaign.case.title).toBe("只在雨中播出的电台");
     expect(lastTramCampaign.case.clues.some((clue) => rainRadioCampaign.case.clues.some((other) => other.id === clue.id))).toBe(false);
   });
@@ -123,6 +127,50 @@ describe("Night Shift case content", () => {
     const terminal = resolveSandboxAction(content, startSandboxCampaign(content, "bootlegger"), "farm-assault");
     expect(terminal.ok).toBe(true);
     expect(availableSandboxEndings(content, terminal.progress).map((ending) => ending.id)).toEqual(["farm-fall"]);
+  });
+
+  it("covers the original tide sandbox content matrix and two representative routes", () => {
+    const content = tideRefusedCampaign.sandbox!;
+    expect(content.origins.map((origin) => origin.id)).toEqual(["salvage-clerks", "night-ferry-families"]);
+    expect(content.locations.map((location) => location.actions.length)).toEqual([3, 3, 3, 3, 3, 4, 3]);
+    expect(content.locations.flatMap((location) => location.actions)).toHaveLength(22);
+    expect(content.clues).toHaveLength(16);
+    expect(content.handouts).toHaveLength(5);
+    expect(content.items).toHaveLength(9);
+    expect(content.npcs).toHaveLength(9);
+    expect(content.corruptionStages.map((stage) => stage.stage)).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+    expect(content.endings.map((ending) => ending.id)).toEqual(["public-ledger", "ferry-home", "seal-gate", "restore-district"]);
+
+    let families = startSandboxCampaign(content, "night-ferry-families");
+    for (const actionId of ["ferry-roster", "ferry-tickets", "clock-cylinder", "clock-ring", "rowhouses-testimony", "rowhouses-evacuate"]) {
+      const resolution = resolveSandboxAction(content, families, actionId);
+      expect(resolution.ok, actionId).toBe(true);
+      families = resolution.progress;
+    }
+    expect(availableSandboxEndings(content, families).map((ending) => ending.id)).toContain("ferry-home");
+    expect(families.npcStates["mei-shao"]).toBe("rescued");
+
+    let clerks = startSandboxCampaign(content, "salvage-clerks");
+    for (const actionId of [
+      "committee-compensation",
+      "floodgate-log",
+      "floodgate-gauge",
+      "salt-nameplates",
+      "salt-tenancy",
+      "rowhouses-rubbings",
+      "ferry-roster",
+      "clock-cylinder",
+      "clock-ring",
+      "records-ledger",
+      "records-names",
+      "records-redraw",
+    ]) {
+      const resolution = resolveSandboxAction(content, clerks, actionId);
+      expect(resolution.ok, actionId).toBe(true);
+      clerks = resolution.progress;
+    }
+    expect(availableSandboxEndings(content, clerks).map((ending) => ending.id)).toContain("restore-district");
+    expect(clerks.clueIds).toContain("redrawn-master-map");
   });
 
   it("delays Blackwater Creek action effects until the morning report and settles only once", () => {
@@ -168,6 +216,26 @@ describe("Night Shift case content", () => {
       phase: "day",
       pendingActionId: undefined,
       selectedItemId: undefined,
+    });
+    persistWarning.mockRestore();
+  });
+
+  it("isolates both sandbox saves and resets only the selected case", () => {
+    const blackwater = blackwaterCreekCampaign.sandbox!;
+    const tide = tideRefusedCampaign.sandbox!;
+    const persistWarning = vi.spyOn(console, "warn").mockImplementation(() => {});
+    useSandboxStore.setState({ saves: {} });
+
+    expect(useSandboxStore.getState().start(blackwaterCreekCampaign.id, blackwater, "bootlegger")).toBe(true);
+    expect(useSandboxStore.getState().start(tideRefusedCampaign.id, tide, "night-ferry-families")).toBe(true);
+    expect(useSandboxStore.getState().saves[blackwaterCreekCampaign.id].originId).toBe("bootlegger");
+    expect(useSandboxStore.getState().saves[tideRefusedCampaign.id].originId).toBe("night-ferry-families");
+
+    useSandboxStore.getState().reset(tideRefusedCampaign.id, tide);
+    expect(useSandboxStore.getState().saves[tideRefusedCampaign.id].started).toBe(false);
+    expect(useSandboxStore.getState().saves[blackwaterCreekCampaign.id]).toMatchObject({
+      started: true,
+      originId: "bootlegger",
     });
     persistWarning.mockRestore();
   });

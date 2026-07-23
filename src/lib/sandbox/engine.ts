@@ -134,12 +134,14 @@ export function chooseSandboxEnding(
 }
 
 export function assertSandboxCampaign(content: SandboxCampaignContent): SandboxCampaignContent {
+  const originIds = unique(content.origins.map((item) => item.id));
   const locationIds = unique(content.locations.map((item) => item.id));
   const clueIds = unique(content.clues.map((item) => item.id));
   const handoutIds = unique(content.handouts.map((item) => item.id));
   const itemIds = unique(content.items.map((item) => item.id));
   const npcIds = unique(content.npcs.map((item) => item.id));
   const actionIds = unique(content.locations.flatMap((location) => location.actions.map((action) => action.id)));
+  if (originIds.length !== content.origins.length) throw new Error(`Sandbox ${content.title} has duplicate origin ids`);
   if (locationIds.length !== content.locations.length) throw new Error(`Sandbox ${content.title} has duplicate location ids`);
   if (clueIds.length !== content.clues.length) throw new Error(`Sandbox ${content.title} has duplicate clue ids`);
   if (handoutIds.length !== content.handouts.length) throw new Error(`Sandbox ${content.title} has duplicate handout ids`);
@@ -147,6 +149,9 @@ export function assertSandboxCampaign(content: SandboxCampaignContent): SandboxC
   if (npcIds.length !== content.npcs.length) throw new Error(`Sandbox ${content.title} has duplicate npc ids`);
   if (actionIds.length !== content.locations.flatMap((location) => location.actions).length) throw new Error(`Sandbox ${content.title} has duplicate action ids`);
   if (content.origins.length < 2) throw new Error(`Sandbox ${content.title} needs at least two origins`);
+  if (!content.presentation.caseNumber || !content.presentation.mapTitle || !content.presentation.conditionLabel) {
+    throw new Error(`Sandbox ${content.title} is missing presentation copy`);
+  }
   if (content.corruptionStages.map((stage) => stage.stage).join(",") !== "0,1,2,3,4,5,6,7") {
     throw new Error(`Sandbox ${content.title} needs corruption stages 0-7`);
   }
@@ -165,6 +170,7 @@ export function assertSandboxCampaign(content: SandboxCampaignContent): SandboxC
       assertIds(action.effects.handoutIds, handoutIds, "action handout");
       assertIds(action.effects.itemIds, itemIds, "action item");
       assertIds(action.effects.unlockLocationIds, locationIds, "action location");
+      assertIds(action.requires?.origins, originIds, "requirement origin");
       assertIds(action.requires?.allClueIds, clueIds, "requirement clue");
       assertIds(action.requires?.anyClueIds, clueIds, "requirement clue");
       assertIds(action.requires?.allItemIds, itemIds, "requirement item");
@@ -176,6 +182,7 @@ export function assertSandboxCampaign(content: SandboxCampaignContent): SandboxC
   }
   for (const clue of content.clues) assertIds(clue.relatedIds, clueIds, "clue relation");
   for (const ending of content.endings) {
+    assertIds(ending.requires.origins, originIds, "ending origin");
     assertIds(ending.requires.allClueIds, clueIds, "ending clue");
     assertIds(ending.requires.anyClueIds, clueIds, "ending clue");
     assertIds(ending.requires.allItemIds, itemIds, "ending item");

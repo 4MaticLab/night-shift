@@ -1,6 +1,6 @@
 import type { SleepMode, SleepQuality, SleepSession } from "@/src/lib/game-engine/schema";
 
-export type SandboxOriginId = "university" | "bootlegger";
+export type SandboxOriginId = string;
 export type SandboxRisk = "quiet" | "exposed" | "dangerous" | "terminal";
 export type SandboxNpcState = "unknown" | "wary" | "helpful" | "hostile" | "rescued" | "lost" | "transformed";
 export type SandboxPhase = "day" | "night" | "morning";
@@ -43,6 +43,7 @@ export interface SandboxItem {
 
 export interface SandboxNpc {
   id: string;
+  assetId?: string;
   name: string;
   role: string;
   faction: string;
@@ -92,6 +93,7 @@ export interface SandboxAction {
 
 export interface SandboxLocation {
   id: string;
+  assetId?: string;
   order: number;
   name: string;
   archiveName: string;
@@ -119,12 +121,44 @@ export interface SandboxCorruptionStage {
   cost: string;
 }
 
-export interface SandboxLicense {
-  originalAuthor: string;
-  translator: string;
+export interface SandboxCredits {
+  attribution: string;
   adaptation: string;
   usage: string;
   notice: string;
+}
+
+export interface SandboxPresentation {
+  caseNumber: string;
+  caseTypeLabel: string;
+  loadingTitle: string;
+  entryEyebrow: string;
+  entryCta: string;
+  navigationLabel: string;
+  mapTitle: string;
+  mapDescription: string;
+  mapAriaLabel: string;
+  mapCaption: string;
+  conditionLabel: string;
+  conditionAdvanceHint: string;
+  threatLabel: string;
+  handoffModeLabel: string;
+  sleepEthic: string;
+  nightTitle: string;
+  nightClosingLine: string;
+  morningTitle: string;
+  noNewEvidence: string;
+  noEndingTitle: string;
+  noEndingDescription: string;
+  resetTitle: string;
+  resetDescription: string;
+  endingEyebrow: string;
+  handoutKicker: string;
+  handoutFooter: string;
+  briefingHeading: string;
+  creditsHeading: string;
+  heroAssetId?: string;
+  npcStateLabels: Record<SandboxNpcState, string>;
 }
 
 export interface SandboxCampaignContent {
@@ -142,7 +176,8 @@ export interface SandboxCampaignContent {
   npcs: SandboxNpc[];
   corruptionStages: SandboxCorruptionStage[];
   endings: SandboxEnding[];
-  license: SandboxLicense;
+  presentation: SandboxPresentation;
+  credits: SandboxCredits;
 }
 
 export interface SandboxLogEntry {

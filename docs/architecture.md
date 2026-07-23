@@ -68,9 +68,9 @@
 
 案件 manifest 同时提供章节数、线索数、藏品数、真结局门槛、档案标题和逐夜视觉。`resolveNight`、关系匹配、结局资格、迁移过滤和页面投影都显式接收当前 manifest；通用模块不按 `case-001`／`case-002` 写分支。`defineCampaign` 要求章节从 1 连续排列、每个 choice 有路线、每夜拥有明信片／植物／四时辰回声／睡隙回声／夜印，并拒绝跨案件线索引用和不可达门槛。
 
-`CampaignManifest.format` 额外区分 `linear-night` 与 `sandbox-expedition`。第三案通过一个最小线性兼容外壳继续满足注册表的共享展示字段，实际玩法读取 `sandbox` 内容；`app/page.tsx` 只按格式选择通用沙盒界面，不按 `case-003` 写业务分支。`assertSandboxCampaign` 校验地点、行动、证物、手札、物品、NPC 和全部条件／效果引用，并要求污染阶段严格覆盖 0–7。
+`CampaignManifest.format` 额外区分 `linear-night` 与 `sandbox-expedition`。第三、四案各通过一个最小线性兼容外壳满足注册表的共享展示字段，实际玩法读取 `sandbox` 内容；`app/page.tsx` 只按格式选择通用沙盒界面，不按案件 ID 写业务分支。`SandboxPresentation` 提供案件编号、入口、地图、主状态、警觉、夜班、晨报、结局、重置、人物状态与署名语义；内部 `corruption`／`threat` 因存档兼容继续保留，第四案显示为“回潮”／“城市警觉”。地点和人物可选 `assetId`，缺图仍保留完整 CSS 档案视图。`assertSandboxCampaign` 校验入口、地点、行动、证物、手札、物品、NPC、展示字段和全部条件／效果引用，并要求主状态阶段严格覆盖 0–7。
 
-沙盒进度单独持久化到 `night-shift-sandbox-v1` v2 的 `saves[campaignId]`，不修改线性存档 v14。其状态包含入口、已显影／访问地点、已完成行动、证物、手札、物品、污染、威胁、NPC 状态、行动日志、低刺激偏好与结局，并增加 `day → night → morning → day`、待执行行动、随队物品、活动 `SleepSession` 和最后晨报差异快照。v1 存档缺少延迟字段时安全归一化为白天；只有同时具有合法行动和会话的夜间存档才恢复为夜间，晨报也必须具备结果快照。行动结算没有随机数：出发时只冻结交接与开始时间，结束夜班时才调用一次 `resolveSandboxAction`；晨报阶段不能再次结算。前置条件决定是否可执行，效果通过去重与有界增量写入，终局结局会优先于普通收场。独立存档避免旧案迁移承受无关字段，也让重置第三案不会触及前两案。
+沙盒进度单独持久化到 `night-shift-sandbox-v1` v2 的 `saves[campaignId]`，不修改线性存档 v16。其状态包含入口、已显影／访问地点、已完成行动、证物、手札、物品、主状态、威胁、NPC 状态、行动日志、低刺激偏好与结局，并增加 `day → night → morning → day`、待执行行动、随队物品、活动 `SleepSession` 和最后晨报差异快照。v1 存档缺少延迟字段时安全归一化为白天；只有同时具有合法行动和会话的夜间存档才恢复为夜间，晨报也必须具备结果快照。行动结算没有随机数：出发时只冻结交接与开始时间，结束夜班时才调用一次 `resolveSandboxAction`；晨报阶段不能再次结算。前置条件决定是否可执行，效果通过去重与有界增量写入，终局结局会优先于普通收场。按 `campaignId` 隔离让重置 CASE 003 或 CASE 004 都不会触及其他案件。
 
 睡眠质量为 `interrupted`、`regular`、`restful`：三者都至少解锁一条主线线索；差异只体现在路线长度、收藏数量、回声事件和环境观察。`selectedPreparationId` 记录当前随身物，`preparationHistory` 按章节保存已经归来的准备；`selectedChoice` 记录当前方向，`choiceHistory` 按章节保存路线履历。方向决定四个路线节点、五段夜间事件、城市遭遇与归来来信，但同章节三个方向的线索和藏品结果保持一致。完成一夜后，章节编号会加入持久化的 `nightSealIds` 与 `completedReports`，旅程册据此解锁明信片与路线履历。
 

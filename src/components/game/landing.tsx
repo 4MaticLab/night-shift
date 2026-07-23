@@ -35,7 +35,7 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
           <button className="primary-button" disabled={!interactive} onClick={onStart}>{started ? t("继续当前案件") : locale === "en" ? `Begin Case ${campaign.presentation.archiveNumber}` : `开始第 ${campaign.presentation.archiveNumber} 宗案件`} <ArrowRight size={18} /></button>
           <button className="text-button" disabled={!interactive} onClick={onDemo}><BookOpen size={17} /> {isSandbox ? t("查看案件说明") : t("观看 90 秒演示")}</button>
         </div>
-        <div className="shift-rule"><span>{isSandbox ? t("你负责调度调查小队") : t("你负责白天推理")}</span><i /><span>{isSandbox ? t("山谷按行动改变") : t("林渡负责夜晚调查")}</span></div>
+        <div className="shift-rule"><span>{isSandbox ? t("你负责调度调查小队") : t("你负责白天推理")}</span><i /><span>{isSandbox ? t("世界按行动改变") : t("林渡负责夜晚调查")}</span></div>
       </section>
       <section className="campaign-shelf" aria-label={t("案件剧本选择")}>
         <small>CASE LIBRARY · {t("选择剧本")}</small>

@@ -7718,6 +7718,21 @@ blockquote {
   background: #111714;
 }
 
+.sandbox-location-art {
+  margin: -30px clamp(-42px, -3vw, -20px) 24px;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border-bottom: 1px solid #3c453a;
+  background: #090d0b;
+}
+
+.sandbox-location-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(.82) contrast(1.04);
+}
+
 .sandbox-location-panel>header {
   padding-bottom: 22px;
   border-bottom: 1px solid #3c453a;
@@ -8195,8 +8210,20 @@ blockquote {
 .npc-ledger article {
   min-height: 190px;
   padding: 17px;
+  overflow: hidden;
   border: 1px solid #3d473d;
   background: #141a16;
+}
+
+.npc-ledger .npc-ledger-portrait {
+  width: calc(100% + 34px);
+  height: 180px;
+  margin: -17px -17px 14px;
+  display: block;
+  object-fit: cover;
+  object-position: center 24%;
+  border-bottom: 1px solid #3d473d;
+  filter: saturate(.82) contrast(1.03);
 }
 
 .npc-ledger article>div {
@@ -8524,6 +8551,8 @@ blockquote {
   grid-template-rows: auto 1fr auto;
   color: #b6ae9d;
   background: radial-gradient(circle at 50% 45%, #493b2429, transparent 34%), linear-gradient(145deg, #111710, #060906 70%);
+  background-position: center;
+  background-size: cover;
 }
 
 .ending-pulse {

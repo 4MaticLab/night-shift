@@ -598,6 +598,30 @@ test("restores a real Blackwater Creek expedition after reload and settles it on
   await expect(page.getByText("每周驶向波士顿的货单")).toHaveCount(1);
 });
 
+test("opens the illustrated tide case and returns its first deterministic report", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /CASE 004/ }).click();
+  await expect(page.locator(".hero-art")).toHaveAttribute("src", /hero-v1/);
+  await page.getByRole("button", { name: /开始第 004 宗案件/ }).click();
+  const clerks = page.locator("article", { hasText: "市政打捞科夜班员" });
+  await clerks.getByRole("button", { name: /以此身份进入低潮/ }).click();
+  await page.locator(".sandbox-map").getByRole("button", { name: /03 第七泄洪闸/ }).click();
+  await expect(page.locator(".sandbox-location-art img")).toHaveAttribute("src", /location-floodgate-v1/);
+
+  const logAction = page.locator("article", { hasText: "取出闸齿日志" });
+  await logAction.getByRole("button", { name: "安排今晚调查" }).click();
+  await expect(page.getByRole("heading", { name: "把这一程交给夜班。" })).toBeVisible();
+  await page.getByRole("button", { name: /今晚交给调查队/ }).click();
+  await expect(page.getByRole("heading", { name: "取出闸齿日志" })).toBeVisible();
+  await page.getByRole("button", { name: /跳到清晨/ }).click();
+  await expect(page.getByText("昨夜调查完成")).toBeVisible();
+  await expect(page.getByText("紧急闸门日志")).toBeVisible();
+  await expect(page.getByText(/睡眠质量只改变晨报的叙事层次/)).toBeVisible();
+  await page.getByRole("button", { name: /归档晨报，准备下一夜/ }).click();
+  await page.getByRole("navigation", { name: "潮汐不肯归档卷宗导航" }).getByRole("button", { name: /证物/ }).click();
+  await expect(page.getByRole("heading", { name: "证物与展示材料" })).toBeVisible();
+});
+
 test.describe("mobile 390x844", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
@@ -651,6 +675,58 @@ test.describe("mobile 390x844", () => {
     await expect(page.getByRole("heading", { name: "证物与展示材料" })).toBeVisible();
     await page.getByRole("navigation", { name: "黑水溪卷宗导航" }).getByRole("button", { name: /收场/ }).click();
     await expect(page.getByRole("heading", { name: "接管威士忌生意" })).toBeVisible();
+  });
+
+  test("plays the original tide case from illustrated entry to resident return", async ({ page }) => {
+    test.setTimeout(90_000);
+    await page.goto("/");
+    await page.getByRole("button", { name: /CASE 004/ }).click();
+    await expect(page.locator(".hero-art")).toHaveAttribute("src", /hero-v1/);
+    await page.getByRole("button", { name: /开始第 004 宗案件/ }).click();
+    await expect(page.locator(".sandbox-origin-backdrop")).toHaveCSS("background-image", /hero-v1/);
+    await expectNoPageOverflow(page);
+
+    const families = page.locator("article", { hasText: "夜渡船失踪者家属" });
+    await families.getByRole("button", { name: /以此身份进入低潮/ }).click();
+    await expect(page.getByRole("navigation", { name: "潮汐不肯归档卷宗导航" })).toBeVisible();
+
+    const runAction = async (locationName: RegExp, actionTitle: string) => {
+      await page.locator(".sandbox-map").getByRole("button", { name: locationName }).click();
+      const action = page.locator("article", { hasText: actionTitle });
+      await action.getByRole("button", { name: "安排今晚调查" }).click();
+      await expect(page.getByRole("heading", { name: "把这一程交给夜班。" })).toBeVisible();
+      await expectNoPageOverflow(page);
+      await page.getByRole("button", { name: /今晚交给调查队/ }).click();
+      await expect(page.getByRole("heading", { name: actionTitle })).toBeVisible();
+      await page.getByRole("button", { name: /跳到清晨/ }).click();
+      await expect(page.getByText("昨夜调查完成")).toBeVisible();
+      await expectNoPageOverflow(page);
+      await page.getByRole("button", { name: /归档晨报，准备下一夜/ }).click();
+    };
+
+    await runAction(/02 夜渡船码头/, "重抄最后一班名册");
+    await runAction(/02 夜渡船码头/, "让返程票靠近空座");
+    await runAction(/05 停钟棚/, "播放未播警报");
+    await runAction(/05 停钟棚/, "让迟到的钟响完");
+    await runAction(/06 淹没排屋/, "逐户拓下门牌");
+
+    await page.locator(".sandbox-map").getByRole("button", { name: /04 盐档案馆/ }).click();
+    await expect(page.locator(".sandbox-location-art img")).toHaveAttribute("src", /location-salt-archive-v1/);
+    await page.getByRole("navigation", { name: "潮汐不肯归档卷宗导航" }).getByRole("button", { name: /人物/ }).click();
+    await expect(page.locator(".npc-ledger-portrait")).toHaveCount(3);
+    await page.getByRole("navigation", { name: "潮汐不肯归档卷宗导航" }).getByRole("button", { name: /地点/ }).click();
+
+    await runAction(/06 淹没排屋/, "听完住户的那一夜");
+    await runAction(/06 淹没排屋/, "逐户送人上夜渡船");
+    await page.getByRole("navigation", { name: "潮汐不肯归档卷宗导航" }).getByRole("button", { name: /收场/ }).click();
+    await expect(page.getByRole("heading", { name: "让夜渡船先送人回家" })).toBeVisible();
+    await page.getByRole("button", { name: "以此收场" }).click();
+    await expect(page.getByRole("heading", { name: "让夜渡船先送人回家" })).toBeVisible();
+    await expect(page.locator(".sandbox-ending-reveal")).toHaveCSS("background-image", /hero-v1/);
+    await expect(page.getByText("Night Shift 原创案件 · 《潮汐不肯归档》")).toBeVisible();
+    await expectNoPageOverflow(page);
+    await page.getByRole("button", { name: "重看证物" }).click();
+    await expect(page.getByRole("heading", { name: "证物与展示材料" })).toBeVisible();
   });
 
   test("keeps the first-night loop touchable without page overflow", async ({ page }) => {

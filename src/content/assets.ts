@@ -299,6 +299,27 @@ export const assets = {
   districtGlassHill: {
     id: "district.glass-hill", src: "/art/districts/glass-hill-v1.webp", alt: "玻璃丘层层上升的温室、档案建筑、旧轨与信号台", category: "district-illustration", status: "complete",
   },
+  tideRefusedHero: {
+    id: "sandbox.tide.hero", src: "/art/sandbox/tide-refused/hero-v1.webp", alt: "低潮中显露的河下区、夜渡船、第七闸与沿屋顶延伸的红色返程路线", category: "header", status: "complete",
+  },
+  tideFloodgate: {
+    id: "sandbox.tide.location.floodgate", src: "/art/sandbox/tide-refused/location-floodgate-v1.webp", alt: "河下区第七泄洪闸的黑铜闸齿、逆向潮位尺与卡在齿轮间的日志", category: "district-illustration", status: "complete",
+  },
+  tideSaltArchive: {
+    id: "sandbox.tide.location.salt-archive", src: "/art/sandbox/tide-refused/location-salt-archive-v1.webp", alt: "盐档案馆里悬挂的结晶档案页与摆放盐档手套的工作桌", category: "district-illustration", status: "complete",
+  },
+  tideLowTideRecords: {
+    id: "sandbox.tide.location.low-tide-records", src: "/art/sandbox/tide-refused/location-low-tide-records-v1.webp", alt: "低潮记录室内被浅水包围的工程总账、城市母图与红色粉线", category: "district-illustration", status: "complete",
+  },
+  tideFerryman: {
+    id: "sandbox.tide.character.ferryman", src: "/art/sandbox/tide-refused/character-ferryman-v1.webp", alt: "握着船篙并佩戴黄铜剪票钳的夜渡船工乔河档案肖像", category: "character-portrait", status: "complete",
+  },
+  tideEngineer: {
+    id: "sandbox.tide.character.engineer", src: "/art/sandbox/tide-refused/character-engineer-v1.webp", alt: "抱着旧工程总账、手持第七闸钥匙的退休工程师顾山档案肖像", category: "character-portrait", status: "complete",
+  },
+  tideArchivist: {
+    id: "sandbox.tide.character.archivist", src: "/art/sandbox/tide-refused/character-archivist-v1.webp", alt: "戴盐档手套并托着结晶档案页的守页人阎珞档案肖像", category: "character-portrait", status: "complete",
+  },
   hardwareVirtualRing: {
     id: "hardware.virtual-ring", src: "/art/hardware/virtual-ring-v1.webp", alt: "铺在旧档案纸上的深蓝睡眠戒，内圈露出细小传感器", category: "hardware-illustration", status: "complete",
   },

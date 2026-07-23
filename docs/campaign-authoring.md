@@ -9,13 +9,14 @@ Night Shift 使用受信任的编译期案件包，而不是把某一份剧本�
 - `case-001`：[[docs/story-bible|《零点四十三分的末班车》]]
 - `case-002`：[[docs/rain-radio-story-bible|《只在雨中播出的电台》]]
 - `case-003`：[[docs/blackwater-creek-adaptation-bible|《黑水溪》]]，首个 `sandbox-expedition` 非商业本地原型
+- `case-004`：[[docs/tide-refused-story-bible|《潮汐不肯归档》]]，首个完全原创的 `sandbox-expedition`
 
 ## Manifest 契约
 
 `src/content/campaigns/types.ts` 定义并校验以下内容：
 
 - `format`：省略或 `linear-night` 使用连续五夜；`sandbox-expedition` 使用地点／条件／效果运行时。
-- `sandbox`：仅沙盒案件提供，包含入口、地点、行动、人物、证物、手札、物品、污染阶段、结局与署名许可。
+- `sandbox`：仅沙盒案件提供，包含入口、地点、行动、人物、证物、手札、物品、0–7 主状态、结局、`presentation` 与通用 `credits`。
 - `case`：案件标题、连续章节、线索、收藏品和每夜固定报告。
 - `routes`：每个章节 choice 都必须拥有且只拥有一条调查路线。
 - `relations`：联合推理使用的确定性线索对；引用必须落在本案线索白名单内。
@@ -24,7 +25,7 @@ Night Shift 使用受信任的编译期案件包，而不是把某一份剧本�
 - `characters`、`districts`：可选的人物和地区档案；空人物表会让通用档案页隐藏该区块。
 - `presentation`：档案编号、城市与侦探称呼、首页介绍、四幕图像、逐夜夜印和结案文案。
 
-`defineCampaign` 会在模块载入时拒绝重复 ID、非连续章节、缺失路线、每夜配套内容不完整、跨案件引用和不可达的真结局条件。沙盒案件还会拒绝重复地点／行动、非法条件与效果引用，以及不完整的 0–7 污染阶段。Zod schema 继续校验线性案件的单条内容字段与文学文本下限。
+`defineCampaign` 会在模块载入时拒绝重复 ID、非连续章节、缺失路线、每夜配套内容不完整、跨案件引用和不可达的真结局条件。沙盒案件还会拒绝重复入口／地点／行动、非法条件与效果引用、缺失展示契约，以及不完整的 0–7 主状态阶段。内部字段仍名为 `corruption`／`threat` 以兼容旧存档，界面必须使用案件 `presentation` 提供的语义标签，不按案件 ID 分支。Zod schema 继续校验线性案件的单条内容字段与文学文本下限。
 
 ## 新增案件
 
