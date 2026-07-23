@@ -60,7 +60,12 @@ function GamePage() {
 
   useEffect(() => {
     const toggleDemo = (event: KeyboardEvent) => {
-      if (event.shiftKey && event.key.toLowerCase() === "d") setDemo((value) => !value);
+      if (!event.shiftKey || event.key.toLowerCase() !== "d") return;
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      if (target?.closest("input, textarea, select, [contenteditable='true']")) return;
+      if (document.querySelector("[aria-modal='true']:not(.demo-drawer)")) return;
+      event.preventDefault();
+      setDemo((value) => !value);
     };
     window.addEventListener("keydown", toggleDemo);
     return () => window.removeEventListener("keydown", toggleDemo);
@@ -108,7 +113,7 @@ function GamePage() {
   const hardwarePanel = <AnimatePresence>{hardwareOpen && <SleepHardwarePanel onClose={() => setHardwareOpen(false)} />}</AnimatePresence>;
 
   if (libraryOpen || (!game.started && !intro)) {
-    return <>{clueNotice}<Hero interactive={hydrated} onStart={() => { setLibraryOpen(false); if (game.started) setIntro(false); else setIntro(true); }} onDemo={() => { game.begin(); setLibraryOpen(false); setDemo(true); }} /><AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={changeView} />}</AnimatePresence></>;
+    return <>{clueNotice}<Hero interactive={hydrated} onStart={() => { setLibraryOpen(false); if (game.started) setIntro(false); else setIntro(true); }} onDemo={() => { setLibraryOpen(false); setDemo(true); }} /><AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={changeView} />}</AnimatePresence></>;
   }
   if (intro && !game.started) return <>{clueNotice}<Intro onDone={() => { game.begin(); setIntro(false); }} /></>;
   if (game.phase === "night") return <>{clueNotice}<NightRun onFinish={game.finishNight} onHardware={() => setHardwareOpen(true)} />{hardwarePanel}</>;

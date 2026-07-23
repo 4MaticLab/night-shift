@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
 import { Check, Copy, QrCode, Send, X } from "lucide-react";
@@ -8,6 +8,7 @@ import type { Clue } from "@/src/lib/game-engine/schema";
 import { createClueShareUrl } from "@/src/lib/game-engine/clue-sharing";
 import { useGameStore } from "@/src/stores/game-store";
 import { useI18n } from "@/src/i18n/provider";
+import { useAccessibleDialog } from "@/src/lib/use-accessible-dialog";
 
 export interface ClueGiftNoticeData {
   kind: "success" | "info" | "error";
@@ -18,6 +19,7 @@ export interface ClueGiftNoticeData {
 export function ClueShareDialog({ clue, onClose }: { clue: Clue; onClose: () => void }) {
   const campaignId = useGameStore((state) => state.campaignId);
   const { locale, t } = useI18n();
+  const dialogRef = useRef<HTMLElement>(null);
   const [qrDataUrl, setQrDataUrl] = useState("");
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
   const shareUrl = typeof window === "undefined" ? "" : createClueShareUrl(`${window.location.origin}${window.location.pathname}`, campaignId, clue.id);
@@ -34,15 +36,11 @@ export function ClueShareDialog({ clue, onClose }: { clue: Clue; onClose: () => 
     }).catch(() => {
       if (!cancelled) setQrDataUrl("");
     });
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", closeOnEscape);
     return () => {
       cancelled = true;
-      window.removeEventListener("keydown", closeOnEscape);
     };
-  }, [onClose, shareUrl]);
+  }, [shareUrl]);
+  useAccessibleDialog(dialogRef, onClose);
 
   const copyLink = async () => {
     const fallbackCopy = () => {
@@ -72,9 +70,9 @@ export function ClueShareDialog({ clue, onClose }: { clue: Clue; onClose: () => 
     }
   };
 
-  return <motion.div className="clue-share-scrim" role="presentation" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-    <motion.section className="clue-share-dialog" role="dialog" aria-modal="true" aria-labelledby="clue-share-title" initial={{ opacity: 0, y: 18, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: .98 }}>
-      <button className="clue-share-close" type="button" aria-label={t("关闭线索分享")} onClick={onClose}><X /></button>
+  return <motion.div className="clue-share-scrim" data-dialog-layer role="presentation" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+    <motion.section ref={dialogRef} className="clue-share-dialog" role="dialog" aria-modal="true" aria-labelledby="clue-share-title" tabIndex={-1} initial={{ opacity: 0, y: 18, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: .98 }}>
+      <button className="clue-share-close" type="button" data-dialog-initial-focus aria-label={t("关闭线索分享")} onClick={onClose}><X /></button>
       <div className="clue-share-copy">
         <small>SEND A CLUE · {t("好友线索")}</small>
         <h2 id="clue-share-title">{locale === "en" ? <>Send “{clue.title}”<br />to a friend&apos;s caseboard.</> : <>把「{clue.title}」<br />送进好友的案件板。</>}</h2>
