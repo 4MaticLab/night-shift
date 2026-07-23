@@ -4,7 +4,7 @@
 
 ## 当前焦点
 
-当前没有进行中的主计划。最近完成的 [[plans/0027-sandbox-delayed-expedition-loop]] 保留《黑水溪》的九地点沙盒世界，并把即时行动改造成 Night Shift 核心的交接、延迟探索和晨报循环；下一轮不满意点先建立新的 `proposed` 计划。
+最近完成的 [[plans/0028-night-shift-logo]] 已产出位图 Logo、浏览器 favicon 与 Next.js `app/icon.png`，并完成运行时接入和全套验证。
 
 ## 计划清单
 
@@ -37,6 +37,7 @@
 | [[plans/0025-multi-campaign-runtime]] | `completed` | `manual` | P0 | 7/7 | 已发布双案件运行时、独立存档与第二案 |
 | [[plans/0026-blackwater-creek-sandbox-adaptation]] | `completed` | `manual` | P0 | 12/12 | 本地原型完成；公开推送／部署仍需 G4 授权复核 |
 | [[plans/0027-sandbox-delayed-expedition-loop]] | `completed` | `manual` | P0 | 8/8 | 已完成沙盒延迟探索、v2 存档、真实恢复与跨设备验收 |
+| [[plans/0028-night-shift-logo]] | `completed` | `auto` | P1 | 4/4 | Logo、favicon、文档与验证已完成 |
 
 ## 状态规则
 

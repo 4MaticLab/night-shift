@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(origin),
     title,
     description,
-    icons: { icon: "/art/headers/night-shift-hero.png", shortcut: "/art/headers/night-shift-hero.png" },
+    icons: { icon: "/favicon.png", shortcut: "/favicon.png", apple: "/art/brand/night-shift-logo-v1.png" },
     openGraph: { title, description, type: "website", url: origin, images: [{ url: `${origin}/og.png`, width: 1672, height: 941, alt: "夜班侦探 Night Shift" }] },
     twitter: { card: "summary_large_image", title, description, images: [`${origin}/og.png`] },
   };

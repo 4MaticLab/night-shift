@@ -11,7 +11,7 @@ export function TopBar({ chapter, onDemo, onHome }: { chapter: number; onDemo: (
   const campaign = getCampaign(useGameStore((state) => state.campaignId));
   return (
     <header className="topbar">
-      <button className="brand-mark compact" onClick={onHome}><span>NS</span><div><b>夜班侦探</b><small>NIGHT SHIFT</small></div></button>
+      <button className="brand-mark compact" onClick={onHome}><span aria-hidden="true" /><div><b>夜班侦探</b><small>NIGHT SHIFT</small></div></button>
       <div className="case-heading"><small>CASE {campaign.presentation.archiveNumber} · 第 {chapter} 夜</small><b>{campaign.case.title}</b></div>
       <button className="demo-pill" onClick={onDemo}><Zap size={14} /> DEMO</button>
     </header>

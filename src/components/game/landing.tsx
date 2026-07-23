@@ -19,7 +19,7 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
       <Image className="hero-art" src={heroAsset.src} alt={heroAsset.alt} fill priority sizes="100vw" />
       <div className="hero-vignette" />
       <nav className="landing-nav">
-        <div className="brand-mark"><span>NS</span><div><b>夜班侦探</b><small>NIGHT SHIFT</small></div></div>
+        <div className="brand-mark"><span aria-hidden="true" /><div><b>夜班侦探</b><small>NIGHT SHIFT</small></div></div>
         <button className="ghost-button" disabled={!interactive} onClick={onDemo}><Zap size={15} /> {isSandbox ? "CASE FILE" : "DEMO MODE"}</button>
       </nav>
       <section className="hero-copy">

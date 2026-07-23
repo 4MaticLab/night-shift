@@ -2,6 +2,8 @@
 
 | ID | 名称 | 类别 | 文件 | 状态 | 页面 |
 |---|---|---|---|---|---|
+| `brand.night-shift.logo` | Night Shift 品牌 Logo | Brand mark | `/public/art/brand/night-shift-logo-v1.png` | 完成 | 导航、夜班、晨报、Apple 图标 |
+| `brand.night-shift.favicon` | Night Shift favicon | Site icon | `/public/favicon.png`、`/app/icon.png` | 完成 | 浏览器标签、Next.js 站点图标 |
 | `header.night-shift.hero` | 夜班交接 | Header / Character / City | `/public/art/headers/shift-handoff-v2.webp` | 完成 | 首页、睡前 |
 | `header.night-expedition` | 雨夜高架调查 | Header / Character / City | `/public/art/headers/night-expedition-v1.webp` | 完成 | 夜间调查 |
 | `header.morning-report` | 黎明归来 | Header / Character / City | `/public/art/headers/morning-report-v1.webp` | 完成 | 晨报 |
@@ -49,12 +51,13 @@
 | `district.old-meridian` | 旧子午区 | District illustration | `/public/art/districts/old-meridian-v1.webp` | 完成 | 雾灯城分区志 |
 | `district.glass-hill` | 玻璃丘 | District illustration | `/public/art/districts/glass-hill-v1.webp` | 完成 | 雾灯城分区志 |
 
-核心插画、八件物证、五枚夜印、五张城市明信片、五张植物学标本、三枚社团纹章、九件口袋纪念物、林渡交接肖像、四张人物肖像与三张地区版画由内置图像生成能力生成；地图、纸张、图钉、路线、四阶段揭示、交接标签和档案材质保持代码原生，以便响应式缩放与动效控制。林渡的身份连续性与最终提示词见 [[docs/art-prompts/lin-du-handoff-portrait]]；明信片的生成约束与场景差异见 [[docs/art-prompts/city-postcards]]，植物提示词见 [[docs/art-prompts/night-greenhouse]]，纹章提示词见 [[docs/art-prompts/city-societies]]，纪念物提示词见 [[docs/art-prompts/pocket-souvenirs]]，人物提示词与源图映射见 [[docs/art-prompts/city-witness-portraits]]，地区提示词见 [[docs/art-prompts/foglight-districts]]。全部运行时引用通过 `src/content/assets.ts` manifest 解析。
+品牌 Logo、核心插画、八件物证、五枚夜印、五张城市明信片、五张植物学标本、三枚社团纹章、九件口袋纪念物、林渡交接肖像、四张人物肖像与三张地区版画由图像生成能力生成；地图、纸张、图钉、路线、四阶段揭示、交接标签和档案材质保持代码原生，以便响应式缩放与动效控制。品牌 Logo 的提示词与透明化记录见 [[docs/art-prompts/night-shift-logo]]；林渡的身份连续性与最终提示词见 [[docs/art-prompts/lin-du-handoff-portrait]]；明信片的生成约束与场景差异见 [[docs/art-prompts/city-postcards]]，植物提示词见 [[docs/art-prompts/night-greenhouse]]，纹章提示词见 [[docs/art-prompts/city-societies]]，纪念物提示词见 [[docs/art-prompts/pocket-souvenirs]]，人物提示词与源图映射见 [[docs/art-prompts/city-witness-portraits]]，地区提示词见 [[docs/art-prompts/foglight-districts]]。内容资产通过 `src/content/assets.ts` manifest 解析；全局品牌 Logo 与 CSS 场景由站点外壳直接引用。
 
 ## 相关文档
 
 - [[docs/art-direction]]
 - [[docs/art-prompts/global-style]]
+- [[docs/art-prompts/night-shift-logo]]
 - [[docs/art-prompts/archive-assets]]
 - [[docs/art-prompts/city-postcards]]
 - [[docs/art-prompts/night-greenhouse]]

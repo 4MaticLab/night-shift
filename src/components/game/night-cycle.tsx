@@ -35,7 +35,7 @@ export function Tonight({ onLaunch }: { onLaunch: (quality: SleepQuality, prepar
   return (
     <div className="content-grid tonight-page">
       <section className={selectedDirection ? "desk-scene handoff-ready" : "desk-scene"}>
-        <div className="scene-copy"><p className="eyebrow"><Clock3 size={14} /> 今晚的任务 · 23:40 前交接</p><h2>林渡正在整理<br />今晚的装备。</h2><p>选择一个调查方向。无论你今晚睡得如何，故事都会继续。</p></div>
+        <div className="scene-copy"><p className="eyebrow"><Clock3 size={14} /> 今晚的任务 · 23:40 前交接</p><h2>林渡正在整理<br />今晚的装备。</h2><p>选择一个调查方向。<br />无论你今晚睡得如何，故事都会继续。</p></div>
         <motion.figure className="handoff-portrait" initial={{ opacity: 0, y: 12, rotate: 1.4 }} animate={{ opacity: 1, y: 0, rotate: selectedDirection ? .35 : 1.15 }} transition={{ duration: .7, ease: "easeOut" }}>
           <div className="handoff-portrait-image"><Image src={handoffPortrait.src} alt={handoffPortrait.alt} fill priority sizes="(max-width: 600px) 44vw, (max-width: 900px) 34vw, 24vw" /></div>
           <figcaption><small>LIN DU · NIGHT DETECTIVE</small><b>林渡</b><span>{selectedDirection ? "已收到今晚的方向" : "在等你写下方向"}</span></figcaption>
@@ -114,7 +114,7 @@ export function NightRun({ onFinish }: { onFinish: () => void }) {
   return (
     <main className="night-run">
       <Image className="night-expedition-art" src={nightHeader.src} alt={nightHeader.alt} fill priority sizes="100vw" />
-      <div className="night-stars" /><div className="night-header"><div className="brand-mark compact"><span>NS</span><div><b>夜班进行中</b><small>第 {chapter} 夜 · {sleepMode === "real" ? "真实夜班" : qualityCopy[quality].time}</small></div></div><button onClick={onFinish}>{sleepMode === "real" ? "我醒了，拆开报告" : "跳到清晨"} <ArrowRight size={16} /></button></div>
+      <div className="night-stars" /><div className="night-header"><div className="brand-mark compact"><span aria-hidden="true" /><div><b>夜班进行中</b><small>第 {chapter} 夜 · {sleepMode === "real" ? "真实夜班" : qualityCopy[quality].time}</small></div></div><button onClick={onFinish}>{sleepMode === "real" ? "我醒了，拆开报告" : "跳到清晨"} <ArrowRight size={16} /></button></div>
       <div className="night-title"><p>{sleepMode === "real" ? "合上页面也没关系。城市记得交接的时刻。" : "你休息的时候，他会继续。"}</p><h2>{current.title}</h2><span>{sessionLine}</span><div className="route-order"><small>TONIGHT&apos;S DIRECTION</small><b>{direction.dispatchTitle}</b><em>目的地 · {direction.destination}</em></div></div>
       <aside className={`city-watch-live watch-${watch.id}`}><Clock3 /><div><small>{watch.archiveLabel} · {watch.window}</small><b>{watch.label}</b><span>{watchEcho.scene}</span></div></aside>
       {sleepMode === "real" && <aside className={wakeEchoVisible ? "wake-check-in recorded" : "wake-check-in"}><div><small>SLEEP GAP · 睡隙记录</small><b>{wakeEchoVisible ? "这次醒转已经夹进夜印" : "如果你只是短暂醒来"}</b><p>{wakeEchoVisible ? "林渡仍在调查；同一夜不会再收集第二条回声。" : "可以留下一次记录再继续休息。它不会结束夜班，也不改变睡眠评价或任何成果。"}</p></div><button type="button" disabled={Boolean(activeSleepSession?.wakeEcho)} onClick={recordWakeEcho}><Ear /> {wakeEchoVisible ? "已记录，夜班继续" : "我只是醒了一下"}</button>{wakeEchoVisible && wakeEcho && <WakeEchoSlip echo={wakeEcho} recordedAt={activeSleepSession?.wakeEcho?.recordedAt} mode="real" />}</aside>}
