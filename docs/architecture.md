@@ -37,6 +37,7 @@
 | 结局终函 | `src/content/endings.ts` | 三种结局的独立结果、林渡终函、档案标签与结案语 |
 | 证物关系 | `src/content/relations.ts` | 三条核心推论、对应证物对与成功解释 |
 | 好友线索链接 | `src/lib/game-engine/clue-sharing.ts` | 白名单线索查询、深链接生成与 query 清理 |
+| 夜班密文内容 | `src/content/ciphers.ts` | 按案件注册的确定性关卡、开放条件、答案归一化、提示与回执 |
 | 内容契约 | `src/lib/game-engine/schema.ts` | Zod schema、引用与数量约束 |
 | 夜间结算 | `src/lib/game-engine/resolve-night.ts` | 根据章节、睡眠质量、随身物与调查方向选择确定性结果 |
 | 睡眠会话 | `src/lib/game-engine/sleep-session.ts` | 创建、恢复和结束 Demo／真实夜班，按时长生成质量与夜印进度 |
@@ -53,6 +54,7 @@
 | 夜间循环 | `src/components/game/night-cycle.tsx` | 睡前准备、夜班会话、晨报与空晨报状态 |
 | 调查与归档 | `src/components/game/investigation.tsx` | 案件板、收藏柜、档案与结局 |
 | 好友线索界面 | `src/components/game/clue-sharing.tsx` | 二维码、复制链接与接收反馈 |
+| 夜班密文台 | `src/components/game/cipher-desk.tsx` | 逐段开放、答案输入、无惩罚提示与已解密回执 |
 | 游戏框架 | `src/components/game/shell.tsx` | 顶栏、底部导航与 Demo 控制台 |
 | 共享游戏 UI | `src/components/game/shared.tsx` | 纸卡、印章、城市路线与睡眠文案 |
 | 视觉系统 | `app/globals.css` | 色板、纸张、地图、雨雾、响应式与动效 |
@@ -60,7 +62,7 @@
 
 ## 状态模型
 
-主要阶段为 `day → ready → night → morning → ending`。章节结算只通过当前案件 manifest 的确定性内容函数产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 15。`campaignId` 标识活动案件，活动进度仍保持扁平供组件读取；切换时先把它快照到 `campaignSaves[campaignId]`，再恢复目标案件或创建新档。章节、线索、关系、结局、案板坐标、夜间历史和放下纸条因此按案隔离。v13 及更早的单案件存档默认归入 `case-001`，原有数据无需清除；v15 对纸条记录逐章校验，旧档默认没有纸条，不伪造用户输入。
+主要阶段为 `day → ready → night → morning → ending`。章节结算只通过当前案件 manifest 的确定性内容函数产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 16。`campaignId` 标识活动案件，活动进度仍保持扁平供组件读取；切换时先把它快照到 `campaignSaves[campaignId]`，再恢复目标案件或创建新档。章节、线索、关系、密文解答、结局、案板坐标、夜间历史和放下纸条因此按案隔离。v13 及更早的单案件存档默认归入 `case-001`，原有数据无需清除；v15 对纸条记录逐章校验，v16 只保留当前案件注册表中的合法密文 ID，旧档默认没有解密记录。
 
 语言偏好单独保存为 `night-shift-locale`，不进入任一游戏 store、存档版本或结算函数。`I18nProvider` 根据当前案件把偏好解析为有效语言：`case-001` 支持 `zh-CN` 与 `en`，未翻译案件明确回退中文。英文模式只递归投影 manifest 的字符串值，稳定 ID、引用、数字、规则和存档键保持原样，因此切换语言或刷新不会复制、重置或迁移游戏进度。
 
@@ -105,6 +107,8 @@ React Flow 使用本地受控节点承接拖动过程，只在桌面端从图钉
 案件板由明确尺寸的证物画布和右侧推理阅档栏组成。桌面端使用真实双栏：左侧画布只负责浏览与整理证物，右栏按“联合推理—当前证物档案—核心论断”排列；A／B 两个已选线索槽与核对动作常驻右栏顶部，核心论断始终是右栏最后一段。900 px 以下恢复文档流，390 px 手机端依次显示画布、联合推理、当前档案与核心论断。这样选择状态与提交动作处在同一区域，React Flow 也不会拦截移动页面滚动。
 
 好友线索使用 `?case=<案件 ID>&clue=<稳定线索 ID>` 的 local-first 深链接。分享端只从当前案件白名单生成链接和二维码；接收端在 hydration 后先验证案件，再验证该案线索，切换到对应存档后才经 `receiveSharedClue` 写入 `unlockedClueIds` 与 `receivedClueIds`，随后从地址栏移除两个 query。跨案件组合与未知 ID 不创建或污染存档，旧的仅含 `clue` 链接继续默认解释为 `case-001`。重复链接保持幂等，不传送其他进度，也不会确认关系或推进章节。赠送线索可参与普通阅档与联合推理，但真结局只计算非 `receivedClueIds` 的亲自取得线索；玩家后来完成对应夜班时，该 ID 会从好友来源表移除，转为亲自取得。
+
+密文关卡使用独立的 `solvedCipherIds` 保存已经核对的稳定 ID。开放条件只读取当前案件已解锁线索；答案经 NFKC、大小写和常见分隔符归一化后与作者白名单精确匹配，不使用模糊判断或生成模型。`solveCipher` 只写解密 ID，不写线索、关系或奖励；迁移会按当前案件的密文注册表过滤未知与跨案件 ID。未注册密文的案件不显示空面板。
 
 真结局资格由 `canUnlockTrueEnding` 统一判断，界面锁定与存档动作共用同一规则；因此不能通过绕开按钮直接写入未满足条件的真结局。旧存档迁移由可独立测试的 `migrateGameState` 提供。
 

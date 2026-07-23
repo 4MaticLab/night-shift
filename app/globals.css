@@ -2363,6 +2363,465 @@ blockquote {
   background: #101827;
 }
 
+.cipher-desk {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 34px 4vw 42px;
+  border-bottom: 1px solid #303a49;
+  background: radial-gradient(circle at 86% 0, #29354866, transparent 34%), linear-gradient(150deg, #0c1422, #151f30);
+}
+
+.cipher-desk-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 30px;
+}
+
+.cipher-desk-heading>div {
+  max-width: 760px;
+}
+
+.cipher-desk-heading small,
+.cipher-level-body>small {
+  color: var(--amber);
+  font: 8px monospace;
+  letter-spacing: .14em;
+}
+
+.cipher-desk-heading h3 {
+  margin: 9px 0 8px;
+  color: var(--paper);
+  font-size: clamp(26px, 3vw, 42px);
+  line-height: 1.08;
+}
+
+.cipher-desk-heading p {
+  margin: 0;
+  color: #8793a2;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.cipher-desk-heading>span {
+  flex: 0 0 92px;
+  min-height: 78px;
+  display: grid;
+  place-content: center;
+  border: 1px solid #7d6748;
+  color: var(--amber);
+  background: #111a28;
+  text-align: center;
+  transform: rotate(1deg);
+}
+
+.cipher-desk-heading>span b {
+  color: var(--paper);
+  font-family: var(--font-newsreader);
+  font-size: 28px;
+}
+
+.cipher-desk-heading>span small {
+  margin-top: 2px;
+  font-size: 7px;
+}
+
+.cipher-progress {
+  margin: 28px 0 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.cipher-progress i {
+  height: 4px;
+  position: relative;
+  background: #303949;
+}
+
+.cipher-progress i span {
+  position: absolute;
+  top: -12px;
+  left: 0;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #3d485a;
+  border-radius: 50%;
+  color: #687383;
+  background: #101827;
+  font: normal 8px monospace;
+}
+
+.cipher-progress i.unlocked {
+  background: #846d4c;
+}
+
+.cipher-progress i.unlocked span {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.cipher-progress i.solved {
+  background: var(--teal);
+}
+
+.cipher-progress i.solved span {
+  border-color: var(--teal);
+  color: #dce8e4;
+  background: #1c3438;
+}
+
+.cipher-levels {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.cipher-level {
+  min-width: 0;
+  min-height: 390px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  border: 1px solid #3c4655;
+  background: #131d2c;
+  box-shadow: 0 18px 38px #0003;
+}
+
+.cipher-level.locked {
+  opacity: .67;
+  background: #101723;
+}
+
+.cipher-level.solved {
+  border-color: #577c77;
+  background: linear-gradient(145deg, #14272c, #16232f);
+}
+
+.cipher-level-index {
+  padding: 14px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 13px;
+  border-right: 1px solid #364152;
+  color: #738091;
+  background: #0d1522;
+}
+
+.cipher-level-index span {
+  font: 9px monospace;
+}
+
+.cipher-level-index svg {
+  width: 16px;
+  color: var(--amber);
+}
+
+.cipher-level.solved .cipher-level-index svg {
+  color: var(--teal);
+}
+
+.cipher-level-body {
+  min-width: 0;
+  padding: 18px 16px 20px;
+}
+
+.cipher-level-body h4 {
+  margin: 7px 0 5px;
+  color: var(--paper);
+  font-size: 23px;
+}
+
+.cipher-level-body>p {
+  min-height: 38px;
+  margin: 0 0 14px;
+  color: #7f8b99;
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.cipher-locked-note {
+  min-height: 110px;
+  margin-top: 28px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: 1px dashed #3d4654;
+  color: #5e6977;
+  background: #0d1520;
+}
+
+.cipher-locked-note svg {
+  flex: 0 0 24px;
+}
+
+.cipher-locked-note span {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  overflow-wrap: anywhere;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.cipher-locked-note b {
+  color: #8993a0;
+  font-size: 9px;
+}
+
+.cipher-strip {
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid #7b684d;
+  background: #0a121d;
+  box-shadow: inset 0 0 26px #0007;
+}
+
+.cipher-strip>small {
+  display: block;
+  margin-bottom: 8px;
+  color: #8f7a57;
+  font: 7px monospace;
+  letter-spacing: .13em;
+}
+
+.cipher-strip>div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cipher-strip code {
+  padding: 6px 8px;
+  border: 1px solid #3d4a5d;
+  color: #d9ceb8;
+  background: #172234;
+  font-size: 10px;
+  letter-spacing: .08em;
+}
+
+.cipher-instruction {
+  min-height: 55px !important;
+  margin: 0 0 12px !important;
+  color: #a5acb5 !important;
+}
+
+.cipher-answer label {
+  display: block;
+  margin-bottom: 7px;
+  color: #cfc4af;
+  font-family: var(--font-newsreader);
+  font-size: 14px;
+}
+
+.cipher-answer>div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+}
+
+.cipher-answer input,
+.cipher-answer button {
+  min-height: 44px;
+  border: 1px solid #465267;
+}
+
+.cipher-answer input {
+  min-width: 0;
+  padding: 9px 10px;
+  outline: 0;
+  color: var(--paper);
+  background: #0c1523;
+  font: 12px monospace;
+  letter-spacing: .04em;
+}
+
+.cipher-answer input:focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 1px #c59a5a33;
+}
+
+.cipher-answer button {
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #e0d5bf;
+  background: #283548;
+  cursor: pointer;
+  font-size: 8px;
+}
+
+.cipher-answer button:disabled {
+  opacity: .45;
+}
+
+.cipher-answer button svg {
+  width: 13px;
+}
+
+.cipher-feedback {
+  min-height: auto !important;
+  margin: 8px 0 0 !important;
+  padding: 8px;
+  border-left: 2px solid var(--red);
+  color: #c08f88 !important;
+  background: #2b1920;
+  font-size: 8px !important;
+}
+
+.cipher-hints {
+  margin-top: 9px;
+  border-top: 1px dashed #3e4856;
+}
+
+.cipher-hints summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #8a96a4;
+  cursor: pointer;
+  font-size: 8px;
+  list-style: none;
+}
+
+.cipher-hints summary::-webkit-details-marker {
+  display: none;
+}
+
+.cipher-hints summary svg {
+  width: 14px;
+  color: var(--amber);
+}
+
+.cipher-hints ol {
+  margin: 0 0 8px;
+  padding-left: 23px;
+  color: #8f9ba7;
+  font-size: 8px;
+  line-height: 1.7;
+}
+
+.cipher-reveal {
+  margin-top: 16px;
+  padding: 15px;
+  border: 1px solid #577c77;
+  color: #b9cbc6;
+  background: #10272b;
+}
+
+.cipher-reveal>span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #7fa39d;
+  font: 7px monospace;
+  letter-spacing: .1em;
+}
+
+.cipher-reveal>span svg {
+  width: 14px;
+}
+
+.cipher-reveal h5 {
+  margin: 9px 0 6px;
+  color: #e1d7c2;
+  font-family: var(--font-newsreader);
+  font-size: 19px;
+}
+
+.cipher-reveal p {
+  margin: 0 0 10px;
+  color: #a8bab6;
+  font-size: 9px;
+  line-height: 1.65;
+}
+
+.cipher-reveal>small {
+  color: #698a85;
+  font: 7px monospace;
+}
+
+.cipher-desk>footer {
+  margin-top: 13px;
+  color: #667383;
+  font-size: 8px;
+  text-align: right;
+}
+
+@media (max-width: 1000px) {
+  .cipher-levels {
+    grid-template-columns: 1fr;
+  }
+
+  .cipher-level {
+    min-height: 0;
+  }
+
+  .cipher-level-body>p,
+  .cipher-instruction {
+    min-height: 0 !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .cipher-desk {
+    padding: 28px 14px 32px;
+  }
+
+  .cipher-desk-heading {
+    gap: 13px;
+  }
+
+  .cipher-desk-heading h3 {
+    font-size: 26px;
+  }
+
+  .cipher-desk-heading>span {
+    flex-basis: 70px;
+    min-height: 66px;
+  }
+
+  .cipher-desk-heading>span b {
+    font-size: 21px;
+  }
+
+  .cipher-level {
+    grid-template-columns: 34px minmax(0, 1fr);
+  }
+
+  .cipher-level-body {
+    padding: 15px 11px 18px;
+  }
+
+  .cipher-level-body h4 {
+    font-size: 20px;
+  }
+
+  .cipher-answer>div {
+    grid-template-columns: 1fr;
+  }
+
+  .cipher-answer button {
+    justify-content: center;
+  }
+
+  .cipher-answer>div>input {
+    min-height: 44px;
+    padding-block: 10px;
+  }
+
+  .cipher-desk>footer {
+    text-align: left;
+    line-height: 1.55;
+  }
+}
+
 .board-workspace {
   position: relative;
 }

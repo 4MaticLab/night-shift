@@ -22,6 +22,7 @@ import type { Clue, CorrespondenceRecord, SocietyMemoryRecord } from "@/src/lib/
 import { BotanicalSpecimen, PaperCard, qualityCopy, Seal, SocietyCrest } from "./shared";
 import { ClueShareDialog } from "./clue-sharing";
 import { useI18n } from "@/src/i18n/provider";
+import { CipherDesk } from "./cipher-desk";
 
 type EvidenceNode = Node<{ clue: Clue; selected: boolean; selectionIndex: number | null; focused: boolean; received: boolean; onSelect: (clueId: string) => void }, "evidence">;
 
@@ -122,6 +123,7 @@ export function CaseBoard() {
 
   return <div className="board-page">
     <div className="page-title"><div><p className="eyebrow">CASE BOARD · {t("证物关系图")}</p><h2>{locale === "en" ? <>Connect the lies<br />the city has told.</> : <>把城市说过的谎，<br />一根根连起来。</>}</h2></div><p>{t("点两张证物，再核对它们是否能共同作证。无需拖线；桌面端拖动图钉只用于整理案板。")}</p></div>
+    <CipherDesk />
     <div className="board-workspace">
       <div className="board-shell">
         <div className="board-flow">{nodes.length ? <ReactFlow nodes={nodes} edges={edges} nodeTypes={evidenceNodeTypes} onNodesChange={onNodesChange} onNodeDragStop={(_, node) => setBoardPosition(node.id, node.position)} fitView minZoom={0.5} maxZoom={1.6} nodesDraggable={!isCompactBoard} panOnDrag={!isCompactBoard} zoomOnPinch={!isCompactBoard} zoomOnScroll={!isCompactBoard} zoomOnDoubleClick={!isCompactBoard} preventScrolling={!isCompactBoard} proOptions={{ hideAttribution: true }}><Background color="#988d73" gap={28} size={1} variant={BackgroundVariant.Dots} />{!isCompactBoard && <Controls showInteractive={false} />}</ReactFlow> : <div className="board-empty"><Search /><h3>{t("案件板还很安静")}</h3><p>{t("完成第一夜调查，林渡带回的证物会出现在这里。")}</p></div>}</div>
