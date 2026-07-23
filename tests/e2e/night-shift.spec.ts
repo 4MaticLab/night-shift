@@ -801,9 +801,9 @@ test("switches to the thirteenth-loaf campaign and completes its five-night stor
 
   await expect(page.getByRole("heading", { name: /房契还给十二人以后/ })).toBeVisible();
   await expect(page.locator(".ending-background")).toHaveAttribute("src", /cases\/thirteenth-loaf\/headers\/ending-tableau-v1/);
-  await page.getByRole("button", { name: /让第十三栏永远空白/ }).click();
-  await expect(page.getByRole("heading", { name: "让第十三栏永远空白" })).toBeVisible();
-  await expect(page.getByText(/第十三只面包继续属于下一位需要它的人/)).toBeVisible();
+  await page.getByRole("button", { name: /把火灾报告贴满全城/ }).click();
+  await expect(page.getByRole("heading", { name: "把火灾报告贴满全城" })).toBeVisible();
+  await expect(page.getByText(/第十三只面包仍用空白纸包着/)).toBeVisible();
 });
 
 test.describe("tablet portrait 820x1180", () => {
@@ -856,7 +856,10 @@ test.describe("mobile 390x844", () => {
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /CASE 003/ }).click();
     await expect(page.getByRole("button", { name: /开始第 003 宗案件/ })).toBeVisible();
-    await expect(page.locator(".featured-case img")).toHaveAttribute("src", /cases\/thirteenth-loaf\/headers\/shift-handoff-v1/);
+    await expect(page.getByRole("img", { name: /林渡站在夜班事务所门边/ })).toHaveAttribute(
+      "src",
+      /cases\/thirteenth-loaf\/headers\/shift-handoff-v1/,
+    );
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /CASE 001/ }).click();
     await expect(page.getByRole("button", { name: /开始第 001 宗案件/ })).toBeVisible();
