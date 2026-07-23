@@ -2747,6 +2747,220 @@ blockquote {
   font: 7px monospace;
 }
 
+.cipher-relay {
+  margin-top: 18px;
+  padding: 22px;
+  border: 1px solid #806b4c;
+  color: #a9b3be;
+  background: linear-gradient(145deg, #171d27, #111b29);
+  box-shadow: inset 0 0 34px #0004, 0 18px 34px #0003;
+}
+
+.cipher-relay>header {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 13px;
+  align-items: start;
+}
+
+.cipher-relay>header>svg {
+  width: 40px;
+  height: 40px;
+  padding: 9px;
+  border: 1px solid #806b4c;
+  color: var(--amber);
+}
+
+.cipher-relay header small {
+  color: var(--amber);
+  font: 7px monospace;
+  letter-spacing: .13em;
+}
+
+.cipher-relay header h4 {
+  margin: 5px 0 4px;
+  color: var(--paper);
+  font-size: 25px;
+}
+
+.cipher-relay header p,
+.cipher-relay-instruction {
+  margin: 0;
+  color: #8e99a6;
+  font-size: 9px;
+  line-height: 1.65;
+}
+
+.cipher-relay-instruction {
+  margin: 14px 0 11px;
+  padding: 10px 12px;
+  border-left: 2px solid var(--teal);
+  background: #0e1724;
+}
+
+.cipher-relay-palette {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.cipher-relay-palette button {
+  min-width: 0;
+  min-height: 62px;
+  padding: 9px 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 16px;
+  grid-template-rows: auto auto;
+  column-gap: 6px;
+  border: 1px solid #465267;
+  color: #b4bdc7;
+  background: #172335;
+  cursor: pointer;
+  text-align: left;
+}
+
+.cipher-relay-palette button:disabled {
+  opacity: .34;
+}
+
+.cipher-relay-palette b {
+  overflow-wrap: anywhere;
+  color: #e0d6c1;
+  font: 11px monospace;
+}
+
+.cipher-relay-palette span {
+  grid-column: 1;
+  color: #788695;
+  font-size: 7px;
+  line-height: 1.45;
+}
+
+.cipher-relay-palette svg {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: center;
+  width: 15px;
+  color: var(--amber);
+}
+
+.cipher-relay-sequence {
+  margin: 12px 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  list-style: none;
+}
+
+.cipher-relay-sequence li {
+  min-width: 0;
+  min-height: 78px;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  border: 1px dashed #455164;
+  background: #0c1522;
+}
+
+.cipher-relay-sequence li>span {
+  display: grid;
+  place-items: center;
+  border-right: 1px solid #394659;
+  color: #677587;
+  font: 9px monospace;
+}
+
+.cipher-relay-sequence li>div,
+.cipher-relay-sequence li>button {
+  min-width: 0;
+  padding: 9px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  border: 0;
+  color: #697686;
+  background: transparent;
+  text-align: left;
+}
+
+.cipher-relay-sequence li>button {
+  min-height: 76px;
+  position: relative;
+  padding-right: 28px;
+  color: #bcc9c5;
+  background: #173036;
+  cursor: pointer;
+}
+
+.cipher-relay-sequence b {
+  overflow-wrap: anywhere;
+  color: #ded4c0;
+  font: 10px monospace;
+}
+
+.cipher-relay-sequence small {
+  color: #748290;
+  font-size: 7px;
+  line-height: 1.4;
+}
+
+.cipher-relay-sequence button svg {
+  position: absolute;
+  top: 8px;
+  right: 7px;
+  width: 13px;
+  color: #84a09a;
+}
+
+.cipher-relay-feedback {
+  margin: 0 0 10px;
+  padding: 9px 11px;
+  border-left: 2px solid var(--red);
+  color: #c29189;
+  background: #2a1820;
+  font-size: 8px;
+  line-height: 1.55;
+}
+
+.cipher-relay-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.cipher-relay-actions button {
+  min-height: 44px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid #465267;
+  color: #99a5b2;
+  background: #182334;
+  cursor: pointer;
+  font-size: 8px;
+}
+
+.cipher-relay-actions button.primary {
+  border-color: #668b85;
+  color: #bfd0cb;
+  background: #1b3438;
+}
+
+.cipher-relay-actions button:disabled {
+  opacity: .4;
+}
+
+.cipher-relay-actions svg {
+  width: 14px;
+}
+
+.cipher-relay-hints {
+  margin-top: 8px;
+}
+
 .cipher-completion {
   margin-top: 18px;
   padding: 20px 22px;
@@ -2895,6 +3109,41 @@ blockquote {
   .cipher-completion>span {
     grid-column: 1 / -1;
     justify-content: center;
+  }
+
+  .cipher-relay {
+    padding: 17px 12px;
+  }
+
+  .cipher-relay>header {
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .cipher-relay>header>svg {
+    width: 34px;
+    height: 34px;
+    padding: 7px;
+  }
+
+  .cipher-relay header h4 {
+    font-size: 21px;
+  }
+
+  .cipher-relay-palette,
+  .cipher-relay-sequence {
+    grid-template-columns: 1fr;
+  }
+
+  .cipher-relay-palette button,
+  .cipher-relay-sequence li,
+  .cipher-relay-sequence li>button {
+    min-height: 54px;
+  }
+
+  .cipher-relay-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 
   .cipher-desk>footer {
