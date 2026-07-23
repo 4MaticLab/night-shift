@@ -14,6 +14,7 @@ import type { SandboxCampaignContent, SandboxProgress } from "@/src/lib/sandbox/
 import { finishSleepSession, startSleepSession } from "@/src/lib/game-engine/sleep-session";
 import type { SleepMode, SleepQuality } from "@/src/lib/game-engine/schema";
 import { useSleepHardwareStore } from "@/src/stores/sleep-hardware-store";
+import { ensureCurrentSaveEpoch } from "@/src/stores/save-epoch";
 
 interface SandboxStore {
   saves: Record<string, SandboxProgress>;
@@ -30,6 +31,8 @@ interface SandboxStore {
   toggleReducedHorror: (campaignId: string, content: SandboxCampaignContent) => void;
   reset: (campaignId: string, content: SandboxCampaignContent) => void;
 }
+
+ensureCurrentSaveEpoch();
 
 export const useSandboxStore = create<SandboxStore>()(persist((set, get) => ({
   saves: {},
@@ -181,17 +184,9 @@ export const useSandboxStore = create<SandboxStore>()(persist((set, get) => ({
   },
 }), {
   name: "night-shift-sandbox-v1",
-  version: 2,
+  version: 3,
   partialize: (state) => ({ saves: state.saves }),
-  migrate: (persisted) => {
-    const state = persisted as { saves?: Record<string, Partial<SandboxProgress>> };
-    return {
-      saves: Object.fromEntries(Object.entries(state.saves ?? {}).map(([campaignId, progress]) => [
-        campaignId,
-        normalizeSandboxProgress(progress),
-      ])),
-    };
-  },
+  migrate: () => ({ saves: {} }),
 }));
 
 export function getSandboxProgress(

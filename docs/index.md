@@ -9,7 +9,7 @@
 - [[docs/story-bible]] — 首案真相、人物关系和不可被动态改写的事实。
 - [[docs/rain-radio-story-bible]] — 第二案的广播网络、四十七户居民与固定真相。
 - [[docs/blackwater-creek-adaptation-bible]] — 第三案双入口、九地点、污染规则、结局矩阵与非商业改编边界。
-- [[docs/tide-refused-story-bible]] — 第四案的固定真相、双入口、证据网络、人物动机与原创边界。
+- [[docs/tide-refused-story-bible]] — 首案河下区支线的固定真相、双路径、跨线证据、人物动机与原创边界。
 - [[docs/demo-script]] — 90 秒现场演示路径。
 - [[docs/hackathon-submission-kit]] — Hack the Rest 赛道陈述、评委问答、提交材料、真实边界与部署排障。
 - [[docs/quality-baseline]] — 当前版本的质量基线、验证命令和已知边界。
@@ -38,7 +38,7 @@
 - [[docs/art-prompts/foglight-districts]] — 灯港区、旧子午区与玻璃丘的城市版画提示词和源图映射。
 - [[docs/art-prompts/four-act-headers]] — 交接、夜行、归来与裁决四幕横幅的构图和源图映射。
 - [[docs/art-prompts/sleep-hardware-dossiers]] — 四类睡眠硬件档案画面与生成源图映射。
-- [[docs/art-prompts/tide-refused-assets]] — 第四案 1+3+3 首批原创资产的场景提示、文件映射与输出处理。
+- [[docs/art-prompts/tide-refused-assets]] — 河下区支线 1+3+3 首批原创资产的场景提示、文件映射与输出处理。
 
 ## 维护规则
 

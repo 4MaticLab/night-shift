@@ -23,6 +23,8 @@ import { BotanicalSpecimen, PaperCard, qualityCopy, Seal, SocietyCrest } from ".
 import { ClueShareDialog } from "./clue-sharing";
 import { useI18n } from "@/src/i18n/provider";
 import { CipherDesk } from "./cipher-desk";
+import type { CampaignStoryline } from "@/src/content/campaigns/types";
+import { CityStoryMap } from "./city-story-map";
 
 type EvidenceNode = Node<{ clue: Clue; selected: boolean; selectionIndex: number | null; focused: boolean; received: boolean; onSelect: (clueId: string) => void }, "evidence">;
 
@@ -196,7 +198,7 @@ export function Collection() {
   </div>;
 }
 
-export function ArchivePage() {
+export function ArchivePage({ onOpenStoryline }: { onOpenStoryline?: (storyline: CampaignStoryline) => void } = {}) {
   const { completedReports, unlockedClueIds } = useGameStore();
   const { campaign, locale, t } = useI18n();
   const progress = Math.round((unlockedClueIds.length / campaign.case.clues.length) * 100);
@@ -205,6 +207,7 @@ export function ArchivePage() {
 
   return <div className="archive-page">
     <div className="page-title"><div><p className="eyebrow">CASE ARCHIVE · {campaign.presentation.archiveNumber}</p><h2>{campaign.case.title}</h2></div><Seal>{progress}% {t("已查明")}</Seal></div>
+    {onOpenStoryline && <CityStoryMap onOpenStoryline={onOpenStoryline} />}
     <div className="archive-folders">{campaign.case.chapters.map((chapter) => <PaperCard key={chapter.number} className={completedReports.includes(chapter.number) ? "folder complete" : "folder"}><span className="folder-tab">NIGHT 0{chapter.number}</span><small>{completedReports.includes(chapter.number) ? "REPORT FILED" : "SEALED"}</small><h3>{chapter.title}</h3><p>{chapter.subtitle}</p><div>{completedReports.includes(chapter.number) ? <><Check /> {t("调查完成")}</> : <><KeyRound /> {t("尚未开启")}</>}</div></PaperCard>)}</div>
     <section className="district-atlas"><div className="shelf-heading"><small>FOGLIGHT ATLAS · {visitedDistricts.length}/{campaign.districts.length} DISTRICTS</small><h3>{locale === "en" ? `${campaign.presentation.cityName} District Atlas` : `${campaign.presentation.cityName}分区志`}</h3></div><p>{locale === "en" ? `Maps record roads, but districts are known by their rules. Only after ${campaign.presentation.detectiveName} has truly walked through a place will the archive permit it a name.` : `地图记录道路，城区却靠规矩辨认。${campaign.presentation.detectiveName}真正走过一块地方以后，档案才允许它获得名字。`}</p><div>{campaign.districts.map((district) => { const unlocked = completedReports.includes(district.introducedChapter); const art = getAsset(district.assetId); return <article className={unlocked ? "district-entry unlocked" : "district-entry locked"} key={district.id}><div className="district-art">{unlocked ? <Image src={art.src} alt={art.alt} width={1200} height={800} /> : <div><KeyRound /><span>DISTRICT UNVISITED</span></div>}</div><div className="district-copy"><small>{unlocked ? district.archiveName : "DISTRICT FILE · SEALED"}</small><h4>{unlocked ? district.name : t("城区尚未归档")}</h4><b>{unlocked ? district.subtitle : locale === "en" ? `Opens after Night ${district.introducedChapter}` : `完成第 ${district.introducedChapter} 夜后展开`}</b>{unlocked && <><p><span>{t("公共说法")}</span>{district.publicVersion}</p><blockquote><span>{t("城里实际遵守")}</span>{district.cityRule}</blockquote><footer>{district.landmarks.map((landmark) => <i key={landmark}>{landmark}</i>)}</footer></>}</div></article>; })}</div></section>
     {campaign.characters.length > 0 && <section className="person-dossiers"><div className="shelf-heading"><small>PERSONS OF INTEREST · {encounteredCharacters.length}/{campaign.characters.length}</small><h3>{t("相关人物")}</h3></div><p>{t("城市传闻不等于证词。只有已经带回的线索，才能让档案展开第二层。")}</p><div>{campaign.characters.map((character) => { const encountered = completedReports.includes(character.encounterChapter); const revealed = encountered && isCharacterRevealed(character, unlockedClueIds); const art = getAsset(character.assetId); return <article className={encountered ? "person-dossier encountered" : "person-dossier locked"} key={character.id}><div className="person-portrait">{encountered ? <Image src={art.src} alt={art.alt} width={1024} height={1280} /> : <div><KeyRound /><span>PERSON SEALED</span></div>}</div><div className="person-dossier-copy"><small>{encountered ? character.archiveName : `PERSON 0${character.encounterChapter} · SEALED`}</small><h4>{encountered ? character.name : t("尚未见面")}</h4><b>{encountered ? `${character.role} · ${character.district}` : t("完成对应夜班后归档")}</b><p>{encountered ? `“${character.publicRumor}”` : t("这份档案还没有获得姓名。")}</p>{encountered && <div><small>{t("已知事实")}</small>{character.knownFact}</div>}{revealed && <blockquote><small>{t("保留意见已展开")}</small>{character.withheld}</blockquote>}{encountered && !revealed && <span><KeyRound /> {t("仍有部分说法需要现有证物互相作证")}</span>}</div></article>; })}</div></section>}

@@ -64,7 +64,7 @@
 - `day | night | morning` 阶段、待执行行动、随队物品与核心 `SleepSession`；
 - 最后一份晨报差异快照、有来源的行动日志、低刺激设置与已选择结局。
 
-持久化结构为 v2，并把缺少阶段字段的 v1 存档安全归一化为白天；有效的夜班与晨报则可以在刷新后继续。它与线性案件的 `night-shift-save-v1` v14 分开持久化。这样无需让前两案承担不适用的地点、污染和 NPC 字段，也避免沙盒状态污染五夜循环。`CampaignManifest.format` 决定页面进入 `linear-night` 或 `sandbox-expedition`；沙盒数据仍在 manifest 注册时执行引用完整性校验。
+持久化结构为 `night-shift-sandbox-v1` v3；当前 epoch 内有效的夜班与晨报可以在刷新后继续，不兼容升级则直接清空重开，不迁移 v1／v2。它与雾灯城各 story thread 按存档键隔离，避免地点、污染和 NPC 字段互相覆盖。`CampaignManifest.format` 让《黑水溪》进入 `sandbox-expedition` 独立样板；沙盒数据仍在 manifest 注册时执行引用完整性校验。
 
 ## 污染、威胁与内容安全
 

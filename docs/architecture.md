@@ -2,7 +2,7 @@
 
 ## 运行形态
 
-项目使用 Next App Router、React 与 TypeScript，并保留两套明确的生产目标：默认 `next build` 生成 Vercel 使用的 `.next/`；`build:sites` 通过 Vinext、Vite 与 Cloudflare 插件生成 Sites/Worker 使用的 `dist/`。游戏页面组织成一个客户端状态机，以减少阶段切换等待；案件书架在同一外壳内选择编译期注册的 `CampaignManifest`，两套目标都由服务端渲染首屏元数据和外壳。
+项目使用 Next App Router、React 与 TypeScript，并保留两套明确的生产目标：默认 `next build` 生成 Vercel 使用的 `.next/`；`build:sites` 通过 Vinext、Vite 与 Cloudflare 插件生成 Sites/Worker 使用的 `dist/`。公开主案进入同一个雾灯城纪事地图，编译期 `CampaignStoryline` 提供可并发的主／支线；公开书架只在雾灯城内容世界与《黑水溪》结构样板之间切换。
 
 原生 Next 构建的 TypeScript 范围排除 `build/`、`db/`、`examples/`、`worker/` 与 `vite.config.ts`：这些文件只属于 Sites 脚手架、Cloudflare 绑定或未启用的 D1 示例，不被产品应用导入。它们仍由 Vinext/Vite 实际构建和 ESLint 检查，不能把 Cloudflare Worker 模块混入 Vercel 的 Node 运行时。
 
@@ -11,15 +11,20 @@
 | 模块 | 位置 | 职责 |
 |---|---|---|
 | 案件包契约 | `src/content/campaigns/types.ts` | `CampaignManifest`、引用完整性校验与案件内容查询 |
-| 案件注册表 | `src/content/campaigns/registry.ts` | 当前三案、默认案件和合法 `campaignId` 白名单 |
+| 案件注册表 | `src/content/campaigns/registry.ts` | 内容源稿、公开书架、默认案件和合法 `campaignId` 白名单 |
 | 首案内容包 | `src/content/campaigns/last-tram.ts` | 组合既有首案模块与视觉／结局规则 |
+| 主线 story thread | `src/content/storylines/last-tram.ts` | 把既有五段真相适配为计时行动、晨报、证物和三种独立收束 |
+| 河下区 story thread | `src/content/storylines/tide-refused*.ts` | 七地点、22 行动、16 线索、九人物、回潮与四种收束 |
+| 城市纪事地图 | `src/components/game/city-story-map.tsx` | 展示主／支线、并发夜班、待拆晨报、地点显影和跨线推论 |
 | 本地化核心 | `src/i18n/core.ts`、`src/i18n/provider.tsx` | 语言偏好、案件能力回退、递归内容投影和界面翻译上下文 |
 | 首案英文目录 | `src/i18n/en-catalog.ts`、`src/i18n/en-overrides.ts` | 首案完整英文覆盖与关键文学文本人工润色 |
-| 第二案内容包 | `src/content/campaigns/rain-radio.ts` | 《只在雨中播出的电台》的五夜完整内容 |
+| 第二案源稿 | `src/content/campaigns/rain-radio.ts` | 未挂载的《只在雨中播出的电台》既有内容 |
 | 第三案内容包 | `src/content/campaigns/blackwater-creek.ts` | 《黑水溪》的沙盒 manifest 与线性兼容外壳 |
 | 第三案沙盒内容 | `src/content/campaigns/blackwater-creek-data.ts` | 双入口、九地点、行动、证物、手札、人物、污染与五结局 |
 | 沙盒契约与结算 | `src/lib/sandbox/` | 地点条件／效果类型、引用校验和确定性行动／结局结算 |
 | 沙盒存档 | `src/stores/sandbox-store.ts` | 按案件隔离的世界状态，以及交接、夜间会话与晨报状态机 |
+| 世界入口存档 | `src/stores/world-store.ts` | 当前公开世界与是否已经进入 |
+| 存档 epoch | `src/stores/save-epoch.ts` | 不兼容版本定点清空 Night Shift 进度，保留语言和无关站点数据 |
 | 沙盒案件界面 | `src/components/game/sandbox-case.tsx` | 身份开场、地点图、夜班交接／等待／晨报、档案与收场 |
 | 首案核心内容 | `src/content/case.ts` | 首案五夜章节、12 条线索、8 件藏品与固定报告文本 |
 | 随身物内容 | `src/content/preparations.ts` | 三件准备物、五夜各自的确定性环境回响 |
@@ -62,15 +67,19 @@
 
 ## 状态模型
 
-主要阶段为 `day → ready → night → morning → ending`。章节结算只通过当前案件 manifest 的确定性内容函数产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 16。`campaignId` 标识活动案件，活动进度仍保持扁平供组件读取；切换时先把它快照到 `campaignSaves[campaignId]`，再恢复目标案件或创建新档。章节、线索、关系、密文解答、结局、案板坐标、夜间历史和放下纸条因此按案隔离。v13 及更早的单案件存档默认归入 `case-001`，原有数据无需清除；v15 对纸条记录逐章校验，v16 只保留当前案件注册表中的合法密文 ID，旧档默认没有解密记录。
+公开主案由多个独立 `SandboxProgress` 组成；每条故事线采用 `day → night → morning → day`，选择收束后保存 `endingId`。存档键为 `case-001:<storyline-id>`，所以《末班车》与河下区可以同时持有各自的 `activeSleepSession`、待执行行动和晨报快照。城市地图只聚合读取各线状态和线索，不拥有或复制结算数据。
 
 语言偏好单独保存为 `night-shift-locale`，不进入任一游戏 store、存档版本或结算函数。`I18nProvider` 根据当前案件把偏好解析为有效语言：`case-001` 支持 `zh-CN` 与 `en`，未翻译案件明确回退中文。英文模式只递归投影 manifest 的字符串值，稳定 ID、引用、数字、规则和存档键保持原样，因此切换语言或刷新不会复制、重置或迁移游戏进度。
 
-案件 manifest 同时提供章节数、线索数、藏品数、真结局门槛、档案标题和逐夜视觉。`resolveNight`、关系匹配、结局资格、迁移过滤和页面投影都显式接收当前 manifest；通用模块不按 `case-001`／`case-002` 写分支。`defineCampaign` 要求章节从 1 连续排列、每个 choice 有路线、每夜拥有明信片／植物／四时辰回声／睡隙回声／夜印，并拒绝跨案件线索引用和不可达门槛。
+`CampaignManifest.storylines` 声明主／支线角色、解锁证物、内容语言、`SandboxCampaignContent` 与跨线证物连接。`defineCampaign` 校验故事线 ID、解锁证物和连接两端；`assertSandboxCampaign` 校验地点、行动、条件／效果、人物、状态阶段和收束引用。主线可用空 `unlockClueIds` 常驻，支线由任一指定证物显影。
 
-`CampaignManifest.format` 额外区分 `linear-night` 与 `sandbox-expedition`。第三、四案各通过一个最小线性兼容外壳满足注册表的共享展示字段，实际玩法读取 `sandbox` 内容；`app/page.tsx` 只按格式选择通用沙盒界面，不按案件 ID 写业务分支。`SandboxPresentation` 提供案件编号、入口、地图、主状态、警觉、夜班、晨报、结局、重置、人物状态与署名语义；内部 `corruption`／`threat` 因存档兼容继续保留，第四案显示为“回潮”／“城市警觉”。地点和人物可选 `assetId`，缺图仍保留完整 CSS 档案视图。`assertSandboxCampaign` 校验入口、地点、行动、证物、手札、物品、NPC、展示字段和全部条件／效果引用，并要求主状态阶段严格覆盖 0–7。
+《末班车》主线把原五章与十五条路线投影成五个顺序显影地点和十五个 storylet；选择任一方向都会归档该段固定线索，并显影下一段。《潮汐不肯归档》保留开放地点与冗余证据。两者共用 `sandbox-case.tsx` 的交接、计时、晨报、档案和收束，但由各自 `SandboxPresentation` 提供语义，不按故事线 ID 写 UI 分支。
 
-沙盒进度单独持久化到 `night-shift-sandbox-v1` v2 的 `saves[campaignId]`，不修改线性存档 v16。其状态包含入口、已显影／访问地点、已完成行动、证物、手札、物品、主状态、威胁、NPC 状态、行动日志、低刺激偏好与结局，并增加 `day → night → morning → day`、待执行行动、随队物品、活动 `SleepSession` 和最后晨报差异快照。v1 存档缺少延迟字段时安全归一化为白天；只有同时具有合法行动和会话的夜间存档才恢复为夜间，晨报也必须具备结果快照。行动结算没有随机数：出发时只冻结交接与开始时间，结束夜班时才调用一次 `resolveSandboxAction`；晨报阶段不能再次结算。前置条件决定是否可执行，效果通过去重与有界增量写入，终局结局会优先于普通收场。按 `campaignId` 隔离让重置 CASE 003 或 CASE 004 都不会触及其他案件。
+`night-shift-sandbox-v1` v3 的 `saves` 同时保存 story thread 与《黑水溪》样板。行动结算没有随机数：出发时冻结交接与开始时间，结束夜班时只调用一次 `resolveSandboxAction`；晨报阶段不能再次结算。前置条件决定可执行性，效果通过去重和有界增量写入。开始第二条故事线只新增另一份 `SleepSession`，不会覆盖第一条线的 phase；单元与浏览器测试都验证两条线可同时为 `night`。
+
+旧 `night-shift-save-v1`、五夜视图、`case-002` 与好友线索不再挂载到 `app/page.tsx`，`?legacy=1` 也不改变公开入口。源模块暂可为内容重写提供参考，但没有运行时或存档兼容保证；新内容不得继续依赖固定章节数、夜印数量或 `campaignSaves` 扩展。
+
+`NIGHT_SHIFT_SAVE_EPOCH` 当前为 `2`。客户端创建世界、故事线或硬件 store 前先核对 `night-shift-save-epoch`；不匹配时只删除四个 Night Shift 存档键并写入新 epoch。各活跃 Zustand store 同时使用自己的 schema version，在不兼容版本上返回空初始状态。语言偏好 `night-shift-locale` 和其他 localStorage 明确排除在清理范围外。
 
 睡眠质量为 `interrupted`、`regular`、`restful`：三者都至少解锁一条主线线索；差异只体现在路线长度、收藏数量、回声事件和环境观察。`selectedPreparationId` 记录当前随身物，`preparationHistory` 按章节保存已经归来的准备；`selectedChoice` 记录当前方向，`choiceHistory` 按章节保存路线履历。方向决定四个路线节点、五段夜间事件、城市遭遇与归来来信，但同章节三个方向的线索和藏品结果保持一致。完成一夜后，章节编号会加入持久化的 `nightSealIds` 与 `completedReports`，旅程册据此解锁明信片与路线履历。
 
@@ -110,7 +119,7 @@ React Flow 使用本地受控节点承接拖动过程，只在桌面端从图钉
 
 密文关卡使用独立的 `solvedCipherIds` 保存已经核对的稳定 ID。开放条件只读取当前案件已解锁线索；答案经 NFKC、大小写和常见分隔符归一化后与作者白名单精确匹配，不使用模糊判断或生成模型。`solveCipher` 只写解密 ID，不写线索、关系或奖励；迁移会按当前案件的密文注册表过滤未知与跨案件 ID。未注册密文的案件不显示空面板。
 
-真结局资格由 `canUnlockTrueEnding` 统一判断，界面锁定与存档动作共用同一规则；因此不能通过绕开按钮直接写入未满足条件的真结局。旧存档迁移由可独立测试的 `migrateGameState` 提供。
+退役线性模块中的真结局资格仍由 `canUnlockTrueEnding` 统一判断；公开 story thread 则由各自 `SandboxEnding.requires` 判断，不共用固定五夜门槛。
 
 调查方向必须来自当前章节的三个 choice ID。空值只用于兼容旧夜班并确定性回退到第一条方向；非空非法 ID 会被拒绝。内容测试遍历全部十五条分支，证明同章节、同睡眠质量下的固定线索与收藏不随方向改变。
 

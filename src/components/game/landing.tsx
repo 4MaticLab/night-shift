@@ -5,13 +5,13 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowRight, BookOpen, ChevronRight, Languages, Moon, TramFront, Zap } from "lucide-react";
 import { getAsset } from "@/src/content/assets";
-import { campaignRegistry } from "@/src/content/campaigns/registry";
-import { useGameStore } from "@/src/stores/game-store";
+import { campaignShelf, LAST_TRAM_CAMPAIGN_ID } from "@/src/content/campaigns/registry";
+import { useWorldStore } from "@/src/stores/world-store";
 import { campaignSupportsLocale, localizeCampaign } from "@/src/i18n/core";
 import { useI18n } from "@/src/i18n/provider";
 
 export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; onDemo: () => void; interactive: boolean }) {
-  const { campaignId, started, switchCampaign } = useGameStore();
+  const { campaignId, started, switchCampaign } = useWorldStore();
   const { campaign, locale, preferredLocale, setLocale, t } = useI18n();
   const isSandbox = campaign.format === "sandbox-expedition";
   const heroAsset = getAsset(campaign.presentation.heroAssetId);
@@ -24,7 +24,7 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
         <div className="brand-mark"><span aria-hidden="true" /><div><b>{t("夜班侦探")}</b><small>NIGHT SHIFT</small></div></div>
         <div className="landing-nav-actions">
           <button className="ghost-button language-button" disabled={!interactive} onClick={() => setLocale(preferredLocale === "en" ? "zh-CN" : "en")}><Languages size={15} /> {preferredLocale === "en" ? "中文" : "ENGLISH"}</button>
-          <button className="ghost-button" disabled={!interactive} onClick={onDemo}><Zap size={15} /> {isSandbox ? "CASE FILE" : "DEMO MODE"}</button>
+          <button className="ghost-button" disabled={!interactive} onClick={onDemo}><Zap size={15} /> {isSandbox ? "CASE FILE" : locale === "en" ? "CITY MAP" : "城市地图"}</button>
         </div>
       </nav>
       <section className="hero-copy">
@@ -33,18 +33,19 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
         <p className="hero-lede">{t("白天分析线索，晚上把调查交给侦探。等你醒来，雾灯城会留下一份新的报告。")}</p>
         <div className="hero-actions">
           <button className="primary-button" disabled={!interactive} onClick={onStart}>{started ? t("继续当前案件") : locale === "en" ? `Begin Case ${campaign.presentation.archiveNumber}` : `开始第 ${campaign.presentation.archiveNumber} 宗案件`} <ArrowRight size={18} /></button>
-          <button className="text-button" disabled={!interactive} onClick={onDemo}><BookOpen size={17} /> {isSandbox ? t("查看案件说明") : t("观看 90 秒演示")}</button>
+          <button className="text-button" disabled={!interactive} onClick={onDemo}><BookOpen size={17} /> {isSandbox ? t("查看案件说明") : locale === "en" ? "Open the city chronicle" : "打开城市纪事"}</button>
         </div>
         <div className="shift-rule"><span>{isSandbox ? t("你负责调度调查小队") : t("你负责白天推理")}</span><i /><span>{isSandbox ? t("世界按行动改变") : t("林渡负责夜晚调查")}</span></div>
       </section>
-      <section className="campaign-shelf" aria-label={t("案件剧本选择")}>
-        <small>CASE LIBRARY · {t("选择剧本")}</small>
-        <div>{campaignRegistry.map((source) => {
+      <section className="campaign-shelf" aria-label="主案与结构样板选择">
+        <small>STORY WORLD · 主案与结构样板</small>
+        <div>{campaignShelf.map((source) => {
           const supported = campaignSupportsLocale(source.id, preferredLocale);
           const item = localizeCampaign(source, supported ? preferredLocale : "zh-CN");
-          return <button type="button" aria-pressed={item.id === campaignId} className={item.id === campaignId ? "active" : ""} key={item.id} onClick={() => switchCampaign(source.id)}><span>CASE {item.presentation.archiveNumber}{preferredLocale === "en" && !supported ? " · 中文版" : ""}</span><b>{item.case.title}</b><p>{item.presentation.teaser}</p></button>;
+          const primary = source.id === LAST_TRAM_CAMPAIGN_ID;
+          return <button type="button" aria-pressed={item.id === campaignId} className={item.id === campaignId ? "active" : ""} key={item.id} onClick={() => switchCampaign(source.id)}><span>{primary ? `MAIN CASE · CASE ${item.presentation.archiveNumber}` : `STRUCTURE SAMPLE · CASE ${item.presentation.archiveNumber}`}{preferredLocale === "en" && !supported ? " · 中文版" : ""}</span><b>{item.case.title}</b><p>{primary ? (locale === "en" ? "One city, one main mystery, and storylines revealed by the evidence you connect." : "同一座城市、同一宗主案；证物会让新的城区与支线逐步显影。") : item.presentation.teaser}</p></button>;
         })}</div>
-        {preferredLocale === "en" && <p className="locale-availability">English edition available for Case 001. Other cases remain in Chinese.</p>}
+        {preferredLocale === "en" && <p className="locale-availability">The Last Tram main thread is fully playable in English. The Lower-River branch and Blackwater Creek structure sample currently remain in Chinese.</p>}
       </section>
       <div className="case-teaser"><span className="case-index">CASE {campaign.presentation.archiveNumber}</span><b>{campaign.case.title}</b><small>{campaign.presentation.teaser}</small></div>
     </main>
@@ -52,7 +53,6 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
 }
 
 export function Intro({ onDone }: { onDone: () => void }) {
-  useGameStore((state) => state.campaignId);
   const { campaign, locale, t } = useI18n();
   const [step, setStep] = useState(0);
   const lines = [

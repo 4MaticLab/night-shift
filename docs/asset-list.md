@@ -50,19 +50,19 @@
 | `district.lantern-wharf` | 灯港区 | District illustration | `/public/art/districts/lantern-wharf-v1.webp` | 完成 | 雾灯城分区志 |
 | `district.old-meridian` | 旧子午区 | District illustration | `/public/art/districts/old-meridian-v1.webp` | 完成 | 雾灯城分区志 |
 | `district.glass-hill` | 玻璃丘 | District illustration | `/public/art/districts/glass-hill-v1.webp` | 完成 | 雾灯城分区志 |
-| `sandbox.tide.hero` | 河下区低潮主视觉 | Case hero | `/public/art/sandbox/tide-refused/hero-v1.webp` | 完成 | CASE 004 书架与入口 |
-| `sandbox.tide.location.floodgate` | 第七泄洪闸 | Sandbox location | `/public/art/sandbox/tide-refused/location-floodgate-v1.webp` | 完成 | CASE 004 地点档案 |
-| `sandbox.tide.location.salt-archive` | 盐档案馆 | Sandbox location | `/public/art/sandbox/tide-refused/location-salt-archive-v1.webp` | 完成 | CASE 004 地点档案 |
-| `sandbox.tide.location.low-tide-records` | 低潮记录室 | Sandbox location | `/public/art/sandbox/tide-refused/location-low-tide-records-v1.webp` | 完成 | CASE 004 地点档案 |
-| `sandbox.tide.character.ferryman` | 夜渡船工乔河 | Character portrait | `/public/art/sandbox/tide-refused/character-ferryman-v1.webp` | 完成 | CASE 004 人物档案 |
-| `sandbox.tide.character.engineer` | 退休工程师顾山 | Character portrait | `/public/art/sandbox/tide-refused/character-engineer-v1.webp` | 完成 | CASE 004 人物档案 |
-| `sandbox.tide.character.archivist` | 盐档守页人阎珞 | Character portrait | `/public/art/sandbox/tide-refused/character-archivist-v1.webp` | 完成 | CASE 004 人物档案 |
+| `sandbox.tide.hero` | 河下区低潮主视觉 | Storyline hero | `/public/art/sandbox/tide-refused/hero-v1.webp` | 完成 | 首案城市纪事地图与支线入口 |
+| `sandbox.tide.location.floodgate` | 第七泄洪闸 | Storyline location | `/public/art/sandbox/tide-refused/location-floodgate-v1.webp` | 完成 | 河下区地点档案 |
+| `sandbox.tide.location.salt-archive` | 盐档案馆 | Storyline location | `/public/art/sandbox/tide-refused/location-salt-archive-v1.webp` | 完成 | 河下区地点档案 |
+| `sandbox.tide.location.low-tide-records` | 低潮记录室 | Storyline location | `/public/art/sandbox/tide-refused/location-low-tide-records-v1.webp` | 完成 | 河下区地点档案 |
+| `sandbox.tide.character.ferryman` | 夜渡船工乔河 | Character portrait | `/public/art/sandbox/tide-refused/character-ferryman-v1.webp` | 完成 | 河下区人物档案 |
+| `sandbox.tide.character.engineer` | 退休工程师顾山 | Character portrait | `/public/art/sandbox/tide-refused/character-engineer-v1.webp` | 完成 | 河下区人物档案 |
+| `sandbox.tide.character.archivist` | 盐档守页人阎珞 | Character portrait | `/public/art/sandbox/tide-refused/character-archivist-v1.webp` | 完成 | 河下区人物档案 |
 | `hardware.virtual-ring` | 雾灯睡眠戒 | Hardware dossier | `/public/art/hardware/virtual-ring-v1.webp` | 完成 | 睡眠硬件中心 |
 | `hardware.virtual-watch` | 十七号夜表 | Hardware dossier | `/public/art/hardware/virtual-watch-v1.webp` | 完成 | 睡眠硬件中心 |
 | `hardware.virtual-mattress` | 床下潮汐带 | Hardware dossier | `/public/art/hardware/virtual-mattress-v1.webp` | 完成 | 睡眠硬件中心 |
 | `hardware.virtual-pillow` | 静默枕 | Hardware dossier | `/public/art/hardware/virtual-pillow-v1.webp` | 完成 | 睡眠硬件中心 |
 
-品牌 Logo、核心插画、八件物证、五枚夜印、五张城市明信片、五张植物学标本、三枚社团纹章、九件口袋纪念物、林渡交接肖像、四张人物肖像、三张地区版画、CASE 004 的 1+3+3 首批画面与四张睡眠硬件档案由内置图像生成能力生成；地图、纸张、图钉、路线、信号读数、四阶段揭示、交接标签和档案材质保持代码原生，以便响应式缩放与动效控制。品牌 Logo 的提示词与透明化记录见 [[docs/art-prompts/night-shift-logo]]；林渡的身份连续性与最终提示词见 [[docs/art-prompts/lin-du-handoff-portrait]]；明信片的生成约束与场景差异见 [[docs/art-prompts/city-postcards]]，植物提示词见 [[docs/art-prompts/night-greenhouse]]，纹章提示词见 [[docs/art-prompts/city-societies]]，纪念物提示词见 [[docs/art-prompts/pocket-souvenirs]]，人物提示词与源图映射见 [[docs/art-prompts/city-witness-portraits]]，地区提示词见 [[docs/art-prompts/foglight-districts]]，CASE 004 提示词见 [[docs/art-prompts/tide-refused-assets]]，硬件提示词见 [[docs/art-prompts/sleep-hardware-dossiers]]。内容资产通过 `src/content/assets.ts` manifest 解析；全局品牌 Logo 与 CSS 场景由站点外壳直接引用。
+品牌 Logo、核心插画、八件物证、五枚夜印、五张城市明信片、五张植物学标本、三枚社团纹章、九件口袋纪念物、林渡交接肖像、四张人物肖像、三张地区版画、河下区支线的 1+3+3 首批画面与四张睡眠硬件档案由内置图像生成能力生成；地图、纸张、图钉、路线、信号读数、四阶段揭示、交接标签和档案材质保持代码原生，以便响应式缩放与动效控制。品牌 Logo 的提示词与透明化记录见 [[docs/art-prompts/night-shift-logo]]；林渡的身份连续性与最终提示词见 [[docs/art-prompts/lin-du-handoff-portrait]]；明信片的生成约束与场景差异见 [[docs/art-prompts/city-postcards]]，植物提示词见 [[docs/art-prompts/night-greenhouse]]，纹章提示词见 [[docs/art-prompts/city-societies]]，纪念物提示词见 [[docs/art-prompts/pocket-souvenirs]]，人物提示词与源图映射见 [[docs/art-prompts/city-witness-portraits]]，地区提示词见 [[docs/art-prompts/foglight-districts]]，河下区提示词见 [[docs/art-prompts/tide-refused-assets]]，硬件提示词见 [[docs/art-prompts/sleep-hardware-dossiers]]。内容资产通过 `src/content/assets.ts` manifest 解析；全局品牌 Logo 与 CSS 场景由站点外壳直接引用。
 
 ## 相关文档
 

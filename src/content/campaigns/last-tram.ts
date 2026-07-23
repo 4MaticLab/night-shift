@@ -9,6 +9,8 @@ import { wakeEchoes } from "@/src/content/wake-echoes";
 import { caseCharacters } from "@/src/content/characters";
 import { cityDistricts } from "@/src/content/districts";
 import { defineCampaign } from "./types";
+import { tideRefusedStoryline } from "@/src/content/storylines/tide-refused";
+import { lastTramStoryline } from "@/src/content/storylines/last-tram";
 
 export const LAST_TRAM_CAMPAIGN_ID = "case-001";
 
@@ -46,4 +48,5 @@ export const lastTramCampaign = defineCampaign({
     endingPrompt: "伊芙琳把账册留在站台，却没有把决定也留下。三种真相，都有各自的代价。",
     closingRefrain: "城市里仍有许多灯，只在你睡着以后亮起。",
   },
+  storylines: [lastTramStoryline, tideRefusedStoryline],
 });

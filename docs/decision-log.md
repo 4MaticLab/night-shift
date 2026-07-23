@@ -120,8 +120,17 @@
 ## ADR-014：用原创第四案验证通用沙盒，而非继续扩写改编案
 
 - 日期：2026-07-23
-- 状态：已采用
+- 状态：已被 ADR-015 取代
 - 背景：《黑水溪》证明双入口、地点网络、人物状态和多收场适合 Night Shift，但继续堆叠改编内容会扩大授权边界，也无法证明运行时真正与案件语汇解耦。
 - 决定：新增原创 `case-004`《潮汐不肯归档》，把沙盒编号、入口、地图、状态、夜班、晨报、重置、结局、人物状态和署名全部移入 `SandboxPresentation`／`credits`；旧 `corruption`／`threat` 字段只作为存档兼容内部名。新案只致意开放调查结构，不复用参考案的专名、情节、文本或视觉素材。
 - 代价：沙盒 manifest 的展示字段更完整，内容作者需要同时维护语义文案；换来的收益是 CASE 003 与 CASE 004 共用组件、独立存档和确定性结算，无案件 ID 分支。
 - 相关：[[docs/tide-refused-story-bible]]、[[docs/campaign-authoring]]、[[plans/0035-original-sandbox-case-content-pilot]]。
+
+## ADR-015：一个雾灯城承载可并发、可完结的故事线
+
+- 日期：2026-07-24
+- 状态：已采用
+- 背景：独立 CASE 004 证明了通用沙盒可行，但继续增加案件卡会把本应互相解释的城市线索切成孤岛；固定五夜也会把版本内容量误写成产品规则。用户要求《末班车》成为持续扩张的主案世界，河下区改为其支线，并让林渡可以同时推进多段剧情。
+- 决定：公开目录只保留持续更新的 `case-001` 与非商业结构样板《黑水溪》。`CampaignManifest.storylines` 在同一张雾灯城地图声明主／支线、解锁证物和跨线连接；每条线用 `case-001:<storyline-id>` 独立保存 `day → night → morning` 会话与收束，可以并行等待并分别完结。旧五夜 UI、`case-002` 与好友线索不再挂载，`?legacy=1` 不再生效。早期开发使用全局 save epoch：不兼容即定点清空 Night Shift 进度，不逐版迁移。
+- 代价：结构升级会让内部测试用户从头开始，末班车 story thread 的完整英文化也需继续迁移；换来的收益是无需维护两套入口和长期迁移链，新增内容不再申请 CASE 编号，版本可以持续追加 storylet、地区、人物、跨线证物与同风格素材。
+- 相关：[[docs/product-overview]]、[[docs/architecture]]、[[docs/campaign-authoring]]、[[plans/0037-primary-case-city-storylines]]。

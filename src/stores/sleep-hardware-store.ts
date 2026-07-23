@@ -14,6 +14,7 @@ import type {
   SleepSignalSummary,
   VirtualDeviceId,
 } from "@/src/lib/sleep-hardware/types";
+import { ensureCurrentSaveEpoch } from "@/src/stores/save-epoch";
 
 interface SleepHardwareStore {
   mode: SleepHardwareMode;
@@ -40,6 +41,8 @@ const initialHardwareState = {
   activeCapture: null as ActiveSleepCapture | null,
   history: {} as Record<string, SleepSignalSummary>,
 };
+
+ensureCurrentSaveEpoch();
 
 export const useSleepHardwareStore = create<SleepHardwareStore>()(persist((set, get) => ({
   ...initialHardwareState,
@@ -128,7 +131,7 @@ export const useSleepHardwareStore = create<SleepHardwareStore>()(persist((set, 
   reset: () => set({ ...initialHardwareState, history: {} }),
 }), {
   name: "night-shift-sleep-hardware-v1",
-  version: 1,
+  version: 2,
   partialize: ({ mode, selectedDeviceId, selectedBridgeId, consent, activeCapture, history }) => ({
     mode,
     selectedDeviceId,
@@ -137,4 +140,5 @@ export const useSleepHardwareStore = create<SleepHardwareStore>()(persist((set, 
     activeCapture,
     history,
   }),
+  migrate: () => initialHardwareState,
 }));

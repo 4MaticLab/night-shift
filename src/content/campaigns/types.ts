@@ -37,6 +37,26 @@ export interface CampaignPresentation {
   closingRefrain: string;
 }
 
+export interface StorylineConnection {
+  campaignClueId: string;
+  storylineClueId: string;
+  label: string;
+  inference: string;
+}
+
+export interface CampaignStoryline {
+  id: string;
+  role: "main" | "side";
+  archiveLabel: string;
+  title: string;
+  teaser: string;
+  locale: "zh-CN" | "en";
+  unlockClueIds: string[];
+  unlockHint: string;
+  content: SandboxCampaignContent;
+  connections: StorylineConnection[];
+}
+
 export interface CampaignManifest {
   id: string;
   version: number;
@@ -54,6 +74,7 @@ export interface CampaignManifest {
   districts: CityDistrict[];
   rules: CampaignRules;
   presentation: CampaignPresentation;
+  storylines?: CampaignStoryline[];
 }
 
 export function defineCampaign<const T extends CampaignManifest>(manifest: T): T {
@@ -78,6 +99,22 @@ export function defineCampaign<const T extends CampaignManifest>(manifest: T): T
   }
   if (clueIds.size !== manifest.case.clues.length) throw new Error(`Campaign ${manifest.id} has duplicate clue ids`);
   if (collectibleIds.size !== manifest.case.collectibles.length) throw new Error(`Campaign ${manifest.id} has duplicate collectible ids`);
+
+  const storylineIds = new Set<string>();
+  for (const storyline of manifest.storylines ?? []) {
+    if (storylineIds.has(storyline.id)) throw new Error(`Campaign ${manifest.id} has duplicate storyline ${storyline.id}`);
+    storylineIds.add(storyline.id);
+    if (storyline.unlockClueIds.some((clueId) => !clueIds.has(clueId))) {
+      throw new Error(`Campaign ${manifest.id} storyline ${storyline.id} has an invalid unlock clue`);
+    }
+    assertSandboxCampaign(storyline.content);
+    const storylineClueIds = new Set(storyline.content.clues.map((clue) => clue.id));
+    for (const connection of storyline.connections) {
+      if (!clueIds.has(connection.campaignClueId) || !storylineClueIds.has(connection.storylineClueId)) {
+        throw new Error(`Campaign ${manifest.id} storyline ${storyline.id} has an invalid clue connection`);
+      }
+    }
+  }
 
   for (const chapter of manifest.case.chapters) {
     const choiceIds = new Set(chapter.choices.map((choice) => choice.id));
