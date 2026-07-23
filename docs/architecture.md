@@ -56,6 +56,8 @@
 | 游戏框架 | `src/components/game/shell.tsx` | 顶栏、底部导航与 Demo 控制台 |
 | 共享游戏 UI | `src/components/game/shared.tsx` | 纸卡、印章、城市路线与睡眠文案 |
 | 视觉系统 | `app/globals.css` | 色板、纸张、地图、雨雾、响应式与动效 |
+
+收藏页本身不建立新的存档投影。`Collection` 只把既有 store 字段映射为四个显示组：核心物证、夜班归来、城市回声与口袋小物。CSS `order` 让核心物证在桌面连续长卷中位于首位；900 px 以下只显示当前 `activeCollectionCategory` 对应的现有 section。分类状态不持久化、不参与解锁或结局，切换案件后仍由各案件的隔离存档提供内容。
 | 资产清单 | `src/content/assets.ts` | 四幕页头／结局画面、物证、夜印、明信片、植物、社团纹章、纪念物、人物与地区的 manifest 和解析函数 |
 
 ## 状态模型

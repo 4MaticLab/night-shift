@@ -372,6 +372,33 @@ test("keeps returned postcards in the journey album", async ({ page }) => {
   await expect(page.locator(".person-dossier.locked")).toHaveCount(3);
 });
 
+test("keeps the desktop collection continuous while putting core evidence first", async ({ page }) => {
+  await openMintableCollection(page);
+  const archiveIndex = page.getByRole("navigation", { name: "收藏档案分类" });
+  await expect(archiveIndex).toBeVisible();
+  await expectMinimumTapTargets(archiveIndex.locator("button"));
+  await expect(page.getByRole("button", { name: /核心物证/ })).toHaveAttribute("aria-pressed", "true");
+
+  const [evidence, journey, city, pocket] = await Promise.all([
+    page.locator("#collection-core-evidence").boundingBox(),
+    page.locator("#collection-returned-nights").boundingBox(),
+    page.locator("#collection-city-echoes").boundingBox(),
+    page.locator("#collection-pocket-drawer").boundingBox(),
+  ]);
+  expect(evidence).not.toBeNull();
+  expect(journey).not.toBeNull();
+  expect(city).not.toBeNull();
+  expect(pocket).not.toBeNull();
+  expect(evidence!.y).toBeLessThan(journey!.y);
+  expect(journey!.y).toBeLessThan(city!.y);
+  expect(city!.y).toBeLessThan(pocket!.y);
+  await expect(page.locator(".collection-section")).toHaveCount(9);
+  expect(await page.locator(".collection-section").evaluateAll(
+    (sections) => sections.every((section) => getComputedStyle(section).display !== "none"),
+  )).toBe(true);
+  await expectNoPageOverflow(page);
+});
+
 test("keeps the Injective keepsake desk honest and responsive when deployment is unconfigured", async ({ page }) => {
   await page.route("**/api/injective/mint-authorization", async (route) => {
     if (route.request().method() !== "GET") return route.continue();
@@ -821,6 +848,27 @@ test.describe("tablet portrait 820x1180", () => {
     await expect(page.locator(".cipher-desk")).toBeVisible();
     await expectNoPageOverflow(page);
   });
+
+  test("focuses one collection drawer at a time and keeps evidence first", async ({ page }) => {
+    await openMintableCollection(page);
+    const archiveIndex = page.getByRole("navigation", { name: "收藏档案分类" });
+    await expect(archiveIndex).toBeVisible();
+    await expectMinimumTapTargets(archiveIndex.locator("button"));
+    await expect(page.locator("#collection-core-evidence")).toBeVisible();
+    await expect(page.locator("#collection-returned-nights")).toBeHidden();
+    await expect(page.locator("#collection-city-echoes")).toBeHidden();
+    await expect(page.locator("#collection-pocket-drawer")).toBeHidden();
+
+    await page.getByRole("button", { name: /夜班归来/ }).click();
+    await expect(page.locator("#collection-returned-nights")).toBeVisible();
+    await expect(page.locator(".night-greenhouse")).toBeVisible();
+    await expect(page.locator("#collection-core-evidence")).toBeHidden();
+    await page.getByRole("button", { name: /城市回声/ }).click();
+    await expect(page.locator("#collection-city-echoes")).toBeVisible();
+    await expect(page.locator(".city-watch-ledger")).toBeVisible();
+    await expect(page.locator("#collection-returned-nights")).toBeHidden();
+    await expectNoPageOverflow(page);
+  });
 });
 
 test.describe("mobile 390x844", () => {
@@ -901,12 +949,29 @@ test.describe("mobile 390x844", () => {
     await expect(page.locator(".sleep-handoff-card")).toContainText("静默枕已待命");
   });
 
-  test("opens long collections and connects evidence on a phone", async ({ page }) => {
+  test("switches focused collection drawers and connects evidence on a phone", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("button", { name: /DEMO MODE/ }).click();
     await page.getByRole("button", { name: /04 地图上被刮掉的线/ }).click();
     await page.getByRole("button", { name: "收藏", exact: true }).click();
+    await expect(page.locator(".collection-page")).toBeVisible();
+    const archiveIndex = page.getByRole("navigation", { name: "收藏档案分类" });
+    await expectMinimumTapTargets(archiveIndex.locator("button"));
+    await expect(page.locator("#collection-core-evidence")).toBeVisible();
+    await expect(page.locator(".night-greenhouse")).toBeHidden();
+    await expect(page.getByRole("button", { name: /核心物证/ })).toHaveAttribute("aria-pressed", "true");
+    expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThan(5200);
+    await page.getByRole("button", { name: /夜班归来/ }).click();
     await expect(page.getByText("雾灯温室")).toBeVisible();
+    await expect(page.locator("#collection-core-evidence")).toBeHidden();
+    await page.getByRole("button", { name: /城市回声/ }).click();
+    await expect(page.getByText("城市人情簿")).toBeVisible();
+    await expect(page.locator(".night-greenhouse")).toBeHidden();
+    await page.getByRole("button", { name: /口袋小物/ }).click();
+    await expect(page.getByText("口袋抽屉")).toBeVisible();
+    await expect(page.getByText("城市人情簿")).toBeHidden();
+    await page.getByRole("button", { name: /核心物证/ }).click();
+    await expect(page.locator("#collection-core-evidence")).toBeVisible();
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: "档案", exact: true }).click();
     await expect(page.getByText("雾灯城分区志")).toBeVisible();

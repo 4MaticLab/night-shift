@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/collection-information-architecture]] | `codex/collection-information-architecture` | `in_progress` | `auto` | 10% | 实现核心物证优先与响应式分类导航 |
+| [[plans/collection-information-architecture]] | `codex/collection-information-architecture` | `in_progress` | `auto` | 80% | 运行全量门禁并完成三档视觉验收 |
 
 ## 使用规则
 
