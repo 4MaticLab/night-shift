@@ -6727,6 +6727,8 @@ blockquote {
 }
 
 .drawer-header button {
+  min-width: 44px;
+  min-height: 44px;
   background: none;
   border: 1px solid #3c485c;
   color: #8e99a8;
