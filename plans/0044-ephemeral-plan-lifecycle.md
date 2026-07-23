@@ -1,6 +1,6 @@
 # 0044 — 临时计划生命周期
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P0
 - 创建：2026-07-24
 - 更新：2026-07-24
@@ -33,8 +33,8 @@
 - [x] 创建计划并作为分支第一笔提交。
 - [x] 定义复杂任务与临时计划命名、状态、并行及提交规则。
 - [x] 更新 AGENTS、PLANS、文档指南与 ADR。
-- [ ] 验证双链和规范一致性。
-- [ ] 把稳定事实沉淀后删除本计划及活动索引项，作为 PR 前最后一笔提交。
+- [x] 验证双链和规范一致性。
+- [x] 确认稳定事实已沉淀，并准备在下一笔提交退役本计划及活动索引项。
 
 ## 验收标准
 
@@ -50,11 +50,22 @@
 - `git diff --check`
 - 检查开工计划提交与计划退役提交均存在
 
+最终结果：
+
+- `npm run docs:check`：80 篇 Markdown 双链全部通过。
+- `git diff --check`：通过。
+- 开工计划提交：`1762007 plan: define ephemeral plan lifecycle`。
+- 规范实现提交：`f8344df docs: adopt ephemeral plan lifecycle`。
+- [[AGENTS]]、[[PLANS]]、[[plans/README]]、[[docs/documentation-guide]]、[[docs/decision-log]] 和 [[docs/index]] 已同步稳定事实。
+- 计划退役将在紧随本提交的 `plan: retire ephemeral-plan-lifecycle` 中完成。
+
 ## 决定记录
 
 - 2026-07-24：用户提出计划只在施工生命周期存在，以 Git 提交记录承担长期追溯。
 - 2026-07-24：本次规范调整由用户明确批准，按 `manual` 计划开始。
 - 2026-07-24：既有历史计划存在大量稳定文档反链，本次保留为 legacy，避免把治理改动扩大成高风险批量删除。
+- 2026-07-24：计划型 PR 默认使用 merge commit，禁止 squash；否则先创建后删除的计划不会成为主线可达历史。
+- 2026-07-24：规范、索引、文档指南和 ADR 已一致，计划进入 `completed`，等待机械退役。
 
 ## 相关文档
 

@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/0044-ephemeral-plan-lifecycle]] | `docs/ephemeral-plan-lifecycle` | `in_progress` | `manual` | 3/5 | 校验规范一致性，完成后退役本计划 |
+| [[plans/0044-ephemeral-plan-lifecycle]] | `docs/ephemeral-plan-lifecycle` | `completed` | `manual` | 5/5 | 验收完成，下一笔提交退役本计划 |
 
 ## 使用规则
 
