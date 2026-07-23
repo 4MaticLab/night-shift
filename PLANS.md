@@ -45,6 +45,7 @@
 | [[plans/0030-last-tram-english-i18n]] | `completed` | `manual` | P0 | 7/7 | 已整合英文版、当前硬件 UX 与最新 main |
 | [[plans/0031-night-shift-logo]] | `completed` | `auto` | P1 | 4/4 | Logo、favicon、文档与最新主线接入已完成 |
 | [[plans/0032-ai-rest-intention-ritual]] | `completed` | `manual` | P0 | 6/6 | 已完成 AI 休息仪式、v15 存档与全量回归 |
+| [[plans/0033-hackathon-submission-kit]] | `completed` | `manual` | P0 | 6/6 | 已完成提交作战卡、真实边界与独立质量门禁 |
 
 ## 状态规则
 
