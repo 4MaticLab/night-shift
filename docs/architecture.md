@@ -11,16 +11,11 @@
 | 模块 | 位置 | 职责 |
 |---|---|---|
 | 案件包契约 | `src/content/campaigns/types.ts` | `CampaignManifest`、引用完整性校验与案件内容查询 |
-| 案件注册表 | `src/content/campaigns/registry.ts` | 当前三案、默认案件和合法 `campaignId` 白名单 |
+| 案件注册表 | `src/content/campaigns/registry.ts` | 当前两案、默认案件和合法 `campaignId` 白名单 |
 | 首案内容包 | `src/content/campaigns/last-tram.ts` | 组合既有首案模块与视觉／结局规则 |
 | 本地化核心 | `src/i18n/core.ts`、`src/i18n/server.ts`、`src/i18n/request-locale-provider.tsx`、`src/i18n/provider.tsx` | Cookie／请求语言协商、案件能力回退、递归内容投影和界面翻译上下文 |
 | 首案英文目录 | `src/i18n/en-catalog.ts`、`src/i18n/en-overrides.ts` | 首案完整英文覆盖与关键文学文本人工润色 |
 | 第二案内容包 | `src/content/campaigns/rain-radio.ts` | 《只在雨中播出的电台》的五夜完整内容 |
-| 第三案内容包 | `src/content/campaigns/blackwater-creek.ts` | 《黑水溪》的沙盒 manifest 与线性兼容外壳 |
-| 第三案沙盒内容 | `src/content/campaigns/blackwater-creek-data.ts` | 双入口、九地点、行动、证物、手札、人物、污染与五结局 |
-| 沙盒契约与结算 | `src/lib/sandbox/` | 地点条件／效果类型、引用校验和确定性行动／结局结算 |
-| 沙盒存档 | `src/stores/sandbox-store.ts` | 按案件隔离的世界状态，以及交接、夜间会话与晨报状态机 |
-| 沙盒案件界面 | `src/components/game/sandbox-case.tsx` | 身份开场、地点图、夜班交接／等待／晨报、档案与收场 |
 | 首案核心内容 | `src/content/case.ts` | 首案五夜章节、12 条线索、8 件藏品与固定报告文本 |
 | 随身物内容 | `src/content/preparations.ts` | 三件准备物、五夜各自的确定性环境回响 |
 | 归来明信片 | `src/content/postcards.ts` | 五夜地点、城市传闻、背面短笺与三种随身物附言 |
@@ -62,7 +57,7 @@
 
 ## 状态模型
 
-`AppBootBoundary` 在应用首次进入时把真实产品内容标记为 `inert`，避免半水合页面被误点；它等待 `window.load`、`document.fonts.ready` 与当前案件首页主视觉的加载或失败结果。加载幕至少保留 700 ms 以避免冷暖缓存之间闪烁，最迟 7 秒主动放行，图片失败也会安全进入产品。退出后不会因切换案件重复播放整页加载幕。案件板、夜间循环、结局、沙盒与硬件中心通过 `next/dynamic` 从首页入口拆分，在真正进入对应界面时使用轻量局部反馈。
+`AppBootBoundary` 在应用首次进入时把真实产品内容标记为 `inert`，避免半水合页面被误点；它等待 `window.load`、`document.fonts.ready` 与当前案件首页主视觉的加载或失败结果。加载幕至少保留 700 ms 以避免冷暖缓存之间闪烁，最迟 7 秒主动放行，图片失败也会安全进入产品。退出后不会因切换案件重复播放整页加载幕。案件板、夜间循环、结局与硬件中心通过 `next/dynamic` 从首页入口拆分，在真正进入对应界面时使用轻量局部反馈。
 
 主要阶段为 `day → ready → night → morning → ending`。章节结算只通过当前案件 manifest 的确定性内容函数产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 16。`campaignId` 标识活动案件，活动进度仍保持扁平供组件读取；切换时先把它快照到 `campaignSaves[campaignId]`，再恢复目标案件或创建新档。章节、线索、关系、密文解答、结局、案板坐标、夜间历史和放下纸条因此按案隔离。v13 及更早的单案件存档默认归入 `case-001`，原有数据无需清除；v15 对纸条记录逐章校验，v16 只保留当前案件注册表中的合法密文 ID，旧档默认没有解密记录。
 
@@ -72,17 +67,11 @@
 
 案件 manifest 同时提供章节数、线索数、藏品数、真结局门槛、档案标题和逐夜视觉。`resolveNight`、关系匹配、结局资格、迁移过滤和页面投影都显式接收当前 manifest；通用模块不按 `case-001`／`case-002` 写分支。`defineCampaign` 要求章节从 1 连续排列、每个 choice 有路线、每夜拥有明信片／植物／四时辰回声／睡隙回声／夜印，并拒绝跨案件线索引用和不可达门槛。
 
-`CampaignManifest.format` 额外区分 `linear-night` 与 `sandbox-expedition`。第三案通过一个最小线性兼容外壳继续满足注册表的共享展示字段，实际玩法读取 `sandbox` 内容；`app/page.tsx` 只按格式选择通用沙盒界面，不按 `case-003` 写业务分支。`assertSandboxCampaign` 校验地点、行动、证物、手札、物品、NPC 和全部条件／效果引用，并要求污染阶段严格覆盖 0–7。
-
-沙盒进度单独持久化到 `night-shift-sandbox-v1` v2 的 `saves[campaignId]`，不修改线性存档 v14。其状态包含入口、已显影／访问地点、已完成行动、证物、手札、物品、污染、威胁、NPC 状态、行动日志、低刺激偏好与结局，并增加 `day → night → morning → day`、待执行行动、随队物品、活动 `SleepSession` 和最后晨报差异快照。v1 存档缺少延迟字段时安全归一化为白天；只有同时具有合法行动和会话的夜间存档才恢复为夜间，晨报也必须具备结果快照。行动结算没有随机数：出发时只冻结交接与开始时间，结束夜班时才调用一次 `resolveSandboxAction`；晨报阶段不能再次结算。前置条件决定是否可执行，效果通过去重与有界增量写入，终局结局会优先于普通收场。独立存档避免旧案迁移承受无关字段，也让重置第三案不会触及前两案。
-
 睡眠质量为 `interrupted`、`regular`、`restful`：三者都至少解锁一条主线线索；差异只体现在路线长度、收藏数量、回声事件和环境观察。`selectedPreparationId` 记录当前随身物，`preparationHistory` 按章节保存已经归来的准备；`selectedChoice` 记录当前方向，`choiceHistory` 按章节保存路线履历。方向决定四个路线节点、五段夜间事件、城市遭遇与归来来信，但同章节三个方向的线索和藏品结果保持一致。完成一夜后，章节编号会加入持久化的 `nightSealIds` 与 `completedReports`，旅程册据此解锁明信片与路线履历。
 
 `sleepMode` 区分 12 秒压缩演示和真实夜班。开始交接时创建包含 `startedAt` 与 `watchId` 的 `activeSleepSession`；Demo 始终保存 `midnight`，真实模式按浏览器本地小时冻结掌灯（19:00–22:59）、夜半（23:00–01:59）、末更（02:00–05:59）或白昼小憩（06:00–18:59）。真实模式不依赖后台定时器，而是在重开页面后由开始时间与当前时间重新计算进度；刷新不会因当前时刻改变已经冻结的城市时辰。真实夜班的 `recordWakeEcho` 只在活动会话尚无 `wakeEcho` 时写入一次章节回声和本地时间，不改变 phase；Demo 只为 `interrupted` 质量预置一条确定性回声。玩家最终结束会话时写入 `endedAt`、实际分钟数和按阈值派生的质量，并把会话保存为 `lastSleepSession` 供晨报读取。少于 5 小时为断续，5 小时至不足 7 小时为普通，7 小时及以上为安稳；任一结果都推进主线。
 
-沙盒案件复用同一组 `startSleepSession`、`finishSleepSession`、时辰和持续时间函数。Demo 仍为 12 秒且允许主动跳到清晨；真实模式保存开始时间，页面重开后直接恢复同一夜班。沙盒睡眠质量只选择夜间与晨报的叙事层级，不传入 `resolveSandboxAction`，所以短暂返回不会改变线索、人物、污染或结局。
-
-睡眠硬件使用第三份独立存档 `night-shift-sleep-hardware-v1`。线性和沙盒存档都只在 `SleepSession` 边界通知硬件域开始／结束采集，不保存任何硬件字段。只有经过本地授权的虚拟设备能创建活动采集；真实厂商桥接入口保持预演状态。虚拟模拟器从会话与设备 ID 确定性生成摘要，运行时变化不持久化，晨报最多保留最近 8 条摘要。设备撤销或切换会终止采集但不结束剧情会话，详见 [[docs/sleep-hardware-bridge]]。
+睡眠硬件使用第三份独立存档 `night-shift-sleep-hardware-v1`。游戏存档只在 `SleepSession` 边界通知硬件域开始／结束采集，不保存任何硬件字段。只有经过本地授权的虚拟设备能创建活动采集；真实厂商桥接入口保持预演状态。虚拟模拟器从会话与设备 ID 确定性生成摘要，运行时变化不持久化，晨报最多保留最近 8 条摘要。设备撤销或切换会终止采集但不结束剧情会话，详见 [[docs/sleep-hardware-bridge]]。
 
 植物阶段由同一持久化进度推导：`0–<25%` 种核、`25–<50%` 抽芽、`50–<85%` 展叶、`85–100%` 开花。页面关闭期间无需运行后台计时器，重开后会根据会话时间直接恢复对应阶段。完成夜班时写入 `growthHistory` 快照，包含章节、时长、质量、方向、随身物、城市时辰、可选睡隙回声 ID 与完成时间；断续睡眠也保存完整植株，只使用较紧凑的视觉层级。v5 迁移会为旧存档中已经完成的报告建立普通层级标本，v11 再为旧会话与温室记录补齐安全时辰；v12 校验可选回声记录，旧档没有回声时保留为空白而不伪造醒转。
 
@@ -144,7 +133,7 @@ React Flow 使用本地受控节点承接拖动过程，只在桌面端从图钉
 - `investigation.tsx`：案件板、明信片旅程册、夜印收藏、物证档案与 manifest 驱动的结案卷宗。
 - `clue-sharing.tsx`：单条证物二维码、复制链接与接收结果提示；不拥有存档校验规则。
 - `shell.tsx`：跨视图导航与 Demo 控制台。
-- `sleep-hardware.tsx`：跨线性／沙盒的硬件中心、授权、信号与回执；不拥有剧情结算。
+- `sleep-hardware.tsx`：跨案件的硬件中心、授权、信号与回执；不拥有剧情结算。
 - `shared.tsx`：跨功能域复用的纸张、印章和路线视觉原语。
 
 会话模型位于 `src/lib/game-engine`，跨页恢复依赖持久化时间戳而非组件生命周期。`app/page.tsx` 只保留顶层状态与视图编排，后续案件板和等待循环可以在各自功能域内独立演进。
@@ -155,7 +144,6 @@ React Flow 使用本地受控节点承接拖动过程，只在桌面端从图钉
 
 - [[docs/product-overview]]
 - [[docs/campaign-authoring]]
-- [[docs/blackwater-creek-adaptation-bible]]
 - [[docs/decision-log]]
 - [[docs/quality-baseline]]
 - [[docs/sleep-hardware-bridge]]

@@ -36,6 +36,12 @@ describe("Night Shift game store", () => {
   it("uses The Last Tram for new and invalid campaign saves", () => {
     expect(DEFAULT_CAMPAIGN_ID).toBe(LAST_TRAM_CAMPAIGN_ID);
     expect(storeModule.migrateGameState({ campaignId: "missing-case" }).campaignId).toBe(LAST_TRAM_CAMPAIGN_ID);
+    expect(storeModule.migrateGameState({
+      campaignId: "case-003",
+      campaignSaves: {
+        "case-003": { started: true, chapter: 4, phase: "night" },
+      },
+    }).campaignId).toBe(LAST_TRAM_CAMPAIGN_ID);
   });
 
   it("completes the deterministic five-night loop", () => {

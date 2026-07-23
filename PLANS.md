@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/refactor-remove-blackwater-sandbox]] | `refactor/remove-blackwater-sandbox` | `in_progress` | `manual` | 1/6 | 审计并移除 CASE 003 与独立沙盒运行时 |
+| [[plans/refactor-remove-blackwater-sandbox]] | `refactor/remove-blackwater-sandbox` | `in_progress` | `manual` | 5/6 | 复核变更并提交最终证据 |
 
 ## 使用规则
 

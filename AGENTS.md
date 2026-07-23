@@ -4,7 +4,7 @@
 
 ## 快速索引
 
-- 产品与世界观：[[docs/product-overview]]、[[docs/story-bible]]、[[docs/rain-radio-story-bible]]、[[docs/blackwater-creek-adaptation-bible]]
+- 产品与世界观：[[docs/product-overview]]、[[docs/story-bible]]、[[docs/rain-radio-story-bible]]
 - 案件包创作：[[docs/campaign-authoring]]
 - 北极星与参考原则：[[docs/north-star]]
 - 工程与状态模型：[[docs/architecture]]

@@ -2,7 +2,7 @@
 
 ## 产品原则
 
-睡眠硬件是 Night Shift 延迟探索的可选感官层，不是新的胜负系统。未接设备、权限被撤销、数据残缺或睡眠断续时，普通案件与沙盒案件都必须继续结算同一组关键事实。设备信号只改变夜行中的环境反馈和晨报摘要，不进入 `resolveNight`、`resolveSandboxAction` 或结局资格。
+睡眠硬件是 Night Shift 延迟探索的可选感官层，不是新的胜负系统。未接设备、权限被撤销、数据残缺或睡眠断续时，所有案件都必须继续结算同一组关键事实。设备信号只改变夜行中的环境反馈和晨报摘要，不进入 `resolveNight` 或结局资格。
 
 ## 当前可用来源
 
@@ -43,7 +43,7 @@
 | `src/stores/sleep-hardware-store.ts` | 独立 localStorage 授权、活动采集与最近摘要 |
 | `src/components/game/sleep-hardware.tsx` | 硬件中心、交接状态、夜间遥测和晨报回执 |
 
-线性 `game-store` 与沙盒 `sandbox-store` 都只在 `SleepSession` 开始／结束边界调用 `beginCapture` 和 `finishCapture`。硬件域不持有剧情进度，游戏域也不持有健康字段，因此更换或移除硬件层不会迁移案件存档。
+`game-store` 只在 `SleepSession` 开始／结束边界调用 `beginCapture` 和 `finishCapture`。硬件域不持有剧情进度，游戏域也不持有健康字段，因此更换或移除硬件层不会迁移案件存档。
 
 ## 生命周期
 
