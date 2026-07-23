@@ -32,6 +32,65 @@ async function expectMinimumTapTargets(locator: import("@playwright/test").Locat
   }
 }
 
+async function expectNoVisibleHan(page: import("@playwright/test").Page) {
+  const visibleText = await page.locator("body").innerText();
+  expect(visibleText).not.toMatch(/\p{Script=Han}/u);
+}
+
+test("plays the first case in English and preserves the language preference", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /ENGLISH/ }).click();
+  await expect(page.getByRole("button", { name: /Begin Case 001/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /When you fall asleep/ })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("button", { name: /Begin Case 001/ })).toBeVisible();
+
+  await page.getByRole("button", { name: /Begin Case 001/ }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: /Enter the agency/ }).click();
+  await expect(page.getByText("The Ticket That Never Existed")).toBeVisible();
+  await expectNoVisibleHan(page);
+
+  await page.getByRole("button", { name: /Let the paper speak first/ }).click();
+  await page.getByRole("button", { name: /The night is yours/ }).click();
+  await expect(page.getByText("Night shift in progress")).toBeVisible();
+  await expectNoVisibleHan(page);
+  await page.getByRole("button", { name: /Skip to morning/ }).click();
+  await expect(page.getByText("Last night's investigation is complete")).toBeVisible();
+  await expect(page.getByText(/Rain had washed the signs of Lantern Wharf quiet/)).toBeVisible();
+  await expectNoVisibleHan(page);
+
+  await page.getByRole("button", { name: "Caseboard", exact: true }).click();
+  await expect(page.getByText("Connect the lies", { exact: false })).toBeVisible();
+  await expectNoVisibleHan(page);
+  await page.getByRole("button", { name: "Collection", exact: true }).click();
+  await expect(page.getByText("Time did not vanish.", { exact: false })).toBeVisible();
+  await expectNoVisibleHan(page);
+  await page.getByRole("button", { name: "Archive", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "The Last Tram at 00:43" })).toBeVisible();
+  await expectNoVisibleHan(page);
+  await expect(page.evaluate(() => localStorage.getItem("night-shift-locale"))).resolves.toBe("en");
+});
+
+test("keeps the English first-night handoff usable at 390 × 844", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await page.getByRole("button", { name: /ENGLISH/ }).click();
+  await expectNoPageOverflow(page);
+  await page.getByRole("button", { name: /Begin Case 001/ }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: "Continue" }).click();
+  await page.getByRole("button", { name: /Enter the agency/ }).click();
+  await expectNoVisibleHan(page);
+  await expectNoPageOverflow(page);
+  await page.getByRole("button", { name: /Let the paper speak first/ }).click();
+  const handoff = page.getByRole("button", { name: /The night is yours/ });
+  await expect(handoff).toBeVisible();
+  await expectMinimumTapTargets(page.locator(".choice-list .choice"));
+  await expectNoPageOverflow(page);
+});
+
 async function reachFinalDecision(page: import("@playwright/test").Page) {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
@@ -264,7 +323,7 @@ test("shares one clue as a QR deep link", async ({ page }) => {
   const dialog = page.getByRole("dialog", { name: /把「四十三天」/ });
   await expect(dialog).toBeVisible();
   await expect(dialog.getByText(/不会附带你的夜班进度/)).toBeVisible();
-  await expect(dialog.getByLabel("好友线索链接")).toHaveValue("http://localhost:3000/?case=case-001&clue=flower-cycle");
+  await expect(dialog.getByLabel("好友线索链接")).toHaveValue(`${new URL(page.url()).origin}/?case=case-001&clue=flower-cycle`);
   await expect(dialog.getByRole("img", { name: /分享线索「四十三天」的二维码/ })).toHaveAttribute("src", /^data:image\/png;base64,/);
   await dialog.getByRole("button", { name: "复制链接" }).click();
   await expect(dialog.getByRole("button", { name: "链接已复制" })).toBeVisible();

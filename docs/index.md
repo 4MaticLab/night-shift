@@ -4,7 +4,7 @@
 
 ## 产品
 
-- [[docs/product-overview]] — 产品定位、核心循环、成功标准与非目标。
+- [[docs/product-overview]] — 产品定位、核心循环、首案中英文范围、成功标准与非目标。
 - [[docs/north-star]] — 文学性城市、异步等待与原创边界的北极星。
 - [[docs/story-bible]] — 首案真相、人物关系和不可被动态改写的事实。
 - [[docs/rain-radio-story-bible]] — 第二案的广播网络、四十七户居民与固定真相。
@@ -17,8 +17,8 @@
 
 ## 工程
 
-- [[docs/architecture]] — 状态、内容、存档、夜间结算与 UI 的组织方式。
-- [[docs/campaign-authoring]] — `CampaignManifest` 契约、新案件接入、存档与链接边界。
+- [[docs/architecture]] — 状态、内容、本地化、存档、夜间结算与 UI 的组织方式。
+- [[docs/campaign-authoring]] — `CampaignManifest` 契约、新案件与本地化接入、存档及链接边界。
 - [[docs/decision-log]] — 重要技术与产品取舍及其原因。
 - [[docs/documentation-guide]] — 双链、文档生命周期和更新触发条件。
 

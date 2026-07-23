@@ -29,6 +29,8 @@ h1, h2, h3, blockquote { font-family: var(--font-newsreader), Georgia, serif; fo
 .brand-mark b { font-family: var(--font-newsreader); letter-spacing: .08em; font-size: 17px; }
 .brand-mark small { font-size: 8px; letter-spacing: .28em; opacity: .55; }
 .ghost-button, .demo-pill { border: 1px solid rgba(197,154,90,.38); color: var(--paper); background: rgba(9,13,24,.5); padding: 11px 16px; letter-spacing: .12em; font-size: 11px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.landing-nav-actions { display: flex; align-items: center; gap: 8px; }
+.language-button { color: var(--amber); }
 .hero-copy { z-index: 3; position: relative; width: min(620px, 47vw); margin-left: 8vw; margin-top: 2vh; }
 .eyebrow { text-transform: uppercase; color: var(--amber); letter-spacing: .16em; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 9px; }
 .hero-copy h1 { margin: 24px 0 22px; color: var(--warm-paper); font-size: clamp(56px, 6vw, 96px); line-height: .98; letter-spacing: -.04em; }
@@ -50,6 +52,7 @@ h1, h2, h3, blockquote { font-family: var(--font-newsreader), Georgia, serif; fo
 .campaign-shelf button p { margin: 0; overflow: hidden; color: #7e8998; font-size: 8px; line-height: 1.45; text-overflow: ellipsis; white-space: nowrap; }
 .campaign-shelf button:hover { border-color: #8f7959; background: #1a2436e8; }
 .campaign-shelf button.active { border-color: var(--amber); background: #2b2b30e8; box-shadow: inset 3px 0 var(--amber); color: var(--paper); }
+.campaign-shelf .locale-availability { margin: 9px 2px 0; color: #a49a89; font: 7px/1.5 monospace; letter-spacing: .04em; }
 .case-teaser { position: absolute; z-index: 3; right: 4vw; bottom: 4vh; width: 310px; padding: 22px 24px; border-top: 1px solid rgba(197,154,90,.55); background: rgba(9,13,24,.72); display: flex; flex-direction: column; gap: 7px; }
 .case-teaser .case-index { font-family: monospace; color: var(--amber); letter-spacing: .18em; font-size: 9px; }
 .case-teaser b { color: var(--paper); font-family: var(--font-newsreader); font-size: 18px; }

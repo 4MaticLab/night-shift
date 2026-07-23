@@ -1,8 +1,11 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const port = process.env.PLAYWRIGHT_PORT ?? "3000";
+const baseURL = `http://localhost:${port}`;
+
 export default defineConfig({
   testDir: "./tests/e2e",
-  use: { baseURL: "http://localhost:3000", trace: "on-first-retry" },
-  webServer: { command: "npm run dev", url: "http://localhost:3000", reuseExistingServer: true },
+  use: { baseURL, trace: "on-first-retry" },
+  webServer: { command: `npm run dev -- -p ${port}`, url: baseURL, reuseExistingServer: true },
   projects: [{ name: "chrome", use: { ...devices["Desktop Chrome"], channel: "chrome" } }],
 });

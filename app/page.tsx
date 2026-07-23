@@ -13,11 +13,18 @@ import { readSharedClueQuery, removeSharedClueQuery } from "@/src/lib/game-engin
 import { getCampaign } from "@/src/content/campaigns/registry";
 import { SandboxCase } from "@/src/components/game/sandbox-case";
 import { SleepHardwarePanel } from "@/src/components/game/sleep-hardware";
+import { I18nProvider, useI18n } from "@/src/i18n/provider";
 
 const subscribeToHydration = () => () => undefined;
 
 export default function HomePage() {
+  const campaignId = useGameStore((state) => state.campaignId);
+  return <I18nProvider campaignId={campaignId}><GamePage /></I18nProvider>;
+}
+
+function GamePage() {
   const game = useGameStore();
+  const { campaign, localize, t } = useI18n();
   const hydrated = useSyncExternalStore(subscribeToHydration, () => true, () => false);
   const [intro, setIntro] = useState(false);
   const [view, setView] = useState<GameView>(game.phase === "morning" ? "report" : "tonight");
@@ -26,7 +33,6 @@ export default function HomePage() {
   const [clueGiftNotice, setClueGiftNotice] = useState<ClueGiftNoticeData | null>(null);
   const [hardwareOpen, setHardwareOpen] = useState(false);
   const processedClueQuery = useRef(false);
-  const campaign = getCampaign(game.campaignId);
   const sandboxContent = campaign.format === "sandbox-expedition" ? campaign.sandbox : undefined;
   const activeView: GameView = game.phase === "morning" && view === "tonight" ? "report" : view;
   const receiveSharedClue = game.receiveSharedClue;
@@ -62,15 +68,16 @@ export default function HomePage() {
       if (cancelled || processedClueQuery.current) return;
       processedClueQuery.current = true;
       if (!shared.clue || !shared.campaignId) {
-        setClueGiftNotice({ kind: "error", title: "这封线索无法归档", message: "链接中的线索编号不存在或已经失效；你的存档没有发生变化。" });
+        setClueGiftNotice({ kind: "error", title: t("这封线索无法归档"), message: t("链接中的线索编号不存在或已经失效；你的存档没有发生变化。") });
       } else {
         switchCampaign(shared.campaignId);
         const result = receiveSharedClue(shared.clue.id);
+        const sharedClue = localize(shared.clue);
         const notices: Record<typeof result, ClueGiftNoticeData> = {
-          received: { kind: "success", title: `好友送来「${shared.clue.title}」`, message: "证物已经放进案件板，并标记为“好友送达”。" },
-          "already-received": { kind: "info", title: `「${shared.clue.title}」已经收过`, message: "案件板保留原来那一张，没有重复写入。" },
-          "already-owned": { kind: "info", title: `你已经找到「${shared.clue.title}」`, message: "这封线索没有覆盖你的调查记录，也没有重复写入。" },
-          invalid: { kind: "error", title: "这封线索无法归档", message: "链接中的线索编号不存在或已经失效；你的存档没有发生变化。" },
+          received: { kind: "success", title: `${t("好友送来")}「${sharedClue.title}」`, message: t("证物已经放进案件板，并标记为“好友送达”。") },
+          "already-received": { kind: "info", title: `「${sharedClue.title}」${t("已经收过")}`, message: t("案件板保留原来那一张，没有重复写入。") },
+          "already-owned": { kind: "info", title: `${t("你已经找到")}「${sharedClue.title}」`, message: t("这封线索没有覆盖你的调查记录，也没有重复写入。") },
+          invalid: { kind: "error", title: t("这封线索无法归档"), message: t("链接中的线索编号不存在或已经失效；你的存档没有发生变化。") },
         };
         setClueGiftNotice(notices[result]);
         if (result !== "invalid") {
@@ -84,7 +91,7 @@ export default function HomePage() {
     return () => {
       cancelled = true;
     };
-  }, [hydrated, receiveSharedClue, switchCampaign]);
+  }, [hydrated, localize, receiveSharedClue, switchCampaign, t]);
 
   const clueNotice = <AnimatePresence>{clueGiftNotice && <ClueGiftNotice notice={clueGiftNotice} onClose={() => setClueGiftNotice(null)} />}</AnimatePresence>;
   const hardwarePanel = <AnimatePresence>{hardwareOpen && <SleepHardwarePanel onClose={() => setHardwareOpen(false)} />}</AnimatePresence>;
