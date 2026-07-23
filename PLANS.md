@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/refactor-remove-blackwater-sandbox]] | `refactor/remove-blackwater-sandbox` | `in_progress` | `manual` | 5/6 | 复核变更并提交最终证据 |
+| [[plans/refactor-remove-blackwater-sandbox]] | `refactor/remove-blackwater-sandbox` | `completed` | `manual` | 6/6 | 退役计划并准备 PR |
 
 ## 使用规则
 
