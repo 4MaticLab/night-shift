@@ -1291,7 +1291,7 @@ blockquote {
   backdrop-filter: blur(15px);
 }
 
-.bottom-nav button {
+.bottom-nav a {
   min-width: 0;
   min-height: 48px;
   color: #7f8a99;
@@ -1306,19 +1306,20 @@ blockquote {
   font-size: 9px;
   cursor: pointer;
   position: relative;
+  text-decoration: none;
 }
 
-.bottom-nav button svg {
+.bottom-nav a svg {
   width: 18px;
 }
 
-.bottom-nav button.active {
+.bottom-nav a.active {
   color: var(--amber);
   border-color: #c59a5a1f;
   background: #c59a5a0d;
 }
 
-.bottom-nav button.active::before {
+.bottom-nav a.active::before {
   content: "";
   position: absolute;
   top: -6px;
@@ -1326,7 +1327,7 @@ blockquote {
   border-top: 2px solid var(--amber);
 }
 
-.bottom-nav button:not(.active):hover {
+.bottom-nav a:not(.active):hover {
   color: var(--paper);
   background: #ffffff08;
 }
@@ -3261,7 +3262,7 @@ blockquote {
   }
 }
 
-.bottom-nav button {
+.bottom-nav a {
   position: relative;
 }
 
@@ -10068,7 +10069,7 @@ blockquote {
     width: calc(100% - 16px);
   }
 
-  .bottom-nav button span {
+  .bottom-nav a span {
     font-size: 8px;
   }
 

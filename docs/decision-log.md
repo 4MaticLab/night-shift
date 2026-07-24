@@ -196,3 +196,12 @@
 - 决定：用 Bun 编译的跨平台 Connector 在 `127.0.0.1` 提供设置页与受限桥，连接 Home Assistant WebSocket API。Vercel 页面只在 Chrome Local Network Access 权限后访问固定 loopback 地址，经六位码换取 12 小时 bearer；它只读取归一化白名单实体，并发送 `night.started`、`wake.echo`、`morning.arrived` 三种幂等语义 cue。桥只翻译场景、灯、开关和风扇的固定动作，传感器只读，危险域与任意 service 拒绝。空间外设使用独立 store，只持久化启用和实体 ID 绑定，任何错误都不阻塞游戏状态机。
 - 代价：比赛机必须下载并保持未签名的 Connector 运行，非 Chrome 浏览器不承诺公网到 loopback 的路径，桥重启也会丢失 token、配对和临时恢复快照。换来的收益是正式 Vercel 页面可在用户授权后接入本机 Home Assistant，长期 token 不落前端，局域网发现边界明确，并可复用 Home Assistant 已有的 HomeKit、Matter、Zigbee 与厂商集成。
 - 相关：[[docs/home-assistant-ambient-bridge]]、[[docs/sleep-hardware-bridge]]、[[docs/privacy-and-guardrails]]、[[docs/architecture]]。
+
+## ADR-022：URL 管理页面位置，Zustand 管理案件进度
+
+- 日期：2026-07-24
+- 状态：已采用
+- 背景：产品已经使用 Next App Router，但案件书架、序章、五个底部页面、夜班与结局仍压在根页面的客户端条件渲染中。浏览器地址不能表达当前页面，前进／后退和直接访问缺少语义，案件库刷新还需要额外 sessionStorage 标记。
+- 决定：为案件书架、序章、今晚、今晨、案件板、收藏、档案、夜班和结局建立稳定路径，用共享 route layout 保留本地化、首次加载、硬件协调与全局弹层。普通页面使用真实链接和浏览器历史；水合后的纯函数守卫以持久化 `started`／`phase` 规范强制阶段。Zustand 继续独占案件、章节、睡眠、证物、推论和结局，不把这些数据复制进 URL。本次不启用 Cache Components。
+- 代价：直接访问游戏路径必须先等待本地存档水合再决定是否重定向；页面局部搜索、展开和滚动状态在离开路由后仍可能丢失。Next 与 Vinext 两套构建都必须验证路由、导航 hooks 和分享 query 行为。
+- 相关：[[docs/architecture]]、[[docs/quality-baseline]]。
