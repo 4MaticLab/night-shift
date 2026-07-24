@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  deployments: read
 
 jobs:
   screenshots:
@@ -19,30 +20,19 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
+      - name: Wait for Cloudflare Pages deployment
+        id: cloudflare
+        uses: WalshyDev/cf-pages-await@v2
         with:
-          node-version-file: package.json
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build Next.js application
-        run: npm run build
-
-      - name: Start application
-        run: npm start &
-        env:
-          PORT: 3000
-
-      - name: Wait for application to be ready
-        run: npx wait-on http://localhost:3000 --timeout 60000
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          project: night-shift
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Capture screenshots
         uses: marketplace/actions/auto-pr-screenshots@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          base-url: http://localhost:3000
+          base-url: ${{ steps.cloudflare.outputs.url }}
           paths: |
             /
