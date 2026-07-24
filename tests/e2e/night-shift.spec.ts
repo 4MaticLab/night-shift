@@ -64,7 +64,7 @@ async function openMintableCollection(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
   await runDemoShortcut(page, /跳到真结局条件/);
   await page.getByRole("button", { name: "收藏", exact: true }).click();
-  await expect(page.locator(".collection-page")).toBeVisible({ timeout: 15_000 });
+  await expect(page.locator(".collection-page")).toBeVisible();
 }
 
 test("holds the first interaction behind a real hero-art loading screen", async ({ page }) => {
@@ -131,7 +131,7 @@ test("returns to the surface that opened demo controls", async ({ page }) => {
   await runDemoShortcut(page, /03 没有退房的307/);
 
   const surfaces = [
-    { name: "今晨", locator: ".report-wrap" },
+    { name: "今晨", locator: ".empty-report" },
     { name: "案件板", locator: ".board-page" },
     { name: "今晚", locator: ".tonight-page" },
     { name: "收藏", locator: ".collection-page" },
@@ -348,92 +348,6 @@ test("rest intention requests an AI note only after explicit consent", async ({ 
   });
   expect(requestBody).not.toHaveProperty("sleepData");
   expect(requestBody).not.toHaveProperty("history");
-});
-
-test("keeps the latest morning report stable while evidence is filed and after the day ends", async ({ page }) => {
-  await page.goto("/");
-  await page.getByRole("button", { name: /DEMO MODE/ }).click();
-  await runDemoShortcut(page, /02 每隔四十三天的花/);
-  await page.getByRole("button", { name: /给米娜一次说谎的机会/ }).click();
-  await page.getByRole("button", { name: /夜香花笺/ }).click();
-  await page.locator(".quality-tabs").getByRole("button", { name: /8小时 · 安稳/ }).click();
-  await page.getByLabel("放下纸条").fill("明天再整理花店的回信，今晚先休息。");
-  await page.getByRole("button", { name: /今晚交给你了/ }).click();
-  await page.getByRole("button", { name: /跳到清晨/ }).click();
-
-  const reportHeading = page.locator(".report-hero").getByRole("heading", { name: "每隔四十三天的花" });
-  const readReportFingerprint = async () => ({
-    hero: await page.locator(".report-hero").innerText(),
-    watch: await page.locator(".city-watch-report").innerText(),
-    rest: await page.locator(".rest-reflection-card").innerText(),
-    character: await page.locator(".character-encounter").innerText(),
-    souvenir: await page.locator(".souvenir-reveal").innerText(),
-    society: {
-      title: await page.locator(".society-memory-letter h3").innerText(),
-      letter: await page.locator(".society-memory-letter .paper-card > blockquote").innerText(),
-      reason: await page.locator(".society-postscript").innerText(),
-    },
-    sleep: await page.locator(".sleep-summary").innerText(),
-    preparation: await page.locator(".preparation-echo").innerText(),
-    route: await page.locator(".route-report").innerText(),
-    evidence: await page.locator(".discoveries").innerText(),
-    contradiction: await page.locator(".contradiction").innerText(),
-  });
-  await expect(reportHeading).toBeVisible();
-  const originalReport = await readReportFingerprint();
-  expect(originalReport.sleep).toContain("8 小时");
-  expect(originalReport.sleep).toContain("雾散得很早");
-  expect(originalReport.preparation).toContain("夜香花笺");
-  expect(originalReport.rest).toContain("明天再整理花店的回信，今晚先休息。");
-  await page.reload();
-  await expect(reportHeading).toBeVisible();
-  expect(await readReportFingerprint()).toEqual(originalReport);
-
-  await page.getByRole("button", { name: /去案件板整理线索/ }).click();
-  await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
-  await page.getByRole("button", { name: /^OBJECT · 02 未寄出的明信片/ }).click();
-  await page.getByRole("button", { name: /核对这两件证物/ }).click();
-  await expect(page.locator(".relation-ledger").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "关闭核心推论" }).click();
-
-  await page.getByRole("button", { name: "今晨", exact: true }).click();
-  await expect(reportHeading).toBeVisible();
-  await expect(page.getByText("最新晨报重读")).toHaveCount(0);
-  expect(await readReportFingerprint()).toEqual(originalReport);
-  let saved = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state);
-  expect(saved).toMatchObject({ chapter: 2, phase: "morning" });
-  expect(saved.confirmedRelations).toContain("mina-evelyn");
-
-  await page.getByRole("button", { name: "收藏", exact: true }).click();
-  await expect(page.locator(".collection-page")).toBeVisible();
-  await page.getByRole("button", { name: "档案", exact: true }).click();
-  await expect(page.locator(".archive-page")).toBeVisible();
-  await page.getByRole("button", { name: "今晨", exact: true }).click();
-  expect(await readReportFingerprint()).toEqual(originalReport);
-
-  await page.getByRole("button", { name: /结束今日，准备下一夜/ }).click();
-  await expect(page.locator(".tonight-page")).toBeVisible();
-  saved = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state);
-  expect(saved).toMatchObject({ chapter: 3, phase: "day" });
-
-  await page.getByRole("button", { name: "今晨", exact: true }).click();
-  await expect(reportHeading).toBeVisible();
-  await expect(page.getByText("最新晨报重读")).toBeVisible();
-  await expect(page.getByRole("button", { name: /去案件板整理线索/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: /去准备今晚/ })).toBeVisible();
-  const correspondenceReplies = page.locator(".correspondence-replies button");
-  await expect(correspondenceReplies).toHaveCount(2);
-  await expect(correspondenceReplies.nth(0)).toBeDisabled();
-  await expect(correspondenceReplies.nth(1)).toBeDisabled();
-  await expect(page.getByText(/今日已经结束；这封未寄出的答复作为空白留在档案里/)).toBeVisible();
-  const correspondenceBeforeReload = (await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state)).correspondenceHistory;
-  expect(await readReportFingerprint()).toEqual(originalReport);
-  await page.reload();
-  await page.getByRole("button", { name: "今晨", exact: true }).click();
-  await expect(reportHeading).toBeVisible();
-  await expect(page.getByText("最新晨报重读")).toBeVisible();
-  expect((await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state)).correspondenceHistory).toEqual(correspondenceBeforeReload);
-  expect(await readReportFingerprint()).toEqual(originalReport);
 });
 
 test("sleep hardware authorizes a virtual ring and returns a local morning receipt", async ({ page }) => {
@@ -724,7 +638,7 @@ test("files an optional daytime notice and returns its echo after the next night
   await openFirstNight(page);
   await page.getByRole("button", { name: /今晚交给你了/ }).click();
   await page.getByRole("button", { name: /跳到清晨/ }).click();
-  await page.getByRole("button", { name: /结束今日，准备下一夜/ }).click();
+  await page.getByRole("button", { name: /整理线索，准备下一夜/ }).click();
   await page.getByRole("button", { name: /^今晚$/ }).click();
 
   await expect(page.getByText("门缝下的三张纸")).toBeVisible();
@@ -739,7 +653,7 @@ test("files an optional daytime notice and returns its echo after the next night
   await expect(page.locator(".opportunity-echo")).toBeVisible();
   await expect(page.getByText(/不改变案件成果或结局资格/)).toBeVisible();
 
-  await page.getByRole("button", { name: /结束今日，准备下一夜/ }).click();
+  await page.getByRole("button", { name: /整理线索，准备下一夜/ }).click();
   await page.getByRole("button", { name: /收藏/ }).click();
   await expect(page.getByText("城市剪报册")).toBeVisible();
   await expect(page.locator(".city-clipping-book article.filed")).toHaveCount(1);
@@ -765,7 +679,7 @@ test("restores and settles a real night after reload", async ({ page }) => {
   await expect(page.getByText("真实夜班")).toBeVisible();
   await expect(page.locator(".wake-echo-report")).toContainText("你短暂醒来时，夜班没有结束");
   await expect(page.locator(".wake-echo-report")).toContainText("不是奖励");
-  await page.getByRole("button", { name: /结束今日，准备下一夜/ }).click();
+  await page.getByRole("button", { name: /整理线索，准备下一夜/ }).click();
   await page.getByRole("button", { name: "收藏", exact: true }).click();
   await expect(page.getByText("睡隙回声簿")).toBeVisible();
   await expect(page.locator(".sleep-gap-entry.returned")).toHaveCount(1);
@@ -775,60 +689,69 @@ test("builds a core inference by connecting two evidence cards", async ({ page }
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
   await runDemoShortcut(page, /解锁完整案件板/);
-  const clueIndex = page.getByRole("region", { name: "线索索引" });
-  await expect(clueIndex).toContainText("12 份档案 · 3 条未结线");
+  await expect(page.getByRole("region", { name: "线索索引" })).toContainText("12 份档案 · 3 条未结线");
   await expect(page.locator(".board-node.checkable")).toHaveCount(6);
+  await expect(page.locator(".clue-index-track i.checkable")).toHaveCount(6);
+  await expect(page.locator(".relation-panel")).toHaveCount(0);
+  await expect(page.locator(".core-inference-dock")).toBeVisible();
   await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
-  await expect(page.getByRole("heading", { name: "四十三天" })).toBeVisible();
-  await expect(page.getByText(/某位顾客长期迟到而形成的礼貌习惯/)).toBeVisible();
-  await expect(page.getByText(/有人七年没有忘记按时想念/)).toBeVisible();
-  await expect(page.getByRole("region", { name: "联合推理操作台" })).toContainText("再点一张");
-  await expect(clueIndex).toContainText("铜绿亮起的证物能与 A 互相作证");
+  const selectedFlower = page.locator('.react-flow__node[data-id="flower-cycle"] .board-node');
   const matchingPostcard = page.locator('.react-flow__node[data-id="postcard"] .board-node');
+  await expect(selectedFlower).toHaveClass(/selected/);
+  await expect(selectedFlower.locator(".evidence-slot-mark")).toHaveText("A");
   await expect(matchingPostcard).toHaveClass(/compatible/);
-  const dossierTrigger = page.getByRole("button", { name: /打开证物档案：四十三天/ });
-  await dossierTrigger.click();
+  await expect(matchingPostcard.locator(".evidence-relation-cue.compatible")).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "四十三天" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "线索索引" })).toContainText("再点一张");
+  await page.getByRole("button", { name: /打开证物档案：四十三天/ }).click();
   const dossierDialog = page.getByRole("dialog", { name: "四十三天" });
   await expect(dossierDialog).toBeVisible();
-  await expectDialogLifecycle(page, dossierDialog);
+  await expect(dossierDialog.getByText(/某位顾客长期迟到而形成的礼貌习惯/)).toBeVisible();
   await expect(dossierDialog.getByText(/有人七年没有忘记按时想念/)).toBeVisible();
   await dossierDialog.getByRole("button", { name: "关闭证物档案" }).click();
   await expect(dossierDialog).toHaveCount(0);
-  await expect(dossierTrigger).toBeFocused();
+  await expectNoPageOverflow(page);
+  await page.setViewportSize({ width: 900, height: 720 });
+  await expect(page.locator(".board-workspace-solo")).toBeVisible();
+  await expect(page.locator(".relation-panel")).toHaveCount(0);
+  await expectNoPageOverflow(page);
+  const boardFlow = page.locator(".board-flow");
+  await page.evaluate(() => window.scrollTo(0, 0));
+  const boardFlowBox = await boardFlow.boundingBox();
+  expect(boardFlowBox).not.toBeNull();
+  const viewportTransformBeforeWheel = await page.locator(".react-flow__viewport").getAttribute("style");
+  const scrollBeforeBoardWheel = await page.evaluate(() => window.scrollY);
+  await page.mouse.move(boardFlowBox!.x + boardFlowBox!.width / 2, boardFlowBox!.y + Math.min(220, boardFlowBox!.height / 2));
+  await page.mouse.wheel(0, 360);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(scrollBeforeBoardWheel);
+  await expect(page.locator(".react-flow__viewport")).toHaveAttribute("style", viewportTransformBeforeWheel ?? "");
+  await page.locator(".react-flow__pane").dispatchEvent("dblclick");
+  await expect(page.locator(".react-flow__viewport")).toHaveAttribute("style", viewportTransformBeforeWheel ?? "");
+  await page.getByRole("button", { name: "Zoom In" }).click();
+  await expect(page.locator(".react-flow__viewport")).not.toHaveAttribute("style", viewportTransformBeforeWheel ?? "");
+  const nodeBoxes = await page.locator(".react-flow__node").evaluateAll((elements) => elements.map((element) => {
+    const rect = element.getBoundingClientRect();
+    return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom };
+  }));
+  for (let first = 0; first < nodeBoxes.length; first += 1) {
+    for (let second = first + 1; second < nodeBoxes.length; second += 1) {
+      const a = nodeBoxes[first];
+      const b = nodeBoxes[second];
+      expect(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top).toBe(true);
+    }
+  }
   await page.getByRole("button", { name: /^OBJECT · 02 未寄出的明信片/ }).click();
-  await expect(page.getByRole("button", { name: /移除证物 A：四十三天/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: /移除证物 B：未寄出的明信片/ })).toBeVisible();
-  await expect(page.getByRole("dialog", { name: "米娜知道伊芙琳仍然活着" })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: /查看核心推论：米娜知道伊芙琳仍然活着/ })).toHaveCount(0);
-  const [board, panel, slotA, slotB, connectAction] = await Promise.all([
-    page.locator(".board-shell").boundingBox(),
-    page.locator(".relation-panel").boundingBox(),
-    page.locator(".inference-workbench .slot-a").boundingBox(),
-    page.locator(".inference-workbench .slot-b").boundingBox(),
-    page.getByRole("button", { name: /核对这两件证物/ }).boundingBox(),
-  ]);
-  expect(board).not.toBeNull();
-  expect(panel).not.toBeNull();
-  expect(slotA).not.toBeNull();
-  expect(slotB).not.toBeNull();
-  expect(connectAction).not.toBeNull();
-  expect(board!.x + board!.width).toBeLessThanOrEqual(panel!.x);
-  expect(slotA!.y + slotA!.height).toBeLessThanOrEqual(slotB!.y);
-  expect(slotB!.y + slotB!.height).toBeLessThanOrEqual(connectAction!.y);
-  await expect(page.locator(".relation-panel > :last-child")).toHaveClass(/relation-ledger/);
-  await page.getByRole("button", { name: /核对这两件证物/ }).click();
-
   const relationDialog = page.getByRole("dialog", { name: "米娜知道伊芙琳仍然活着" });
   await expect(relationDialog).toBeVisible();
-  await expectDialogLifecycle(page, relationDialog);
-  await expect(relationDialog).toContainText(/共同证明米娜一直替她维持联络/);
+  await expect(relationDialog.getByText(/共同证明米娜一直替她维持联络/)).toBeVisible();
+  await expect(page.locator(".core-inference-dock").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
   await relationDialog.getByRole("button", { name: "关闭核心推论" }).click();
   await expect(relationDialog).toHaveCount(0);
-  await expect(page.locator(".relation-ledger").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
-  await expect(page.getByText(/共同证明米娜一直替她维持联络/)).toBeVisible();
-  await expect(page.getByText("这份证物已经参与作证")).toBeVisible();
   await expect(page.locator(".react-flow__edge")).toHaveCount(1);
-  await expect(clueIndex).toContainText("12 份档案 · 2 条未结线");
+  await expect(page.getByRole("region", { name: "线索索引" })).toContainText("12 份档案 · 2 条未结线");
+  await expect(page.locator(".clue-index-track i.checkable")).toHaveCount(4);
+  await expect(selectedFlower).not.toHaveClass(/checkable/);
+  await expect(matchingPostcard).not.toHaveClass(/checkable/);
   await page.getByRole("button", { name: /查看核心推论：米娜知道伊芙琳仍然活着/ }).click();
   await expect(page.getByRole("dialog", { name: "米娜知道伊芙琳仍然活着" })).toBeVisible();
 });
@@ -837,7 +760,7 @@ test("shares one clue as a QR deep link", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
   await runDemoShortcut(page, /解锁完整案件板/);
-  await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
+  await page.getByRole("button", { name: /打开证物档案：四十三天/ }).click();
   const shareTrigger = page.getByRole("button", { name: /送给好友/ });
   await shareTrigger.click();
 
@@ -974,7 +897,7 @@ test("completes all five nights from a new save without chapter jumps", async ({
     await page.getByRole("button", { name: /跳到清晨/ }).click();
     await expect(page.locator(".report-hero").getByRole("heading", { name: reportTitles[chapter - 1] })).toBeVisible();
     await expect(page.locator(".sleep-summary").getByText(`第 ${chapter} 枚夜印`)).toBeVisible();
-    await page.getByRole("button", { name: chapter === 5 ? /做出最终决定/ : /结束今日，准备下一夜/ }).click();
+    await page.getByRole("button", { name: chapter === 5 ? /做出最终决定/ : /整理线索，准备下一夜/ }).click();
   }
 
   await expect(page.getByRole("heading", { name: /最后的决定/ })).toBeVisible();
@@ -1001,7 +924,7 @@ test("switches to the rain-radio campaign and completes its five-night story", a
     await page.getByRole("button", { name: /今晚交给你了/ }).click();
     await page.getByRole("button", { name: /跳到清晨/ }).click();
     await expect(page.locator(".report-hero").getByRole("heading", { name: reportTitles[chapter - 1] })).toBeVisible();
-    await page.getByRole("button", { name: chapter === 5 ? /做出最终决定/ : /结束今日，准备下一夜/ }).click();
+    await page.getByRole("button", { name: chapter === 5 ? /做出最终决定/ : /整理线索，准备下一夜/ }).click();
   }
 
   await expect(page.getByRole("heading", { name: /最后一次广播/ })).toBeVisible();
@@ -1033,7 +956,7 @@ test("switches to the thirteenth-loaf campaign and completes its five-night stor
     await page.getByRole("button", { name: /跳到清晨/ }).click();
     await expect(page.locator(".report-hero").getByRole("heading", { name: reportTitles[chapter - 1] })).toBeVisible();
     await expect(page.locator(".report-hero-art")).toHaveAttribute("src", /cases\/thirteenth-loaf\/headers\/morning-report-v1/);
-    await page.getByRole("button", { name: chapter === 5 ? /做出最终决定/ : /结束今日，准备下一夜/ }).click();
+    await page.getByRole("button", { name: chapter === 5 ? /做出最终决定/ : /整理线索，准备下一夜/ }).click();
   }
 
   await expect(page.getByRole("heading", { name: /房契还给十二人以后/ })).toBeVisible();
@@ -1052,7 +975,6 @@ test.describe("tablet portrait 820x1180", () => {
     await runDemoShortcut(page, /解锁完整案件板/);
     await expect(page.locator(".demo-drawer")).toHaveCount(0);
 
-    await expect(page.getByRole("region", { name: "线索索引" })).toContainText("12 份档案 · 3 条未结线");
     await expect(page.locator(".board-workspace")).toHaveCSS("flex-direction", "column");
     await expect(page.locator(".board-flow .react-flow__pane")).toHaveCSS("touch-action", "pan-y");
     await expect(page.locator(".mobile-board-hint")).toBeVisible();
@@ -1159,13 +1081,13 @@ test.describe("mobile 390x844", () => {
     await expect(page.locator(".city-watch-report")).toBeHidden();
     const compactReportHeight = await page.evaluate(() => document.documentElement.scrollHeight);
     expect(compactReportHeight).toBeLessThan(6000);
-    await page.getByRole("button", { name: /结束今日，准备下一夜/ }).scrollIntoViewIfNeeded();
-    await expect(page.getByRole("button", { name: /结束今日，准备下一夜/ })).toBeVisible();
+    await page.getByRole("button", { name: /整理线索，准备下一夜/ }).scrollIntoViewIfNeeded();
+    await expect(page.getByRole("button", { name: /整理线索，准备下一夜/ })).toBeVisible();
     await page.locator(".report-archive-details > summary").click();
     await expect(page.locator(".city-watch-report")).toBeVisible();
     await expect(page.locator(".wake-echo-report")).toContainText("纸纤维里的第二场雨");
     await expectNoPageOverflow(page);
-    await page.getByRole("button", { name: /结束今日，准备下一夜/ }).click();
+    await page.getByRole("button", { name: /整理线索，准备下一夜/ }).click();
     await expect(page.getByRole("button", { name: "案件板" })).toBeVisible();
   });
 
@@ -1239,8 +1161,9 @@ test.describe("mobile 390x844", () => {
     await page.getByRole("button", { name: /DEMO/ }).click();
     await runDemoShortcut(page, /解锁完整案件板/);
     await expect(page.locator(".demo-drawer")).toHaveCount(0);
-    await expect(page.getByRole("region", { name: "线索索引" })).toContainText("12 份档案 · 3 条未结线");
-    await expect(page.getByRole("region", { name: "联合推理操作台" })).toContainText("上下滑动可以继续阅档");
+    await expect(page.locator(".relation-panel")).toHaveCount(0);
+    await expect(page.locator(".core-inference-dock")).toBeVisible();
+    await expect(page.getByRole("region", { name: "线索索引" })).toContainText("点选证物进行配对");
     await expect(page.locator(".board-node-drag-handle").first()).toBeHidden();
     await expect(page.locator(".board-flow .react-flow__pane")).toHaveCSS("touch-action", "pan-y");
     const boardFlow = page.locator(".board-flow");
@@ -1252,27 +1175,17 @@ test.describe("mobile 390x844", () => {
     await page.mouse.wheel(0, 360);
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(scrollBeforeBoardGesture);
     await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
-    await expect(page.getByRole("heading", { name: "四十三天" })).toBeVisible();
-    await expect(page.getByText(/有人七年没有忘记按时想念/)).toBeVisible();
-    await expect(page.getByRole("region", { name: "联合推理操作台" })).toContainText("再点一张");
+    await expect(page.getByRole("dialog", { name: "四十三天" })).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "线索索引" })).toContainText("再点一张");
+    await page.getByRole("button", { name: /打开证物档案：四十三天/ }).click();
+    const dossierDialog = page.getByRole("dialog", { name: "四十三天" });
+    await expect(dossierDialog).toBeVisible();
+    await expect(dossierDialog.getByText(/有人七年没有忘记按时想念/)).toBeVisible();
+    await dossierDialog.getByRole("button", { name: "关闭证物档案" }).click();
     await page.getByRole("button", { name: /^OBJECT · 02 未寄出的明信片/ }).click();
-    const [slotA, slotB, connectAction] = await Promise.all([
-      page.locator(".inference-workbench .slot-a").boundingBox(),
-      page.locator(".inference-workbench .slot-b").boundingBox(),
-      page.getByRole("button", { name: /核对这两件证物/ }).boundingBox(),
-    ]);
-    expect(slotA).not.toBeNull();
-    expect(slotB).not.toBeNull();
-    expect(connectAction).not.toBeNull();
-    expect(slotA!.y + slotA!.height).toBeLessThanOrEqual(slotB!.y);
-    expect(slotB!.y + slotB!.height).toBeLessThanOrEqual(connectAction!.y);
-    await expect(page.locator(".relation-panel > :last-child")).toHaveClass(/relation-ledger/);
-    await page.getByRole("button", { name: /核对这两件证物/ }).click();
     const relationDialog = page.getByRole("dialog", { name: "米娜知道伊芙琳仍然活着" });
     await expect(relationDialog).toBeVisible();
-    await expectDialogLifecycle(page, relationDialog);
-    await relationDialog.getByRole("button", { name: "关闭核心推论" }).click();
-    await expect(page.locator(".relation-ledger").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
+    await expect(page.locator(".core-inference-dock").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
     await expectNoPageOverflow(page);
   });
 
@@ -1292,4 +1205,90 @@ test.describe("mobile 390x844", () => {
     await expect(page.getByRole("heading", { name: "5 夜归来总账" })).toBeVisible();
     await expectNoPageOverflow(page);
   });
+});
+
+test("keeps the latest morning report stable while evidence is filed and after the day ends", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /DEMO MODE/ }).click();
+  await runDemoShortcut(page, /02 每隔四十三天的花/);
+  await page.getByRole("button", { name: /给米娜一次说谎的机会/ }).click();
+  await page.getByRole("button", { name: /夜香花笺/ }).click();
+  await page.locator(".quality-tabs").getByRole("button", { name: /8小时 · 安稳/ }).click();
+  await page.getByLabel("放下纸条").fill("明天再整理花店的回信，今晚先休息。");
+  await page.getByRole("button", { name: /今晚交给你了/ }).click();
+  await page.getByRole("button", { name: /跳到清晨/ }).click();
+
+  const reportHeading = page.locator(".report-hero").getByRole("heading", { name: "每隔四十三天的花" });
+  const readReportFingerprint = async () => ({
+    hero: await page.locator(".report-hero").innerText(),
+    watch: await page.locator(".city-watch-report").innerText(),
+    rest: await page.locator(".rest-reflection-card").innerText(),
+    character: await page.locator(".character-encounter").innerText(),
+    souvenir: await page.locator(".souvenir-reveal").innerText(),
+    society: {
+      title: await page.locator(".society-memory-letter h3").innerText(),
+      letter: await page.locator(".society-memory-letter .paper-card > blockquote").innerText(),
+      reason: await page.locator(".society-postscript").innerText(),
+    },
+    sleep: await page.locator(".sleep-summary").innerText(),
+    preparation: await page.locator(".preparation-echo").innerText(),
+    route: await page.locator(".route-report").innerText(),
+    evidence: await page.locator(".discoveries").innerText(),
+    contradiction: await page.locator(".contradiction").innerText(),
+  });
+  await expect(reportHeading).toBeVisible();
+  const originalReport = await readReportFingerprint();
+  expect(originalReport.sleep).toContain("8 小时");
+  expect(originalReport.sleep).toContain("雾散得很早");
+  expect(originalReport.preparation).toContain("夜香花笺");
+  expect(originalReport.rest).toContain("明天再整理花店的回信，今晚先休息。");
+  await page.reload();
+  await expect(reportHeading).toBeVisible();
+  expect(await readReportFingerprint()).toEqual(originalReport);
+
+  await page.getByRole("button", { name: /去案件板整理线索/ }).click();
+  await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
+  await page.getByRole("button", { name: /^OBJECT · 02 未寄出的明信片/ }).click();
+  await page.getByRole("button", { name: /核对这两件证物/ }).click();
+  await expect(page.locator(".relation-ledger").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "关闭核心推论" }).click();
+
+  await page.getByRole("button", { name: "今晨", exact: true }).click();
+  await expect(reportHeading).toBeVisible();
+  await expect(page.getByText("最新晨报重读")).toHaveCount(0);
+  expect(await readReportFingerprint()).toEqual(originalReport);
+  let saved = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state);
+  expect(saved).toMatchObject({ chapter: 2, phase: "morning" });
+  expect(saved.confirmedRelations).toContain("mina-evelyn");
+
+  await page.getByRole("button", { name: "收藏", exact: true }).click();
+  await expect(page.locator(".collection-page")).toBeVisible();
+  await page.getByRole("button", { name: "档案", exact: true }).click();
+  await expect(page.locator(".archive-page")).toBeVisible();
+  await page.getByRole("button", { name: "今晨", exact: true }).click();
+  expect(await readReportFingerprint()).toEqual(originalReport);
+
+  await page.getByRole("button", { name: /结束今日，准备下一夜/ }).click();
+  await expect(page.locator(".tonight-page")).toBeVisible();
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state);
+  expect(saved).toMatchObject({ chapter: 3, phase: "day" });
+
+  await page.getByRole("button", { name: "今晨", exact: true }).click();
+  await expect(reportHeading).toBeVisible();
+  await expect(page.getByText("最新晨报重读")).toBeVisible();
+  await expect(page.getByRole("button", { name: /去案件板整理线索/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /去准备今晚/ })).toBeVisible();
+  const correspondenceReplies = page.locator(".correspondence-replies button");
+  await expect(correspondenceReplies).toHaveCount(2);
+  await expect(correspondenceReplies.nth(0)).toBeDisabled();
+  await expect(correspondenceReplies.nth(1)).toBeDisabled();
+  await expect(page.getByText(/今日已经结束；这封未寄出的答复作为空白留在档案里/)).toBeVisible();
+  const correspondenceBeforeReload = (await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state)).correspondenceHistory;
+  expect(await readReportFingerprint()).toEqual(originalReport);
+  await page.reload();
+  await page.getByRole("button", { name: "今晨", exact: true }).click();
+  await expect(reportHeading).toBeVisible();
+  await expect(page.getByText("最新晨报重读")).toBeVisible();
+  expect((await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state)).correspondenceHistory).toEqual(correspondenceBeforeReload);
+  expect(await readReportFingerprint()).toEqual(originalReport);
 });

@@ -101,7 +101,7 @@ export function RelationRevealDialog({
     </header>
     <p className="evidence-letter-body">{relation.explanation}</p>
     <footer className="evidence-letter-footer soft">
-      <small>{t("论断已经归入右侧核心推论，并在案件板上留下连线。")}</small>
+      <small>{t("论断已经归入屏幕底端的核心推论栏，并在案件板上留下连线。")}</small>
     </footer>
   </EvidenceLetterLayer>;
 }

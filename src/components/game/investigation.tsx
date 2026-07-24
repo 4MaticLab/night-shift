@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, FileCheck2, FileText, Flower2, KeyRound, Link2, QrCode, RotateCcw, Search, Sparkles, X } from "lucide-react";
-import { Background, BackgroundVariant, Controls, Handle, Position, ReactFlow, useNodesState, type Edge, type Node, type NodeProps } from "@xyflow/react";
+import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, FileCheck2, FileText, Flower2, KeyRound, RotateCcw, Search, Sparkles, X } from "lucide-react";
+import { Controls, Handle, Position, ReactFlow, useNodesState, type Edge, type Node, type NodeProps } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { getAsset } from "@/src/content/assets";
 import { getPreparation } from "@/src/content/preparations";
@@ -14,7 +14,7 @@ import { souvenirs } from "@/src/content/souvenirs";
 import { getOpportunityNotice, getOpportunityResponse } from "@/src/content/opportunities";
 import { isCharacterRevealed } from "@/src/content/characters";
 import { DEMO_CITY_WATCH_ID, getCityWatch } from "@/src/content/watches";
-import { getCampaignNightSealAssetId, getCampaignRouteDirection, getCampaignWakeEchoById, getCampaignWatchEcho } from "@/src/content/campaigns/types";
+import { getCampaignNightSealAssetId, getCampaignRouteDirection, getCampaignWakeEchoById, getCampaignWatchEcho, matchCampaignEvidenceRelation } from "@/src/content/campaigns/types";
 import { useGameStore } from "@/src/stores/game-store";
 import { canUnlockTrueEnding, type EndingId } from "@/src/lib/game-engine/ending";
 import { formatSleepDuration } from "@/src/lib/game-engine/sleep-session";
@@ -25,7 +25,6 @@ import { useI18n } from "@/src/i18n/provider";
 import { CipherDesk } from "./cipher-desk";
 import { InjectiveMintDialog } from "./injective-mint";
 import { readMintReceipts } from "@/src/lib/injective/client";
-import { deriveEvidenceBoardHints } from "@/src/lib/game-engine/evidence-board";
 import { ClueDossierDialog, RelationRevealDialog } from "./evidence-letters";
 
 type EvidenceNode = Node<{
@@ -36,15 +35,16 @@ type EvidenceNode = Node<{
   received: boolean;
   checkable: boolean;
   compatible: boolean;
+  paperVariant: number;
   onSelect: (clueId: string) => void;
   onOpenDossier: (clueId: string) => void;
 }, "evidence">;
 
 function EvidenceNodeCard({ data }: NodeProps<EvidenceNode>) {
   const { t } = useI18n();
-  const { clue, selected, selectionIndex, focused, received, checkable, compatible, onSelect, onOpenDossier } = data;
+  const { clue, selected, selectionIndex, focused, received, checkable, compatible, paperVariant, onSelect, onOpenDossier } = data;
   return <div className="board-node-wrap">
-    <Handle className="board-connection-handle" type="target" position={Position.Left} isConnectable={false} />
+    <Handle className="board-connection-handle target" type="target" position={Position.Left} isConnectable={false} />
     <span className="board-node-drag-handle" title={t("拖动图钉整理证物")}><span className="pin" /></span>
     <div
       role="button"
@@ -58,77 +58,109 @@ function EvidenceNodeCard({ data }: NodeProps<EvidenceNode>) {
           onSelect(clue.id);
         }
       }}
-      className={`board-node ${clue.type} ${checkable ? "checkable" : ""} ${compatible ? "compatible" : ""} ${selected ? "selected" : ""} ${focused ? "focused" : ""} ${received ? "received" : ""}`}
+      className={`board-node evidence-paper-${paperVariant} ${clue.type} ${checkable ? "checkable" : ""} ${compatible ? "compatible" : ""} ${selected ? "selected" : ""} ${focused ? "focused" : ""} ${received ? "received" : ""}`}
     >
       {selectionIndex !== null && <><span className="evidence-slot-mark" aria-hidden="true">{selectionIndex === 0 ? "A" : "B"}</span><span className="sr-only">{t("已选证物")} {selectionIndex === 0 ? "A" : "B"}</span></>}
       {received && <span className="friend-clue-mark">{t("好友送达")}</span>}
+      <button
+        type="button"
+        className="board-node-dossier"
+        aria-label={`${t("打开证物档案")}：${clue.title}`}
+        title={t("打开证物档案")}
+        onPointerDown={(event) => event.stopPropagation()}
+        onClick={(event) => {
+          event.stopPropagation();
+          onOpenDossier(clue.id);
+        }}
+      >
+        <Image src="/art/ui/butterfly-dossier-seal-v1.png" alt="" width={28} height={28} aria-hidden="true" />
+      </button>
       <small>{clue.type.toUpperCase()} · 0{clue.chapter}</small>
       <b>{clue.title}</b>
       <p>{clue.summary}</p>
-      {!selected && checkable && <><span className="sr-only">{compatible ? t("当前关系候选") : t("存在未结关系")}</span><span className={`evidence-relation-cue ${compatible ? "compatible" : ""}`} aria-hidden="true"><i /><i /><i /></span></>}
+      {selectionIndex === null && checkable && <>
+        <span className="sr-only">{compatible ? t("当前关系候选") : t("存在未结关系")}</span>
+        <span className={`evidence-relation-cue ${compatible ? "compatible" : ""}`} aria-hidden="true"><i /></span>
+      </>}
     </div>
-    <button
-      type="button"
-      className="board-node-dossier"
-      aria-label={`${t("打开证物档案")}：${clue.title}`}
-      title={t("打开证物档案")}
-      onPointerDown={(event) => event.stopPropagation()}
-      onClick={(event) => {
-        event.stopPropagation();
-        onOpenDossier(clue.id);
-      }}
-    >
-      <BookOpen aria-hidden="true" />
-    </button>
-    <Handle className="board-connection-handle" type="source" position={Position.Right} isConnectable={false} />
+    <Handle className="board-connection-handle source" type="source" position={Position.Right} isConnectable={false} />
   </div>;
 }
 
 const evidenceNodeTypes = { evidence: EvidenceNodeCard };
 
-function defaultBoardPosition(index: number) {
-  return { x: 70 + (index % 4) * 240 + (index % 2) * 20, y: 70 + Math.floor(index / 4) * 180 };
+function defaultBoardPosition(index: number, total: number) {
+  const columns = Math.min(4, Math.max(1, Math.ceil(Math.sqrt(total))));
+  const row = Math.floor(index / columns);
+  const column = index % columns;
+  const itemsInRow = Math.min(columns, total - row * columns);
+  const centeredRowOffset = (columns - itemsInRow) * 120;
+  return { x: 70 + centeredRowOffset + column * 240, y: 70 + row * 210 };
 }
 
 export function CaseBoard() {
   const { unlockedClueIds, receivedClueIds, confirmedRelations, boardPositions, connectClues, setBoardPosition, resetBoardPositions } = useGameStore();
   const { campaign, locale, t } = useI18n();
   const [selectedClueIds, setSelectedClueIds] = useState<string[]>([]);
-  const [focusedClueId, setFocusedClueId] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<{ kind: "success" | "error"; text: string } | null>(null);
+  const [dossierClueId, setDossierClueId] = useState<string | null>(null);
+  const [letterRelationId, setLetterRelationId] = useState<string | null>(null);
+  const [mismatchNotice, setMismatchNotice] = useState<string | null>(null);
   const [isCompactBoard, setIsCompactBoard] = useState(false);
   const [sharedClue, setSharedClue] = useState<Clue | null>(null);
-  const [dossierClueId, setDossierClueId] = useState<string | null>(null);
-  const [revealedRelationId, setRevealedRelationId] = useState<string | null>(null);
   const available = useMemo(() => campaign.case.clues.filter((clue) => unlockedClueIds.includes(clue.id)), [campaign.case.clues, unlockedClueIds]);
-  const boardHints = useMemo(() => deriveEvidenceBoardHints({
-    relations: campaign.relations,
-    unlockedClueIds,
-    confirmedRelationIds: confirmedRelations,
-    selectedClueIds,
-  }), [campaign.relations, confirmedRelations, selectedClueIds, unlockedClueIds]);
-  const checkableClueIds = useMemo(() => new Set(boardHints.checkableClueIds), [boardHints.checkableClueIds]);
-  const compatibleClueIds = useMemo(() => new Set(boardHints.compatibleClueIds), [boardHints.compatibleClueIds]);
+  const availableClueIds = useMemo(() => new Set(available.map((clue) => clue.id)), [available]);
+  const openRelations = useMemo(() => campaign.relations.filter((relation) =>
+    !confirmedRelations.includes(relation.id) && relation.clueIds.every((clueId) => availableClueIds.has(clueId)),
+  ), [availableClueIds, campaign.relations, confirmedRelations]);
+  const checkableClueIds = useMemo(() => new Set(openRelations.flatMap((relation) => relation.clueIds)), [openRelations]);
+  const compatibleClueIds = useMemo(() => {
+    if (selectedClueIds.length !== 1) return new Set<string>();
+    const selectedClueId = selectedClueIds[0];
+    return new Set(openRelations.flatMap((relation) =>
+      relation.clueIds.includes(selectedClueId) ? relation.clueIds.filter((clueId) => clueId !== selectedClueId) : [],
+    ));
+  }, [openRelations, selectedClueIds]);
+
+  // Pairing stays on the card surface; the dossier letter only opens from the explicit 阅档 control.
+  const openDossier = useCallback((clueId: string) => {
+    setMismatchNotice(null);
+    setLetterRelationId(null);
+    setDossierClueId(clueId);
+  }, []);
 
   const selectEvidence = useCallback((clueId: string) => {
-    setFocusedClueId(clueId);
+    setMismatchNotice(null);
+
     if (selectedClueIds.includes(clueId)) {
-      setFeedback(null);
       setSelectedClueIds(selectedClueIds.filter((id) => id !== clueId));
       return;
     }
-    if (selectedClueIds.length === 2) {
-      setFeedback({ kind: "error", text: t("证物槽已经放满。先移除 A 或 B，再换入另一件证物。") });
+
+    if (selectedClueIds.length >= 2) {
+      setSelectedClueIds([clueId]);
       return;
     }
-    setFeedback(null);
-    setSelectedClueIds([...selectedClueIds, clueId]);
-  }, [selectedClueIds, t]);
 
-  const openDossier = useCallback((clueId: string) => {
-    setFocusedClueId(clueId);
-    setDossierClueId(clueId);
-  }, []);
+    const next = [...selectedClueIds, clueId];
+    if (next.length < 2) {
+      setSelectedClueIds(next);
+      return;
+    }
+
+    const matched = matchCampaignEvidenceRelation(campaign, next[0], next[1]);
+    if (!matched) {
+      setSelectedClueIds([next[0]]);
+      setMismatchNotice(t("这两件证物还不能互相作证。换一种连接。"));
+      return;
+    }
+
+    if (!confirmedRelations.includes(matched.id)) {
+      connectClues(next[0], next[1]);
+    }
+    setSelectedClueIds([]);
+    setDossierClueId(null);
+    setLetterRelationId(matched.id);
+  }, [campaign, confirmedRelations, connectClues, selectedClueIds, t]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia(
@@ -140,10 +172,16 @@ export function CaseBoard() {
     return () => mediaQuery.removeEventListener("change", syncBoardMode);
   }, []);
 
+  useEffect(() => {
+    if (!mismatchNotice) return;
+    const timer = window.setTimeout(() => setMismatchNotice(null), 3200);
+    return () => window.clearTimeout(timer);
+  }, [mismatchNotice]);
+
   const [nodes, setNodes, onNodesChange] = useNodesState<EvidenceNode>(available.map((clue, index) => ({
     id: clue.id,
     type: "evidence",
-    position: boardPositions[clue.id] ?? defaultBoardPosition(index),
+    position: boardPositions[clue.id] ?? defaultBoardPosition(index, available.length),
     data: {
       clue,
       selected: false,
@@ -152,6 +190,7 @@ export function CaseBoard() {
       received: receivedClueIds.includes(clue.id),
       checkable: checkableClueIds.has(clue.id),
       compatible: false,
+      paperVariant: (index % 7) + 1,
       onSelect: selectEvidence,
       onOpenDossier: openDossier,
     },
@@ -168,7 +207,7 @@ export function CaseBoard() {
           ...node.data,
           selected: selectionIndex !== -1,
           selectionIndex: selectionIndex === -1 ? null : selectionIndex,
-          focused: focusedClueId === node.id,
+          focused: dossierClueId === node.id,
           received: receivedClueIds.includes(node.id),
           checkable: checkableClueIds.has(node.id),
           compatible: compatibleClueIds.has(node.id),
@@ -177,90 +216,118 @@ export function CaseBoard() {
         },
       };
     }));
-  }, [checkableClueIds, compatibleClueIds, focusedClueId, openDossier, receivedClueIds, selectEvidence, selectedClueIds, setNodes]);
-  const edges: Edge[] = campaign.relations.flatMap((relation, index) => {
-    if (!confirmedRelations.includes(relation.id) || !relation.clueIds.every((clueId) => unlockedClueIds.includes(clueId))) return [];
-    return [{ id: relation.id, source: relation.clueIds[0], target: relation.clueIds[1], animated: true, label: `${t("推论")} 0${index + 1}`, style: { stroke: index === 1 ? "#a86158" : "#698d89", strokeWidth: 3 }, labelStyle: { fill: "#e7dcc5", fontSize: 9 } }];
-  });
+  }, [checkableClueIds, compatibleClueIds, dossierClueId, openDossier, receivedClueIds, selectEvidence, selectedClueIds, setNodes]);
 
-  const submitConnection = () => {
-    if (selectedClueIds.length !== 2) {
-      setFeedback({ kind: "error", text: t("先从案板上选中两件证物。") });
-      return;
-    }
-    const relationId = connectClues(selectedClueIds[0], selectedClueIds[1]);
-    const relation = campaign.relations.find((item) => item.id === relationId);
-    if (!relation) {
-      setFeedback({ kind: "error", text: t("这两件证物还不能互相作证。换一种连接。") });
-      return;
-    }
-    setFeedback({ kind: "success", text: relation.explanation });
-    setSelectedClueIds([]);
-    setRevealedRelationId(relation.id);
-  };
+  const confirmedEdges: Edge[] = campaign.relations.flatMap((relation, index) => {
+    if (!confirmedRelations.includes(relation.id) || !relation.clueIds.every((clueId) => unlockedClueIds.includes(clueId))) return [];
+    // Solid thread between the two evidence cards — visible, not green dashed.
+    const stroke = index === 1 ? "#8b4f4c" : "#a8895c";
+    return [{
+      id: relation.id,
+      source: relation.clueIds[0],
+      target: relation.clueIds[1],
+      animated: false,
+      zIndex: 4,
+      style: {
+        stroke,
+        strokeWidth: 3,
+        strokeLinecap: "round" as const,
+        strokeDasharray: "none",
+      },
+    }];
+  });
+  const previewEdges: Edge[] = selectedClueIds.length === 1
+    ? Array.from(compatibleClueIds, (clueId) => ({
+      id: `preview-${selectedClueIds[0]}-${clueId}`,
+      source: selectedClueIds[0],
+      target: clueId,
+      className: "board-preview-edge",
+      zIndex: 3,
+      style: { stroke: "#7fa39d", strokeWidth: 2, strokeDasharray: "7 7" },
+    }))
+    : [];
+  const edges = [...confirmedEdges, ...previewEdges];
 
   const restoreBoardLayout = () => {
     resetBoardPositions();
-    setNodes((current) => current.map((node, index) => ({ ...node, position: defaultBoardPosition(index) })));
+    setNodes((current) => current.map((node, index) => ({ ...node, position: defaultBoardPosition(index, current.length) })));
   };
 
-  const selectedClues = selectedClueIds.map((id) => campaign.case.clues.find((clue) => clue.id === id)).filter((clue): clue is Clue => clue !== undefined);
-  const focusedClue = available.find((clue) => clue.id === focusedClueId);
-  const focusedRelations = focusedClue ? campaign.relations.filter((relation) => confirmedRelations.includes(relation.id) && relation.clueIds.includes(focusedClue.id)) : [];
   const dossierClue = available.find((clue) => clue.id === dossierClueId) ?? null;
-  const dossierRelations = dossierClue ? campaign.relations.filter((relation) => confirmedRelations.includes(relation.id) && relation.clueIds.includes(dossierClue.id)) : [];
-  const revealedRelation = revealedRelationId ? campaign.relations.find((relation) => relation.id === revealedRelationId) ?? null : null;
-  const inferenceStep = selectedClueIds.length;
-  const inferencePrompt = inferenceStep === 0
-    ? t("先点一张你认为重要的证物。")
-    : inferenceStep === 1
-      ? t("再点一张，寻找能互相补全的事实。")
-      : t("两件证物已就绪。现在核对它们能否共同证明一个结论。");
+  const dossierRelations = dossierClue
+    ? campaign.relations.filter((relation) => confirmedRelations.includes(relation.id) && relation.clueIds.includes(dossierClue.id))
+    : [];
+  const letterRelation = letterRelationId
+    ? campaign.relations.find((relation) => relation.id === letterRelationId) ?? null
+    : null;
+  const selectionHint = selectedClueIds.length === 0
+    ? t("点选证物进行配对；需要细读时再按「阅档」。")
+    : selectedClueIds.length === 1
+      ? t("再点一张，留意案板上变亮的线头。匹配成功会弹出信笺。")
+      : t("正在核对这些证物…");
 
-  return <div className="board-page">
-    <div className="page-title"><div><p className="eyebrow">CASE BOARD · {t("证物关系图")}</p><h2>{locale === "en" ? <>Connect the lies<br />the city has told.</> : <>把城市说过的谎，<br />一根根连起来。</>}</h2></div><p>{t("点两张证物，再核对它们是否能共同作证。无需拖线；桌面端拖动图钉只用于整理案板。")}</p></div>
-    <div className="board-workspace">
+  return <div className="board-page board-page-lettered">
+    <div className="page-title"><div><p className="eyebrow">CASE BOARD · {t("证物关系图")}</p><h2>{locale === "en" ? <>Connect the lies<br />the city has told.</> : <>把城市说过的谎，<br />一根根连起来。</>}</h2></div><p>{t("点两张能互相作证的证物即可自动配对。点卡片只负责选中；要展开完整档案，请按卡片上的「阅档」。")}</p></div>
+    <div className="board-workspace board-workspace-solo">
       <div className="board-shell">
         <header className="clue-index" role="region" aria-label={t("线索索引")}>
-          <div className="clue-index-copy">
-            <small>CLUE INDEX · {t("线索索引")}</small>
-            <b>{available.length} {t("份档案")} · {boardHints.openRelationIds.length} {t("条未结线")}</b>
-            <span>{selectedClueIds.length === 1 ? t("铜绿亮起的证物能与 A 互相作证；仍需放入 B 后手动核对。") : t("细线标记尚有未结关系的证物；先选择一件放入 A。")}</span>
-          </div>
-          <div className="clue-index-status" aria-hidden="true">
-            {available.map((clue) => {
+          <div className="clue-index-copy"><small>CLUE INDEX · {t("线索索引")}</small><b>{available.length} {t("份档案")} · {openRelations.length} {t("条未结线")}</b><span className="clue-index-hint" role="status" aria-live="polite">{selectionHint}</span></div>
+          <div className="clue-index-actions">
+            <div className="clue-index-track" aria-hidden="true">{available.map((clue) => {
               const selectionIndex = selectedClueIds.indexOf(clue.id);
               const state = selectionIndex !== -1 ? "selected" : compatibleClueIds.has(clue.id) ? "compatible" : checkableClueIds.has(clue.id) ? "checkable" : "";
               return <i className={state} key={clue.id} />;
-            })}
+            })}</div>
+            <button type="button" className="board-restore-layout" onClick={restoreBoardLayout}><RotateCcw /> {t("恢复摆放")}</button>
           </div>
+          <span className="sr-only">{checkableClueIds.size} {t("件证物存在未结关系")}</span>
         </header>
-        <div className="board-flow">{nodes.length ? <ReactFlow nodes={nodes} edges={edges} nodeTypes={evidenceNodeTypes} onNodesChange={onNodesChange} onNodeDragStop={(_, node) => setBoardPosition(node.id, node.position)} fitView minZoom={0.5} maxZoom={1.6} nodesDraggable={!isCompactBoard} panOnDrag={!isCompactBoard} zoomOnPinch={!isCompactBoard} zoomOnScroll={!isCompactBoard} zoomOnDoubleClick={!isCompactBoard} preventScrolling={!isCompactBoard} proOptions={{ hideAttribution: true }}><Background color="#988d73" gap={28} size={1} variant={BackgroundVariant.Dots} />{!isCompactBoard && <Controls showInteractive={false} />}</ReactFlow> : <div className="board-empty"><Search /><h3>{t("案件板还很安静")}</h3><p>{t("完成第一夜调查，林渡带回的证物会出现在这里。")}</p></div>}</div>
+        <div className="board-flow">{nodes.length ? <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={evidenceNodeTypes}
+          onNodesChange={onNodesChange}
+          onNodeDragStop={(_, node) => setBoardPosition(node.id, node.position)}
+          fitView
+          fitViewOptions={{ padding: 0.14, maxZoom: 1 }}
+          minZoom={0.5}
+          maxZoom={1.6}
+          nodesDraggable={!isCompactBoard}
+          panOnDrag={false}
+          zoomOnPinch={false}
+          zoomOnScroll={false}
+          zoomOnDoubleClick={false}
+          preventScrolling={false}
+          proOptions={{ hideAttribution: true }}
+        >{!isCompactBoard && <Controls showInteractive={false} />}</ReactFlow> : <div className="board-empty"><Search /><h3>{t("案件板还很安静")}</h3><p>{t("完成第一夜调查，林渡带回的证物会出现在这里。")}</p></div>}</div>
       </div>
-      <aside className="relation-panel" aria-label={t("证物档案与关系")}>
-        <section className="inference-toolbar" aria-label={t("联合推理操作台")}>
-          <div className="inference-toolbar-copy">
-            <small>JOINT INFERENCE · {t("联合推理")}</small>
-            <b>{inferencePrompt}</b>
-            <span><i className="desktop-board-hint">{t("从左侧案板点选；只有图钉可以拖动整理。")}</i><i className="mobile-board-hint">{t("从上方案板点选；上下滑动可以继续阅档。")}</i></span>
-          </div>
-          <ol className="inference-steps" aria-label={t("联合推理步骤")}>
-            {["选第一件", "选第二件", "核对证词"].map((label, index) => <li className={inferenceStep > index || (index === 2 && inferenceStep === 2) ? "active" : ""} aria-current={inferenceStep === index ? "step" : undefined} key={label}><span>{index + 1}</span>{t(label)}</li>)}
-          </ol>
-          <div className="inference-workbench" aria-label={t("待核对证物")} aria-live="polite">
-            {[0, 1].map((index) => {
-              const clue = selectedClues[index];
-              return clue ? <button type="button" className={`evidence-slot slot-${index === 0 ? "a" : "b"} filled`} aria-label={`${t("移除证物")} ${index === 0 ? "A" : "B"}：${clue.title}`} onClick={() => selectEvidence(clue.id)} key={clue.id}><span>{index === 0 ? "A" : "B"}</span><div><small>{clue.type} · NIGHT 0{clue.chapter}</small><b>{clue.title}</b><p>{clue.summary}</p></div><X /></button> : <div className={`evidence-slot slot-${index === 0 ? "a" : "b"}`} key={index}><span>{index === 0 ? "A" : "B"}</span><div><small>{t("等待线索")}</small><b>{t("尚未选择")}</b><p>{t("从案板点选一件证物。")}</p></div></div>;
-            })}
-            <button className="connect-evidence" aria-label={selectedClueIds.length === 2 ? t("核对这两件证物") : locale === "en" ? `Choose ${2 - selectedClueIds.length} more pieces of evidence` : `还需选择 ${2 - selectedClueIds.length} 件证物`} disabled={selectedClueIds.length !== 2} onClick={submitConnection}><Link2 /><span>{selectedClueIds.length === 2 ? t("核对证物") : t("等待配对")}</span><small>{selectedClueIds.length === 2 ? t("A 与 B") : locale === "en" ? `${selectedClueIds.length}/2 selected` : `${selectedClueIds.length}/2 已选择`}</small></button>
-          </div>
-          {feedback && <p className={`relation-feedback ${feedback.kind}`} role="status">{feedback.text}</p>}
-        </section>
-        <div className="board-panel-heading"><small>OPEN DOSSIER · {focusedClue ? `NIGHT 0${focusedClue.chapter}` : "NO FILE"}</small><button type="button" onClick={restoreBoardLayout}><RotateCcw /> {t("恢复摆放")}</button></div>
-        {focusedClue ? <article className="clue-dossier" aria-live="polite"><span>{focusedClue.type}{receivedClueIds.includes(focusedClue.id) ? ` · ${t("好友送达")}` : ""}</span><h3>{focusedClue.title}</h3><div className="clue-dossier-actions"><button className="clue-dossier-open" type="button" onClick={() => openDossier(focusedClue.id)}><BookOpen /> {t("以信笺阅档")}</button><button className="clue-share-trigger" type="button" onClick={() => setSharedClue(focusedClue)}><QrCode /> {t("送给好友")}</button></div><p>{focusedClue.detail}</p><blockquote><small>{t("城市异议")}</small>“{focusedClue.cityObjection}”</blockquote><div><small>{campaign.presentation.detectiveName} · {t("页边批注")}</small>{focusedClue.marginNote}</div>{focusedRelations.length > 0 && <footer><small>{t("这份证物已经参与作证")}</small>{focusedRelations.map((relation) => <b key={relation.id}><Link2 /> {relation.statement}</b>)}</footer>}</article> : <div className="clue-dossier empty"><FileText /><p>{t("点击案板上的证物即可阅档；选中的两件会留在右侧推理栏中。")}</p></div>}
-        <div className="relation-ledger"><small>{t("核心推论")} · {confirmedRelations.length}/{campaign.relations.length}</small>{campaign.relations.map((relation, index) => { const confirmed = confirmedRelations.includes(relation.id); return <button type="button" disabled={!confirmed} aria-label={confirmed ? `${t("查看核心推论")}：${relation.statement}` : t("未确认推论")} onClick={() => setRevealedRelationId(relation.id)} className={confirmed ? "relation-entry done" : "relation-entry"} key={relation.id}><span>{confirmed ? <Check /> : `0${index + 1}`}</span><div><small>{confirmed ? "CONFIRMED" : "UNRESOLVED"}</small><b>{confirmed ? relation.statement : t("未确认推论")}</b></div></button>; })}</div>
-      </aside>
     </div>
+    <aside className="core-inference-dock" aria-label={t("核心推论")}>
+      <div className="core-inference-dock-head">
+        <small>{t("核心推论")} · {confirmedRelations.length}/{campaign.relations.length}</small>
+        <b>{confirmedRelations.length ? t("已确认的论断会留在这里") : t("配对成功后，论断会出现在底端")}</b>
+      </div>
+      <div className="core-inference-dock-list">
+        {campaign.relations.map((relation, index) => {
+          const confirmed = confirmedRelations.includes(relation.id);
+          return <button
+            type="button"
+            className={confirmed ? "core-inference-chip done" : "core-inference-chip"}
+            key={relation.id}
+            disabled={!confirmed}
+            onClick={() => { if (confirmed) { setDossierClueId(null); setLetterRelationId(relation.id); } }}
+            aria-label={confirmed ? `${t("查看核心推论")}：${relation.statement}` : t("未确认推论")}
+          >
+            <span>{confirmed ? <Check /> : `0${index + 1}`}</span>
+            <div>
+              <small>{confirmed ? "CONFIRMED" : "UNRESOLVED"}</small>
+              <b>{confirmed ? relation.statement : t("未确认推论")}</b>
+            </div>
+          </button>;
+        })}
+      </div>
+    </aside>
+
     <details className="board-cipher-disclosure">
       <summary>
         <span><small>OPTIONAL ARCHIVE · {locale === "en" ? "OPTIONAL CIPHERS" : "可选解密"}</small><b>{locale === "en" ? "Open the night cipher desk" : "打开夜班密文台"}</b><p>{locale === "en" ? "Ciphers reveal extra archive notes. They add no reward, replace no inference, and change no ending condition." : "密文只展开补充旁注，不增加奖励、不替代联合推理，也不改变任何结局资格。"}</p></span>
@@ -268,18 +335,38 @@ export function CaseBoard() {
       </summary>
       <CipherDesk />
     </details>
-    <AnimatePresence>{dossierClue && <ClueDossierDialog
-      clue={dossierClue}
-      received={receivedClueIds.includes(dossierClue.id)}
-      relations={dossierRelations}
-      detectiveName={campaign.presentation.detectiveName}
-      onClose={() => setDossierClueId(null)}
-      onShare={() => {
-        setDossierClueId(null);
-        setSharedClue(dossierClue);
-      }}
-    />}</AnimatePresence>
-    <AnimatePresence>{revealedRelation && <RelationRevealDialog relation={revealedRelation} onClose={() => setRevealedRelationId(null)} />}</AnimatePresence>
+
+    <AnimatePresence>
+      {mismatchNotice && <motion.aside className="board-match-notice error" role="status" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
+        <FileText />
+        <div><small>NO MATCH</small><b>{mismatchNotice}</b></div>
+        <button type="button" aria-label={t("关闭提示")} onClick={() => setMismatchNotice(null)}><X /></button>
+      </motion.aside>}
+    </AnimatePresence>
+
+    <AnimatePresence>
+      {dossierClue && !letterRelation && <ClueDossierDialog
+        key={`dossier-${dossierClue.id}`}
+        clue={dossierClue}
+        received={receivedClueIds.includes(dossierClue.id)}
+        relations={dossierRelations}
+        detectiveName={campaign.presentation.detectiveName}
+        onClose={() => setDossierClueId(null)}
+        onShare={() => {
+          setDossierClueId(null);
+          setSharedClue(dossierClue);
+        }}
+      />}
+    </AnimatePresence>
+
+    <AnimatePresence>
+      {letterRelation && <RelationRevealDialog
+        key={`relation-${letterRelation.id}`}
+        relation={letterRelation}
+        onClose={() => setLetterRelationId(null)}
+      />}
+    </AnimatePresence>
+
     <AnimatePresence>{sharedClue && <ClueShareDialog clue={sharedClue} onClose={() => setSharedClue(null)} />}</AnimatePresence>
   </div>;
 }
@@ -412,7 +499,7 @@ export function Ending({ onOpenLibrary }: { onOpenLibrary: () => void }) {
   const trueReady = canUnlockTrueEnding({ unlockedClueIds: earnedClueIds, unlockedCollectibleIds, confirmedRelations }, campaign.rules);
   const dominantStance = getDominantCorrespondenceStance(correspondenceHistory);
   const cityAfterword = localize(dominantStance ? correspondencePostures[dominantStance] : { title: "未寄出的答复", note: "你没有让任何社团替你固定立场。雾灯城把那些空信封也归了档：沉默不是失败，只是一种尚未交出的决定。" });
-  const icons: Record<EndingId, React.ReactNode> = { public: <FileText />, protect: <KeyRound />, return: <Flower2 /> };
+  const icons: Record<EndingId, ReactNode> = { public: <FileText />, protect: <KeyRound />, return: <Flower2 /> };
   const selected = campaign.endings.find((item) => item.id === endingId);
   const endingArt = getAsset(campaign.presentation.endingAssetId);
   const journeyNights = [...completedReports].sort((a, b) => a - b).flatMap((chapterNumber) => {

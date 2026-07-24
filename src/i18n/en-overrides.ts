@@ -21,7 +21,6 @@ export const englishOverrides: Record<string, string> = {
   "相信城市忘记的，铁轨仍会记得。": "Trust the rails to remember what the city has forgotten.",
   "雨把灯港区的招牌洗得很安静，只有市政厅那块仍在尽职撒谎：此处从无43号线。我沿票背的花粉绕到封闭维修站。出票机断电七年，色带却有余温；旧纸纤维记得伊芙琳失踪那年，新油墨只承认昨天。雾灯城擅长保存旧事，尤其是它已经盖章否认过的那些。": "Rain had washed the signs of Lantern Wharf quiet. Only City Hall's remained dutifully at work: LINE 43 NEVER RAN HERE. I followed the pollen on the ticket's reverse to a shuttered service depot. The machine had been without power for seven years, yet its ribbon was warm. The old paper remembered the year Evelyn vanished; the fresh ink would admit only to yesterday. Foglight City is very good at preserving old things—especially those it has stamped and denied.",
   "为什么一张已经停运七年的车票，会印着昨天的日期？": "Why does a ticket from a line closed seven years ago bear yesterday's date?",
-
   "每隔四十三天的花": "Flowers Every Forty-Three Days",
   "夜香花总在同一个清晨送出。": "Night-blooming flowers leave on the same morning, every time.",
   "灯港的花店十点关门。悲伤若提前预约，可以晚一些。": "The florist at Lantern Wharf closes at ten. Grief may stay later by appointment.",
@@ -34,7 +33,6 @@ export const englishOverrides: Record<string, string> = {
   "雾灯城的信件不总信任邮差。": "The letters of Foglight City do not always trust the post.",
   "米娜没有回答关于伊芙琳的问题，只把夜香花往雨棚里挪了半步。花每四十三天出现，付款人没有名字，明信片没有地址——邮局大概会把这称为手续不全，雾灯城把它称为忠诚。米娜说从未见过伊芙琳，卡片却感谢她照看那些花。有些谎言不是墙，是替某个人虚掩着的门。": "Mina did not answer my question about Evelyn. She merely moved the night-blooming flowers half a step beneath the awning. They arrive every forty-three days; the payer has no name and the postcard no address. The post office would call that insufficient paperwork. Foglight City calls it loyalty. Mina says she never saw Evelyn, yet the card thanks her for tending the flowers. Some lies are not walls. They are doors left carefully ajar for someone.",
   "米娜说从未见过伊芙琳，为什么明信片却在感谢她？": "If Mina never saw Evelyn, why does the postcard thank her?",
-
   "没有退房的307": "Room 307 Never Checked Out",
   "一间空房，被续订了七年。": "An empty room, renewed for seven years.",
   "无名旅馆从不问客人是否离开。替客人保管钥匙，比较体面。": "The Nameless Hotel never asks whether a guest has left. Keeping the key for them is considered more civil.",
@@ -47,7 +45,6 @@ export const englishOverrides: Record<string, string> = {
   "被撕走的一页也会留下纸边。": "A torn page still leaves an edge behind.",
   "307的窗帘积了七年灰，洗手池却干净得像刚洗掉一个名字。暗房底片里，一列维修车拖着没有货号的箱子；每只箱子只写着一个家庭的姓。吉迪恩说不记得那晚，他的日志也很配合，恰好少了一页。他沉默很久，只纠正我一个词：那不是运输，是撤离。": "The curtains in 307 held seven years of dust. The basin was clean, as though someone had just washed away a name. On a darkroom negative, a service tram hauled crates without consignment numbers; each bore only a family's surname. Gideon claims not to remember that night, and his log obligingly lacks exactly one page. After a long silence he corrected a single word: it was not a shipment. It was an evacuation.",
   "照片中的箱子不是货物。为什么每个箱子上都写着一个家庭的姓氏？": "The crates in the photograph were not cargo. Why did each bear a family's name?",
-
   "地图上被刮掉的线": "The Line Scratched from the Map",
   "一条线路消失得太过刻意。": "A route erased with altogether too much care.",
   "档案馆声称没有地下室。地下室对此保留了三层楼的意见。": "The archive insists it has no basement. The basement has three storeys of objections.",
@@ -60,7 +57,6 @@ export const englishOverrides: Record<string, string> = {
   "城市刮掉墨迹，却刮不掉坡度。": "A city may scrape away ink, but not a gradient.",
   "奥林把43号线从公开地图上刮掉，却把原图藏在第一个会被调查者打开的柜子里。这是档案员式的勇敢：把真相归进错误分类，再祈祷合适的人犯一次正确的错。玻璃丘寄存牌与照片箱号一致，温室下的铜扣属于一本账册。路线被藏起，是为阻止追捕；账册被藏起，是在等一位不会急着拥有它的读者。": "Orin scraped Line 43 from the public map, then hid the original in the first cabinet an investigator would open. It is an archivist's sort of courage: misfile the truth, then pray the right person makes the right mistake. The Glass Hill storage tag matches the number on a photographed crate; the brass clasp beneath the greenhouse belonged to a ledger. The route was hidden to stop a pursuit. The ledger was hidden to await a reader in no hurry to own it.",
   "如果奥林想销毁证据，为什么把原始地图藏在最容易找到的柜子里？": "If Orin meant to destroy the evidence, why hide the original map in the easiest cabinet to find?",
-
   "最后一班车": "The Last Tram",
   "今夜，隐藏站台重新亮灯。": "Tonight, the hidden platform lights again.",
   "真相应该被公开、被保护，还是被交还？": "Should the truth be made public, kept safe, or returned?",
@@ -115,7 +111,6 @@ export const englishOverrides: Record<string, string> = {
   "灯港封存岔线": "Lantern Wharf Sealed Spur",
   "失物领事馆候见室": "Waiting Room of the Consulate of Mislaid Things",
   "玻璃丘背街": "Glass Hill Backstreet",
-
   "一款与你轮班生活的异步侦探游戏": "An asynchronous detective game that keeps your hours",
   "你睡着以后，他才开始工作。": "When you fall asleep, his work begins.",
   "白天分析线索，晚上把调查交给侦探。等你醒来，雾灯城会留下一份新的报告。": "Study the clues by day, then hand the case to your detective at night. When you wake, Foglight City will have left you a new report.",
@@ -144,7 +139,6 @@ export const englishOverrides: Record<string, string> = {
   "今晚的调查，交给他吧。": "Leave tonight's investigation to him.",
   "继续": "Continue",
   "进入事务所": "Enter the agency",
-
   "今晨": "Morning",
   "案件板": "Caseboard",
   "今晚": "Tonight",
@@ -159,7 +153,6 @@ export const englishOverrides: Record<string, string> = {
   "解锁完整案件板": "Unlock the full caseboard",
   "跳到真结局条件": "Jump to true-ending conditions",
   "重置当前案件存档": "Reset this case save",
-
   "今晚的任务 · 23:40 前交接": "Tonight's assignment · handoff before 23:40",
   "林渡正在整理\n今晚的装备。": "Lin Du is arranging\ntonight's equipment.",
   "选择一个调查方向。无论你今晚睡得如何，故事都会继续。": "Choose an investigative direction. However you sleep tonight, the story will continue.",
@@ -196,7 +189,6 @@ export const englishOverrides: Record<string, string> = {
   "暂时无法确认 AI 访问权限，仍可使用仅本机回信。": "AI access cannot be checked right now. The local-only reply remains available.",
   "访问码不正确；纸条尚未发送。": "The access code is incorrect. The note has not been sent.",
   "无法验证访问码；纸条尚未发送。": "The access code could not be verified. The note has not been sent.",
-
   "夜班进行中": "Night shift in progress",
   "真实夜班": "Real night shift",
   "我醒了，拆开报告": "I'm awake — open the report",
@@ -217,7 +209,6 @@ export const englishOverrides: Record<string, string> = {
   "听见：": "Heard:",
   "看见：": "Seen:",
   "此刻": "now",
-
   "调查报告": "Investigation report",
   "昨夜调查完成": "Last night's investigation is complete",
   "记录人：": "Filed by:",
@@ -281,7 +272,6 @@ export const englishOverrides: Record<string, string> = {
   "先把今晚的任务交给林渡。": "First hand tonight's assignment to Lin Du.",
   "查看档案": "View archive",
   "准备今晚": "Prepare tonight",
-
   "从左侧案板点选；只有图钉可以拖动整理。": "Choose evidence from the caseboard on the left; drag only the pins to arrange it.",
   "从上方案板点选；上下滑动可以继续阅档。": "Choose evidence from the caseboard above; scroll down to continue through the dossier.",
   "待核对证物": "Evidence to compare",
@@ -298,16 +288,15 @@ export const englishOverrides: Record<string, string> = {
   "细线标记尚有未结关系的证物；先选择一件放入 A。": "Fine threads mark evidence that still belongs to an open inference. Choose one piece for slot A.",
   "铜绿亮起的证物能与 A 互相作证；仍需放入 B 后手动核对。": "The verdigris highlight marks evidence that can corroborate A. Place it in B, then confirm the inference yourself.",
   "已选证物": "Selected evidence",
-  "当前关系候选": "Candidate for the current inference",
-  "存在未结关系": "Part of an open inference",
+  "当前关系候选": "Current relationship candidate",
+  "存在未结关系": "Has an unresolved relationship",
   "打开证物档案": "Open evidence dossier",
-  "关闭证物档案": "Close evidence dossier",
+  "关闭证物档案": "Close the evidence dossier",
   "以信笺阅档": "Open letter dossier",
   "查看核心推论": "View core inference",
-  "关闭核心推论": "Close core inference",
+  "关闭核心推论": "Close the core inference",
   "核对成立": "Corroborated",
   "论断已经归入右侧核心推论，并在案件板上留下连线。": "The finding is filed under Core Inferences on the right and remains connected on the caseboard.",
-
   "关闭睡眠硬件中心": "Close the sleep hardware centre",
   "感官夜班台": "Somatic night desk",
   "设备信号只会丰富夜行与晨报。没有设备、没有好数据、或中途撤销，都不会让故事失败。": "Device signals only enrich the night journey and morning report. No device, imperfect data, or revoked access can make the story fail.",
@@ -470,4 +459,19 @@ export const englishOverrides: Record<string, string> = {
   "留在本地收藏": "Keep it in the local cabinet",
   "此浏览器已有链上回执": "On-chain receipt saved here",
   "封进 Injective 链上档案": "File on Injective",
+  "从左侧案板点选；滚轮浏览页面，只有图钉可以拖动整理。": "Choose evidence from the caseboard on the left; use the wheel to scroll the page and drag only the pins to arrange it.",
+  "件证物存在未结关系": "pieces of evidence have unresolved relationships",
+  "再点一张，留意案板上变亮的线头。": "Choose one more; watch for the thread that brightens on the board.",
+  "点两张能互相作证的证物，就会自动配对并展开一封信笺。桌面端拖动图钉只用于整理案板。": "Choose two pieces of evidence that can testify together: they pair automatically and open as a letter. On desktop, dragging pins only rearranges the board.",
+  "点两张能互相作证的证物即可自动配对。点卡片只负责选中；要展开完整档案，请按卡片上的「阅档」。": "Choose two pieces that can testify together and they pair automatically. Tapping a card only selects it; open the full dossier with Read file on the card.",
+  "点一张证物打开档案；再点第二张，匹配时会自动配对。": "Open a dossier with one piece of evidence; choose a second, and matching pairs form automatically.",
+  "点选证物进行配对；需要细读时再按「阅档」。": "Select evidence to pair; press Read file only when you need the full dossier.",
+  "再点一张，留意案板上变亮的线头。匹配成功会弹出信笺。": "Choose one more; watch for the thread that brightens. A matching pair opens as a letter.",
+  "正在核对这些证物…": "Checking these pieces of evidence…",
+  "阅档": "Read file",
+  "已自动配对": "Paired automatically",
+  "这封信笺会留在屏幕底端的核心推论栏。": "This letter remains in the core-inference dock at the bottom of the screen.",
+  "已确认的论断会留在这里": "Confirmed statements stay here",
+  "配对成功后，论断会出现在底端": "After a successful pair, the statement appears at the bottom",
+  "关闭提示": "Dismiss notice",
 };
