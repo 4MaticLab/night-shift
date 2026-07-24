@@ -41,7 +41,7 @@ function GamePage() {
   const [intro, setIntro] = useState(false);
   const [view, setView] = useState<GameView>(game.phase === "morning" ? "report" : "tonight");
   const [demo, setDemo] = useState(false);
-  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [userToggledLibrary, setUserToggledLibrary] = useState<boolean | null>(null);
   const [clueGiftNotice, setClueGiftNotice] = useState<ClueGiftNoticeData | null>(null);
   const [hardwareOpen, setHardwareOpen] = useState(false);
   const processedClueQuery = useRef(false);
@@ -50,6 +50,9 @@ function GamePage() {
   const reviewingCurrentMorning = game.phase === "morning" && latestReportChapter === game.chapter;
   const receiveSharedClue = game.receiveSharedClue;
   const switchCampaign = game.switchCampaign;
+
+  const lastView = hydrated && typeof window !== "undefined" ? sessionStorage.getItem("night-shift-view") : null;
+  const libraryOpen = userToggledLibrary !== null ? userToggledLibrary : lastView !== "game";
 
   const changeView = (nextView: GameView) => {
     if (nextView === activeView) window.scrollTo({ top: 0, left: 0 });
@@ -100,7 +103,7 @@ function GamePage() {
         setClueGiftNotice(notices[result]);
         if (result !== "invalid") {
           setIntro(false);
-          setLibraryOpen(false);
+          setUserToggledLibrary(false);
           setView("board");
         }
       }
@@ -114,16 +117,21 @@ function GamePage() {
   const clueNotice = <AnimatePresence>{clueGiftNotice && <ClueGiftNotice notice={clueGiftNotice} onClose={() => setClueGiftNotice(null)} />}</AnimatePresence>;
   const hardwarePanel = <AnimatePresence>{hardwareOpen && <SleepHardwarePanel onClose={() => setHardwareOpen(false)} />}</AnimatePresence>;
 
+  useEffect(() => {
+    if (!hydrated) return;
+    sessionStorage.setItem("night-shift-view", libraryOpen ? "library" : "game");
+  }, [hydrated, libraryOpen]);
+
   if (libraryOpen || (!game.started && !intro)) {
-    return <>{clueNotice}<Hero interactive={hydrated} onStart={() => { setLibraryOpen(false); if (game.started) setIntro(false); else setIntro(true); }} onDemo={() => setDemo(true)} /><AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={(nextView) => { setLibraryOpen(false); changeView(nextView); }} />}</AnimatePresence></>;
+    return <>{clueNotice}<Hero interactive={hydrated} onStart={() => { setUserToggledLibrary(false); if (game.started) setIntro(false); else setIntro(true); }} onDemo={() => setDemo(true)} /><AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={(nextView) => { setUserToggledLibrary(false); changeView(nextView); }} />}</AnimatePresence></>;
   }
   if (intro && !game.started) return <>{clueNotice}<Intro onDone={() => { game.begin(); setIntro(false); }} /></>;
   if (game.phase === "night") return <>{clueNotice}<NightRun onFinish={game.finishNight} onHardware={() => setHardwareOpen(true)} />{hardwarePanel}</>;
-  if (game.phase === "ending") return <>{clueNotice}<Ending onOpenLibrary={() => setLibraryOpen(true)} /></>;
+  if (game.phase === "ending") return <>{clueNotice}<Ending onOpenLibrary={() => setUserToggledLibrary(true)} /></>;
 
   return (
     <><div className="app-shell">
-      <TopBar chapter={game.chapter} onDemo={() => setDemo(true)} onHome={() => { setLibraryOpen(true); setIntro(false); }} onHardware={() => setHardwareOpen(true)} />
+      <TopBar chapter={game.chapter} onDemo={() => setDemo(true)} onHome={() => { setUserToggledLibrary(true); setIntro(false); }} onHardware={() => setHardwareOpen(true)} />
       <main className="app-content">
         {activeView === "tonight" && <Tonight onLaunch={game.startNight} onHardware={() => setHardwareOpen(true)} />}
         {activeView === "report" && (latestReportChapter !== null

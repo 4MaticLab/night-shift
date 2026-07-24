@@ -56,37 +56,49 @@
 
 ## 验证命令
 
-面向 `main` 的 Pull Request 由 `.github/workflows/ci.yml` 提供统一远端门禁：
+### PR 远端门禁（快）
 
-- `Quality` 运行单元／内容测试、ESLint、原生 Next.js 构建与文档双链检查。
-- `Platform` 运行 Vinext/Cloudflare render、Hardhat 编译与本地合约测试；不读取部署私钥或发起链上写入。
-- `End-to-end` 在临时 Ubuntu runner 安装 Google Chrome 与系统依赖，串行执行完整 Playwright 回归。CI 禁止复用已有服务器，失败重试一次并上传七天有效的 HTML、trace 与错误上下文。
-- `CI Gate` 汇总以上三项；任一任务失败、跳过或取消都会让门禁失败。Vercel 部署状态不进入该汇总，外部贡献者无需取得部署团队权限才能提供测试证据。
-- `.github/workflows/windows-smoke.yml` 每周及手动运行 Windows 核心 smoke，只覆盖 npm、单元／内容测试、lint、Next 构建与 docs check；完整 E2E 仍以 Ubuntu/Chrome 为合并权威环境。
+面向 `main` 的 Pull Request 由 `.github/workflows/ci.yml` 提供轻量远端门禁：
 
-本地开发按改动范围运行最小验证：代码至少运行 `npm test` 与 `npm run lint`，文档运行 `npm run docs:check`，入口／构建变化补充 `npm run build`。Sites、合约或关键浏览器路径的直接改动应运行下列对应专项命令；其他完整验证可以交给 PR CI，失败后必须本地复现和修复。
+- `Quality` 运行单元／内容测试、ESLint、原生 Next.js 构建与文档双链检查（墙钟约 1–2 分钟）。
+- `CI Gate` **只**要求 `Quality` 成功。Vercel 预览不进入该汇总；外部贡献者无需部署团队权限。
+- Vinext/Cloudflare render、Hardhat、完整 Playwright **不在 PR 上阻塞合并**。四人并行黑客松阶段优先合入速度；细粒度 UI／选择器断言很少拦住真正的逻辑回归，却会让所有人跟 CI 打乒乓球。
+
+贡献者本地最小验证：
 
 ```bash
 npm test
 npm run lint
-npm run build
-npm run build:sites
-npm run test:render
-npm run contract:compile
-npm run contract:test
+# 文档改动
 npm run docs:check
-npm run test:e2e
+# 入口／构建配置变化
+npm run build
 ```
 
-Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：除既有 Demo／真实夜班、晨报、联合推理、二维码、拖动持久化和结案往返外，还会从新档分别完成三案五夜循环，验证案件书架切换、未开封案件启动、各案结局、案件感知好友线索与独立存档，并覆盖第三案晨报／结局专属美术和放下纸条的显式 AI 授权、最小请求与晨报回信。Injective 路径额外覆盖未配置诚实降级、模拟既有 token 回执、刷新保留，以及 390 × 844、820 × 1180、1440 × 900 无横向溢出与触控尺寸。首载路径会人为延迟首页主视觉，验证加载幕持续可见、背景不可交互并在资源就绪后放行，同时断言首案主卷宗与推荐标识；自动本地化路径验证英文浏览器首帧、两个未翻译案件回退、中文 Cookie 覆盖、刷新保持和旧本地偏好迁移。820 × 1180 路径验证平板竖屏案件板的触控文档流、画布宽度、推理台衔接和无横向溢出；390 × 844 路径验证三张案件入口、触摸目标和无横向溢出。英文完整路径会在桌面端验证首夜交接、晨报、案板、收藏与档案无可见汉字，并在 390 × 844 验证交接触摸目标和无横向溢出。其余移动路径额外检查最大长度无断点纸条、首夜闭环、长收藏／档案、移动案件板和结案卷宗；桌面路径另覆盖虚拟戒指完整回执、桥接预演、真实夜班刷新恢复与晨报幂等。`tests/i18n.test.ts` 覆盖 Cookie 优先级、语言地区标签、质量权重、未知语言、序列化和全部准备物英文投影；`tests/game-store.test.ts` 在内存浏览器存储上覆盖默认首案、三案主循环、切换隔离、纸条历史、跨案件脏数据过滤、已退役案件回落、旧结构迁移和结局；内容测试覆盖三案 manifest、第三案 34 张资产消费、首案英文 ID／规则一致性和确定性内容护栏。浏览器测试使用本机 Chrome channel。
+### 合并者可选鲁棒性（慢，本机）
 
-模态回归逐一检查 Demo、睡眠硬件、好友线索、Injective、证物信笺和推论信笺的初始焦点、Tab 焦点圈、背景 inert、滚动锁定、Escape 与焦点恢复；案件板另验证第二件证物不会自动确认，只有显式核对后才写入关系并揭示推论。Demo 另验证打开零写入、取消零写入、确认快照写入、重置影响文案，以及输入框／其他弹层拦截 Shift+D。
+完整浏览器回归、Sites 渲染与合约检查保留为**可选本地脚本**，由负责合 PR 的人在需要时拉取分支执行，而不是每个 PR 的强制门禁：
+
+```bash
+# 一次跑齐 Sites render + 合约 + Playwright
+npm run test:robustness
+
+# 或按需单项
+npm run test:e2e
+npm run test:render
+npm run contract:compile && npm run contract:test
+```
+
+`.github/workflows/windows-smoke.yml` 仍可每周／手动跑 Windows 上的 Quality 子集。
+
+Playwright 套件位于 `tests/e2e/night-shift.spec.ts`，覆盖 Demo／真实夜班、晨报、联合推理、二维码、三案五夜、移动视口等；适合合并前抽检与大改后的鲁棒性，不作为日常 PR 阻塞条件。逻辑与内容护栏以 Vitest 为准：`tests/i18n.test.ts`、`tests/game-store.test.ts`、`tests/content.test.ts` 等已在 `Quality` 内每次必跑。
 
 ## 已知边界
 
 - 浏览器端尚未建立像素截图基线或多设备／多浏览器矩阵；当前响应式证据聚焦 820 × 1180 与 390 × 844 Chrome 关键路径。
 - 默认 `npm run build` 验证原生 Next.js/Vercel 产物；`npm run build:sites` 与 `npm run test:render` 验证 Vinext/Cloudflare Worker 产物。仅供 Cloudflare 使用的目录不进入 Next 类型检查，但仍由 Vinext 构建和 ESLint 覆盖。
-- 《只在雨中播出的电台》和《黎明前出炉的第十三个面包》尚无英文内容；选择英文偏好时书架会明确标记，进入后安全回退完整中文界面。
+- 《只在雨中播出的电台》和《黎明前出炉的第十三个面包》的英文能力以 `campaignSupportsLocale` 与对应案件词典为准；未开启英文的案件在英文偏好下安全回退完整中文界面。
+- 黑客松并行期 PR 门禁刻意偏轻：设计／布局回归依赖预览与合并者判断，不以完整 Playwright 阻塞合入。
 
 完成的工程加固见 [[plans/0003-mvp-quality-hardening]]；当前时间成长升级见 [[plans/0007-night-greenhouse-and-time-growth]]。
 

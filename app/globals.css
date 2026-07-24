@@ -13,6 +13,7 @@
   --red: #a86158;
   --moss: #72836b;
   --fog: #aeb7c2;
+  --primary: #c59a5a;
   --topbar-height: 74px;
   --nav-clearance: 96px;
 }
@@ -33,7 +34,8 @@ body {
   min-height: 100svh;
   color: var(--fog);
   background: var(--navy);
-  font-family: var(--font-manrope), sans-serif;
+  font-family: var(--font-baskerville), var(--font-noto-serif-sc), "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
+  line-height: 1.7;
 }
 
 .click-spark-canvas {
@@ -138,7 +140,7 @@ body.app-is-booting {
 
 .app-boot-brand b {
   color: #eadfc8;
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-playfair), var(--font-noto-serif-sc), Georgia, serif;
   font-size: 16px;
   letter-spacing: .08em;
 }
@@ -356,8 +358,9 @@ h1,
 h2,
 h3,
 blockquote {
-  font-family: var(--font-newsreader), Georgia, serif;
-  font-weight: 500;
+  font-family: var(--font-playfair), var(--font-noto-serif-sc), Georgia, serif;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .hero-shell {
@@ -483,7 +486,7 @@ blockquote {
 }
 
 .brand-mark b {
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   letter-spacing: .08em;
   font-size: 17px;
 }
@@ -662,7 +665,7 @@ blockquote {
 .campaign-shelf>header h2 {
   margin: 8px 0 0;
   color: var(--warm-paper);
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 21px;
 }
 
@@ -814,7 +817,7 @@ blockquote {
   min-width: 0;
   overflow: hidden;
   color: #d3d5d2;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 15px;
   font-weight: 500;
   text-overflow: ellipsis;
@@ -990,7 +993,7 @@ blockquote {
 
 .case-heading b {
   color: var(--paper);
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 15px;
   margin-top: 2px;
 }
@@ -1114,14 +1117,24 @@ blockquote {
   z-index: 5;
   left: 7%;
   top: 8%;
-  max-width: min(330px, 40%);
+  max-width: min(320px, 42%);
 }
 
 .scene-copy h2 {
   color: var(--paper);
-  font-size: clamp(42px, 4.4vw, 67px);
+  font-size: clamp(38px, 3.8vw, 52px);
   line-height: 1.02;
   margin: 20px 0;
+}
+
+.scene-title span {
+  display: block;
+  white-space: nowrap;
+}
+
+.scene-title-en {
+  font-size: clamp(28px, 2.2vw, 32px) !important;
+  line-height: 1.08 !important;
 }
 
 .scene-copy>p:last-child {
@@ -1188,7 +1201,7 @@ blockquote {
 }
 
 .handoff-portrait figcaption b {
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 22px;
 }
 
@@ -1223,7 +1236,7 @@ blockquote {
 
 .handoff-docket b {
   color: var(--paper);
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 19px;
 }
 
@@ -1453,7 +1466,7 @@ blockquote {
   border-left: 2px solid var(--red);
   color: #aeb4bd;
   background: #0e1728;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 13px;
   line-height: 1.55;
 }
@@ -1480,7 +1493,7 @@ blockquote {
 
 .preparation-heading b {
   color: #aab0b9;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 14px;
 }
 
@@ -1662,7 +1675,7 @@ blockquote {
 
 .route-order b {
   color: var(--paper);
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 14px;
 }
 
@@ -1840,7 +1853,7 @@ blockquote {
 
 .map-label {
   position: absolute;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   color: #6d7888;
   font-size: 12px;
   letter-spacing: .2em;
@@ -2021,7 +2034,7 @@ blockquote {
 
 .botanical-specimen>div b {
   color: var(--paper);
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 12px;
 }
 
@@ -2095,7 +2108,7 @@ blockquote {
   display: block;
   margin-top: 5px;
   color: var(--paper);
-  font: 22px var(--font-newsreader);
+  font: 22px var(--font-playfair), var(--font-noto-serif-sc);
 }
 
 .report-archive-details>summary p,
@@ -2269,7 +2282,7 @@ blockquote {
 .postcard-back .postcard-rumor {
   margin: 16px 0;
   color: #31322e;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 17px;
   line-height: 1.55;
 }
@@ -2313,14 +2326,14 @@ blockquote {
 .route-letter b {
   display: block;
   margin-top: 5px;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 16px;
 }
 
 .route-letter p {
   margin: 9px 0 7px;
   color: #3c3d38;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 14px;
   line-height: 1.55;
 }
@@ -2375,7 +2388,7 @@ blockquote {
 
 .growth-record .botanical-rumor {
   color: #31322e;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 18px;
   line-height: 1.6;
 }
@@ -2445,7 +2458,7 @@ blockquote {
 
 .society-memory-letter .society-rumor {
   color: #6f5644;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 16px;
   line-height: 1.55;
 }
@@ -2500,7 +2513,7 @@ blockquote {
 .correspondence-echo p {
   margin: 5px 0 0;
   color: #4f5c58;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -2520,7 +2533,7 @@ blockquote {
 .correspondence-question h4 {
   margin: 8px 0 14px;
   color: #32332f;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 21px;
   line-height: 1.45;
 }
@@ -2551,7 +2564,7 @@ blockquote {
 }
 
 .correspondence-replies button b {
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 15px;
 }
 
@@ -2660,12 +2673,12 @@ blockquote {
 }
 
 .paper-heading b {
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 20px;
 }
 
 .sleep-number {
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 56px;
   color: #273342;
   margin-top: 15px;
@@ -2683,7 +2696,7 @@ blockquote {
 }
 
 .journal p {
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 18px;
   line-height: 1.9;
   margin: 20px 0;
@@ -2730,7 +2743,7 @@ blockquote {
 
 .sleep-session-meta b {
   color: #273342;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 17px;
 }
 
@@ -2760,7 +2773,7 @@ blockquote {
 
 .preparation-echo p {
   margin: 0;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 17px;
   line-height: 1.75;
 }
@@ -2827,13 +2840,13 @@ blockquote {
 }
 
 .evidence-glyph {
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 42px;
   color: var(--amber);
 }
 
 .evidence-card h4 {
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 22px;
   margin: 15px 0 7px;
 }
@@ -2950,7 +2963,7 @@ blockquote {
 
 .report-replay-note b {
   color: #3f3a32;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 18px;
 }
 
@@ -3277,7 +3290,7 @@ blockquote {
 
 .cipher-desk-heading>span b {
   color: var(--paper);
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 28px;
 }
 
@@ -3508,7 +3521,7 @@ blockquote {
 
 .cipher-dial header b {
   color: #e3d8c1;
-  font: 22px var(--font-newsreader);
+  font: 22px var(--font-playfair), var(--font-noto-serif-sc);
   line-height: 1;
 }
 
@@ -3642,7 +3655,7 @@ blockquote {
   display: block;
   margin-bottom: 7px;
   color: #cfc4af;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 14px;
 }
 
@@ -3759,7 +3772,7 @@ blockquote {
 .cipher-reveal h5 {
   margin: 9px 0 6px;
   color: #e1d7c2;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 19px;
 }
 
@@ -4277,7 +4290,7 @@ blockquote {
 .clue-index-copy b {
   margin-top: 2px;
   color: #b9ad97;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 13px;
   font-weight: 500;
 }
@@ -4595,7 +4608,7 @@ blockquote {
 
 .board-node b {
   display: block;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 18px;
   margin: 8px 0 3px;
 }
@@ -4777,7 +4790,7 @@ blockquote {
 
 .relation-entry b {
   color: #8a95a3;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 12px;
   line-height: 1.35;
 }
@@ -4899,7 +4912,7 @@ blockquote {
 
 .clue-dossier h3 {
   margin: 5px 0 8px;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 24px;
 }
 
@@ -5030,7 +5043,7 @@ blockquote {
   content: "N";
   display: block;
   color: #8f654f;
-  font: 18px var(--font-newsreader);
+  font: 18px var(--font-playfair), var(--font-noto-serif-sc);
   text-align: center;
 }
 
@@ -5069,7 +5082,7 @@ blockquote {
 .evidence-letter-head h2 {
   max-width: 570px;
   margin: 8px 0 0;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: clamp(34px, 6vw, 54px);
   line-height: 1.02;
   font-weight: 600;
@@ -5096,7 +5109,7 @@ blockquote {
 .evidence-letter-body {
   margin: 24px 0;
   color: #4d4c45;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: clamp(17px, 2.4vw, 22px);
   line-height: 1.72;
 }
@@ -5107,7 +5120,7 @@ blockquote {
   border-left: 3px solid #a86158;
   background: #a8615810;
   color: #4a4741;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 17px;
   line-height: 1.65;
 }
@@ -5140,7 +5153,7 @@ blockquote {
 .evidence-letter-footer b {
   margin-top: 8px;
   color: #426b67;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 15px;
   line-height: 1.45;
   display: flex;
@@ -5166,7 +5179,7 @@ blockquote {
   border-left: 2px solid var(--red);
   background: #b99b7830;
   color: #4e4c46;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 13px;
   line-height: 1.55;
 }
@@ -5197,7 +5210,7 @@ blockquote {
   align-items: center;
   gap: 5px;
   color: #426b67;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 11px;
 }
 
@@ -5259,7 +5272,7 @@ blockquote {
 
 .inference-toolbar-copy>b {
   color: var(--paper);
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 16px;
   font-weight: 600;
   line-height: 1.35;
@@ -5373,7 +5386,7 @@ blockquote {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 11px;
 }
 
@@ -5412,7 +5425,7 @@ blockquote {
 
 .inference-workbench>.connect-evidence span {
   align-self: end;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 12px;
 }
 
@@ -5451,7 +5464,7 @@ blockquote {
 
 .evidence-slot>div b {
   color: var(--paper);
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 11px;
 }
 
@@ -5647,7 +5660,7 @@ blockquote {
 .clue-share-evidence b {
   display: block;
   margin: 5px 0;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 20px;
 }
 
@@ -5761,7 +5774,7 @@ blockquote {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 12px;
 }
 
@@ -5824,7 +5837,7 @@ blockquote {
 .clue-gift-notice b {
   display: block;
   margin: 3px 0;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 15px;
 }
 
@@ -5906,7 +5919,7 @@ blockquote {
 .collection-index-heading b {
   margin-top: 6px;
   color: #c8c9c6;
-  font: 500 14px/1.3 var(--font-newsreader);
+  font: 500 14px/1.3 var(--font-playfair), var(--font-noto-serif-sc);
 }
 
 .collection-index-tabs {
@@ -5965,7 +5978,7 @@ blockquote {
 }
 
 .collection-index-tabs button b {
-  font: 600 12px/1.25 var(--font-newsreader);
+  font: 600 12px/1.25 var(--font-playfair), var(--font-noto-serif-sc);
 }
 
 .collection-index-tabs button small {
@@ -6004,7 +6017,7 @@ blockquote {
   margin-top: 13px;
   margin-bottom: 0;
   color: #8f98a4;
-  font: 11px/1.7 var(--font-manrope);
+  font: 11px/1.7 var(--font-baskerville), var(--font-noto-serif-sc), "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
 }
 
 .collection-evidence-cabinet .collection-grid {
@@ -6086,7 +6099,7 @@ blockquote {
   height: 185px;
   display: grid;
   place-items: center;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 88px;
   color: #b18751;
   border: 1px solid #7c695041;
@@ -6292,7 +6305,7 @@ blockquote {
   display: block;
   margin: 7px 0;
   color: #f0e6d3;
-  font: 600 28px/1.12 var(--font-newsreader), serif;
+  font: 600 28px/1.12 var(--font-playfair), var(--font-noto-serif-sc), serif;
 }
 
 .injective-mint-copy {
@@ -6318,7 +6331,7 @@ blockquote {
   max-width: 420px;
   margin: 0 0 13px;
   color: #eee5d3;
-  font: 500 clamp(29px, 3vw, 42px)/1.08 var(--font-newsreader), serif;
+  font: 500 clamp(29px, 3vw, 42px)/1.08 var(--font-playfair), var(--font-noto-serif-sc), serif;
 }
 
 .injective-mint-copy>header>span {
@@ -6471,7 +6484,7 @@ blockquote {
 .injective-mint-success h3 {
   margin: 0;
   color: #e8dfcd;
-  font: 500 25px/1.2 var(--font-newsreader), serif;
+  font: 500 25px/1.2 var(--font-playfair), var(--font-noto-serif-sc), serif;
 }
 
 .injective-mint-success p {
@@ -6747,7 +6760,7 @@ blockquote {
   display: block;
   margin: 4px 0;
   color: #363733;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 13px;
 }
 
@@ -6770,7 +6783,7 @@ blockquote {
   max-width: 680px;
   margin: -4px 0 22px;
   color: #82958f;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 14px;
   line-height: 1.65;
 }
@@ -6882,7 +6895,7 @@ blockquote {
   max-width: 720px;
   margin: -4px 0 22px;
   color: #918386;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 14px;
   line-height: 1.65;
 }
@@ -6960,7 +6973,7 @@ blockquote {
 
 .society-current-address b {
   color: var(--paper);
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
 }
 
 .society-rule {
@@ -7025,7 +7038,7 @@ blockquote {
 .correspondence-ledger-heading h4 {
   margin: 0;
   color: var(--paper);
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 23px;
 }
 
@@ -7061,7 +7074,7 @@ blockquote {
   min-height: 46px;
   margin: 7px 0 13px;
   color: #c9c0ad;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 15px;
   line-height: 1.45;
 }
@@ -7082,7 +7095,7 @@ blockquote {
 
 .correspondence-ledger-entry>div b {
   color: var(--paper);
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 13px;
 }
 
@@ -7172,7 +7185,7 @@ blockquote {
 
 .night-seal b {
   color: #9aa4b1;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 13px;
   margin-top: 3px;
 }
@@ -7428,7 +7441,7 @@ blockquote {
   display: block;
   margin-top: 5px;
   color: #3f5f5b;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 20px;
 }
 
@@ -7502,7 +7515,7 @@ blockquote {
 
 .ending-letter blockquote {
   color: #343630;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   line-height: 1.75;
 }
 
@@ -7532,7 +7545,7 @@ blockquote {
 .ending-section-heading p {
   margin: 0;
   color: #9299a3;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 14px;
   line-height: 1.65;
 }
@@ -7585,7 +7598,7 @@ blockquote {
   min-height: 52px;
   margin: 5px 0 8px;
   color: var(--paper);
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 21px;
 }
 
@@ -7616,7 +7629,7 @@ blockquote {
 .ending-night-entry dd {
   margin: 3px 0 0;
   color: #d0c3a8;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 11px;
   line-height: 1.35;
 }
@@ -7659,7 +7672,7 @@ blockquote {
 .ending-evidence-item b {
   display: block;
   margin: 4px 0;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 16px;
 }
 
@@ -7677,7 +7690,7 @@ blockquote {
 
 .ending-refrain {
   color: var(--amber);
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 17px;
 }
 
@@ -7835,7 +7848,7 @@ blockquote {
 
 .demo-impact-note b {
   color: #d8ccb8;
-  font: 600 13px/1.3 var(--font-newsreader);
+  font: 600 13px/1.3 var(--font-playfair), var(--font-noto-serif-sc);
 }
 
 .demo-impact-note p {
@@ -8027,7 +8040,7 @@ blockquote {
 
 .souvenir-reveal .souvenir-rumor {
   color: #373832;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 17px;
   line-height: 1.55;
 }
@@ -8035,7 +8048,7 @@ blockquote {
 .souvenir-reveal blockquote {
   margin: 16px 0;
   color: #4d4b45;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 16px;
   line-height: 1.65;
 }
@@ -8073,7 +8086,7 @@ blockquote {
   max-width: 760px;
   margin: -4px 0 22px;
   color: #958b7b;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 14px;
   line-height: 1.65;
 }
@@ -8136,7 +8149,7 @@ blockquote {
 
 .pocket-object-copy h4 {
   margin: 6px 0 9px;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 21px;
 }
 
@@ -8169,7 +8182,7 @@ blockquote {
 
 .pocket-object-copy footer b {
   color: #704d46;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 13px;
 }
 
@@ -8227,7 +8240,7 @@ blockquote {
 
 .daytime-notices-heading b,
 .daytime-notices.resolved b {
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 20px;
 }
 
@@ -8278,7 +8291,7 @@ blockquote {
 
 .daytime-notice-list summary>b {
   grid-column: 1 / -1;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 15px;
 }
 
@@ -8330,7 +8343,7 @@ blockquote {
 }
 
 .daytime-notice-list button b {
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 12px;
 }
 
@@ -8345,7 +8358,7 @@ blockquote {
 }
 
 .daytime-notices.resolved>p {
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 13px;
 }
 
@@ -8381,7 +8394,7 @@ blockquote {
 .opportunity-echo blockquote {
   margin: 0;
   color: #41433e;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 16px;
   line-height: 1.65;
 }
@@ -8404,7 +8417,7 @@ blockquote {
   max-width: 720px;
   margin: -4px 0 22px;
   color: #8b929c;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 14px;
   line-height: 1.65;
 }
@@ -8437,7 +8450,7 @@ blockquote {
 
 .city-clipping-book article h4 {
   margin: 7px 0 10px;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 21px;
 }
 
@@ -8510,7 +8523,7 @@ blockquote {
 
 .character-encounter p {
   color: #5d5448;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 17px;
   line-height: 1.6;
 }
@@ -8551,7 +8564,7 @@ blockquote {
   max-width: 680px;
   margin: -4px 0 23px;
   color: #918779;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 14px;
 }
 
@@ -8614,7 +8627,7 @@ blockquote {
 
 .person-dossier-copy h4 {
   margin: 6px 0 4px;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 24px;
 }
 
@@ -8626,7 +8639,7 @@ blockquote {
 .person-dossier-copy>p {
   margin: 13px 0;
   color: #625e55;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 13px;
   line-height: 1.55;
 }
@@ -8697,7 +8710,7 @@ blockquote {
   max-width: 680px;
   margin: -4px 0 23px;
   color: #918779;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 14px;
 }
 
@@ -8758,7 +8771,7 @@ blockquote {
 
 .district-copy h4 {
   margin: 6px 0 3px;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 27px;
 }
 
@@ -8774,7 +8787,7 @@ blockquote {
 .district-copy blockquote {
   margin: 14px 0 0;
   color: #5d5951;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 12px;
   line-height: 1.55;
 }
@@ -8911,7 +8924,7 @@ blockquote {
 
 .city-watch-live b {
   color: var(--paper);
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 17px;
 }
 
@@ -9034,7 +9047,7 @@ blockquote {
   max-width: 760px;
   margin: -4px 0 22px;
   color: #8b929c;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 14px;
   line-height: 1.65;
 }
@@ -9063,7 +9076,7 @@ blockquote {
 .watch-ledger-entry h4 {
   margin: 8px 0 3px;
   color: var(--paper);
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 22px;
 }
 
@@ -9076,7 +9089,7 @@ blockquote {
 .watch-ledger-entry blockquote {
   margin: 20px 0 0;
   color: #a6adb4;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 12px;
   line-height: 1.58;
 }
@@ -9157,6 +9170,101 @@ blockquote {
 
   .night-seal-row {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1100px) {
+  .tonight-page {
+    grid-template-columns: minmax(0, 1fr) minmax(390px, .68fr);
+  }
+
+  .scene-copy {
+    left: 6%;
+    max-width: 46%;
+  }
+
+  .scene-copy h2 {
+    font-size: clamp(36px, 4vw, 42px);
+  }
+
+  .scene-title-en {
+    font-size: clamp(27px, 2.9vw, 31px) !important;
+  }
+
+  .handoff-portrait {
+    right: 20px;
+    width: min(42%, 300px);
+  }
+
+  .handoff-docket {
+    left: 6%;
+    width: min(260px, 41%);
+  }
+
+  .plan-panel {
+    padding: 30px 26px;
+  }
+
+  .plan-panel h3 {
+    font-size: 28px;
+    text-wrap: balance;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 900px) {
+  .tonight-page {
+    display: block;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .tonight-page .desk-scene {
+    height: min(720px, calc(100svh - var(--topbar-height)));
+    min-height: 620px;
+    background-position: 20% center;
+  }
+
+  .tonight-page .scene-copy {
+    left: 5%;
+    top: 8%;
+    max-width: 45%;
+  }
+
+  .tonight-page .scene-copy h2 {
+    font-size: clamp(38px, 5.4vw, 46px);
+  }
+
+  .tonight-page .scene-title-en {
+    font-size: clamp(30px, 4vw, 34px) !important;
+  }
+
+  .tonight-page .handoff-portrait {
+    right: 5%;
+    bottom: 36px;
+    width: min(38%, 300px);
+  }
+
+  .tonight-page .handoff-docket {
+    left: 5%;
+    bottom: 36px;
+    width: min(330px, 45%);
+  }
+
+  .tonight-page .plan-panel {
+    padding: 38px clamp(32px, 6vw, 54px) 30px;
+    overflow: visible;
+  }
+
+  .tonight-page .plan-panel-scroll {
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  .tonight-page .plan-panel h3 {
+    max-width: 680px;
+    font-size: clamp(30px, 4.6vw, 38px);
+    text-wrap: balance;
   }
 }
 
@@ -9439,6 +9547,10 @@ blockquote {
     margin-block: 15px;
   }
 
+  .scene-title-en span {
+    white-space: normal;
+  }
+
   .scene-copy>p:last-child {
     font-size: 10px;
     line-height: 1.65;
@@ -9702,7 +9814,7 @@ blockquote {
   }
 
   .collection-index-tabs button b {
-    font: 600 9px/1.2 var(--font-newsreader);
+    font: 600 9px/1.2 var(--font-playfair), var(--font-noto-serif-sc);
   }
 
   .collection-index-tabs button small {
@@ -10047,7 +10159,7 @@ blockquote {
   max-width: 145px;
   overflow: hidden;
   color: #c9c1b2;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -10148,7 +10260,7 @@ blockquote {
   max-width: 560px;
   margin: 22px 0;
   color: #8994a2;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 14px;
   line-height: 1.7;
 }
@@ -10254,7 +10366,7 @@ blockquote {
 
 .sleep-device-grid b {
   color: #d5c9b4;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 17px;
 }
 
@@ -10312,7 +10424,7 @@ blockquote {
 .sleep-device-consent header p {
   margin: 0;
   color: #838d99;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 12px;
 }
 
@@ -10685,7 +10797,7 @@ blockquote {
   display: block;
   margin: 3px 0;
   color: #cfc5b5;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
 }
 
 .sleep-handoff-card p {
@@ -10810,7 +10922,7 @@ blockquote {
 
 .sleep-live-telemetry>div b {
   color: #b7c9c4;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 15px;
 }
 
@@ -10890,7 +11002,7 @@ blockquote {
 
 .sleep-morning-receipt>div b {
   color: #4c463a;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 17px;
 }
 
@@ -11190,7 +11302,7 @@ blockquote {
 
 .rest-intention-heading b {
   color: var(--paper);
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 17px;
 }
 
@@ -11216,7 +11328,7 @@ blockquote {
   outline: 0;
   color: #d8ccb5;
   background: #091321;
-  font: 12px/1.6 var(--font-newsreader), Georgia, serif;
+  font: 12px/1.6 var(--font-playfair), var(--font-noto-serif-sc), Georgia, serif;
 }
 
 .rest-intention-box textarea:focus {
@@ -11386,7 +11498,7 @@ blockquote {
 .rest-reflection-card p {
   margin: 0;
   color: #353832;
-  font-family: var(--font-newsreader);
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 19px;
   line-height: 1.65;
   overflow-wrap: anywhere;
@@ -11440,9 +11552,9 @@ blockquote {
 .sleep-hardware-status > svg:first-child { width: 17px; color: #9f8258; }
 .sleep-hardware-status > svg:last-child { width: 13px; opacity: .55; }
 .sleep-hardware-status-copy { display: flex; flex-direction: column; min-width: 90px; }
-.sleep-hardware-mobile-label { display: none; font-family: var(--font-newsreader); font-size: 11px; font-weight: 700; white-space: nowrap; }
+.sleep-hardware-mobile-label { display: none; font-family: var(--font-playfair), var(--font-noto-serif-sc); font-size: 11px; font-weight: 700; white-space: nowrap; }
 .sleep-hardware-status small { color: #7c8797; font: 6px monospace; letter-spacing: .1em; }
-.sleep-hardware-status b { max-width: 145px; overflow: hidden; color: #c9c1b2; font-family: var(--font-newsreader); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.sleep-hardware-status b { max-width: 145px; overflow: hidden; color: #c9c1b2; font-family: var(--font-playfair), var(--font-noto-serif-sc); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .sleep-hardware-status.connected { border-color: #6d8d88; background: #142629; }
 .sleep-hardware-status.connected > svg:first-child { color: #83aaa4; }
 .sleep-hardware-status.recording > svg:first-child { animation: hardwarePulse 1.7s ease-in-out infinite; }
@@ -11462,14 +11574,14 @@ blockquote {
 .sleep-hardware-panel-header small { color: #b08a54; font: 7px monospace; letter-spacing: .14em; }
 .sleep-hardware-panel-header h2 { margin: 12px 0 0; color: #e3d8c2; font-size: clamp(42px, 5vw, 64px); line-height: .98; }
 .sleep-hardware-panel-header > button { position: fixed; z-index: 4; top: 34px; right: clamp(14px, 3vw, 32px); width: 46px; height: 46px; display: grid; place-items: center; border: 1px solid #5b6878; background: #111b2bf2; color: #c5cbd1; cursor: pointer; box-shadow: 0 8px 24px #05080dbf; }
-.sleep-hardware-lede { max-width: 560px; margin: 22px 0; color: #8994a2; font-family: var(--font-newsreader); font-size: 14px; line-height: 1.7; }
+.sleep-hardware-lede { max-width: 560px; margin: 22px 0; color: #8994a2; font-family: var(--font-playfair), var(--font-noto-serif-sc); font-size: 14px; line-height: 1.7; }
 .sleep-connection-summary { position: relative; margin: 0 0 12px; padding: 15px; display: grid; grid-template-columns: 42px 1fr auto; gap: 12px; align-items: center; border: 1px solid #465466; background: linear-gradient(120deg, #121d2d, #0e1724); overflow: hidden; }
 .sleep-connection-summary::after { content: ""; position: absolute; right: -28px; bottom: -42px; width: 150px; height: 90px; border: 1px solid #a17d4b24; transform: rotate(-13deg); }
 .sleep-connection-summary > span { width: 40px; height: 40px; display: grid; place-items: center; border: 1px solid #75664d; color: #ae8953; }
 .sleep-connection-summary > span svg { width: 19px; }
 .sleep-connection-summary > div { position: relative; z-index: 1; min-width: 0; }
 .sleep-connection-summary small { color: #9b7b4e; font: 8px monospace; letter-spacing: .12em; }
-.sleep-connection-summary b { display: block; margin-top: 3px; color: #d8cebb; font-family: var(--font-newsreader); font-size: 17px; }
+.sleep-connection-summary b { display: block; margin-top: 3px; color: #d8cebb; font-family: var(--font-playfair), var(--font-noto-serif-sc); font-size: 17px; }
 .sleep-connection-summary p { margin: 3px 0 0; color: #8b96a3; font-size: 11px; line-height: 1.45; }
 .sleep-connection-summary > i { position: relative; z-index: 1; padding: 7px 9px; display: flex; align-items: center; gap: 5px; border: 1px solid #57756f; color: #86a8a2; font-size: 9px; font-style: normal; white-space: nowrap; }
 .sleep-connection-summary > i svg { width: 14px; }
@@ -11505,7 +11617,7 @@ blockquote {
 .sleep-device-image img { object-fit: cover; }
 .sleep-device-grid > button > span:nth-child(2) { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
 .sleep-device-grid small { color: #aa8551; font: 8px monospace; letter-spacing: .08em; }
-.sleep-device-grid b { color: #d5c9b4; font-family: var(--font-newsreader); font-size: 17px; }
+.sleep-device-grid b { color: #d5c9b4; font-family: var(--font-playfair), var(--font-noto-serif-sc); font-size: 17px; }
 .sleep-device-grid em { color: #8994a1; font-size: 10px; font-style: normal; line-height: 1.45; }
 .sleep-device-grid strong { width: fit-content; padding: 4px 6px; display: flex; align-items: center; gap: 4px; border: 1px solid #61817c; color: #8aaca6; background: #17302f; font-size: 8px; font-weight: 600; }
 .sleep-device-grid strong svg { width: 10px; }
@@ -11522,7 +11634,7 @@ blockquote {
 .sleep-device-consent > header { display: flex; justify-content: space-between; gap: 16px; }
 .sleep-device-consent > header small, .bridge-permission-map > small { color: #aa8450; font: 8px monospace; letter-spacing: .12em; }
 .sleep-device-consent h3, .bridge-permission-map h3 { margin: 5px 0; color: #ddd0b8; font-size: 26px; }
-.sleep-device-consent header p { margin: 0; color: #838d99; font-family: var(--font-newsreader); font-size: 12px; }
+.sleep-device-consent header p { margin: 0; color: #838d99; font-family: var(--font-playfair), var(--font-noto-serif-sc); font-size: 12px; }
 .sleep-device-consent header > span { flex: 0 0 auto; height: fit-content; padding: 7px 9px; display: flex; align-items: center; gap: 6px; border: 1px solid #5a5f62; color: #9ca5ad; font-size: 9px; }
 .sleep-device-consent header > span svg { width: 15px; }
 .sleep-device-consent header > span.authorized { border-color: #688c87; color: #8fb6af; background: #16302f; }
@@ -11583,7 +11695,7 @@ blockquote {
 .sleep-handoff-card.ready .sleep-handoff-icon { border-color: #6d928d; color: #83aaa4; }
 .sleep-handoff-card > div:nth-child(2) { min-width: 0; }
 .sleep-handoff-card small { color: #a48050; font: 8px monospace; letter-spacing: .1em; }
-.sleep-handoff-card b { display: block; margin: 3px 0; color: #cfc5b5; font-family: var(--font-newsreader); }
+.sleep-handoff-card b { display: block; margin: 3px 0; color: #cfc5b5; font-family: var(--font-playfair), var(--font-noto-serif-sc); }
 .sleep-handoff-card p { margin: 0; color: #87929f; font-size: 10px; line-height: 1.45; }
 .sleep-handoff-card.dark p { color: #78847a; }
 .sleep-handoff-card > button { min-height: 44px; padding: 8px 10px; display: flex; align-items: center; gap: 5px; border: 1px solid #5a6878; background: transparent; color: #aab2ba; cursor: pointer; font-size: 10px; white-space: nowrap; }
@@ -11602,7 +11714,7 @@ blockquote {
 .sleep-live-telemetry > div span { padding: 8px; border: 1px solid #35504f; background: #10272a; }
 .sleep-live-telemetry.dark > div span { border-color: #344c3a; background: #102015; }
 .sleep-live-telemetry > div small { display: block; color: #718e89; font-size: 9px; }
-.sleep-live-telemetry > div b { color: #b7c9c4; font-family: var(--font-newsreader); font-size: 15px; }
+.sleep-live-telemetry > div b { color: #b7c9c4; font-family: var(--font-playfair), var(--font-noto-serif-sc); font-size: 15px; }
 .sleep-live-telemetry > p { margin: 8px 0 0; color: #708581; font-size: 9px; }
 
 .sleep-receipt-wrap { max-width: 1040px; margin: -24px auto 34px; padding-inline: 20px; position: relative; z-index: 3; }
@@ -11615,7 +11727,7 @@ blockquote {
 .sleep-morning-receipt > div { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 16px 0; }
 .sleep-morning-receipt > div span { padding: 10px; border: 1px solid #9d8968; background: #f0e6d24d; }
 .sleep-morning-receipt > div small { display: block; color: #796b55; font-size: 9px; }
-.sleep-morning-receipt > div b { color: #4c463a; font-family: var(--font-newsreader); font-size: 17px; }
+.sleep-morning-receipt > div b { color: #4c463a; font-family: var(--font-playfair), var(--font-noto-serif-sc); font-size: 17px; }
 .sleep-morning-receipt blockquote { margin: 13px 0 7px; padding-top: 13px; border-top: 1px solid #9d8968; color: #514b40; font-size: 15px; line-height: 1.55; }
 .sleep-morning-receipt > p { margin: 0; color: #7d715f; font-size: 9px; }
 .sleep-receipt-wrap > button { min-height: 44px; margin: 7px 0 0 auto; padding: 7px 10px; display: flex; align-items: center; gap: 5px; border: 1px solid #8c7656; background: #d6cab1; color: #574c3b; cursor: pointer; font-size: 9px; }
@@ -11707,6 +11819,73 @@ blockquote {
 .landing-nav-actions { display: flex; align-items: center; gap: 8px; }
 .language-button { color: var(--amber); }
 .campaign-shelf .locale-availability { margin: 9px 2px 0; color: #a49a89; font: 7px/1.5 monospace; letter-spacing: .04em; }
+
+.campaign-wheel {
+  position: absolute;
+  z-index: 4;
+  right: 0;
+  top: 0;
+  width: min(720px, 58vw);
+  height: 100vh;
+  transform: none;
+}
+
+.campaign-wheel .option-wheel {
+  height: 100%;
+}
+
+.campaign-wheel .option-wheel__item {
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
+}
+
+.campaign-wheel.inert {
+  pointer-events: none;
+}
+
+.campaign-wheel .locale-availability { position: absolute; right: 24px; bottom: 0; margin: 0; color: #a49a89; font: 7px/1.5 monospace; letter-spacing: .04em; }
+
+.option-wheel {
+  --ow-text-color: #a6a6a6;
+  --ow-active-color: #ffffff;
+  --ow-font-size: 3rem;
+  --ow-inset: 80px;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  outline: none;
+}
+
+.option-wheel--dragging {
+  cursor: grabbing;
+}
+
+.option-wheel__item {
+  position: absolute;
+  top: 50%;
+  left: var(--ow-inset);
+  white-space: nowrap;
+  font-size: var(--ow-font-size);
+  line-height: 1;
+  font-weight: 200;
+  transform-origin: left center;
+  cursor: pointer;
+  will-change: transform, opacity, filter;
+  color: color-mix(in srgb, var(--ow-active-color) calc(var(--ow-p, 0) * 100%), var(--ow-text-color));
+}
+
+.option-wheel--right .option-wheel__item {
+  left: auto;
+  right: var(--ow-inset);
+  transform-origin: right center;
+}
+
+.option-wheel__item--selected {
+  font-weight: 500;
+}
 
 @media (max-width: 900px) {
   .clue-index {

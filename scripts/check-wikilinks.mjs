@@ -1,5 +1,5 @@
 import { access, readFile, readdir } from "node:fs/promises";
-import { extname, join, relative, resolve } from "node:path";
+import { extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 const root = process.cwd();
 const roots = ["AGENTS.md", "PLANS.md", "README.md", "docs", "plans"];
@@ -25,7 +25,12 @@ for (const file of files) {
     const rawTarget = match[1].trim();
     const target = extname(rawTarget) ? rawTarget : `${rawTarget}.md`;
     const targetPath = resolve(root, target);
-    if (!targetPath.startsWith(`${root}/`)) {
+    const relativeTarget = relative(root, targetPath);
+    if (
+      relativeTarget === ".." ||
+      relativeTarget.startsWith(`..${sep}`) ||
+      isAbsolute(relativeTarget)
+    ) {
       problems.push(`${relative(root, file)}: link escapes repository: [[${rawTarget}]]`);
       continue;
     }
@@ -43,4 +48,3 @@ if (problems.length) {
 } else {
   console.log(`Checked ${files.length} Markdown files: all wiki links resolve.`);
 }
-
