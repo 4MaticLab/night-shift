@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, FileCheck2, FileText, Flower2, KeyRound, Link2, QrCode, RotateCcw, Search, Sparkles, X } from "lucide-react";
-import { Background, BackgroundVariant, Controls, Handle, Position, ReactFlow, useNodesState, type Edge, type Node, type NodeProps } from "@xyflow/react";
+import { Controls, Handle, Position, ReactFlow, useNodesState, type Edge, type Node, type NodeProps } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { getAsset } from "@/src/content/assets";
 import { getPreparation } from "@/src/content/preparations";
@@ -34,15 +34,16 @@ type EvidenceNode = Node<{
   received: boolean;
   checkable: boolean;
   compatible: boolean;
+  paperVariant: number;
   onSelect: (clueId: string) => void;
   onOpenDossier: (clueId: string) => void;
 }, "evidence">;
 
 function EvidenceNodeCard({ data }: NodeProps<EvidenceNode>) {
   const { t } = useI18n();
-  const { clue, selected, selectionIndex, focused, received, checkable, compatible, onSelect, onOpenDossier } = data;
+  const { clue, selected, selectionIndex, focused, received, checkable, compatible, paperVariant, onSelect, onOpenDossier } = data;
   return <div className="board-node-wrap">
-    <Handle className="board-connection-handle" type="target" position={Position.Left} isConnectable={false} />
+    <Handle className="board-connection-handle target" type="target" position={Position.Left} isConnectable={false} />
     <span className="board-node-drag-handle" title={t("拖动图钉整理证物")}><span className="pin" /></span>
     <div
       role="button"
@@ -56,7 +57,7 @@ function EvidenceNodeCard({ data }: NodeProps<EvidenceNode>) {
           onSelect(clue.id);
         }
       }}
-      className={`board-node ${clue.type} ${checkable ? "checkable" : ""} ${compatible ? "compatible" : ""} ${selected ? "selected" : ""} ${focused ? "focused" : ""} ${received ? "received" : ""}`}
+      className={`board-node evidence-paper-${paperVariant} ${clue.type} ${checkable ? "checkable" : ""} ${compatible ? "compatible" : ""} ${selected ? "selected" : ""} ${focused ? "focused" : ""} ${received ? "received" : ""}`}
     >
       {selectionIndex !== null && <><span className="evidence-slot-mark" aria-hidden="true">{selectionIndex === 0 ? "A" : "B"}</span><span className="sr-only">{t("已选证物")} {selectionIndex === 0 ? "A" : "B"}</span></>}
       {received && <span className="friend-clue-mark">{t("好友送达")}</span>}
@@ -70,14 +71,17 @@ function EvidenceNodeCard({ data }: NodeProps<EvidenceNode>) {
           onOpenDossier(clue.id);
         }}
       >
-        <BookOpen aria-hidden="true" strokeWidth={1.75} />
+        <Image src="/art/ui/butterfly-dossier-seal-v1.png" alt="" width={28} height={28} aria-hidden="true" />
       </button>
       <small>{clue.type.toUpperCase()} · 0{clue.chapter}</small>
       <b>{clue.title}</b>
       <p>{clue.summary}</p>
-      {selectionIndex === null && checkable && <><span className="sr-only">{compatible ? t("当前关系候选") : t("存在未结关系")}</span><span className={`evidence-relation-cue ${compatible ? "compatible" : ""}`} aria-hidden="true"><i /><i /><i /></span></>}
+      {selectionIndex === null && checkable && <>
+        <span className="sr-only">{compatible ? t("当前关系候选") : t("存在未结关系")}</span>
+        <span className={`evidence-relation-cue ${compatible ? "compatible" : ""}`} aria-hidden="true"><i /></span>
+      </>}
     </div>
-    <Handle className="board-connection-handle" type="source" position={Position.Right} isConnectable={false} />
+    <Handle className="board-connection-handle source" type="source" position={Position.Right} isConnectable={false} />
   </div>;
 }
 
@@ -242,6 +246,7 @@ export function CaseBoard() {
       received: receivedClueIds.includes(clue.id),
       checkable: checkableClueIds.has(clue.id),
       compatible: false,
+      paperVariant: (index % 7) + 1,
       onSelect: selectEvidence,
       onOpenDossier: openDossier,
     },
@@ -269,11 +274,35 @@ export function CaseBoard() {
     }));
   }, [checkableClueIds, compatibleClueIds, dossierClueId, openDossier, receivedClueIds, selectEvidence, selectedClueIds, setNodes]);
 
-  const edges: Edge[] = campaign.relations.flatMap((relation, index) => {
+  const confirmedEdges: Edge[] = campaign.relations.flatMap((relation, index) => {
     if (!confirmedRelations.includes(relation.id) || !relation.clueIds.every((clueId) => unlockedClueIds.includes(clueId))) return [];
-    // No edge label: keep the board quiet; confirmed statements live in the letter popup and bottom dock.
-    return [{ id: relation.id, source: relation.clueIds[0], target: relation.clueIds[1], animated: true, style: { stroke: index === 1 ? "#a86158" : "#698d89", strokeWidth: 3 } }];
+    // Solid thread between the two evidence cards — visible, not green dashed.
+    const stroke = index === 1 ? "#8b4f4c" : "#a8895c";
+    return [{
+      id: relation.id,
+      source: relation.clueIds[0],
+      target: relation.clueIds[1],
+      animated: false,
+      zIndex: 4,
+      style: {
+        stroke,
+        strokeWidth: 3,
+        strokeLinecap: "round" as const,
+        strokeDasharray: "none",
+      },
+    }];
   });
+  const previewEdges: Edge[] = selectedClueIds.length === 1
+    ? Array.from(compatibleClueIds, (clueId) => ({
+      id: `preview-${selectedClueIds[0]}-${clueId}`,
+      source: selectedClueIds[0],
+      target: clueId,
+      className: "board-preview-edge",
+      zIndex: 3,
+      style: { stroke: "#7fa39d", strokeWidth: 2, strokeDasharray: "7 7" },
+    }))
+    : [];
+  const edges = [...confirmedEdges, ...previewEdges];
 
   const restoreBoardLayout = () => {
     resetBoardPositions();
@@ -298,7 +327,7 @@ export function CaseBoard() {
     <div className="board-workspace board-workspace-solo">
       <div className="board-shell">
         <header className="clue-index" role="region" aria-label={t("线索索引")}>
-          <div className="clue-index-copy"><small>CLUE INDEX · {t("线索索引")}</small><b>{available.length} {t("份档案")} · {openRelations.length} {t("条未结线")}</b><span className="clue-index-hint">{selectionHint}</span></div>
+          <div className="clue-index-copy"><small>CLUE INDEX · {t("线索索引")}</small><b>{available.length} {t("份档案")} · {openRelations.length} {t("条未结线")}</b><span className="clue-index-hint" role="status" aria-live="polite">{selectionHint}</span></div>
           <div className="clue-index-actions">
             <div className="clue-index-track" aria-hidden="true">{available.map((clue) => {
               const selectionIndex = selectedClueIds.indexOf(clue.id);
@@ -326,7 +355,7 @@ export function CaseBoard() {
           zoomOnDoubleClick={false}
           preventScrolling={false}
           proOptions={{ hideAttribution: true }}
-        ><Background color="#988d73" gap={28} size={1} variant={BackgroundVariant.Dots} />{!isCompactBoard && <Controls showInteractive={false} />}</ReactFlow> : <div className="board-empty"><Search /><h3>{t("案件板还很安静")}</h3><p>{t("完成第一夜调查，林渡带回的证物会出现在这里。")}</p></div>}</div>
+        >{!isCompactBoard && <Controls showInteractive={false} />}</ReactFlow> : <div className="board-empty"><Search /><h3>{t("案件板还很安静")}</h3><p>{t("完成第一夜调查，林渡带回的证物会出现在这里。")}</p></div>}</div>
       </div>
     </div>
     <aside className="core-inference-dock" aria-label={t("核心推论")}>
