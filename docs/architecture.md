@@ -12,7 +12,7 @@
 |---|---|---|
 | 案件包契约 | `src/content/campaigns/types.ts` | `CampaignManifest`、引用完整性校验与案件内容查询 |
 | 案件序章 | `src/components/game/case-prologue.tsx` | 首次开案的三幕案件导入、返回与接案动作 |
-| 案件注册表 | `src/content/campaigns/registry.ts` | 当前四案、默认案件和合法 `campaignId` 白名单 |
+| 案件注册表 | `src/content/campaigns/registry.ts` | 当前五案、默认案件和合法 `campaignId` 白名单 |
 | 首案内容包 | `src/content/campaigns/last-tram.ts` | 组合既有首案模块与视觉／结局规则 |
 | 本地化核心 | `src/i18n/core.ts`、`src/i18n/server.ts`、`src/i18n/request-locale-provider.tsx`、`src/i18n/provider.tsx` | Cookie／请求语言协商、案件能力回退、递归内容投影和界面翻译上下文 |
 | 首案英文目录 | `src/i18n/en-catalog.ts`、`src/i18n/en-overrides.ts` | 首案完整英文覆盖与关键文学文本人工润色 |
@@ -21,6 +21,8 @@
 | 第三案视觉包 | `src/content/thirteenth-loaf-assets.ts` | 第三案 34 张专属横幅、夜印、明信片、植物、收藏、人物与城区资产 |
 | 第四案内容包 | `src/content/campaigns/chihaya-noa.ts` | 《千早诺亚的第十三次旅行》的五夜完整内容 |
 | 第四案视觉包 | `src/content/chihaya-noa-assets.ts` | 第四案 34 张专属横幅、夜印、明信片、植物、收藏、人物与城区资产 |
+| 第五案内容包 | `src/content/campaigns/fog-without-wolves.ts` | 《雾中无狼》的五夜完整内容与五条分层推论 |
+| 第五案视觉包 | `src/content/fog-without-wolves-assets.ts` | 第五案 34 张专属横幅、夜印、明信片、植物、收藏、人物与城区资产 |
 | 首案核心内容 | `src/content/case.ts` | 首案五夜章节、12 条线索、8 件藏品与固定报告文本 |
 | 随身物内容 | `src/content/preparations.ts` | 三件准备物、五夜各自的确定性环境回响 |
 | 归来明信片 | `src/content/postcards.ts` | 五夜地点、城市传闻、背面短笺与三种随身物附言 |
@@ -114,13 +116,13 @@ Home Assistant 使用第四份独立存档 `night-shift-ambient-hardware-v1`，�
 
 第一夜归来后的四个白天各由 `getOpportunityCandidates` 从十二张告示中稳定取三张，并排除 `opportunityHistory` 里所有曾展示的 ID。选择一张会保存对应答复，全部收起则只保存三张展示记录；两种方式都不会重抽或阻断调查。下一份晨报读取同章节记录显示一句回响，收藏页剪报册保存结果。v9 迁移不替旧档伪造白天选择，Demo 跳章才生成明确的第一选项演示履历。
 
-第四案同样把 34 张专属图像作为静态 WebP 提交，提示词与映射见 [[docs/art-prompts/chihaya-noa-visual-archive]]；两案都不在运行时生成画面或事实。
+第四、第五案同样各把 34 张专属图像作为静态 WebP 提交，提示词与映射见 [[docs/art-prompts/chihaya-noa-visual-archive]] 与 [[docs/art-prompts/fog-without-wolves-visual-archive]]；所有案件都不在运行时生成画面或核心事实。
 
 ## 内容边界
 
 链上藏品是确定性内容之外的可选公开回执层。服务端只为案件注册表中真实存在的收藏品生成元数据和 15 分钟 EIP-712 voucher，前端钱包在 Injective EVM Testnet 调用 ERC-721 合约；合约按钱包、案件和收藏拒绝重复领取。`night-shift-injective-mints-v1` 与游戏 store 完全分离，任何钱包、RPC、签名或交易失败都不得进入 `resolveNight`、存档迁移或结局资格。完整部署和隐私边界见 [[docs/injective-keepsake-mint]]。
 
-生成式能力用于编译期视觉资产和玩家明确授权的晨间短笺风格。第三案的 34 张专属图像已作为静态 WebP 随构建提交，运行时不会为案件生成画面或事实，提示词与映射见 [[docs/art-prompts/thirteenth-loaf-visual-archive]]。晨间短笺部署必须同时配置模型密钥、访问码和持久化 Redis 配额；访问码只用于换取带独立会话 ID 的 24 小时 HMAC 签名 HttpOnly、SameSite Strict Cookie，不写入游戏存档。访问尝试、单会话额度、部署每日预算和纸条 `requestId` 幂等均由 Redis 跨实例执行，配额不可用时关闭 AI。模型只接收当前纸条、案件／章节标题、方向、地点、随身物和侦探名，并只能返回固定 `tone`／`image` 枚举；服务端以校验后的枚举组合安全短笺，不直接展示自由模型文本。未配置模型、权限失效、超时、上游错误和无效输出都返回有明确原因的本地确定性回信。人物动机、线索存在性、核心因果与结局条件必须来自各案故事圣经。
+生成式能力用于编译期视觉资产和玩家明确授权的晨间短笺风格。第三至第五案的专属图像已作为静态 WebP 随构建提交，运行时不会为案件生成画面或事实；提示词与映射分别见 [[docs/art-prompts/thirteenth-loaf-visual-archive]]、[[docs/art-prompts/chihaya-noa-visual-archive]] 与 [[docs/art-prompts/fog-without-wolves-visual-archive]]。晨间短笺部署必须同时配置模型密钥、访问码和持久化 Redis 配额；访问码只用于换取带独立会话 ID 的 24 小时 HMAC 签名 HttpOnly、SameSite Strict Cookie，不写入游戏存档。访问尝试、单会话额度、部署每日预算和纸条 `requestId` 幂等均由 Redis 跨实例执行，配额不可用时关闭 AI。模型只接收当前纸条、案件／章节标题、方向、地点、随身物和侦探名，并只能返回固定 `tone`／`image` 枚举；服务端以校验后的枚举组合安全短笺，不直接展示自由模型文本。未配置模型、权限失效、超时、上游错误和无效输出都返回有明确原因的本地确定性回信。人物动机、线索存在性、核心因果与结局条件必须来自各案故事圣经。
 
 英文内容同样是随构建提交的确定性目录，不在运行时调用翻译服务或生成模型。内容测试要求首案英文投影不含汉字，并逐项比较章节、方向、线索、收藏、关系与结局的稳定 ID 及规则，防止翻译改变剧情图谱。
 

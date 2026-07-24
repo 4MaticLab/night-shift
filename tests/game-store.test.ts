@@ -9,10 +9,12 @@ import {
   LAST_TRAM_CAMPAIGN_ID,
   RAIN_RADIO_CAMPAIGN_ID,
   THIRTEENTH_LOAF_CAMPAIGN_ID,
+  FOG_WITHOUT_WOLVES_CAMPAIGN_ID,
 } from "@/src/content/campaigns/registry";
 import { rainRadioCampaign } from "@/src/content/campaigns/rain-radio";
 import { thirteenthLoafCampaign } from "@/src/content/campaigns/thirteenth-loaf";
 import { chihayaNoaCampaign } from "@/src/content/campaigns/chihaya-noa";
+import { fogWithoutWolvesCampaign } from "@/src/content/campaigns/fog-without-wolves";
 
 type StoreModule = typeof import("@/src/stores/game-store");
 let storeModule: StoreModule;
@@ -182,6 +184,30 @@ describe("Night Shift game store", () => {
     expect(completed.completedReports).toHaveLength(chihayaNoaCampaign.case.chapters.length);
     expect(completed.unlockedClueIds).toEqual(chihayaNoaCampaign.case.clues.map((clue) => clue.id));
     for (const synthesis of chihayaNoaCampaign.syntheses) {
+      expect(storeModule.useGameStore.getState().synthesizeEvidence(synthesis.id)).toBe(true);
+    }
+    storeModule.useGameStore.getState().chooseEnding("return");
+    expect(storeModule.useGameStore.getState().endingId).toBe("return");
+  });
+
+  it("completes the fifth campaign through the shared lifecycle and reaches its true ending", () => {
+    expect(storeModule.useGameStore.getState().switchCampaign(FOG_WITHOUT_WOLVES_CAMPAIGN_ID)).toBe(true);
+    storeModule.useGameStore.getState().begin();
+
+    for (const chapter of fogWithoutWolvesCampaign.case.chapters) {
+      const state = storeModule.useGameStore.getState();
+      state.selectChoice(chapter.choices[0].id);
+      storeModule.useGameStore.getState().startNight("restful", "side-lamp", "demo");
+      storeModule.useGameStore.getState().finishNight();
+      storeModule.useGameStore.getState().continueDay();
+    }
+
+    const completed = storeModule.useGameStore.getState();
+    expect(completed.campaignId).toBe(FOG_WITHOUT_WOLVES_CAMPAIGN_ID);
+    expect(completed.phase).toBe("ending");
+    expect(completed.completedReports).toHaveLength(fogWithoutWolvesCampaign.case.chapters.length);
+    expect(completed.unlockedClueIds).toEqual(fogWithoutWolvesCampaign.case.clues.map((clue) => clue.id));
+    for (const synthesis of fogWithoutWolvesCampaign.syntheses) {
       expect(storeModule.useGameStore.getState().synthesizeEvidence(synthesis.id)).toBe(true);
     }
     storeModule.useGameStore.getState().chooseEnding("return");
