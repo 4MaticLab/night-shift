@@ -6,7 +6,6 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-game-surface-routing]] | `codex/game-surface-routing` | `completed` | `auto` | 100% | 退役计划并创建 PR |
 
 ## 使用规则
 
