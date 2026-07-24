@@ -1,6 +1,6 @@
 # 黑客松轻量 PR 门禁
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P0
 - 创建：2026-07-24
 - 更新：2026-07-24
@@ -31,22 +31,28 @@
 
 ## 任务
 
-- [ ] 计划与 PLANS 登记
-- [ ] 精简 `.github/workflows/ci.yml`
-- [ ] `package.json` 增加 `test:robustness`
-- [ ] 更新 Agents.md / quality-baseline
-- [ ] 退役计划并开 PR
+- [x] 计划与 PLANS 登记
+- [x] 精简 `.github/workflows/ci.yml`
+- [x] `package.json` 增加 `test:robustness`
+- [x] 更新 Agents.md / quality-baseline
+- [x] 退役计划并开 PR
 
 ## 验收标准
 
 - PR 上 `CI Gate` 在 Quality 通过后即成功，墙钟约 1–2 分钟量级。
 - 文档明确：完整浏览器／Sites／合约鲁棒性由合并者本地可选执行。
-- `npm run test:robustness` 指向完整 Playwright。
+- `npm run test:robustness` 串联 render + 合约 + Playwright。
 
 ## 验证
 
-- 审阅 workflow YAML：gate 仅依赖 quality。
+- 审阅 workflow YAML：gate 仅依赖 quality；无 platform / end-to-end job。
 - `npm run docs:check`（文档改动）。
+
+## 最终证据
+
+- `ci.yml`：仅 `quality` + `gate`。
+- `package.json`：`test:robustness` = `test:render` + `contract:compile` + `contract:test` + `test:e2e`。
+- Agents.md / quality-baseline 已改为「PR 快门禁 + 合并者本地鲁棒性」。
 
 ## 决定记录
 
