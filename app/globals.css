@@ -3010,10 +3010,11 @@ blockquote {
 .board-page {
   min-height: calc(100vh - 145px);
   background: #101827;
-  padding-bottom: 100px;
+  /* Room for bottom nav + core-inference floating dock. */
+  padding-bottom: calc(168px + env(safe-area-inset-bottom));
 }
 
-/* Shared content column: matches collection / archive (1180). */
+/* Shared content column: whole case board centered like other surfaces. */
 .board-page > .board-stage {
   width: min(1180px, calc(100% - 48px));
   margin: 24px auto 0;
@@ -3022,6 +3023,177 @@ blockquote {
 .board-page > .board-stage > .board-workspace {
   width: 100%;
   margin: 0;
+}
+
+/* Solo board: never leave an empty second column for the removed right panel. */
+.board-page-lettered .board-workspace-solo,
+.board-page-lettered .board-workspace.board-workspace-solo {
+  display: block !important;
+  grid-template-columns: none !important;
+  height: auto !important;
+}
+
+.board-page-lettered .board-workspace-solo > .board-shell {
+  width: 100%;
+  max-width: none;
+}
+
+/* Bottom floating dock for core inferences — not a right-side panel. */
+.core-inference-dock {
+  position: fixed;
+  z-index: 48;
+  left: 50%;
+  bottom: calc(78px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(920px, calc(100% - 24px));
+  padding: 10px 12px 12px;
+  border: 1px solid #4a5566;
+  border-radius: 6px;
+  background: #0f1726f5;
+  box-shadow: 0 14px 40px #000a, inset 0 0 0 1px #c59a5a12;
+  backdrop-filter: blur(12px);
+  color: var(--paper);
+}
+
+.core-inference-dock-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 0 2px;
+}
+
+.core-inference-dock-head small {
+  display: block;
+  color: var(--amber);
+  font: 8px monospace;
+  letter-spacing: .12em;
+}
+
+.core-inference-dock-head b {
+  display: block;
+  margin-top: 3px;
+  color: #d7deea;
+  font-family: var(--font-newsreader);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.core-inference-dock-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.core-inference-chip {
+  min-height: 54px;
+  padding: 9px 10px;
+  border: 1px solid #354155;
+  border-radius: 4px;
+  background: linear-gradient(145deg, #172235, #121c2d);
+  color: #6f7d90;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  text-align: left;
+  font: inherit;
+  cursor: default;
+}
+
+.core-inference-chip > span {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #4c596c;
+  border-radius: 50%;
+  font: 8px monospace;
+}
+
+.core-inference-chip > span svg {
+  width: 12px;
+  height: 12px;
+}
+
+.core-inference-chip > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.core-inference-chip small {
+  color: #6d7c90;
+  font: 7px monospace;
+  letter-spacing: .1em;
+}
+
+.core-inference-chip b {
+  color: #8793a5;
+  font-family: var(--font-newsreader);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.core-inference-chip.done {
+  border-color: #6f9b92;
+  background: linear-gradient(145deg, #1c3340, #162a36);
+  color: var(--paper);
+  cursor: pointer;
+  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+.core-inference-chip.done:hover {
+  border-color: #8fb9b0;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px #0006;
+}
+
+.core-inference-chip.done > span {
+  border-color: transparent;
+  background: var(--teal);
+  color: var(--ink);
+}
+
+.core-inference-chip.done b {
+  color: var(--paper);
+}
+
+.core-inference-chip:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.core-inference-chip:disabled {
+  cursor: default;
+}
+
+@media (max-width: 600px) {
+  .core-inference-dock {
+    width: calc(100% - 16px);
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    padding: 9px 10px 10px;
+  }
+
+  .core-inference-dock-list {
+    grid-template-columns: 1fr;
+    max-height: 148px;
+    overflow: auto;
+  }
+
+  .core-inference-chip b {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
 }
 
 .board-cipher-disclosure {
@@ -4559,96 +4731,6 @@ blockquote {
   border-top: 1px solid #334057;
 }
 
-/* Centered letter-board: side panel is a framed core-inference template, not free text. */
-.board-page-lettered .core-inference-panel {
-  position: relative;
-  inset: auto;
-  top: auto;
-  right: auto;
-  width: auto;
-  max-height: none;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  padding: 0;
-  background:
-    linear-gradient(180deg, #151e2ef7, #0f1726f5),
-    #101827;
-  border: 1px solid #4a5361;
-  box-shadow: 0 14px 40px #0008, inset 0 0 0 1px #c59a5a0d;
-}
-
-.board-page-lettered .core-inference-panel > .board-panel-heading {
-  padding: 12px 16px 0;
-}
-
-.board-page-lettered .core-inference-panel > .relation-ledger {
-  margin: 0;
-  padding: 8px 16px 16px;
-  border-top: 0;
-  flex: 1;
-}
-
-.board-page-lettered .inference-toolbar-stack {
-  position: relative;
-  min-height: 0;
-  margin: 0;
-  padding: 14px 14px 12px;
-  border-bottom: 1px solid #3b4658;
-  background:
-    linear-gradient(145deg, #121b2bfa, #0c1422f5);
-  box-shadow: none;
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-areas:
-    "copy"
-    "steps"
-    "workbench";
-  gap: 10px;
-}
-
-.board-page-lettered .inference-workbench-stack {
-  grid-template-columns: 1fr;
-  grid-template-areas:
-    "slot-a"
-    "slot-b"
-    "action";
-  gap: 8px;
-}
-
-.board-page-lettered .auto-pair-badge {
-  grid-area: action;
-  min-height: 48px;
-  padding: 8px 12px;
-  border: 1px solid #698d8977;
-  background: linear-gradient(145deg, #1a2d31, #14242a);
-  color: #d8e7e2;
-  display: grid;
-  grid-template-columns: 18px 1fr;
-  grid-template-rows: auto auto;
-  column-gap: 8px;
-  align-items: center;
-}
-
-.board-page-lettered .auto-pair-badge svg {
-  grid-row: 1 / 3;
-  width: 15px;
-  color: #8fb9b0;
-}
-
-.board-page-lettered .auto-pair-badge span {
-  font-family: var(--font-newsreader);
-  font-size: 13px;
-  color: var(--paper);
-}
-
-.board-page-lettered .auto-pair-badge small {
-  color: #8ea09b;
-  font: 8px monospace;
-  letter-spacing: .08em;
-}
-
 .relation-entry {
   width: 100%;
   display: grid;
@@ -5400,18 +5482,16 @@ blockquote {
     box-shadow: inset 18px 0 32px #0003;
   }
 
-  /* Letter-board: framed side panel matches board shell height. */
-  .board-page-lettered .board-workspace {
-    align-items: stretch;
+  /* Solo letter-board: no side panel column. */
+  .board-page-lettered .board-workspace-solo,
+  .board-page-lettered .board-workspace.board-workspace-solo {
+    display: block !important;
+    grid-template-columns: none !important;
+    height: auto !important;
   }
 
-  .board-page-lettered .board-workspace>.core-inference-panel {
-    height: 760px;
-    max-height: 760px;
-    border-block: 16px solid #252119;
-    border-right: 16px solid #252119;
-    border-left: 1px solid #4a5361;
-    box-shadow: inset 14px 0 30px #0003;
+  .board-page-lettered .board-workspace-solo > .board-shell {
+    width: 100%;
   }
 
   .relation-panel>.inference-toolbar {
