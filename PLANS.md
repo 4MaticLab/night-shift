@@ -6,6 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
+| [[plans/codex-home-assistant-connector]] | `codex/home-assistant-connector` | `in_progress` | `manual` | 0% | 移植桥核心并建立 Connector 配对协议 |
 
 ## 使用规则
 
