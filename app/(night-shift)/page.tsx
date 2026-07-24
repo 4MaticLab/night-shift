@@ -9,10 +9,10 @@ import { useGameStore } from "@/src/stores/game-store";
 export default function CaseLibraryPage() {
   const started = useGameStore((state) => state.started);
   const phase = useGameStore((state) => state.phase);
-  const { hydrated, navigate, openDemo } = useGameApp();
+  const { hydrated, navigate } = useGameApp();
   const openCase = useCallback(() => {
     navigate(started ? getResumeGamePath({ started, phase }) : CASE_INTRO_PATH);
   }, [navigate, phase, started]);
 
-  return <Hero interactive={hydrated} onStart={openCase} onDemo={openDemo} />;
+  return <Hero interactive={hydrated} onStart={openCase} />;
 }

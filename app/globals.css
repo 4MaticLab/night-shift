@@ -498,8 +498,7 @@ blockquote {
   opacity: .55;
 }
 
-.ghost-button,
-.demo-pill {
+.ghost-button {
   border: 1px solid rgba(197, 154, 90, .38);
   color: var(--paper);
   background: rgba(9, 13, 24, .5);
@@ -1267,13 +1266,6 @@ blockquote {
   font-family: var(--font-playfair), var(--font-noto-serif-sc);
   font-size: 15px;
   margin-top: 2px;
-}
-
-.demo-pill {
-  background: #202a3b;
-  padding: 8px 12px;
-  color: var(--amber);
-  cursor: pointer;
 }
 
 .app-content {
@@ -11414,14 +11406,6 @@ blockquote {
     display: none;
   }
 
-  .topbar-actions .demo-pill {
-    width: 43px;
-    overflow: hidden;
-    justify-content: center;
-    padding-inline: 7px;
-    font-size: 0;
-  }
-
   .sleep-hardware-panel {
     padding: calc(20px + env(safe-area-inset-top)) 14px calc(28px + env(safe-area-inset-bottom));
     border-left: 0;
@@ -12185,7 +12169,6 @@ blockquote {
   .topbar-actions .sleep-hardware-status { width: auto; min-width: 78px; height: 44px; min-height: 44px; padding: 7px 9px; justify-content: center; gap: 6px; }
   .topbar-actions .sleep-hardware-status-copy, .topbar-actions .sleep-hardware-status > svg:last-child { display: none; }
   .topbar-actions .sleep-hardware-mobile-label { display: inline; }
-  .topbar-actions .demo-pill { width: 43px; overflow: hidden; justify-content: center; padding-inline: 7px; font-size: 0; }
   .sleep-hardware-panel { padding: calc(20px + env(safe-area-inset-top)) 14px calc(28px + env(safe-area-inset-bottom)); border-left: 0; }
   .sleep-hardware-panel-header { padding-right: 56px; }
   .sleep-hardware-panel-header > button { top: calc(18px + env(safe-area-inset-top)); right: 14px; }
@@ -12282,7 +12265,7 @@ blockquote {
 
 /* Localized landing controls */
 .landing-nav-actions { display: flex; align-items: center; gap: 8px; }
-.language-button { color: var(--amber); }
+.language-button { color: var(--amber); padding: 11px; border: none; background: none; }
 .campaign-shelf .locale-availability { margin: 9px 2px 0; color: #a49a89; font: 7px/1.5 monospace; letter-spacing: .04em; }
 
 .campaign-wheel {

@@ -33,7 +33,6 @@ const subscribeToHydration = () => () => undefined;
 
 interface GameAppContextValue {
   hydrated: boolean;
-  openDemo: () => void;
   openHardware: () => void;
   navigate: (href: string, options?: { replace?: boolean; scroll?: boolean }) => void;
   navigateView: (view: GameView, options?: { replace?: boolean; scroll?: boolean }) => void;
@@ -97,7 +96,6 @@ function NightShiftRuntimeContent({ children }: { children: ReactNode }) {
 
   const context = useMemo<GameAppContextValue>(() => ({
     hydrated,
-    openDemo: () => setDemoOpen(true),
     openHardware: () => setHardwareOpen(true),
     navigate,
     navigateView,

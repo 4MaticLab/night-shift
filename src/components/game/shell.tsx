@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { Archive, ChevronRight, Coffee, Gift, Moon, RotateCcw, Search, Sparkles, X, Zap } from "lucide-react";
+import { Archive, ChevronRight, Coffee, Gift, Moon, RotateCcw, Search, Sparkles, X } from "lucide-react";
 import { useGameStore } from "@/src/stores/game-store";
 import { useI18n } from "@/src/i18n/provider";
 import type { GameView } from "./types";
@@ -12,14 +12,14 @@ import { useAccessibleDialog } from "@/src/lib/use-accessible-dialog";
 import { getReadyEvidenceSyntheses } from "@/src/lib/game-engine/evidence-synthesis";
 import { getGameViewPath } from "@/src/lib/game-routes";
 
-export function TopBar({ chapter, onDemo, onHome, onHardware }: { chapter: number; onDemo: () => void; onHome: () => void; onHardware: () => void }) {
+export function TopBar({ chapter, onHome, onHardware }: { chapter: number; onHome: () => void; onHardware: () => void }) {
   useGameStore((state) => state.campaignId);
   const { campaign, locale, t } = useI18n();
   return (
     <header className="topbar">
       <button className="brand-mark compact" onClick={onHome}><span aria-hidden="true" /><div><b>{t("夜班侦探")}</b><small>NIGHT SHIFT</small></div></button>
       <div className="case-heading"><small>CASE {campaign.presentation.archiveNumber} · {locale === "en" ? `NIGHT ${chapter}` : `第 ${chapter} 夜`}</small><b>{campaign.case.title}</b></div>
-      <div className="topbar-actions"><SleepHardwareStatus onOpen={onHardware} /><button className="demo-pill" onClick={onDemo}><Zap size={14} /> DEMO</button></div>
+      <div className="topbar-actions"><SleepHardwareStatus onOpen={onHardware} /></div>
     </header>
   );
 }
