@@ -477,7 +477,7 @@ blockquote {
   height: 42px;
   flex: 0 0 42px;
   display: block;
-  background: url("/art/brand/night-shift-logo-v1.png") center / contain no-repeat;
+  background: url("/art/brand/night-shift-logo-mark-v1.webp") center / contain no-repeat;
 }
 
 .brand-mark>div {
@@ -4335,7 +4335,7 @@ blockquote {
   background-color: #0a0909;
   background-image:
     linear-gradient(#080b10a8, #080b105c),
-    url("/art/ui/case-board-crumpled-paper-v2.png");
+    url("/art/ui/case-board-crumpled-paper-v2.webp");
   background-position: center;
   background-size: cover;
   border: 16px solid #252119;
@@ -4349,7 +4349,7 @@ blockquote {
   background-color: #0a0909;
   background-image:
     linear-gradient(#080b1054, #080b102e),
-    url("/art/ui/case-board-crumpled-paper-v2.png");
+    url("/art/ui/case-board-crumpled-paper-v2.webp");
   background-position: center;
   background-size: cover;
 }
@@ -12568,7 +12568,7 @@ blockquote {
   border: 12px solid #252119;
   background:
     linear-gradient(#080b1080, #080b1045),
-    url("/art/ui/case-board-crumpled-paper-v2.png") center / cover;
+    url("/art/ui/case-board-crumpled-paper-v2.webp") center / cover;
   box-shadow: inset 0 0 70px #0009, 0 18px 45px #0005;
 }
 
@@ -12828,7 +12828,7 @@ blockquote {
   border: 12px solid #252119;
   background:
     linear-gradient(150deg, #172235f7, #101827fa),
-    url("/art/ui/case-board-crumpled-paper-v2.png") center / cover;
+    url("/art/ui/case-board-crumpled-paper-v2.webp") center / cover;
   color: var(--paper);
   box-shadow: inset 0 0 45px #0008, 0 18px 45px #0005;
 }

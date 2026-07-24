@@ -26,7 +26,7 @@ export function CasePrologue({ onDone, onBack }: { onDone: () => void; onBack: (
           exit={{ opacity: 0 }}
           transition={{ duration: .55, ease: "easeOut" }}
         >
-          <Image src={art.src} alt={art.alt} fill priority sizes="100vw" />
+          <Image src={art.src} alt={art.alt} fill preload sizes="100vw" />
         </motion.div>
       </AnimatePresence>
       <div className="case-prologue-vignette" />

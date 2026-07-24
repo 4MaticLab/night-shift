@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight, BookOpen, Languages, Moon, Zap } from "lucide-react";
+import { ArrowRight, Languages, Moon, Zap } from "lucide-react";
 import { getAsset } from "@/src/content/assets";
 import { campaignRegistry } from "@/src/content/campaigns/registry";
 import { useGameStore } from "@/src/stores/game-store";
@@ -34,7 +34,7 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
       <div className="rain" aria-hidden="true" />
       <AnimatePresence initial={false}>
         <motion.div className="hero-art-layer" style={{ position: "absolute", inset: 0 }} key={campaign.id} initial={{ opacity: 0, scale: 1.015 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: .55, ease: "easeOut" }}>
-          <Image className="hero-art" src={heroAsset.src} alt={heroAsset.alt} fill priority sizes="100vw" />
+          <Image className="hero-art" src={heroAsset.src} alt={heroAsset.alt} fill preload sizes="100vw" />
         </motion.div>
       </AnimatePresence>
       <div className="hero-vignette" />

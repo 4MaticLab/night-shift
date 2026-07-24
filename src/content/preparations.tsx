@@ -18,7 +18,7 @@ export const preparations: PreparationItem[] = [
     shortTitle: "提灯",
     description: "让刮痕、旧墨和不愿见光的指纹从纸面上浮起来。",
     promise: "偏向物证细节",
-    imageSrc: "https://iili.io/COCnQxs.md.png",
+    imageSrc: "/art/preparations/side-lamp-v1.webp",
     imageAlt: "黄铜提灯",
     echoes: {
       1: "你装进包里的侧照灯派上了用场：斜光越过票面时，七年前的压印与昨夜的新油墨各自露出了边界。它们彼此客气，像两位拒绝同桌的证人。",
@@ -34,7 +34,7 @@ export const preparations: PreparationItem[] = [
     shortTitle: "花笺",
     description: "一小片带香气的旧信纸。有人见到它，会想起自己答应过什么。",
     promise: "偏向人物回响",
-    imageSrc: "https://iili.io/COCgz8u.md.png",
+    imageSrc: "/art/preparations/flower-note-v1.webp",
     imageAlt: "夜香花笺",
     echoes: {
       1: "花笺在维修站潮湿的空气里重新有了香气。守夜人没有开门，只从门缝里说：七年前也有人带着同样的味道来问路。",
@@ -50,7 +50,7 @@ export const preparations: PreparationItem[] = [
     shortTitle: "旧零钱",
     description: "三枚早已停用的硬币。雾灯城仍有少数售票员拒绝承认时代变了。",
     promise: "偏向意外路线",
-    imageSrc: "https://iili.io/COCrdKP.md.png",
+    imageSrc: "/art/preparations/tram-fare-v1.webp",
     imageAlt: "旧制电车零钱",
     echoes: {
       1: "那三枚旧零钱买到了一段不在时刻表上的顺风车。售票员收钱时没有抬头，只提醒林渡：这座城的终点站常常比乘客先下车。",
@@ -65,4 +65,3 @@ export const preparations: PreparationItem[] = [
 export function getPreparation(id: PreparationId | ""): PreparationItem | undefined {
   return preparations.find((item) => item.id === id);
 }
-

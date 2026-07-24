@@ -10,8 +10,6 @@ import type { GameView } from "@/src/components/game/types";
 import { useGameStore } from "@/src/stores/game-store";
 import { ClueGiftNotice, type ClueGiftNoticeData } from "@/src/components/game/clue-sharing";
 import { readSharedClueQuery, removeSharedClueQuery } from "@/src/lib/game-engine/clue-sharing";
-import { getCampaign } from "@/src/content/campaigns/registry";
-import { getAsset } from "@/src/content/assets";
 import { I18nProvider, useI18n } from "@/src/i18n/provider";
 import { AppBootBoundary, GameSectionLoading } from "@/src/components/game/loading-screen";
 import { AmbientHardwareCoordinator } from "@/src/components/game/ambient-hardware-coordinator";
@@ -31,9 +29,7 @@ const SleepHardwarePanel = dynamic(() => import("@/src/components/game/sleep-har
 
 export default function HomePage() {
   const campaignId = useGameStore((state) => state.campaignId);
-  const campaign = getCampaign(campaignId);
-  const heroSrc = getAsset(campaign.presentation.heroAssetId).src;
-  return <I18nProvider campaignId={campaignId}><AppBootBoundary heroSrc={heroSrc}><GamePage /></AppBootBoundary></I18nProvider>;
+  return <I18nProvider campaignId={campaignId}><AppBootBoundary><GamePage /></AppBootBoundary></I18nProvider>;
 }
 
 function GamePage() {
