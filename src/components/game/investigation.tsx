@@ -268,7 +268,7 @@ export function CaseBoard() {
 
   return <div className="board-page board-page-lettered">
     <div className="page-title"><div><p className="eyebrow">CASE BOARD · {t("证物关系图")}</p><h2>{locale === "en" ? <>Connect the lies<br />the city has told.</> : <>把城市说过的谎，<br />一根根连起来。</>}</h2></div><p>{t("点两张能互相作证的证物即可自动配对。点卡片只负责选中；要展开完整档案，请按卡片上的「阅档」。")}</p></div>
-    <div className="board-workspace board-workspace-solo">
+    <div className="board-workspace">
       <div className="board-shell">
         <header className="clue-index" role="region" aria-label={t("线索索引")}>
           <div className="clue-index-copy"><small>CLUE INDEX · {t("线索索引")}</small><b>{available.length} {t("份档案")} · {openRelations.length} {t("条未结线")}</b><span className="clue-index-hint" role="status" aria-live="polite">{selectionHint}</span></div>
@@ -301,32 +301,34 @@ export function CaseBoard() {
           proOptions={{ hideAttribution: true }}
         >{!isCompactBoard && <Controls showInteractive={false} />}</ReactFlow> : <div className="board-empty"><Search /><h3>{t("案件板还很安静")}</h3><p>{t("完成第一夜调查，林渡带回的证物会出现在这里。")}</p></div>}</div>
       </div>
+      <aside className="relation-panel" aria-label={t("核心推论")}>
+        <div className="board-panel-heading">
+          <small>CORE INFERENCE · {confirmedRelations.length}/{campaign.relations.length}</small>
+          <button type="button" onClick={restoreBoardLayout}><RotateCcw /> {t("恢复摆放")}</button>
+        </div>
+        <p className="relation-panel-status" role="status" aria-live="polite">{selectionHint}</p>
+        <div className="relation-ledger">
+          <small>{t("核心推论")} · {confirmedRelations.length}/{campaign.relations.length}</small>
+          {campaign.relations.map((relation, index) => {
+            const confirmed = confirmedRelations.includes(relation.id);
+            return <button
+              type="button"
+              className={confirmed ? "relation-entry done" : "relation-entry"}
+              key={relation.id}
+              disabled={!confirmed}
+              onClick={() => { if (confirmed) { setDossierClueId(null); setLetterRelationId(relation.id); } }}
+              aria-label={confirmed ? `${t("查看核心推论")}：${relation.statement}` : t("未确认推论")}
+            >
+              <span>{confirmed ? <Check /> : `0${index + 1}`}</span>
+              <div>
+                <small>{confirmed ? "CONFIRMED" : "UNRESOLVED"}</small>
+                <b>{confirmed ? relation.statement : t("未确认推论")}</b>
+              </div>
+            </button>;
+          })}
+        </div>
+      </aside>
     </div>
-    <aside className="core-inference-dock" aria-label={t("核心推论")}>
-      <div className="core-inference-dock-head">
-        <small>{t("核心推论")} · {confirmedRelations.length}/{campaign.relations.length}</small>
-        <b>{confirmedRelations.length ? t("已确认的论断会留在这里") : t("配对成功后，论断会出现在底端")}</b>
-      </div>
-      <div className="core-inference-dock-list">
-        {campaign.relations.map((relation, index) => {
-          const confirmed = confirmedRelations.includes(relation.id);
-          return <button
-            type="button"
-            className={confirmed ? "core-inference-chip done" : "core-inference-chip"}
-            key={relation.id}
-            disabled={!confirmed}
-            onClick={() => { if (confirmed) { setDossierClueId(null); setLetterRelationId(relation.id); } }}
-            aria-label={confirmed ? `${t("查看核心推论")}：${relation.statement}` : t("未确认推论")}
-          >
-            <span>{confirmed ? <Check /> : `0${index + 1}`}</span>
-            <div>
-              <small>{confirmed ? "CONFIRMED" : "UNRESOLVED"}</small>
-              <b>{confirmed ? relation.statement : t("未确认推论")}</b>
-            </div>
-          </button>;
-        })}
-      </div>
-    </aside>
 
     <details className="board-cipher-disclosure">
       <summary>

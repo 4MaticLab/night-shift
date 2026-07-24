@@ -692,8 +692,9 @@ test("builds a core inference by connecting two evidence cards", async ({ page }
   await expect(page.getByRole("region", { name: "线索索引" })).toContainText("12 份档案 · 3 条未结线");
   await expect(page.locator(".board-node.checkable")).toHaveCount(6);
   await expect(page.locator(".clue-index-track i.checkable")).toHaveCount(6);
-  await expect(page.locator(".relation-panel")).toHaveCount(0);
-  await expect(page.locator(".core-inference-dock")).toBeVisible();
+  await expect(page.locator(".relation-panel")).toBeVisible();
+  await expect(page.locator(".relation-ledger")).toBeVisible();
+  await expect(page.locator(".core-inference-dock")).toHaveCount(0);
   await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
   const selectedFlower = page.locator('.react-flow__node[data-id="flower-cycle"] .board-node');
   const matchingPostcard = page.locator('.react-flow__node[data-id="postcard"] .board-node');
@@ -712,8 +713,8 @@ test("builds a core inference by connecting two evidence cards", async ({ page }
   await expect(dossierDialog).toHaveCount(0);
   await expectNoPageOverflow(page);
   await page.setViewportSize({ width: 900, height: 720 });
-  await expect(page.locator(".board-workspace-solo")).toBeVisible();
-  await expect(page.locator(".relation-panel")).toHaveCount(0);
+  await expect(page.locator(".board-workspace")).toBeVisible();
+  await expect(page.locator(".relation-panel")).toBeVisible();
   await expectNoPageOverflow(page);
   const boardFlow = page.locator(".board-flow");
   await page.evaluate(() => window.scrollTo(0, 0));
@@ -744,7 +745,7 @@ test("builds a core inference by connecting two evidence cards", async ({ page }
   const relationDialog = page.getByRole("dialog", { name: "米娜知道伊芙琳仍然活着" });
   await expect(relationDialog).toBeVisible();
   await expect(relationDialog.getByText(/共同证明米娜一直替她维持联络/)).toBeVisible();
-  await expect(page.locator(".core-inference-dock").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
+  await expect(page.locator(".relation-ledger").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
   await relationDialog.getByRole("button", { name: "关闭核心推论" }).click();
   await expect(relationDialog).toHaveCount(0);
   await expect(page.locator(".react-flow__edge")).toHaveCount(1);
@@ -1161,8 +1162,8 @@ test.describe("mobile 390x844", () => {
     await page.getByRole("button", { name: /DEMO/ }).click();
     await runDemoShortcut(page, /解锁完整案件板/);
     await expect(page.locator(".demo-drawer")).toHaveCount(0);
-    await expect(page.locator(".relation-panel")).toHaveCount(0);
-    await expect(page.locator(".core-inference-dock")).toBeVisible();
+    await expect(page.locator(".relation-panel")).toBeVisible();
+    await expect(page.locator(".relation-ledger")).toBeVisible();
     await expect(page.getByRole("region", { name: "线索索引" })).toContainText("点选证物进行配对");
     await expect(page.locator(".board-node-drag-handle").first()).toBeHidden();
     await expect(page.locator(".board-flow .react-flow__pane")).toHaveCSS("touch-action", "pan-y");
@@ -1185,7 +1186,7 @@ test.describe("mobile 390x844", () => {
     await page.getByRole("button", { name: /^OBJECT · 02 未寄出的明信片/ }).click();
     const relationDialog = page.getByRole("dialog", { name: "米娜知道伊芙琳仍然活着" });
     await expect(relationDialog).toBeVisible();
-    await expect(page.locator(".core-inference-dock").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
+    await expect(page.locator(".relation-ledger").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
     await expectNoPageOverflow(page);
   });
 
@@ -1249,7 +1250,7 @@ test("keeps the latest morning report stable while evidence is filed and after t
   await page.getByRole("button", { name: /去案件板整理线索/ }).click();
   await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
   await page.getByRole("button", { name: /^OBJECT · 02 未寄出的明信片/ }).click();
-  await page.getByRole("button", { name: /核对这两件证物/ }).click();
+  await expect(page.getByRole("dialog", { name: "米娜知道伊芙琳仍然活着" })).toBeVisible();
   await expect(page.locator(".relation-ledger").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "关闭核心推论" }).click();
 

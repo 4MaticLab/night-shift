@@ -3010,6 +3010,13 @@ blockquote {
 .board-page {
   min-height: calc(100vh - 145px);
   background: #101827;
+  padding-bottom: 100px;
+}
+
+/* Keep the case board column centered like other main surfaces (1180 content width). */
+.board-page > .board-workspace {
+  width: min(1180px, calc(100% - 48px));
+  margin: 24px auto 0;
 }
 
 .board-cipher-disclosure {
@@ -4206,12 +4213,12 @@ blockquote {
 }
 
 .board-node {
-  --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-01.png");
+  --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-clean-01-v2.png");
   width: 100%;
   border: 0;
   background-color: #e8dcc4;
   background-image: var(--evidence-paper);
-  background-position: 70% center;
+  background-position: right center;
   background-size: cover;
   color: #282925;
   padding: 20px 15px 15px;
@@ -4223,13 +4230,13 @@ blockquote {
   transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
 }
 
-.board-node.evidence-paper-1 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-01.png"); }
-.board-node.evidence-paper-2 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-02.png"); }
-.board-node.evidence-paper-3 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-03.png"); }
-.board-node.evidence-paper-4 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-04.png"); }
-.board-node.evidence-paper-5 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-05.png"); }
-.board-node.evidence-paper-6 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-06.png"); }
-.board-node.evidence-paper-7 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-07.png"); }
+.board-node.evidence-paper-1 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-clean-01-v2.png"); }
+.board-node.evidence-paper-2 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-clean-02-v2.png"); }
+.board-node.evidence-paper-3 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-clean-03-v2.png"); }
+.board-node.evidence-paper-4 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-clean-04-v2.png"); }
+.board-node.evidence-paper-5 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-clean-05-v2.png"); }
+.board-node.evidence-paper-6 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-clean-06-v2.png"); }
+.board-node.evidence-paper-7 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-clean-07-v2.png"); }
 
 .board-node:hover {
   transform: translateY(-2px) rotate(-1deg);
@@ -4541,10 +4548,39 @@ blockquote {
   border-color: var(--red);
 }
 
+.relation-panel-status {
+  margin: 12px 0 0;
+  padding: 10px 11px;
+  border: 1px dashed #465267;
+  background: #0c1525;
+  color: #9aa7b8;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
 .relation-ledger {
   margin-top: 16px;
   padding-top: 13px;
   border-top: 1px solid #334057;
+}
+
+/* Auto-pair board: no A/B workbench — the side panel is the core-inference ledger. */
+.board-page-lettered .relation-panel {
+  position: relative;
+  inset: auto;
+  top: auto;
+  right: auto;
+  width: auto;
+  max-height: none;
+  overflow: auto;
+}
+
+.board-page-lettered .relation-ledger {
+  margin-top: 14px;
+}
+
+.board-page-lettered .relation-entry:first-of-type {
+  margin-top: 10px;
 }
 
 .relation-entry {
@@ -5260,6 +5296,20 @@ blockquote {
     max-height: 760px;
     border-left: 0;
     box-shadow: inset 18px 0 32px #0003;
+  }
+
+  /* Letter-board uses a ledger-only panel: match shell height and share the frame. */
+  .board-page-lettered .board-workspace {
+    align-items: stretch;
+  }
+
+  .board-page-lettered .board-workspace>.relation-panel {
+    height: 760px;
+    max-height: 760px;
+    border-block: 16px solid #252119;
+    border-right: 16px solid #252119;
+    border-left: 1px solid #4a5361;
+    box-shadow: inset 14px 0 30px #0003;
   }
 
   .relation-panel>.inference-toolbar {
@@ -11555,24 +11605,6 @@ blockquote {
   .clue-dossier-actions {
     grid-template-columns: 1fr;
   }
-}
-
-
-/* merged from feat branch */
-.core-inference-dock {
-  position: fixed;
-  z-index: 48;
-  left: 50%;
-  bottom: calc(78px + env(safe-area-inset-bottom));
-  transform: translateX(-50%);
-  width: min(920px, calc(100% - 24px));
-  padding: 10px 12px 12px;
-  border: 1px solid #4a5566;
-  border-radius: 4px;
-  background: #0f1726f5;
-  box-shadow: 0 14px 40px #000a;
-  backdrop-filter: blur(10px);
-  color: var(--paper);
 }
 
 

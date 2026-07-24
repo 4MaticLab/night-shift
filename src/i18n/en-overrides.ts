@@ -470,8 +470,6 @@ export const englishOverrides: Record<string, string> = {
   "正在核对这些证物…": "Checking these pieces of evidence…",
   "阅档": "Read file",
   "已自动配对": "Paired automatically",
-  "这封信笺会留在屏幕底端的核心推论栏。": "This letter remains in the core-inference dock at the bottom of the screen.",
   "已确认的论断会留在这里": "Confirmed statements stay here",
-  "配对成功后，论断会出现在底端": "After a successful pair, the statement appears at the bottom",
   "关闭提示": "Dismiss notice",
 };
