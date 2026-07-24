@@ -18,6 +18,7 @@
 - 新增面向 `main` 的主 CI workflow，覆盖快速质量检查、Next/Vinext/合约平台验证、Chrome Playwright E2E 与稳定的汇总门禁。
 - 为主 CI 配置 Node 22、npm 下载缓存、最小 GitHub Token 权限、同分支旧运行取消、超时和失败报告留存。
 - 新增手动与定时 Windows smoke workflow，验证核心开发链路的跨平台兼容性，但不在每个 PR 重跑完整 E2E。
+- 修正最新主线 E2E 在推论信笺打开时越过模态层点击底部导航的问题，使测试按真实可访问交互关闭信笺后再继续。
 - 更新代理手册与质量基线，区分本地最小验证、PR 远端完整验证和失败后的复现责任。
 - PR 正文关闭 GitHub issue #46，并在远端 CI 全绿后以 merge commit 合入 `main`。
 
@@ -31,11 +32,11 @@
 
 ## 任务
 
-- [ ] 新增主 CI workflow，包含 `Quality`、`Platform`、`End-to-end` 与 `CI Gate`。
-- [ ] 让主 CI 覆盖质量基线中的 npm、lint、Next、Vinext render、Hardhat、docs 与 Playwright 命令。
-- [ ] 为 Playwright 失败上传短期报告与 trace，并确保 workflow 无需仓库 secrets。
-- [ ] 新增每周与手动触发的 Windows smoke workflow。
-- [ ] 更新 `AGENTS.md` 与 `docs/quality-baseline.md`，记录本地和远端验证职责。
+- [x] 新增主 CI workflow，包含 `Quality`、`Platform`、`End-to-end` 与 `CI Gate`。
+- [x] 让主 CI 覆盖质量基线中的 npm、lint、Next、Vinext render、Hardhat、docs 与 Playwright 命令。
+- [x] 为 Playwright 失败上传短期报告与 trace，并确保 workflow 无需仓库 secrets。
+- [x] 新增每周与手动触发的 Windows smoke workflow。
+- [x] 更新 `AGENTS.md` 与 `docs/quality-baseline.md`，记录本地和远端验证职责。
 - [ ] 完成本地验证、远端 PR CI 验证和 merge commit 合并。
 
 ## 验收标准
@@ -70,6 +71,9 @@
 - 2026-07-24：第一版对所有代码 PR 运行完整主门禁，不使用路径过滤；先换取稳定、容易理解的 check，再根据实际 Actions 用量优化。
 - 2026-07-24：Ubuntu/Chrome 是合并权威环境；Windows 只做定时与手动 smoke，避免把队友本地困难转化为每个 PR 的双平台成本。
 - 2026-07-24：Vercel 状态与 GitHub CI 解耦，外部贡献者无需为测试取得部署团队权限。
+- 2026-07-24：CI 中 Playwright 固定单 worker、失败重试一次并生成报告；同时禁止复用已有服务器，避免端口上意外存在的其他工作树掩盖当前提交行为。
+- 2026-07-24：首次 CI 模式运行发现 #52 新增晨报回归在推论信笺仍打开时点击被 inert 的底部导航，并用单元素断言检查两个回信按钮；产品行为正确，测试补充显式关闭动作与逐项禁用断言，不改变产品结果。
+- 2026-07-24：完整 CI 模式回归发现收藏动态模块的首次冷加载可能超过 Playwright 默认 5 秒；相关页面等待提高到 15 秒，并启用 `--fail-on-flaky-tests`，重试成功不再掩盖不稳定场景。
 
 ## 相关文档
 
