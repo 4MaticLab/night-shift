@@ -56,7 +56,6 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
             disabled={!interactive}
             onClick={onStart}
           >{primaryLabel} <ArrowRight size={18} /></ShinyButton>
-          <button className="text-button" disabled={!interactive} onClick={onDemo}><BookOpen size={17} /> {t("观看 90 秒演示")}</button>
         </div>
         <div className="shift-rule"><span>{t("你负责白天推理")}</span><i /><span>{t("林渡负责夜晚调查")}</span></div>
       </section>
