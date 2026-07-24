@@ -2,6 +2,7 @@ import { z } from "zod";
 import { LAST_TRAM_CAMPAIGN_ID } from "./campaigns/last-tram";
 import { RAIN_RADIO_CAMPAIGN_ID } from "./campaigns/rain-radio";
 import { THIRTEENTH_LOAF_CAMPAIGN_ID } from "./campaigns/thirteenth-loaf";
+import { CHIHAYA_NOA_CAMPAIGN_ID } from "./campaigns/chihaya-noa";
 
 const cipherDialSchema = z.object({
   min: z.number(),
@@ -10,7 +11,14 @@ const cipherDialSchema = z.object({
   initial: z.number(),
   target: z.number(),
   precision: z.number().int().min(0).max(3),
-  mode: z.enum(["minutes", "frequency"]),
+  mode: z.enum(["minutes", "frequency", "count"]),
+  instrumentLabel: z.string().min(1).optional(),
+  signalLabels: z.object({
+    silent: z.string().min(1),
+    faint: z.string().min(1),
+    clear: z.string().min(1),
+    locked: z.string().min(1),
+  }).optional(),
   ariaLabel: z.string().min(1),
   decreaseLabel: z.string().min(1),
   increaseLabel: z.string().min(1),
@@ -279,6 +287,81 @@ const thirteenthLoafCiphers = [
   },
 ].map((challenge) => cipherChallengeSchema.parse(challenge));
 
+const chihayaNoaCiphers = [
+  {
+    id: "noa-arrival-count",
+    campaignId: CHIHAYA_NOA_CAMPAIGN_ID,
+    order: 1,
+    archiveLabel: "REFLECTION 01 · ARRIVAL REGISTER",
+    title: "第十三次抵达刻度",
+    subtitle: "入境厅留下十二枚有效印章，明日车票又在站钟下提前打出一枚孔。",
+    requiredClueIds: ["twelve-entry-stamps", "tomorrow-ticket", "thirteen-school-portraits"],
+    cipherLabel: "返照计数",
+    cipherTokens: ["12 次已登记抵达", "+", "1 张明日车票"],
+    instruction: "把每份可独立验证的抵达都保留在刻度上。不要因为姓名相同就把其中任何一份折叠掉。",
+    prompt: "返照记录里共有多少次独立抵达？",
+    answerAliases: ["13", "13份", "十三", "十三次"],
+    hints: ["十二枚入境章都能通过纸张、日期与指纹验证。", "再加上已经留下剪票孔的明日车票：12 + 1 = 13。"],
+    revealTitle: "13 · 十三次抵达",
+    revealText: "档案不是同一份记录的复印件。十三次抵达各自拥有日期、路线与磨损，不能被压缩成一次行政错误。",
+    dial: {
+      min: 1,
+      max: 13,
+      step: 1,
+      initial: 1,
+      target: 13,
+      precision: 0,
+      mode: "count",
+      instrumentLabel: "返照计数环",
+      signalLabels: {
+        silent: "错位 · 仍有多份抵达被折叠",
+        faint: "靠近 · 记录开始彼此分离",
+        clear: "清晰 · 只差一份明日记录",
+        locked: "已对齐 · 十三份记录完整",
+      },
+      ariaLabel: "十三次抵达计数刻度",
+      decreaseLabel: "减少一份抵达记录",
+      increaseLabel: "增加一份抵达记录",
+      lockLabel: "核对抵达总数",
+      unit: "份",
+    },
+  },
+  {
+    id: "noa-life-continuity",
+    campaignId: CHIHAYA_NOA_CAMPAIGN_ID,
+    order: 2,
+    archiveLabel: "REFLECTION 02 · CONTINUITY TEST",
+    title: "没有被镜子收走的生活",
+    subtitle: "纸结、镜片与住址簿分别保存路线、房间和日常债务。",
+    requiredClueIds: ["paper-knot-route", "mirror-shard-memory", "unmade-address-book"],
+    cipherLabel: "连续性三联",
+    cipherTokens: ["ROUTE · 走过的路", "ROOM · 住过的房", "DEBT · 欠下的日常"],
+    instruction: "三件证据都要求同一个动词：不是“被复制”，而是在主城删除之后仍然怎样。",
+    prompt: "未成线中的十二位诺亚保留了什么？",
+    answerAliases: ["LIVES", "LIFE", "生活", "人生", "完整生活"],
+    hints: ["纸结证明她们走过路，住址簿证明她们持续居住。", "答案不是“倒影”，而是每个人在未成线继续拥有的生活。"],
+    revealTitle: "LIVES · 生活",
+    revealText: "路线、房间与债务组成了连续人生。未成线保存的是十二位住户，不是等待当前诺亚调用的记忆资源。",
+  },
+  {
+    id: "noa-observer-switch",
+    campaignId: CHIHAYA_NOA_CAMPAIGN_ID,
+    order: 3,
+    archiveLabel: "REFLECTION 03 · ERASURE SWITCH",
+    title: "谁按下了排除开关",
+    subtitle: "镜面没有留下选择记录，裁决席却保存了每一次签字后的线路坍缩。",
+    requiredClueIds: ["observer-chair-log", "zero-key-casting", "thirteen-signed-tickets"],
+    cipherLabel: "仪式因果顺序",
+    cipherTokens: ["十三人签名", "→", "裁决者指定唯一原本", "→", "十二条线路坍缩"],
+    instruction: "找到位于十三份生活与十二次抹除之间的行动者。镜子与钥匙都没有自动选择。",
+    prompt: "终灯会真正需要谁来完成排除？",
+    answerAliases: ["OBSERVER", "观察者", "裁决者", "外部观察者"],
+    hints: ["零号钥匙能为十三份签名开门，没有真身优先级。", "每次线路坍缩都发生在观察者席签字之后。"],
+    revealTitle: "OBSERVER · 观察者",
+    revealText: "仪式把人的裁决伪装成自然规律。只要观察者拒绝宣布唯一原本，返照镜就没有排除任何人的开关。",
+  },
+].map((challenge) => cipherChallengeSchema.parse(challenge));
+
 const cipherRegistry: Record<string, CipherDeskDefinition> = {
   [LAST_TRAM_CAMPAIGN_ID]: cipherDeskSchema.parse({
     campaignId: LAST_TRAM_CAMPAIGN_ID,
@@ -351,6 +434,30 @@ const cipherRegistry: Record<string, CipherDeskDefinition> = {
       hints: ["先写造成火灾的设施，再写恢复所有权的人。", "完整顺序是 CAUSE → OWNERS → RIGHT。"],
     },
     challenges: thirteenthLoafCiphers,
+  }),
+  [CHIHAYA_NOA_CAMPAIGN_ID]: cipherDeskSchema.parse({
+    campaignId: CHIHAYA_NOA_CAMPAIGN_ID,
+    archiveLabel: "RETURNING MIRROR TABLE · 返照镜台",
+    title: "把抵达、生活与裁决重新分开，镜子才不能替人制造唯一原本。",
+    description: "每段返照都来自已经归档的证物。对齐错误不会抹去记录，打开提示也不会让任何版本失去存在资格。",
+    completionLabel: "ALL THREE REFLECTIONS FILED",
+    completionTitle: "十三段人生已经分别显影",
+    completionText: "十三次抵达、十二段未成线生活与观察者开关已经互相作证：这里没有可由仪器辨认的唯一原本，只有被裁决强行折叠的人。",
+    relay: {
+      id: "chihaya-noa-final-relay",
+      archiveLabel: "FINAL ALIGNMENT · 最终返照",
+      title: "把三份结论写回零号门的开启顺序",
+      description: "零号门要求按 ARRIVALS、LIVES、RIGHT 三个字段归档。每份答案只能使用一次。",
+      instruction: "依次选择 ARRIVALS（发生了多少次抵达）、LIVES（这些记录属于什么）、RIGHT（最后应归还什么）。点已放入的碎片可以撤回。",
+      fragments: [
+        { id: "noa-right", label: "RIGHT TO CHOOSE", note: "RIGHT · 名字、出口与沉默的选择权" },
+        { id: "noa-arrivals", label: "13 ARRIVALS", note: "ARRIVALS · 十二枚印章与一张明日票" },
+        { id: "noa-lives", label: "13 LIVES", note: "LIVES · 各自连续生活过的人" },
+      ],
+      solutionIds: ["noa-arrivals", "noa-lives", "noa-right"],
+      hints: ["先写发生了多少次抵达，再写这些记录属于什么。", "完整顺序是 ARRIVALS → LIVES → RIGHT。"],
+    },
+    challenges: chihayaNoaCiphers,
   }),
 };
 

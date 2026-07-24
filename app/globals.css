@@ -2428,19 +2428,21 @@ blockquote {
   margin: 0 auto 44px;
   padding: 0 24px;
   display: grid;
-  grid-template-columns: 250px 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 22px;
-  align-items: center;
+  align-items: stretch;
 }
 
 .society-memory-letter>.society-crest {
   width: 100%;
-  transform: rotate(.6deg);
+  min-height: 0;
+  aspect-ratio: auto;
 }
 
 .society-memory-letter>.paper-card {
+  min-width: 0;
+  width: 100%;
   padding: 32px 38px;
-  transform: rotate(-.2deg);
 }
 
 .society-archive-name {
@@ -9432,8 +9434,9 @@ blockquote {
   }
 
   .society-memory-letter>.society-crest {
-    width: min(280px, 100%);
-    margin: auto;
+    width: 100%;
+    margin: 0;
+    aspect-ratio: 1;
   }
 
   .society-memory-letter>.paper-card {

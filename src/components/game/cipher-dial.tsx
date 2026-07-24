@@ -1,6 +1,6 @@
 "use client";
 
-import { Minus, Plus, Radio, TimerReset } from "lucide-react";
+import { Layers3, Minus, Plus, Radio, TimerReset } from "lucide-react";
 import { alignCipherDialValue, cipherDialAnswer, formatCipherDialValue, getCipherDialSignal, stepCipherDialValue, type CipherChallenge } from "@/src/content/ciphers";
 import { useI18n } from "@/src/i18n/provider";
 
@@ -11,15 +11,17 @@ export function CipherDialControl({ challenge, value, onChange, onLock }: { chal
   const aligned = alignCipherDialValue(dial, value);
   const signal = getCipherDialSignal(dial, aligned);
   const progress = ((aligned - dial.min) / (dial.max - dial.min)) * 100;
-  const signalCopy = {
-    silent: t("静默 · 只有雨底噪"),
-    faint: t("微弱 · 有一段信号靠近"),
+  const signalCopy = dial.signalLabels?.[signal] ?? {
+    silent: t("静默 · 尚未对准记录"),
+    faint: t("微弱 · 有一段记录靠近"),
     clear: t("清晰 · 几乎对准了"),
-    locked: t("已锁定 · 信号完整"),
+    locked: t("已锁定 · 记录完整"),
   }[signal];
-  const SignalIcon = dial.mode === "minutes" ? TimerReset : Radio;
+  const SignalIcon = dial.mode === "minutes" ? TimerReset : dial.mode === "frequency" ? Radio : Layers3;
+  const instrumentLabel = dial.instrumentLabel
+    ?? (dial.mode === "minutes" ? t("隐藏站钟") : dial.mode === "frequency" ? t("雨中调频仪") : t("档案计数环"));
   return <div className={`cipher-dial signal-${signal}`}>
-    <header><SignalIcon /><div><small>{dial.mode === "minutes" ? t("隐藏站钟") : t("雨中调频仪")}</small><b>{formatCipherDialValue(dial, aligned)}</b></div><span>{signalCopy}</span></header>
+    <header><SignalIcon /><div><small>{instrumentLabel}</small><b>{formatCipherDialValue(dial, aligned)}</b></div><span>{signalCopy}</span></header>
     <div className="cipher-dial-scale" aria-hidden="true"><i style={{ left: `${progress}%` }} />{Array.from({ length: 11 }, (_, index) => <span style={{ left: `${index * 10}%` }} key={index} />)}</div>
     <div className="cipher-dial-controls">
       <button type="button" aria-label={dial.decreaseLabel} disabled={aligned <= dial.min} onClick={() => onChange(stepCipherDialValue(dial, aligned, -1))}><Minus /></button>

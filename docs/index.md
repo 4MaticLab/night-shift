@@ -9,6 +9,7 @@
 - [[docs/story-bible]] — 首案真相、人物关系和不可被动态改写的事实。
 - [[docs/rain-radio-story-bible]] — 第二案的广播网络、四十七户居民与固定真相。
 - [[docs/thirteenth-loaf-story-bible]] — 第三案的十二人合作社、访客份额、火灾责任与固定真相。
+- [[docs/chihaya-noa-story-bible]] — 第四案的十三次抵达、未成线人生、观察者裁决与固定真相。
 - [[docs/blackwater-creek-adaptation-bible]] — 已退役的《黑水溪》原型及其撤销原因；只作为历史索引。
 - [[docs/demo-script]] — 90 秒现场演示路径。
 - [[docs/hackathon-submission-kit]] — Hack the Rest 赛道陈述、评委问答、提交材料、真实边界与部署排障。
@@ -41,6 +42,7 @@
 - [[docs/art-prompts/four-act-headers]] — 交接、夜行、归来与裁决四幕横幅的构图和源图映射。
 - [[docs/art-prompts/sleep-hardware-dossiers]] — 四类睡眠硬件档案画面与生成源图映射。
 - [[docs/art-prompts/thirteenth-loaf-visual-archive]] — 第三案 34 张专属美术的提示词组、画幅与运行时映射。
+- [[docs/art-prompts/chihaya-noa-visual-archive]] — 第四案 34 张专属美术、人物连续性与文化表达边界。
 
 ## 维护规则
 

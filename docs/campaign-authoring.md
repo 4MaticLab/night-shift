@@ -9,6 +9,7 @@ Night Shift 使用受信任的编译期案件包，而不是把某一份剧本�
 - `case-001`：[[docs/story-bible|《零点四十三分的末班车》]]
 - `case-002`：[[docs/rain-radio-story-bible|《只在雨中播出的电台》]]
 - `case-004`：[[docs/thirteenth-loaf-story-bible|《黎明前出炉的第十三个面包》]]，书架档案号为 `003`；技术 ID 有意跳过已退役沙盒使用过的 `case-003`。
+- `case-005`：[[docs/chihaya-noa-story-bible|《千早诺亚的第十三次旅行》]]，书架档案号为 `004`。
 
 ## Manifest 契约
 
@@ -22,7 +23,7 @@ Night Shift 使用受信任的编译期案件包，而不是把某一份剧本�
 - `characters`、`districts`：可选的人物和地区档案；空人物表会让通用档案页隐藏该区块。
 - `presentation`：档案编号、城市与侦探称呼、首页介绍、四幕图像、逐夜夜印和结案文案。
 
-`defineCampaign` 会在模块载入时拒绝重复 ID、非连续章节、缺失路线、每夜配套内容不完整、跨案件引用和不可达的真结局条件。Zod schema 继续校验单条内容字段与文学文本下限。
+`defineCampaign` 会在模块载入时拒绝不是恰好五夜的案件、重复 ID、非连续章节、缺失路线、每夜配套内容不完整、跨案件引用和不可达的真结局条件。Zod schema 继续校验单条内容字段与文学文本下限。
 
 ## 新增案件
 
@@ -62,5 +63,6 @@ Night Shift 使用受信任的编译期案件包，而不是把某一份剧本�
 - [[docs/story-bible]]
 - [[docs/rain-radio-story-bible]]
 - [[docs/thirteenth-loaf-story-bible]]
+- [[docs/chihaya-noa-story-bible]]
 - [[docs/quality-baseline]]
 - [[plans/0025-multi-campaign-runtime]]

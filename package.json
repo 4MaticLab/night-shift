@@ -6,8 +6,8 @@
     "node": "22.x"
   },
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
+    "dev": "next dev",
     "start": "next start",
     "dev:sites": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext dev",
     "build:sites": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext build",
@@ -22,9 +22,14 @@
     "validate:content": "vitest run tests/content.test.ts",
     "docs:check": "node scripts/check-wikilinks.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern artifacts --ignore-pattern cache",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "^1.20.2",
     "@xyflow/react": "^12.11.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -65,7 +70,7 @@
     "vinext": "0.0.50",
     "vite": "8.1.5",
     "vitest": "^4.1.10",
-    "wrangler": "4.113.0"
+    "wrangler": "^4.114.0"
   },
   "type": "module"
 }
