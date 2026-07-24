@@ -1,6 +1,6 @@
 # Injective 测试网合约部署
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P1
 - 创建：2026-07-24
 - 更新：2026-07-24
@@ -31,11 +31,11 @@
 ## 任务
 
 - [x] 生成临时测试网钱包，安全保存私钥并交付收款地址。
-- [ ] 确认部署地址在 chain ID 1439 上有足够 Testnet INJ。
-- [ ] 编译并运行现有合约测试。
-- [ ] 部署 `NightShiftKeepsake` 并保存 Ignition 部署记录。
-- [ ] 通过 RPC 与 Blockscout 核对部署状态，尝试源码验证。
-- [ ] 更新稳定部署文档并记录最终验证证据。
+- [x] 确认部署地址在 chain ID 1439 上有足够 Testnet INJ。
+- [x] 编译并运行现有合约测试。
+- [x] 部署 `NightShiftKeepsake` 并保存 Ignition 部署记录。
+- [x] 通过 RPC 与 Blockscout 核对部署状态，尝试源码验证。
+- [x] 更新稳定部署文档并记录最终验证证据。
 
 ## 验收标准
 
@@ -54,11 +54,29 @@
 - Blockscout 合约页与可用时的源码验证结果
 - `npm run docs:check`
 
+最终结果：
+
+- 合约：`0x4016a9165f655618055c8bbd2f992FB20895288C`
+- 交易：`0xbe4520df00904a6d67341f226f04e8836a826879785fa270844ff2e4b3b66d39`
+- 区块：`134536213`
+- `owner`／`claimSigner`：`0xC02b873Ef4F79Da50435c164C76e941365a7b7ca`
+- RPC 读取：名称 `Night Shift Keepsakes`，符号 `NIGHT`，部署字节码存在
+- Blockscout：Solidity 源码验证成功
+- `npm test`：9 个文件、100 项测试通过
+- `npm run lint`：通过
+- `npm run contract:compile`：通过
+- `npm run contract:test`：2 项合约测试通过
+- `npm run docs:check`：86 个 Markdown 文件通过
+- `git diff --check`：通过
+- `npx hardhat ignition status chain-1439`：successful
+
 ## 决定记录
 
 - 2026-07-24：用户明确批准创建临时测试网钱包并在取得测试水后执行合约部署。
 - 2026-07-24：为比赛 Demo 保持最小结构，临时部署钱包同时作为 owner 与 `claimSigner`；不在本计划内扩展生产级密钥架构。
 - 2026-07-24：临时钱包已生成并保存于 Git 忽略、权限为 `0600` 的本地环境文件；RPC 复算地址一致，初始测试网余额为 0 INJ。
+- 2026-07-24：用户领取 1 Testnet INJ 后执行部署。公共 RPC 未在 Ignition 轮询窗口内返回交易／回执，导致 CLI 报 dropped；随后从部署区块、`eth_getBlockReceipts`、合约字节码和状态读取确认交易成功，并据真实链上回执恢复 Ignition journal，避免重复部署。
+- 2026-07-24：Blockscout 验证通过，稳定部署信息已进入 [[docs/injective-keepsake-mint]]，计划完成。
 
 ## 相关文档
 
