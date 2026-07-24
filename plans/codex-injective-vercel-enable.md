@@ -1,6 +1,6 @@
 # 启用 Vercel Injective mint
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P1
 - 创建：2026-07-24
 - 更新：2026-07-24
@@ -31,11 +31,11 @@ Injective EVM Testnet 合约已经部署并验证，但公开 Vercel 站点尚�
 
 ## 任务
 
-- [ ] 绑定本地 checkout 到正确的 Vercel team/project，并核对现有 production 环境。
-- [ ] 配置三个 Injective production 环境变量。
-- [ ] 触发并等待 production deployment 成功。
-- [ ] 验证 production 状态 API、voucher 签名和 metadata origin。
-- [ ] 更新稳定文档并记录最终验证证据。
+- [x] 绑定本地 checkout 到正确的 Vercel team/project，并核对现有 production 环境。
+- [x] 配置三个 Injective production 环境变量。
+- [x] 触发并等待 production deployment 成功。
+- [x] 验证 production 状态 API、voucher 签名和 metadata origin。
+- [x] 更新稳定文档并记录最终验证证据。
 
 ## 验收标准
 
@@ -55,10 +55,23 @@ Injective EVM Testnet 合约已经部署并验证，但公开 Vercel 站点尚�
 - `npm run docs:check`
 - `git diff --check`
 
+## 最终验证证据
+
+- Vercel project：`luokerenx4-s-team/night-shift`
+- production deployment：`night-shift-jqjs676be-luokerenx4-s-team.vercel.app`，已别名到 `https://www.shiftx.top`
+- Vercel deployment inspect：`https://vercel.com/luokerenx4-s-team/night-shift/3B6zdm3TqoiT7owRT8d5az4WER9X`
+- production 环境已配置 `INJECTIVE_MINT_SIGNER_PRIVATE_KEY`（Sensitive）、`INJECTIVE_NFT_CONTRACT_ADDRESS` 和 `INJECTIVE_NFT_METADATA_ORIGIN`。
+- `GET https://www.shiftx.top/api/injective/mint-authorization` 返回 `configured: true`、chain ID `1439` 和合约 `0x4016a9165f655618055c8bbd2f992FB20895288C`。
+- production POST 为 `case-001 / torn-ticket` 返回 `authorized`；本地 `verifyTypedData` 恢复到链上 `claimSigner`，metadata 哈希一致，图片和 `external_url` origin 均为 `https://www.shiftx.top`。
+- smoke test 未调用合约 `redeem`，未铸造 NFT。
+- `npm run docs:check`：通过，86 个 Markdown 文件的双链均可解析。
+- `git diff --check`：通过。
+
 ## 决定记录
 
 - 2026-07-24：用户明确授权使用 Vercel CLI 配置并发布现有 production 项目。
 - 2026-07-24：选择 `https://www.shiftx.top` 作为永久 metadata origin；它是 Vercel 当前列出的 `night-shift` production URL。
+- 2026-07-24：用部署／签名测试钱包作为 voucher 的接收地址进行只读 smoke test；不提交 mint 交易。
 
 ## 相关文档
 
