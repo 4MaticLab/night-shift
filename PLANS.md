@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-unified-campaign-intake|三案统一生命周期与视觉接入]] | `codex/unified-campaign-intake` | `approved` | `manual` | 计划骨架完成 | 用户将三份剧本粘贴到本机输入槽位，随后逐案审阅并补全施工批次 |
+| [[plans/codex-unified-campaign-intake|剧本一统一生命周期与视觉接入]] | `codex/unified-campaign-intake` | `in_progress` | `manual` | 剧本一已完成结构提取 | 按五夜适配卡实现《千早诺亚的第十三次旅行》案件包与完整资产组 |
 
 ## 使用规则
 
