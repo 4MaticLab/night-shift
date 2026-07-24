@@ -470,6 +470,10 @@ export const englishOverrides: Record<string, string> = {
   "正在核对这些证物…": "Checking these pieces of evidence…",
   "阅档": "Read file",
   "已自动配对": "Paired automatically",
+  "自动配对": "Auto pair",
+  "匹配成功时会自动配对并展开信笺。": "A match pairs automatically and opens as a letter.",
+  "从左侧案板点选；匹配成功会自动配对。": "Pick from the board on the left; a match pairs automatically.",
+  "从上方案板点选；上下滑动可继续阅档。": "Pick from the board above; scroll to keep reading the dossier.",
   "已确认的论断会留在这里": "Confirmed statements stay here",
   "关闭提示": "Dismiss notice",
 };
