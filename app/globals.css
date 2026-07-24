@@ -1283,9 +1283,11 @@ blockquote {
   max-width: calc(100% - 16px);
   height: auto;
   margin-top: 0;
+  gap: 18px;
+  padding: 8px 24px;
   background: rgba(12, 18, 30, .92);
   border: 1px solid rgba(197, 154, 90, .24);
-  border-radius: 18px;
+  border-radius: 10px;
   box-shadow: 0 -12px 40px #0006;
   backdrop-filter: blur(15px);
 }
@@ -1329,14 +1331,6 @@ blockquote {
 .bottom-nav a.active .dock-icon-box {
   background: #c59a5a0d;
   border-color: #c59a5a1f;
-}
-
-.bottom-nav a.active::before {
-  content: "";
-  position: absolute;
-  top: -9px;
-  width: 30px;
-  border-top: 2px solid var(--amber);
 }
 
 .bottom-nav a:not(.active):hover {
