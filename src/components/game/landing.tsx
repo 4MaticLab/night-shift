@@ -40,7 +40,6 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
       <div className="hero-vignette" />
       <nav className="landing-nav">
         <div className="brand-mark"><span aria-hidden="true" /><div><b>{t("夜班侦探")}</b><small>NIGHT SHIFT</small></div></div>
-        <div className="landing-watch" aria-hidden="true"><i /><span>AGENCY WATCH</span><b>00:43</b></div>
         <div className="landing-nav-actions">
           <button className="ghost-button language-button" disabled={!interactive} onClick={() => setLocale(preferredLocale === "en" ? "zh-CN" : "en")}><Languages size={15} /> {preferredLocale === "en" ? "中文" : "ENGLISH"}</button>
           <button className="ghost-button" disabled={!interactive} onClick={onDemo}><Zap size={15} /> DEMO MODE</button>
