@@ -1,0 +1,66 @@
+# Injective 测试网合约部署
+
+- 状态：`in_progress`
+- 优先级：P1
+- 创建：2026-07-24
+- 更新：2026-07-24
+- 负责人：Codex / Human
+- 分支：`codex/injective-testnet-deploy`
+- 依赖：用户向临时部署地址领取 Injective EVM Testnet INJ
+- 推进模式：`manual`
+
+## 动机
+
+仓库已实现 `NightShiftKeepsake`、EIP-712 领取凭证和前端 mint 流程，但尚无真实 Injective EVM Testnet 合约地址。比赛演示需要一份可读取、可验证的测试网部署，使后端签发的 voucher 能被玩家钱包实际兑换。
+
+## 范围
+
+- 创建并本地保存一个仅用于本次 Injective EVM Testnet 演示的临时 EVM 钱包。
+- 使用该钱包作为合约 owner 和 `claimSigner` 部署现有 `NightShiftKeepsake`。
+- 在 Blockscout 与 RPC 上核对部署字节码、owner、`claimSigner`、名称和符号。
+- 在可行时验证合约源码，并把稳定的测试网部署信息同步到部署文档。
+- 交付合约地址及后端所需环境变量映射。
+
+## 非目标
+
+- 不部署 Injective EVM Mainnet。
+- 不实现生产级密钥托管、跨实例限流、玩法进度证明或反自动化。
+- 不改变 NFT 供应、metadata、收藏品美术或 mint 产品交互。
+- 本计划不自动修改或发布 Vercel／Sites 运行环境；网站接线在合约部署验收后另行执行。
+
+## 任务
+
+- [ ] 生成临时测试网钱包，安全保存私钥并交付收款地址。
+- [ ] 确认部署地址在 chain ID 1439 上有足够 Testnet INJ。
+- [ ] 编译并运行现有合约测试。
+- [ ] 部署 `NightShiftKeepsake` 并保存 Ignition 部署记录。
+- [ ] 通过 RPC 与 Blockscout 核对部署状态，尝试源码验证。
+- [ ] 更新稳定部署文档并记录最终验证证据。
+
+## 验收标准
+
+- Injective EVM Testnet 上存在可读取字节码的 `NightShiftKeepsake` 合约。
+- 合约 `owner` 与 `claimSigner` 均为本次临时部署地址。
+- 合约名称为 `Night Shift Keepsakes`、符号为 `NIGHT`。
+- 仓库测试继续通过，部署地址和浏览器链接被准确记录。
+- 未把私钥加入 Git、公开日志或前端变量。
+
+## 验证
+
+- `npm run contract:compile`
+- `npm run contract:test`
+- Injective RPC：`eth_chainId`、`eth_getBalance`、`eth_getCode`
+- 合约读取：`owner()`、`claimSigner()`、`name()`、`symbol()`
+- Blockscout 合约页与可用时的源码验证结果
+- `npm run docs:check`
+
+## 决定记录
+
+- 2026-07-24：用户明确批准创建临时测试网钱包并在取得测试水后执行合约部署。
+- 2026-07-24：为比赛 Demo 保持最小结构，临时部署钱包同时作为 owner 与 `claimSigner`；不在本计划内扩展生产级密钥架构。
+
+## 相关文档
+
+- [[docs/injective-keepsake-mint]]
+- [[docs/architecture]]
+- [[docs/privacy-and-guardrails]]

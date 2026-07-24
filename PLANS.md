@@ -6,6 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
+| [[plans/codex-injective-testnet-deploy]] | `codex/injective-testnet-deploy` | `in_progress` | `manual` | 0/6 | 生成临时钱包并等待测试水 |
 
 ## 使用规则
 
