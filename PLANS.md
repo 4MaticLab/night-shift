@@ -6,6 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
+| [[plans/feat-five-day-print-posters]] | `feat/five-day-print-posters` | `in_progress` | `auto` | 0% | 定义海报内容并实现网页预览与打印版式 |
 
 ## 使用规则
 
