@@ -1,6 +1,6 @@
 # feat-rain-radio-english-i18n
 
-- 状态：in_progress
+- 状态：completed
 - 模式：auto
 - 分支：feat/rain-radio-english-i18n
 - 负责人：Qoder（用户委托）
@@ -43,6 +43,14 @@
 
 - `npx vitest run tests/i18n.test.ts`
 - `npm test` / `npm run lint` / `npm run build` / `npm run docs:check`
+
+## 最终验证证据（2026-07-24，rebase 至 origin/main 8ad08cc 后）
+
+- `npm test`：8 个测试文件、95 个测试全部通过，含新增 rain-radio 英文投影套件（新引用、稳定 ID、规则一致、无汉字）。
+- `npm run lint`：无告警无错误。
+- `npm run build`：构建成功。
+- `npm run docs:check`：84 个 Markdown 文件双链全部解析。
+- 英文词典共 366 条，由 `node scripts/gen-rain-radio-en.mjs` 确定性生成。
 
 ## 决定记录
 
