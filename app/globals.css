@@ -13836,3 +13836,370 @@ blockquote {
     grid-template-columns: 1fr;
   }
 }
+/* Night journey diorama: layered paper theatre for the night phase.
+   Depth comes from per-layer translateZ inside a preserve-3d stage;
+   all scene state is a pure function of the night progress prop. */
+.night-diorama {
+  height: min(47vh, 480px);
+  margin: 35px auto 22px;
+  max-width: 1120px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #334057;
+  background: var(--ink);
+  box-shadow: inset 0 0 90px #070b14, 0 30px 70px #0005;
+  perspective: 1150px;
+}
+
+.diorama-stage {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.diorama-layer {
+  position: absolute;
+  inset: -5%;
+  pointer-events: none;
+}
+
+.diorama-svg {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Scrolling world strips: nearer strips are wider and sweep past faster */
+.diorama-strip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  transition: transform 1.4s linear;
+}
+
+/* Ambient sway: in real mode the night clock barely moves, so the camera
+   itself breathes — a slow standing drift with a different rhythm per
+   depth layer. Purely decorative; disabled under reduced motion. */
+.diorama-sway {
+  position: absolute;
+  inset: 0;
+}
+
+.diorama-sway-a { animation: diorama-sway-a 13s ease-in-out -4s infinite alternate; }
+.diorama-sway-b { animation: diorama-sway-b 11s ease-in-out -7s infinite alternate; }
+.diorama-sway-c { animation: diorama-sway-c 9s ease-in-out -2s infinite alternate; }
+
+@keyframes diorama-sway-a {
+  from { transform: translateX(-5px); }
+  to { transform: translateX(5px); }
+}
+
+@keyframes diorama-sway-b {
+  from { transform: translate(-8px, 0); }
+  to { transform: translate(8px, 1.6px); }
+}
+
+@keyframes diorama-sway-c {
+  from { transform: translate(-13px, 0); }
+  to { transform: translate(13px, 3px); }
+}
+
+/* Sky and moon */
+.diorama-sky {
+  position: absolute;
+  inset: -8%;
+  background:
+    radial-gradient(90% 70% at 76% 10%, #22324f 0%, transparent 60%),
+    linear-gradient(180deg, #101b31 0%, var(--navy) 46%, #0a101f 100%);
+}
+
+.night-diorama[data-watch="lamplighting"] .diorama-sky {
+  background:
+    radial-gradient(65% 42% at 16% 92%, #c59a5a20, transparent 70%),
+    radial-gradient(90% 70% at 76% 10%, #22324f 0%, transparent 60%),
+    linear-gradient(180deg, #111c33 0%, var(--navy) 46%, #0b1120 100%);
+}
+
+.night-diorama[data-watch="last-watch"] .diorama-sky {
+  background:
+    radial-gradient(75% 40% at 55% 96%, #698d8922, transparent 72%),
+    radial-gradient(90% 70% at 76% 10%, #1f2f4c 0%, transparent 60%),
+    linear-gradient(180deg, #0f1a30 0%, var(--navy) 46%, #0a101d 100%);
+}
+
+.night-diorama[data-watch="daylight"] .diorama-sky {
+  background:
+    radial-gradient(80% 55% at 50% 100%, #aeb7c218, transparent 74%),
+    radial-gradient(90% 70% at 76% 10%, #2a3c5e 0%, transparent 62%),
+    linear-gradient(180deg, #16223c 0%, #142036 46%, #0d1526 100%);
+}
+
+.diorama-star {
+  fill: #d9c18d;
+}
+
+.night-diorama[data-watch="daylight"] .diorama-star {
+  opacity: .05;
+}
+
+.diorama-moon {
+  fill: var(--paper);
+  filter: drop-shadow(0 0 14px #c59a5a66);
+}
+
+.night-diorama[data-watch="daylight"] .diorama-moon {
+  opacity: .3;
+}
+
+/* Far skyline */
+.diorama-far-fill {
+  fill: var(--slate);
+  opacity: .42;
+}
+
+.diorama-window-far {
+  fill: var(--amber);
+  opacity: .2;
+  animation: diorama-window-twinkle 7s ease-in-out infinite alternate;
+}
+
+@keyframes diorama-window-twinkle {
+  from { opacity: .1; }
+  to { opacity: .3; }
+}
+
+/* Fog bands between layers */
+.diorama-fog {
+  position: absolute;
+  left: -22%;
+  width: 144%;
+  opacity: .85;
+  pointer-events: none;
+  filter: blur(12px);
+}
+
+.night-diorama[data-watch="last-watch"] .diorama-fog,
+.night-diorama[data-watch="daylight"] .diorama-fog {
+  opacity: 1;
+}
+
+.diorama-fog-a {
+  top: 34%;
+  height: 30%;
+  background: linear-gradient(90deg, transparent, #aeb7c214 20%, #aeb7c220 52%, #aeb7c20d 78%, transparent);
+  animation: diorama-fog-drift-a 52s ease-in-out infinite alternate;
+}
+
+.diorama-fog-b {
+  top: 58%;
+  height: 34%;
+  background: linear-gradient(90deg, transparent, #aeb7c21c 26%, #aeb7c226 58%, transparent 86%);
+  animation: diorama-fog-drift-b 37s ease-in-out infinite alternate;
+}
+
+@keyframes diorama-fog-drift-a {
+  from { transform: translateX(-3.5%); }
+  to { transform: translateX(3%); }
+}
+
+@keyframes diorama-fog-drift-b {
+  from { transform: translateX(3%); }
+  to { transform: translateX(-3.5%); }
+}
+
+/* Mid skyline and district accents */
+.diorama-mid-fill {
+  fill: var(--night);
+}
+
+.diorama-water-glints rect {
+  fill: var(--amber);
+  opacity: .16;
+  filter: blur(1.6px);
+}
+
+.diorama-bunting>path:first-child {
+  fill: none;
+  stroke: var(--teal);
+  stroke-width: 1.4;
+  opacity: .5;
+}
+
+.diorama-bunting>path:not(:first-child) {
+  fill: var(--teal);
+  opacity: .45;
+}
+
+.diorama-glasshouse path {
+  fill: none;
+  stroke: var(--teal);
+  stroke-width: 2;
+  opacity: .38;
+}
+
+.diorama-window {
+  fill: #22314d;
+  opacity: .75;
+  transition: fill 1.1s ease, opacity 1.1s ease;
+}
+
+.diorama-window.lit {
+  fill: var(--amber);
+  opacity: .95;
+  filter: drop-shadow(0 0 5px #c59a5a80);
+}
+
+/* Roadside signposts: stops approach out of the fog, light as the camera
+   arrives, and stay warmly lit once passed */
+.diorama-signpost {
+  position: absolute;
+  bottom: 12%;
+  width: 0;
+  height: 0;
+}
+
+.diorama-signpost-pole {
+  position: absolute;
+  bottom: 0;
+  left: -1.5px;
+  width: 3px;
+  height: 62px;
+  background: #05080f;
+}
+
+.diorama-signpost-lantern {
+  position: absolute;
+  bottom: 56px;
+  left: -6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #22314d;
+  transition: background 1s ease, box-shadow 1s ease;
+}
+
+.diorama-signpost-lantern i {
+  position: absolute;
+  inset: -15px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #c59a5a88 0%, #c59a5a2e 48%, transparent 72%);
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.diorama-signpost-label {
+  position: absolute;
+  bottom: 30px;
+  left: 10px;
+  padding: 3px 7px;
+  border: 1px solid #334057;
+  background: #101827e8;
+  color: #8b96a3;
+  font-size: 9px;
+  letter-spacing: .08em;
+  white-space: nowrap;
+  opacity: .6;
+  transition: color 1s ease, border-color 1s ease, opacity 1s ease;
+}
+
+/* Past mid-frame the label swings to the pole's left so it never reaches
+   under the growth panel parked at the right edge. */
+.diorama-signpost.flip .diorama-signpost-label {
+  left: auto;
+  right: 10px;
+}
+
+.diorama-signpost.near .diorama-signpost-lantern {
+  background: var(--amber);
+  box-shadow: 0 0 10px 2px #c59a5acc;
+}
+
+.diorama-signpost.near .diorama-signpost-lantern i {
+  opacity: .95;
+}
+
+.diorama-signpost.near .diorama-signpost-label {
+  color: var(--paper);
+  border-color: var(--gold);
+  opacity: 1;
+}
+
+.diorama-signpost.passed .diorama-signpost-lantern {
+  background: var(--gold);
+}
+
+.diorama-signpost.passed .diorama-signpost-lantern i {
+  opacity: .3;
+}
+
+.diorama-signpost.passed .diorama-signpost-label {
+  opacity: .85;
+}
+
+/* Shrouded signposts are still inside the right fog bank (behind the growth
+   panel) or about to exit left: keep the lantern ember but hide the label
+   so nothing reads clipped. */
+.diorama-signpost.shrouded .diorama-signpost-label {
+  opacity: 0;
+}
+
+.diorama-signpost.shrouded .diorama-signpost-lantern i {
+  opacity: 0;
+}
+
+/* Foreground railing, lamps and tram wires */
+.diorama-front-fill {
+  fill: var(--ink);
+}
+
+.diorama-front-stroke {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.diorama-wire {
+  fill: none;
+  stroke: #05080f;
+  stroke-width: 2.2;
+  opacity: .9;
+}
+
+.diorama-lamp-glow {
+  fill: var(--amber);
+  opacity: .5;
+  filter: blur(9px);
+}
+
+.diorama-lamp-bulb {
+  fill: var(--warm-paper);
+  filter: drop-shadow(0 0 6px var(--amber));
+}
+
+.diorama-lamp-pool {
+  fill: var(--amber);
+  opacity: .16;
+  filter: blur(4px);
+}
+
+@media (max-width: 600px) {
+  .night-diorama {
+    height: min(40vh, 340px);
+    margin: 26px auto 16px;
+  }
+
+  .diorama-signpost-label {
+    font-size: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diorama-fog,
+  .diorama-sway,
+  .diorama-window-far {
+    animation: none;
+  }
+}

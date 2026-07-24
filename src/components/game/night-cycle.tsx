@@ -19,6 +19,7 @@ import { elapsedSessionMinutes, formatSleepDuration, nightSealProgress } from "@
 import { useGameStore } from "@/src/stores/game-store";
 import { getReadyEvidenceSyntheses } from "@/src/lib/game-engine/evidence-synthesis";
 import { BotanicalSpecimen, CityRoute, PaperCard, qualityCopy, Seal, SocietyCrest } from "./shared";
+import { NightDiorama } from "./night-diorama";
 import type { GameView } from "./types";
 import { SleepHardwareHandoff, SleepHardwareMorningReceipt, SleepHardwareNightTelemetry } from "./sleep-hardware";
 import { REST_INTENTION_MAX_LENGTH, restReflectionResponseSchema, type RestRitualInput } from "@/src/lib/rest-ritual";
@@ -187,7 +188,7 @@ export function NightRun({ onFinish, onHardware }: { onFinish: () => void; onHar
       {sleepMode === "real" && <aside className={wakeEchoVisible ? "wake-check-in recorded" : "wake-check-in"}><div><small>SLEEP GAP · {t("睡隙记录")}</small><b>{wakeEchoVisible ? t("这次醒转已经夹进夜印") : t("如果你只是短暂醒来")}</b><p>{wakeEchoVisible ? t("林渡仍在调查；同一夜不会再收集第二条回声。") : t("可以留下一次记录再继续休息。它不会结束夜班，也不改变睡眠评价或任何成果。")}</p></div><button type="button" disabled={Boolean(activeSleepSession?.wakeEcho)} onClick={recordWakeEcho}><Ear /> {wakeEchoVisible ? t("已记录，夜班继续") : t("我只是醒了一下")}</button>{wakeEchoVisible && wakeEcho && <WakeEchoSlip echo={wakeEcho} recordedAt={activeSleepSession?.wakeEcho?.recordedAt} mode="real" />}</aside>}
       {sleepMode === "demo" && wakeEchoVisible && wakeEcho && <aside className="wake-check-in demo recorded"><div><small>INTERRUPTED SLEEP ECHO · {t("断续旅程回声")}</small><b>{t("睡意裂开时，城市递来一张薄纸")}</b><p>{t("这是断续旅程的叙事侧影，不是失败或额外奖励。")}</p></div><WakeEchoSlip echo={wakeEcho} recordedAt={activeSleepSession?.wakeEcho?.recordedAt} mode="demo" /></aside>}
       <div className="night-seal-growth" aria-label={locale === "en" ? `Night ${chapter} seal forming` : `第${chapter}夜的夜印正在形成`}><Image className="seal-ghost" src={nightSeal.src} alt="" width={118} height={118} sizes="118px" /><span style={{ height: `${progress}%` }}><Image src={nightSeal.src} alt={nightSeal.alt} width={118} height={118} sizes="118px" /></span></div>
-      <div className="night-journey-stage"><CityRoute progress={progress} routeNodes={direction.routeNodes} variant={direction.mapVariant} /><aside className="night-growth-panel"><BotanicalSpecimen chapter={chapter} progress={progress} compact /><small>GROWING WHILE YOU REST</small><p>{botanical.growthStages[growthStage]}</p></aside></div>
+      <div className="night-journey-stage"><NightDiorama progress={progress} routeNodes={direction.routeNodes} variant={direction.mapVariant} watchId={watch.id} /><aside className="night-growth-panel"><BotanicalSpecimen chapter={chapter} progress={progress} compact /><small>GROWING WHILE YOU REST</small><p>{botanical.growthStages[growthStage]}</p></aside></div>
       <div className="event-ticker">{result.events.slice(0, eventCount).map((event, index) => <motion.div key={event} initial={{ opacity: 0, x: -10 }} animate={{ opacity: index === eventCount - 1 ? 1 : .45, x: 0 }}><i />{event}</motion.div>)}</div>
       <div className="night-progress"><span style={{ width: `${progress}%` }} /></div>
     </main>
