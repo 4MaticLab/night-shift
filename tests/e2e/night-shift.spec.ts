@@ -847,6 +847,28 @@ test("carries the hidden-platform tableau through final choice and ending", asyn
   await expect(page.getByRole("heading", { name: "5 夜归来总账" })).toBeVisible();
 });
 
+test("remembers the case library after reload (issue #35)", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /开始第 001 宗案件/ }).click();
+  await page.getByRole("button", { name: "继续" }).click();
+  await page.getByRole("button", { name: "继续" }).click();
+  await page.getByRole("button", { name: /进入事务所/ }).click();
+  await page.getByRole("button", { name: /让纸张先开口/ }).click();
+  await expect(page.locator(".app-shell")).toBeVisible();
+  await expect(page.locator(".hero-shell")).toHaveCount(0);
+
+  await page.locator(".brand-mark.compact").click();
+  await expect(page.locator(".hero-shell")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /When you fall asleep|你睡着以后/ })).toBeVisible();
+  await expect(page.locator(".campaign-shelf")).toBeVisible();
+
+  await page.reload();
+  await expect(page.locator(".hero-shell")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /When you fall asleep|你睡着以后/ })).toBeVisible();
+  await expect(page.locator(".campaign-shelf")).toBeVisible();
+  await expect(page.locator(".app-shell")).toHaveCount(0);
+});
+
 test("completes all five nights from a new save without chapter jumps", async ({ page }) => {
   const reportTitles = ["不存在的车票", "每隔四十三天的花", "没有退房的307", "地图上被刮掉的线", "最后一班车"];
   await openFirstNight(page);
