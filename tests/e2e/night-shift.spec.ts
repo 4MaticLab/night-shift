@@ -346,7 +346,7 @@ test("keeps the English first-night handoff usable at 390 × 844", async ({ page
   await page.getByRole("button", { name: /Begin Case 001/ }).click();
   await page.getByRole("button", { name: "Continue" }).click();
   await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByRole("button", { name: /Enter the agency/ }).click();
+  await page.getByRole("button", { name: /enter the agency/i }).click();
   await expectNoVisibleHan(page);
   await expectNoPageOverflow(page);
   await page.getByRole("button", { name: /Let the paper speak first/ }).click();
@@ -952,7 +952,7 @@ test("files an optional daytime notice and returns its echo after the next night
   await page.getByRole("button", { name: /今晚交给你了/ }).click();
   await page.getByRole("button", { name: /跳到清晨/ }).click();
   await page.getByRole("button", { name: /结束今日，准备下一夜|整理线索，准备下一夜/ }).click();
-  await page.getByRole("button", { name: /^今晚$/ }).click();
+  await page.getByRole("link", { name: /^今晚$/ }).click();
 
   await expect(page.getByText("门缝下的三张纸")).toBeVisible();
   await expect(page.locator(".daytime-notice-list details")).toHaveCount(3);
@@ -1211,7 +1211,7 @@ test("completes all five nights from a new save without chapter jumps", async ({
 
   for (let chapter = 1; chapter <= 5; chapter += 1) {
     if (chapter > 1) {
-      await page.getByRole("button", { name: /^今晚$/ }).click();
+      await page.getByRole("link", { name: /^今晚$/ }).click();
       await page.getByRole("button", { name: /全部收起，不拆/ }).click();
       await page.locator(".choice-list .choice").first().click();
     }
@@ -1240,7 +1240,7 @@ test("switches to the rain-radio campaign and completes its five-night story", a
 
   for (let chapter = 1; chapter <= 5; chapter += 1) {
     if (chapter > 1) {
-      await page.getByRole("button", { name: /^今晚$/ }).click();
+      await page.getByRole("link", { name: /^今晚$/ }).click();
       await page.getByRole("button", { name: /全部收起，不拆/ }).click();
       await page.locator(".choice-list .choice").first().click();
     }
@@ -1271,19 +1271,19 @@ test("switches to the thirteenth-loaf campaign and completes its five-night stor
 
   for (let chapter = 1; chapter <= 5; chapter += 1) {
     if (chapter > 1) {
-      await page.getByRole("button", { name: /^今晚$/ }).click();
+      await page.getByRole("link", { name: /^今晚$/ }).click();
       await page.getByRole("button", { name: /全部收起，不拆/ }).click();
       await page.locator(".choice-list .choice").first().click();
     }
     await page.getByRole("button", { name: /今晚交给你了/ }).click();
     await page.getByRole("button", { name: /跳到清晨/ }).click();
     await expect(page.locator(".report-hero").getByRole("heading", { name: reportTitles[chapter - 1] })).toBeVisible();
-    await expect(page.locator(".report-hero-art")).toHaveAttribute("src", /cases\/thirteenth-loaf\/headers\/morning-report-v1/);
+    await expect(page.locator(".report-hero-art")).toHaveAttribute("src", /thirteenth-loaf.*morning-report-v1/);
     await page.getByRole("button", { name: chapter === 5 ? /做出最终决定/ : /结束今日，准备下一夜|整理线索，准备下一夜/ }).click();
   }
 
   await expect(page.getByRole("heading", { name: /房契还给十二人以后/ })).toBeVisible();
-  await expect(page.locator(".ending-background")).toHaveAttribute("src", /cases\/thirteenth-loaf\/headers\/ending-tableau-v1/);
+  await expect(page.locator(".ending-background")).toHaveAttribute("src", /thirteenth-loaf.*ending-tableau-v1/);
   await page.getByRole("button", { name: /把火灾报告贴满全城/ }).click();
   await expect(page.getByRole("heading", { name: "把火灾报告贴满全城" })).toBeVisible();
   await expect(page.getByText(/第十三只面包仍用空白纸包着/)).toBeVisible();
@@ -1301,19 +1301,19 @@ test("switches to the Chihaya Noa campaign and completes its five-night story", 
 
   for (let chapter = 1; chapter <= 5; chapter += 1) {
     if (chapter > 1) {
-      await page.getByRole("button", { name: /^今晚$/ }).click();
+      await page.getByRole("link", { name: /^今晚$/ }).click();
       await page.getByRole("button", { name: /全部收起，不拆/ }).click();
       await page.locator(".choice-list .choice").first().click();
     }
     await page.getByRole("button", { name: /今晚交给你了/ }).click();
     await page.getByRole("button", { name: /跳到清晨/ }).click();
     await expect(page.locator(".report-hero").getByRole("heading", { name: reportTitles[chapter - 1] })).toBeVisible();
-    await expect(page.locator(".report-hero-art")).toHaveAttribute("src", /cases\/chihaya-noa\/headers\/morning-report-v1/);
+    await expect(page.locator(".report-hero-art")).toHaveAttribute("src", /chihaya-noa.*morning-report-v1/);
     await page.getByRole("button", { name: chapter === 5 ? /做出最终决定/ : /结束今日，准备下一夜|整理线索，准备下一夜/ }).click();
   }
 
   await expect(page.getByRole("heading", { name: /十三段人生都能自证以后/ })).toBeVisible();
-  await expect(page.locator(".ending-background")).toHaveAttribute("src", /cases\/chihaya-noa\/headers\/ending-tableau-v1/);
+  await expect(page.locator(".ending-background")).toHaveAttribute("src", /chihaya-noa.*ending-tableau-v1/);
   await page.getByRole("button", { name: /公开十三次抵达/ }).click();
   await expect(page.getByRole("heading", { name: "公开十三次抵达" })).toBeVisible();
   await expect(page.getByText(/十三次抵达都被看见了/)).toBeVisible();
@@ -1442,14 +1442,14 @@ test.describe("mobile 390x844", () => {
     await expect(page.getByRole("button", { name: /开始第 003 宗案件/ })).toBeVisible();
     await expect(page.getByRole("img", { name: /林渡站在夜班事务所门边/ })).toHaveAttribute(
       "src",
-      /cases\/thirteenth-loaf\/headers\/shift-handoff-v1/,
+      /thirteenth-loaf.*shift-handoff-v1/,
     );
     await expectNoPageOverflow(page);
     await selectCampaign(page, "千早诺亚的第十三次旅行");
     await expect(page.getByRole("button", { name: /开始第 004 宗案件/ })).toBeVisible();
     await expect(page.getByRole("img", { name: /千早诺亚在夜班事务所交接桌前/ })).toHaveAttribute(
       "src",
-      /cases\/chihaya-noa\/headers\/shift-handoff-v1/,
+      /chihaya-noa.*shift-handoff-v1/,
     );
     await expectNoPageOverflow(page);
     await selectCampaign(page, "零点四十三分的末班车");

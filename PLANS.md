@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-game-surface-routing]] | `codex/game-surface-routing` | `in_progress` | `auto` | 70% | 运行完整双构建与浏览器回归 |
+| [[plans/codex-game-surface-routing]] | `codex/game-surface-routing` | `in_progress` | `auto` | 90% | 发布已验证 Sites 版本并完成计划 |
 
 ## 使用规则
 
