@@ -1208,7 +1208,7 @@ test("remembers the case library after reload (issue #35)", async ({ page }) => 
   await expect(page.locator(".app-shell")).toBeVisible();
   await expect(page.locator(".hero-shell")).toHaveCount(0);
 
-  await page.locator(".brand-mark.compact").click();
+  await page.locator(".global-brand").click();
   await expect(page.locator(".hero-shell")).toBeVisible();
   await expect(page.getByRole("heading", { name: /When you fall asleep|你睡着以后/ })).toBeVisible();
   await expect(page.locator(".campaign-wheel")).toBeVisible();

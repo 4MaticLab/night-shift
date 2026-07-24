@@ -421,8 +421,7 @@ blockquote {
   }
 }
 
-.landing-nav,
-.topbar {
+.landing-nav {
   position: absolute;
   z-index: 5;
   top: 0;
@@ -1220,19 +1219,44 @@ blockquote {
   padding-bottom: calc(var(--nav-clearance) + env(safe-area-inset-bottom));
 }
 
-.topbar {
-  position: sticky;
-  z-index: 40;
-  top: 0;
-  height: calc(var(--topbar-height) + env(safe-area-inset-top));
-  padding: calc(12px + env(safe-area-inset-top)) 3vw 12px;
-  background: rgba(9, 13, 24, .92);
-  border-bottom: 1px solid rgba(174, 183, 194, .1);
-  backdrop-filter: blur(16px);
+.global-brand {
+  position: fixed;
+  z-index: 45;
+  top: calc(28px + env(safe-area-inset-top));
+  left: max(4vw, 42px);
+  cursor: pointer;
 }
 
-.topbar>button {
-  min-height: 44px;
+.game-chrome {
+  position: fixed;
+  z-index: 40;
+  top: calc(28px + env(safe-area-inset-top));
+  left: max(4vw, 42px);
+  right: max(4vw, 42px);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 42px;
+  pointer-events: none;
+}
+
+.game-chrome .case-heading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  max-width: 48vw;
+  transform: translate(-50%, -50%);
+}
+
+.game-chrome .case-heading b {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.game-chrome .topbar-actions {
+  pointer-events: auto;
 }
 
 .brand-mark.compact {
@@ -1269,8 +1293,21 @@ blockquote {
 }
 
 .app-content {
-  min-height: calc(100vh - var(--topbar-height) - var(--nav-clearance));
-  min-height: calc(100svh - var(--topbar-height) - var(--nav-clearance));
+  min-height: calc(100vh - var(--nav-clearance));
+  min-height: calc(100svh - var(--nav-clearance));
+  padding-top: calc(var(--topbar-height) + env(safe-area-inset-top));
+}
+
+@media (max-width: 760px) {
+  .game-chrome .case-heading {
+    top: calc(100% + 8px);
+    transform: translateX(-50%);
+    max-width: calc(100vw - 40px);
+  }
+
+  .app-content {
+    padding-top: calc(116px + env(safe-area-inset-top));
+  }
 }
 
 .bottom-nav {
@@ -9845,8 +9882,15 @@ blockquote {
     opacity: .61;
   }
 
-  .topbar {
-    padding-inline: 15px;
+  .global-brand {
+    top: calc(18px + env(safe-area-inset-top));
+    left: 20px;
+  }
+
+  .game-chrome {
+    top: calc(18px + env(safe-area-inset-top));
+    left: 20px;
+    right: 20px;
   }
 
   .brand-mark.compact div {
@@ -12264,7 +12308,7 @@ blockquote {
 }
 
 /* Localized landing controls */
-.landing-nav-actions { display: flex; align-items: center; gap: 8px; }
+.landing-nav-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 .language-button { color: var(--amber); padding: 11px; border: none; background: none; }
 .campaign-shelf .locale-availability { margin: 9px 2px 0; color: #a49a89; font: 7px/1.5 monospace; letter-spacing: .04em; }
 
