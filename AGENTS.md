@@ -71,5 +71,6 @@
 - 健康数据默认最小化且可撤销；设备信号只丰富叙事，不得诊断、惩罚、锁线索或伪装未实现的真实连接，详见 [[docs/privacy-and-guardrails]]。
 - 保持“文学性地下都市 × 温暖异步等待”的原创统一语言，参见 [[docs/north-star]] 与 [[docs/art-direction]]。
 - 剧本翻译一次只处理一个案件；必须先读目标故事圣经与 [[docs/translation-guide]]。中英文共享稳定 ID、关系、规则和存档，全部覆盖与验证完成前不得在 `campaignSupportsLocale` 开启目标语言。个人 Skill 可用时调用 `$night-shift-campaign-translation`。
-- 本地提交前按改动范围运行最小验证：代码至少运行 `npm test` 与 `npm run lint`，仅改文档至少运行 `npm run docs:check`，构建配置或入口变化另运行 `npm run build`；直接影响 Sites、合约或浏览器关键路径时再运行对应专项命令。
-- 面向 `main` 的 PR 必须等待 GitHub Actions `CI Gate` 成功。远端门禁统一覆盖 Next 构建、Vinext render、Hardhat 与完整 Playwright；开发者不必在每次提交前本地重跑完整 E2E，但 CI 失败必须在合并前复现、修复并重新验证。
+- 本地提交前按改动范围运行最小验证：代码至少运行 `npm test` 与 `npm run lint`，仅改文档至少运行 `npm run docs:check`，构建配置或入口变化另运行 `npm run build`。
+- 面向 `main` 的 PR 必须等待 GitHub Actions `CI Gate` 成功。远端门禁**只**跑 `Quality`（单元／内容测试、lint、Next 构建、文档双链），目标是快速挡住装不上／测不过／构不出来，而不是做完整产品验收。
+- Vinext render、Hardhat、完整 Playwright **不进 PR 门禁**。它们是合并者本机可选的鲁棒性检验：需要时在合并前拉分支跑 `npm run test:robustness`（或单独的 `test:e2e` / `test:render` / `contract:*`）。贡献者默认不必跟 E2E 打乒乓球；设计／布局问题用预览与人工判断处理。
