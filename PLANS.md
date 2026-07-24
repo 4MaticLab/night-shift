@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-ci-quality-gate]] | `codex/ci-quality-gate` | `completed` | `manual` | 6/6 | 提交完成证据后退役计划 |
+当前 checkout 没有尚未退役的临时计划；已退役计划不再列入活动索引。
 
 ## 使用规则
 
