@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-translation-workflow]] | `codex/translation-workflow` | `in_progress` | `manual` | 4/5 | 完成文档验证并退役计划 |
+| [[plans/codex-translation-workflow]] | `codex/translation-workflow` | `completed` | `manual` | 5/5 | 退役临时计划并创建 PR |
 
 ## 使用规则
 

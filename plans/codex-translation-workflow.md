@@ -1,6 +1,6 @@
 # 剧本翻译规范与 Skill
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P1
 - 创建：2026-07-24
 - 更新：2026-07-24
@@ -34,7 +34,7 @@
 - [x] 在 Agent 手册加入翻译任务入口和护栏。
 - [x] 初始化并编写可发现的个人翻译 Skill。
 - [x] 校验 Skill 结构与指令完整性。
-- [ ] 运行文档检查并完成计划生命周期。
+- [x] 运行文档检查并完成计划生命周期。
 
 ## 验收标准
 
@@ -46,15 +46,16 @@
 
 ## 验证
 
-- `python3 /Users/ame/.codex/skills/.system/skill-creator/scripts/quick_validate.py /Users/ame/.codex/skills/night-shift-campaign-translation`
-- `npm run docs:check`
-- `git diff --check`
+- `python3 /Users/ame/.codex/skills/.system/skill-creator/scripts/quick_validate.py /Users/ame/.codex/skills/night-shift-campaign-translation`：通过。
+- `npm run docs:check`：84 个 Markdown 文件双链通过。
+- `git diff --check`：通过。
 
 ## 决定记录
 
 - 2026-07-24：用户要求提供翻译规范和可交给快模型执行的 Skill。
 - 2026-07-24：规范进入仓库，Skill 安装到个人 Codex Skills 目录；Skill 以仓库规范为长期事实源，避免复制两份术语表。
 - 2026-07-24：`night-shift-campaign-translation` 已由官方初始化脚本创建并通过 `quick_validate.py`；仓库 84 个 Markdown 文件双链通过。
+- 2026-07-24：仓库规范、Agent 入口和个人 Skill 验收完成。
 
 ## 相关文档
 
