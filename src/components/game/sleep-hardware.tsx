@@ -33,6 +33,7 @@ import { projectLiveSleepSignals } from "@/src/lib/sleep-hardware/simulator";
 import type { SleepPermissionId } from "@/src/lib/sleep-hardware/types";
 import { useSleepHardwareStore } from "@/src/stores/sleep-hardware-store";
 import { useI18n } from "@/src/i18n/provider";
+import { useAccessibleDialog } from "@/src/lib/use-accessible-dialog";
 
 const bridgeVirtualMatches = {
   "apple-health": "watch-17",
@@ -63,19 +64,11 @@ export function SleepHardwarePanel({ onClose }: { onClose: () => void }) {
   const ready = authorized && permissionsMatch;
   const connected = Boolean(connectedDevice);
 
+  useAccessibleDialog(panelRef, onClose, { returnFocusSelector: ".sleep-hardware-status" });
+
   useEffect(() => {
-    const escape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    const priorOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     panelRef.current?.scrollTo({ top: 0 });
-    window.addEventListener("keydown", escape);
-    return () => {
-      document.body.style.overflow = priorOverflow;
-      window.removeEventListener("keydown", escape);
-    };
-  }, [onClose]);
+  }, []);
 
   const chooseDevice = (deviceId: typeof selectedDevice.id) => {
     const device = getVirtualSleepDevice(deviceId);
@@ -108,12 +101,12 @@ export function SleepHardwarePanel({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <>
+    <motion.div className="sleep-hardware-layer" data-dialog-layer initial={{ opacity: 1 }} animate={{ opacity: 1 }} exit={{ opacity: 1 }}>
       <motion.button type="button" aria-label={t("关闭睡眠硬件中心")} className="sleep-hardware-scrim" onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
-      <motion.aside ref={panelRef} className="sleep-hardware-panel" role="dialog" aria-modal="true" aria-labelledby="sleep-hardware-title" initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 30, stiffness: 280 }}>
+      <motion.aside ref={panelRef} className="sleep-hardware-panel" role="dialog" aria-modal="true" aria-labelledby="sleep-hardware-title" tabIndex={-1} initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 30, stiffness: 280 }}>
         <header className="sleep-hardware-panel-header">
           <div><small>SOMATIC NIGHT DESK · {t("感官夜班台")}</small><h2 id="sleep-hardware-title">{locale === "en" ? <>Give the faint light<br />of a night to the city.</> : <>把一夜的微光<br />交给城市。</>}</h2></div>
-          <button type="button" onClick={onClose} aria-label={t("关闭")}><X /></button>
+          <button type="button" data-dialog-initial-focus onClick={onClose} aria-label={t("关闭")}><X /></button>
         </header>
         <p className="sleep-hardware-lede">{t("设备信号只会丰富夜行与晨报。没有设备、没有好数据、或中途撤销，都不会让故事失败。")}</p>
 
@@ -232,7 +225,7 @@ export function SleepHardwarePanel({ onClose }: { onClose: () => void }) {
           </section>
         )}
       </motion.aside>
-    </>
+    </motion.div>
   );
 }
 

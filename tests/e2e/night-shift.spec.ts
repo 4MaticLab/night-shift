@@ -40,10 +40,29 @@ async function expectNoVisibleHan(page: import("@playwright/test").Page) {
   expect(visibleText).not.toMatch(/\p{Script=Han}/u);
 }
 
+async function runDemoShortcut(page: import("@playwright/test").Page, name: string | RegExp) {
+  await page.getByRole("button", { name }).click();
+  const confirmation = page.locator(".demo-confirmation");
+  await expect(confirmation).toBeVisible();
+  await confirmation.getByRole("button", { name: /确认|Stage/ }).click();
+}
+
+async function expectDialogLifecycle(page: import("@playwright/test").Page, dialog: import("@playwright/test").Locator) {
+  await expect.poll(() => dialog.evaluate((element) => element.contains(document.activeElement))).toBe(true);
+  await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("hidden");
+  expect(await page.locator("[inert]").count()).toBeGreaterThan(0);
+  for (let index = 0; index < 8; index += 1) {
+    await page.keyboard.press("Tab");
+    expect(await dialog.evaluate((element) => element.contains(document.activeElement))).toBe(true);
+  }
+  await page.keyboard.press("Shift+Tab");
+  expect(await dialog.evaluate((element) => element.contains(document.activeElement))).toBe(true);
+}
+
 async function openMintableCollection(page: import("@playwright/test").Page) {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
-  await page.getByRole("button", { name: /跳到真结局条件/ }).click();
+  await runDemoShortcut(page, /跳到真结局条件/);
   await page.getByRole("button", { name: "收藏", exact: true }).click();
   await expect(page.locator(".collection-page")).toBeVisible();
 }
@@ -65,6 +84,45 @@ test("holds the first interaction behind a real hero-art loading screen", async 
   await expect(caseLibrary.locator(".featured-case")).toContainText("零点四十三分的末班车");
   await expect(caseLibrary.locator(".featured-case")).toContainText("推荐起点");
   await expect(page.locator(".case-teaser")).toHaveCount(0);
+});
+
+test("opens demo controls without changing a fresh save and confirms snapshot writes", async ({ page }) => {
+  await page.goto("/");
+  const trigger = page.getByRole("button", { name: /DEMO MODE/ });
+  await trigger.click();
+  const dialog = page.getByRole("dialog", { name: "演示控制台" });
+  await expect(dialog).toContainText("只打开控制台，不会改动存档");
+  await expect(dialog).toContainText("其他案件的独立存档不会改变");
+  await expectDialogLifecycle(page, dialog);
+  expect(await page.evaluate(() => localStorage.getItem("night-shift-save-v1"))).toBeNull();
+
+  await dialog.getByRole("button", { name: /03 没有退房的307/ }).click();
+  const confirmation = dialog.locator(".demo-confirmation");
+  await expect(confirmation).toContainText("替换成该夜开始时的固定演示快照");
+  expect(await page.evaluate(() => localStorage.getItem("night-shift-save-v1"))).toBeNull();
+  await confirmation.getByRole("button", { name: "取消" }).click();
+  await expect(confirmation).toHaveCount(0);
+  expect(await page.evaluate(() => localStorage.getItem("night-shift-save-v1"))).toBeNull();
+
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => document.body.style.overflow)).not.toBe("hidden");
+  await expect(trigger).toBeFocused();
+  expect(await page.evaluate(() => localStorage.getItem("night-shift-save-v1"))).toBeNull();
+
+  await trigger.click();
+  await runDemoShortcut(page, /03 没有退房的307/);
+  await expect(page.getByText("夜 3")).toBeVisible();
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state);
+  expect(saved).toMatchObject({ started: true, chapter: 3, phase: "day" });
+
+  await page.getByRole("button", { name: "DEMO", exact: true }).click();
+  await dialog.getByRole("button", { name: "重置当前案件存档" }).click();
+  await expect(dialog.locator(".demo-confirmation")).toContainText("其他案件的独立存档不会改变");
+  await dialog.locator(".demo-confirmation").getByRole("button", { name: "取消" }).click();
+  const unchanged = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state);
+  expect(unchanged).toMatchObject({ started: true, chapter: 3, phase: "day" });
+  await page.keyboard.press("Escape");
 });
 
 test.describe("automatic browser locale", () => {
@@ -170,7 +228,7 @@ test("keeps the English first-night handoff usable at 390 × 844", async ({ page
 async function reachFinalDecision(page: import("@playwright/test").Page) {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
-  await page.getByRole("button", { name: /跳到真结局条件/ }).click();
+  await runDemoShortcut(page, /跳到真结局条件/);
   await page.getByRole("button", { name: /去站台等一辆被否认的车/ }).click();
   await page.getByRole("button", { name: /今晚交给你了/ }).click();
   await page.getByRole("button", { name: /跳到清晨/ }).click();
@@ -340,7 +398,7 @@ test("anchors the desktop handoff and resets long-view scroll positions", async 
 test("keeps returned postcards in the journey album", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
-  await page.getByRole("button", { name: /03 没有退房的307/ }).click();
+  await runDemoShortcut(page, /03 没有退房的307/);
   await page.getByRole("button", { name: /收藏/ }).click();
 
   await expect(page.getByText("灯港拒收件")).toBeVisible();
@@ -417,10 +475,12 @@ test("keeps the Injective keepsake desk honest and responsive when deployment is
   await page.setViewportSize({ width: 390, height: 844 });
   await openMintableCollection(page);
   await expect(page.locator(".collectible-card.locked .collectible-mint-trigger")).toHaveCount(0);
-  await page.getByRole("button", { name: "封进 Injective 链上档案" }).first().click();
+  const mintTrigger = page.getByRole("button", { name: "封进 Injective 链上档案" }).first();
+  await mintTrigger.click();
 
   const dialog = page.getByRole("dialog", { name: "把这件夜班藏品封进链上档案" });
   await expect(dialog).toBeVisible();
+  await expectDialogLifecycle(page, dialog);
   await expect(dialog).toContainText("链上档案尚未开门");
   await expect(dialog).toContainText("本地收藏和主线不受影响");
   await expectNoPageOverflow(page);
@@ -449,6 +509,7 @@ test("keeps the Injective keepsake desk honest and responsive when deployment is
   await dialog.getByRole("button", { name: "关闭链上归档" }).click();
   await expect(dialog).toHaveCount(0);
   await expect.poll(() => page.evaluate(() => getComputedStyle(document.body).overflow)).not.toBe("hidden");
+  await expect(mintTrigger).toBeFocused();
 });
 
 test("stores an Injective explorer receipt after the wallet finds an existing mint", async ({ page }) => {
@@ -524,7 +585,7 @@ test("stores an Injective explorer receipt after the wallet finds an existing mi
 test("returns a prior society answer in a later letter", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
-  await page.getByRole("button", { name: /03 没有退房的307/ }).click();
+  await runDemoShortcut(page, /03 没有退房的307/);
   await page.getByRole("button", { name: /替307号房完成退房/ }).click();
   await page.getByRole("button", { name: /今晚交给你了/ }).click();
   await page.getByRole("button", { name: /跳到清晨/ }).click();
@@ -590,7 +651,7 @@ test("restores and settles a real night after reload", async ({ page }) => {
 test("builds a core inference by connecting two evidence cards", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
-  await page.getByRole("button", { name: /解锁完整案件板/ }).click();
+  await runDemoShortcut(page, /解锁完整案件板/);
   await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
   await expect(page.getByRole("heading", { name: "四十三天" })).toBeVisible();
   await expect(page.getByText(/某位顾客长期迟到而形成的礼貌习惯/)).toBeVisible();
@@ -626,12 +687,14 @@ test("builds a core inference by connecting two evidence cards", async ({ page }
 test("shares one clue as a QR deep link", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
-  await page.getByRole("button", { name: /解锁完整案件板/ }).click();
+  await runDemoShortcut(page, /解锁完整案件板/);
   await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
-  await page.getByRole("button", { name: /送给好友/ }).click();
+  const shareTrigger = page.getByRole("button", { name: /送给好友/ });
+  await shareTrigger.click();
 
   const dialog = page.getByRole("dialog", { name: /把「四十三天」/ });
   await expect(dialog).toBeVisible();
+  await expectDialogLifecycle(page, dialog);
   await expect(dialog.getByText(/不会附带你的夜班进度/)).toBeVisible();
   await expect(dialog.getByLabel("好友线索链接")).toHaveValue(`${new URL(page.url()).origin}/?case=case-001&clue=flower-cycle`);
   await expect(dialog.getByRole("img", { name: /分享线索「四十三天」的二维码/ })).toHaveAttribute("src", /^data:image\/png;base64,/);
@@ -639,6 +702,7 @@ test("shares one clue as a QR deep link", async ({ page }) => {
   await expect(dialog.getByRole("button", { name: "链接已复制" })).toBeVisible();
   await dialog.getByRole("button", { name: "关闭线索分享" }).click();
   await expect(dialog).toHaveCount(0);
+  await expect(shareTrigger).toBeFocused();
 });
 
 test("receives a friend clue from a validated query without advancing the case", async ({ page }) => {
@@ -699,7 +763,7 @@ test("rejects an unknown friend clue without starting a save", async ({ page }) 
 test("remembers a hand-arranged evidence desk after reload", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
-  await page.getByRole("button", { name: /解锁完整案件板/ }).click();
+  await runDemoShortcut(page, /解锁完整案件板/);
   await expect(page.locator(".demo-drawer")).toHaveCount(0);
   const handle = page.locator('.react-flow__node[data-id="ticket-date"] .board-node-drag-handle');
   await handle.scrollIntoViewIfNeeded();
@@ -806,7 +870,7 @@ test.describe("tablet portrait 820x1180", () => {
   test("keeps the case board and inference desk in one touch-scroll flow", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("button", { name: /DEMO MODE/ }).click();
-    await page.getByRole("button", { name: /解锁完整案件板/ }).click();
+    await runDemoShortcut(page, /解锁完整案件板/);
     await expect(page.locator(".demo-drawer")).toHaveCount(0);
 
     await expect(page.locator(".board-workspace")).toHaveCSS("flex-direction", "column");
@@ -922,6 +986,8 @@ test.describe("mobile 390x844", () => {
     await openFirstNight(page);
     const intention = "x".repeat(160);
     await page.getByLabel("放下纸条").fill(intention);
+    await page.getByLabel("放下纸条").press("Shift+D");
+    await expect(page.locator(".demo-drawer")).toHaveCount(0);
     await expect(page.getByRole("button", { name: /请 AI 替林渡选择晨间短笺风格/ })).toHaveAttribute("aria-pressed", "false");
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /今晚交给你了/ }).click();
@@ -937,7 +1003,11 @@ test.describe("mobile 390x844", () => {
     await expect(hardwareEntry).toContainText("睡眠设备");
     await expectMinimumTapTargets(hardwareEntry);
     await hardwareEntry.click();
-    await expect(page.getByRole("dialog", { name: /把一夜的微光/ })).toBeVisible();
+    const hardwareDialog = page.getByRole("dialog", { name: /把一夜的微光/ });
+    await expect(hardwareDialog).toBeVisible();
+    await expectDialogLifecycle(page, hardwareDialog);
+    await page.keyboard.press("Shift+D");
+    await expect(page.locator(".demo-drawer")).toHaveCount(0);
     await expect(page.locator(".sleep-device-grid img")).toHaveCount(4);
     await expectMinimumTapTargets(page.locator(".sleep-source-tabs button, .sleep-device-grid > button, .sleep-hardware-panel-header > button"));
     await expectNoPageOverflow(page);
@@ -946,13 +1016,15 @@ test.describe("mobile 390x844", () => {
     await expect(page.getByText("连接完成，可以回到游戏了")).toBeVisible();
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: "关闭", exact: true }).click();
+    await expect(hardwareDialog).toHaveCount(0);
     await expect(page.locator(".sleep-handoff-card")).toContainText("静默枕已待命");
+    await expect(hardwareEntry).toBeFocused();
   });
 
   test("switches focused collection drawers and connects evidence on a phone", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("button", { name: /DEMO MODE/ }).click();
-    await page.getByRole("button", { name: /04 地图上被刮掉的线/ }).click();
+    await runDemoShortcut(page, /04 地图上被刮掉的线/);
     await page.getByRole("button", { name: "收藏", exact: true }).click();
     await expect(page.locator(".collection-page")).toBeVisible();
     const archiveIndex = page.getByRole("navigation", { name: "收藏档案分类" });
@@ -978,7 +1050,7 @@ test.describe("mobile 390x844", () => {
     await expectNoPageOverflow(page);
 
     await page.getByRole("button", { name: /DEMO/ }).click();
-    await page.getByRole("button", { name: /解锁完整案件板/ }).click();
+    await runDemoShortcut(page, /解锁完整案件板/);
     await expect(page.locator(".demo-drawer")).toHaveCount(0);
     await expect(page.getByRole("region", { name: "联合推理操作台" })).toContainText("上下滑动可以继续阅档");
     await expect(page.locator(".board-node-drag-handle").first()).toBeHidden();
