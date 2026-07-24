@@ -3268,6 +3268,27 @@ blockquote {
   }
 }
 
+.bottom-nav button {
+  position: relative;
+}
+
+.nav-ready-badge {
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border: 1px solid #f0d7a5;
+  border-radius: 9px;
+  background: #8b4f4c;
+  color: #fff8e8;
+  display: grid;
+  place-items: center;
+  font: normal 8px monospace;
+  box-shadow: 0 2px 7px #0007;
+}
+
 .page-title {
   min-height: 250px;
   display: flex;
@@ -12193,4 +12214,596 @@ blockquote {
   grid-template-columns: 28px 1fr;
   gap: 10px;
   align-items: center;
+}
+
+/* Searchable evidence archive and deterministic synthesis desk.
+   This reuses the existing case-board paper, brass, ink, and dossier assets. */
+.evidence-archive-page {
+  padding-bottom: calc(108px + env(safe-area-inset-bottom));
+}
+
+.evidence-archive-layout {
+  width: min(1280px, calc(100% - 48px));
+  margin: 0 auto 36px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(330px, 370px);
+  gap: 20px;
+  align-items: start;
+}
+
+.evidence-library {
+  min-width: 0;
+  border: 12px solid #252119;
+  background:
+    linear-gradient(#080b1080, #080b1045),
+    url("/art/ui/case-board-crumpled-paper-v2.png") center / cover;
+  box-shadow: inset 0 0 70px #0009, 0 18px 45px #0005;
+}
+
+.evidence-library-toolbar {
+  padding: 16px;
+  border-bottom: 1px solid #8c7b5f;
+  background: linear-gradient(135deg, #171d25f5, #202735f2);
+  color: var(--paper);
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(220px, 310px);
+  gap: 12px 16px;
+  align-items: center;
+}
+
+.evidence-library-toolbar > div:first-child small,
+.synthesis-desk > header > small,
+.ready-synthesis-card > small,
+.filed-inference-list > small {
+  color: var(--amber);
+  font: 8px monospace;
+  letter-spacing: .13em;
+}
+
+.evidence-library-toolbar h3 {
+  margin: 4px 0 0;
+  color: var(--paper);
+  font-size: 24px;
+}
+
+.evidence-search {
+  min-height: 46px;
+  padding: 0 12px;
+  border: 1px solid #677286;
+  background: #0d1522;
+  display: grid;
+  grid-template-columns: 19px 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.evidence-search:focus-within {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 2px #c59a5a33;
+}
+
+.evidence-search svg {
+  width: 17px;
+  color: #9ba7b7;
+}
+
+.evidence-search input {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--paper);
+  font: 12px var(--font-noto-serif-sc);
+}
+
+.evidence-search input::placeholder {
+  color: #7d8898;
+}
+
+.evidence-filter-row {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.evidence-filter-row button {
+  min-height: 38px;
+  padding: 7px 12px;
+  border: 1px solid #4a5669;
+  background: #121b2a;
+  color: #aeb7c4;
+  font: 10px var(--font-noto-serif-sc);
+  cursor: pointer;
+}
+
+.evidence-filter-row button[aria-pressed="true"] {
+  border-color: var(--amber);
+  background: #2f2b27;
+  color: #f2dfbc;
+  box-shadow: inset 0 -2px 0 var(--amber);
+}
+
+.evidence-filter-row button:focus-visible,
+.evidence-archive-card:focus-visible,
+.synthesis-inputs button:focus-visible,
+.synthesis-action:focus-visible,
+.filed-inference-list button:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+.evidence-archive-grid {
+  padding: 26px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.evidence-archive-card {
+  --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-01.png");
+  min-height: 226px;
+  padding: 30px 18px 17px;
+  position: relative;
+  border: 0;
+  background-color: #e8dcc4;
+  background-image: var(--evidence-paper);
+  background-position: 70% center;
+  background-size: cover;
+  color: #282925;
+  box-shadow: 3px 8px 16px #0008;
+  text-align: left;
+  cursor: pointer;
+  transform: rotate(-.35deg);
+  transition: transform .16s ease, box-shadow .16s ease;
+}
+
+.evidence-archive-card.evidence-paper-1 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-01.png"); }
+.evidence-archive-card.evidence-paper-2 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-02.png"); }
+.evidence-archive-card.evidence-paper-3 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-03.png"); }
+.evidence-archive-card.evidence-paper-4 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-04.png"); }
+.evidence-archive-card.evidence-paper-5 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-05.png"); }
+.evidence-archive-card.evidence-paper-6 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-06.png"); }
+.evidence-archive-card.evidence-paper-7 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-07.png"); }
+
+.evidence-archive-card:hover {
+  transform: translateY(-4px) rotate(.15deg);
+  box-shadow: 5px 14px 24px #000a;
+}
+
+.evidence-archive-card.inference {
+  background-image:
+    linear-gradient(135deg, #d9e3d14d, #bdcbb65c),
+    var(--evidence-paper);
+  box-shadow: 3px 8px 16px #0008, inset 0 0 0 2px #698d89;
+}
+
+.evidence-card-pin {
+  position: absolute;
+  left: 50%;
+  top: 7px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #a86158;
+  box-shadow: 0 2px 3px #0005;
+  transform: translateX(-50%);
+}
+
+.evidence-archive-card.inference .evidence-card-pin {
+  background: #698d89;
+}
+
+.evidence-card-seal {
+  position: absolute;
+  left: 9px;
+  top: 10px;
+  width: 30px;
+  height: 30px;
+  filter: drop-shadow(0 1px 1px #3b271f66);
+}
+
+.evidence-archive-card > small {
+  display: block;
+  min-height: 13px;
+  padding-left: 27px;
+  padding-right: 12px;
+  color: #8d6749;
+  font: 7px monospace;
+  letter-spacing: .12em;
+}
+
+.evidence-archive-card > b {
+  display: block;
+  margin: 17px 0 9px;
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
+  font-size: 21px;
+  line-height: 1.25;
+}
+
+.evidence-archive-card > p {
+  margin: 0;
+  color: #55564f;
+  font-size: 10px;
+  line-height: 1.65;
+}
+
+.evidence-card-action {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 14px;
+  padding-top: 8px;
+  border-top: 1px solid #7a6c5855;
+  color: #6e5337;
+  font: 8px monospace;
+  letter-spacing: .08em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.evidence-card-action svg {
+  width: 13px;
+  height: 13px;
+}
+
+.evidence-archive-card > em {
+  position: absolute;
+  right: 9px;
+  top: 9px;
+  padding: 3px 5px;
+  border: 1px solid #6d877f;
+  background: #d6e0d3;
+  color: #46645e;
+  font: normal 7px monospace;
+}
+
+.evidence-archive-empty {
+  min-height: 430px;
+  padding: 42px 24px;
+  color: #d4c7ad;
+  display: grid;
+  place-content: center;
+  text-align: center;
+}
+
+.evidence-archive-empty svg {
+  width: 38px;
+  height: 38px;
+  margin: 0 auto;
+  color: var(--amber);
+}
+
+.evidence-archive-empty h3 {
+  margin: 14px 0 4px;
+  font-size: 27px;
+}
+
+.evidence-archive-empty p {
+  max-width: 360px;
+  color: #8f99a7;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.synthesis-desk {
+  position: sticky;
+  top: 78px;
+  max-height: calc(100svh - 164px);
+  overflow: auto;
+  border: 12px solid #252119;
+  background:
+    linear-gradient(150deg, #172235f7, #101827fa),
+    url("/art/ui/case-board-crumpled-paper-v2.png") center / cover;
+  color: var(--paper);
+  box-shadow: inset 0 0 45px #0008, 0 18px 45px #0005;
+}
+
+.synthesis-desk > header {
+  padding: 21px 19px 17px;
+  border-bottom: 1px solid #495365;
+}
+
+.synthesis-desk h3 {
+  margin: 6px 0 8px;
+  color: var(--paper);
+  font-size: 25px;
+  line-height: 1.25;
+}
+
+.synthesis-desk > header > p,
+.synthesis-waiting p {
+  margin: 0;
+  color: #9ba6b5;
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.synthesis-progress {
+  margin-top: 14px;
+  padding-top: 11px;
+  border-top: 1px dashed #495365;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #b8c1ce;
+  font-size: 9px;
+}
+
+.synthesis-progress b {
+  color: var(--amber);
+  font: 17px var(--font-playfair), var(--font-noto-serif-sc);
+}
+
+.ready-synthesis-list {
+  padding: 15px;
+}
+
+.ready-synthesis-card {
+  padding: 15px;
+  border: 1px solid #7a9b92;
+  background: linear-gradient(145deg, #1a3038, #14262f);
+  box-shadow: inset 0 0 0 1px #d8c9aa1c;
+}
+
+.ready-synthesis-card + .ready-synthesis-card {
+  margin-top: 12px;
+}
+
+.synthesis-inputs {
+  margin: 11px 0 13px;
+  display: grid;
+  gap: 7px;
+}
+
+.synthesis-inputs > span {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+}
+
+.synthesis-inputs > span:first-child {
+  grid-template-columns: 1fr;
+}
+
+.synthesis-inputs i {
+  color: var(--amber);
+  font: normal 16px var(--font-playfair);
+  text-align: center;
+}
+
+.synthesis-inputs button {
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid #89785e;
+  background: #d9caaa;
+  color: #34342f;
+  font: 600 12px var(--font-playfair), var(--font-noto-serif-sc);
+  text-align: left;
+  cursor: pointer;
+}
+
+.synthesis-action {
+  width: 100%;
+  min-height: 50px;
+  padding: 10px 12px;
+  border: 1px solid var(--amber);
+  background: #2d2a27;
+  color: var(--paper);
+  display: grid;
+  grid-template-columns: 19px 1fr 16px;
+  gap: 8px;
+  align-items: center;
+  font: 11px var(--font-noto-serif-sc);
+  text-align: left;
+  cursor: pointer;
+}
+
+.synthesis-action svg {
+  width: 16px;
+  height: 16px;
+  color: var(--amber);
+}
+
+.synthesis-waiting {
+  min-height: 180px;
+  padding: 26px 18px;
+  border: 1px dashed #4b586a;
+  background: #0d1523aa;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.synthesis-waiting > svg {
+  width: 25px;
+  color: #7e8b9d;
+}
+
+.synthesis-waiting b {
+  margin: 11px 0 6px;
+  color: #d1d8e1;
+  font: 17px var(--font-playfair), var(--font-noto-serif-sc);
+}
+
+.filed-inference-list {
+  padding: 0 15px 17px;
+}
+
+.filed-inference-list > small {
+  display: block;
+  margin: 2px 0 8px;
+}
+
+.filed-inference-list > button {
+  width: 100%;
+  min-height: 56px;
+  padding: 8px 9px;
+  border: 1px solid #3f5f60;
+  background: #152937;
+  color: var(--paper);
+  display: grid;
+  grid-template-columns: 22px 1fr 15px;
+  gap: 8px;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+}
+
+.filed-inference-list > button + button {
+  margin-top: 7px;
+}
+
+.filed-inference-list > button > svg:first-child {
+  width: 18px;
+  color: #8fb9b0;
+}
+
+.filed-inference-list > button > svg:last-child {
+  width: 14px;
+  color: #8290a2;
+}
+
+.filed-inference-list button span {
+  min-width: 0;
+}
+
+.filed-inference-list button small,
+.filed-inference-list button b {
+  display: block;
+}
+
+.filed-inference-list button small {
+  color: #79a49b;
+  font: 7px monospace;
+}
+
+.filed-inference-list button b {
+  margin-top: 2px;
+  font: 12px/1.35 var(--font-playfair), var(--font-noto-serif-sc);
+}
+
+.evidence-letter-inputs {
+  margin: 18px 0 4px;
+  padding: 13px;
+  border: 1px dashed #796b575f;
+  background: #d5c5a7;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.evidence-letter-inputs span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.evidence-letter-inputs i {
+  color: #8b5c49;
+  font-style: normal;
+}
+
+.evidence-letter-inputs b {
+  padding: 6px 8px;
+  border: 1px solid #8f7b5e;
+  background: #e4d6bc;
+  font: 12px var(--font-playfair), var(--font-noto-serif-sc);
+}
+
+@media (max-width: 1080px) {
+  .evidence-archive-layout {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+
+  .evidence-archive-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .evidence-archive-layout {
+    width: calc(100% - 28px);
+    grid-template-columns: 1fr;
+  }
+
+  .synthesis-desk {
+    position: relative;
+    top: auto;
+    max-height: none;
+    overflow: visible;
+    grid-row: 1;
+  }
+
+  .evidence-library {
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 600px) {
+  .evidence-archive-page {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+
+  .evidence-archive-layout {
+    width: calc(100% - 16px);
+    gap: 12px;
+  }
+
+  .evidence-library,
+  .synthesis-desk {
+    border-width: 7px;
+  }
+
+  .evidence-library-toolbar {
+    padding: 14px 12px;
+    grid-template-columns: 1fr;
+  }
+
+  .evidence-search {
+    min-height: 48px;
+  }
+
+  .evidence-filter-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .evidence-filter-row button {
+    min-height: 44px;
+  }
+
+  .evidence-archive-grid {
+    padding: 17px 14px;
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .evidence-archive-card {
+    min-height: 210px;
+    padding-inline: 17px;
+  }
+
+  .synthesis-desk > header {
+    padding: 18px 15px 15px;
+  }
+
+  .ready-synthesis-list {
+    padding: 12px;
+  }
+
+  .evidence-letter-inputs {
+    display: grid;
+  }
+
+  .evidence-letter-inputs span {
+    display: grid;
+    grid-template-columns: 18px 1fr;
+  }
+
+  .evidence-letter-inputs span:first-child {
+    grid-template-columns: 1fr;
+  }
 }

@@ -4,7 +4,7 @@ import {
   cityDistrictSchema,
   cityWatchEchoSchema,
   endingEpilogueSchema,
-  evidenceRelationSchema,
+  evidenceSynthesisSchema,
   journeyPostcardSchema,
   nightBotanicalSchema,
   routeDirectionSchema,
@@ -221,26 +221,26 @@ const chihayaNoaRoutes: RouteDirection[] = chihayaNoaCase.chapters.flatMap((chap
   })),
 );
 
-const chihayaNoaRelations = [
+const chihayaNoaSyntheses = [
   {
     id: "noa-resets-left-travelers",
-    clueIds: ["twelve-entry-stamps", "paper-knot-route"],
-    statement: "每次城市重置都留下了一位真实旅行者",
+    inputIds: ["twelve-entry-stamps", "paper-knot-route"],
+    title: "每次城市重置都留下了一位真实旅行者",
     explanation: "十二份合法入境记录与十二套只能由亲自走过者留下的纸结路线逐层对应，证明旧诺亚不是一次性复制品。",
   },
   {
     id: "noa-unmade-lives-continue",
-    clueIds: ["mirror-shard-memory", "unmade-address-book"],
-    statement: "未成线中的诺亚仍拥有连续生活",
+    inputIds: ["mirror-shard-memory", "unmade-address-book"],
+    title: "未成线中的诺亚仍拥有连续生活",
     explanation: "返照镜片中的房间细节与住址簿里的租住、借书和工作记录互相验证，旧版本在被主城排除后仍作为人生活。",
   },
   {
     id: "noa-observer-performs-erasure",
-    clueIds: ["observer-chair-log", "thirteen-signed-tickets"],
-    statement: "抹除来自观察者裁决，不来自镜子辨认真伪",
+    inputIds: ["observer-chair-log", "thirteen-signed-tickets"],
+    title: "抹除来自观察者裁决，不来自镜子辨认真伪",
     explanation: "裁决记录显示每次线路坍缩都发生在观察者签字之后，而十三张签名票证明没有任何一位缺少独立人生。",
   },
-].map((item) => evidenceRelationSchema.parse(item));
+].map((item) => evidenceSynthesisSchema.parse(item));
 
 const chihayaNoaEndings: EndingEpilogue[] = [
   {
@@ -433,7 +433,7 @@ export const chihayaNoaCampaign = defineCampaign({
   version: 1,
   case: chihayaNoaCase,
   routes: chihayaNoaRoutes,
-  relations: chihayaNoaRelations,
+  syntheses: chihayaNoaSyntheses,
   endings: chihayaNoaEndings,
   postcards: chihayaNoaPostcards,
   botanicals: chihayaNoaBotanicals,
@@ -445,7 +445,7 @@ export const chihayaNoaCampaign = defineCampaign({
     trueEndingId: "return",
     requiredClueCount: chihayaNoaCase.clues.length,
     requiredCollectibleCount: 7,
-    requiredRelationCount: chihayaNoaRelations.length,
+    requiredSynthesisCount: chihayaNoaSyntheses.length,
   },
   presentation: {
     archiveNumber: "004",

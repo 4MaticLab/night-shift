@@ -17,6 +17,7 @@ import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import type { SleepMode, SleepQuality, WakeEcho } from "@/src/lib/game-engine/schema";
 import { elapsedSessionMinutes, formatSleepDuration, nightSealProgress } from "@/src/lib/game-engine/sleep-session";
 import { useGameStore } from "@/src/stores/game-store";
+import { getReadyEvidenceSyntheses } from "@/src/lib/game-engine/evidence-synthesis";
 import { BotanicalSpecimen, CityRoute, PaperCard, qualityCopy, Seal, SocietyCrest } from "./shared";
 import type { GameView } from "./types";
 import { SleepHardwareHandoff, SleepHardwareMorningReceipt, SleepHardwareNightTelemetry } from "./sleep-hardware";
@@ -224,6 +225,8 @@ export function MorningReport({ reportChapter, reviewingCurrentMorning, onReview
     restRitualHistory,
     answerCorrespondence,
     completeRestReflection,
+    unlockedClueIds,
+    synthesizedEvidenceIds,
   } = useGameStore();
   const { campaign, localize, locale, t } = useI18n();
   const chapter = reportChapter;
@@ -270,6 +273,11 @@ export function MorningReport({ reportChapter, reviewingCurrentMorning, onReview
   const wakeEchoId = reportSleepSession?.wakeEcho?.echoId ?? growthRecord?.wakeEchoId;
   const wakeEcho = wakeEchoId ? getCampaignWakeEchoById(campaign, wakeEchoId) : null;
   const restRitual = restRitualHistory[chapter];
+  const readyInferenceCount = getReadyEvidenceSyntheses({
+    syntheses: campaign.syntheses,
+    unlockedClueIds,
+    synthesizedEvidenceIds,
+  }).length;
   const reportClock = reportSleepSession?.mode === "real" && reportSleepSession.endedAt
     ? new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(reportSleepSession.endedAt))
     : "05:28";
@@ -364,7 +372,7 @@ export function MorningReport({ reportChapter, reviewingCurrentMorning, onReview
       <section className="discoveries"><div className="dark-heading"><span>06</span><div><small>NEW EVIDENCE</small><h3>{t("新发现")}</h3></div></div><div className="evidence-row">{foundClues.map((clue) => <PaperCard key={clue.id} className="evidence-card"><div className="evidence-icon">{clue.type === "contradiction" ? <Lightbulb /> : <FileText />}</div><Seal>{clue.type === "contradiction" ? t("矛盾") : t("线索")}</Seal><h4>{clue.title}</h4><p>{clue.detail}</p></PaperCard>)}{foundItems.map((item) => { const art = getAsset(item.assetId); return <PaperCard key={item.id} className="evidence-card collectible"><div className="evidence-art"><Image src={art.src} alt={art.alt} width={180} height={180} /></div><Seal>{t("收藏")} · {item.rarity}</Seal><h4>{item.title}</h4><p>{item.surfaceDescription}</p></PaperCard>; })}</div></section>
       <PaperCard className="contradiction"><span>NEW QUESTION · {t("新的矛盾")}</span><blockquote>“{current.contradiction}”</blockquote><p>{t("把它带回案件板。白天的推理由你完成。")}</p></PaperCard>
       <div className="report-action">
-        <button className="report-board-action" onClick={onReviewEvidence}><FileText size={18} />{t("去案件板整理线索")}</button>
+        <button className="report-board-action" onClick={onReviewEvidence}><FileText size={18} />{readyInferenceCount > 0 ? (locale === "en" ? `${readyInferenceCount} inference${readyInferenceCount > 1 ? "s" : ""} ready to file` : `${readyInferenceCount} 条新推论可以整理`) : (locale === "en" ? "Open the evidence archive" : "去线索档案继续整理")}</button>
         <button className="primary-button" onClick={reviewingCurrentMorning ? onFinishDay : onPrepareTonight}>{reviewingCurrentMorning ? (chapter === campaign.case.chapters.at(-1)!.number ? t("做出最终决定") : t("结束今日，准备下一夜")) : t("去准备今晚")}<ArrowRight size={18} /></button>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { nightShiftCase } from "@/src/content/case";
 import { routeDirections } from "@/src/content/routes";
-import { evidenceRelations } from "@/src/content/relations";
+import { evidenceSyntheses } from "@/src/content/relations";
 import { endingEpilogues } from "@/src/content/endings";
 import { journeyPostcards } from "@/src/content/postcards";
 import { nightBotanicals } from "@/src/content/botany";
@@ -17,7 +17,7 @@ export const lastTramCampaign = defineCampaign({
   version: 1,
   case: nightShiftCase,
   routes: routeDirections,
-  relations: evidenceRelations,
+  syntheses: evidenceSyntheses,
   endings: endingEpilogues,
   postcards: journeyPostcards,
   botanicals: nightBotanicals,
@@ -29,7 +29,7 @@ export const lastTramCampaign = defineCampaign({
     trueEndingId: "return",
     requiredClueCount: nightShiftCase.clues.length,
     requiredCollectibleCount: 7,
-    requiredRelationCount: evidenceRelations.length,
+    requiredSynthesisCount: evidenceSyntheses.length,
   },
   presentation: {
     archiveNumber: "001",

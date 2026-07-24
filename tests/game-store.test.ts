@@ -157,8 +157,8 @@ describe("Night Shift game store", () => {
     expect(completed.phase).toBe("ending");
     expect(completed.completedReports).toHaveLength(thirteenthLoafCampaign.case.chapters.length);
     expect(completed.unlockedClueIds).toEqual(thirteenthLoafCampaign.case.clues.map((clue) => clue.id));
-    for (const relation of thirteenthLoafCampaign.relations) {
-      expect(storeModule.useGameStore.getState().connectClues(relation.clueIds[0], relation.clueIds[1])).toBe(relation.id);
+    for (const synthesis of thirteenthLoafCampaign.syntheses) {
+      expect(storeModule.useGameStore.getState().synthesizeEvidence(synthesis.id)).toBe(true);
     }
     storeModule.useGameStore.getState().chooseEnding("return");
     expect(storeModule.useGameStore.getState().endingId).toBe("return");
@@ -181,8 +181,8 @@ describe("Night Shift game store", () => {
     expect(completed.phase).toBe("ending");
     expect(completed.completedReports).toHaveLength(chihayaNoaCampaign.case.chapters.length);
     expect(completed.unlockedClueIds).toEqual(chihayaNoaCampaign.case.clues.map((clue) => clue.id));
-    for (const relation of chihayaNoaCampaign.relations) {
-      expect(storeModule.useGameStore.getState().connectClues(relation.clueIds[0], relation.clueIds[1])).toBe(relation.id);
+    for (const synthesis of chihayaNoaCampaign.syntheses) {
+      expect(storeModule.useGameStore.getState().synthesizeEvidence(synthesis.id)).toBe(true);
     }
     storeModule.useGameStore.getState().chooseEnding("return");
     expect(storeModule.useGameStore.getState().endingId).toBe("return");
@@ -299,15 +299,18 @@ describe("Night Shift game store", () => {
     expect(Object.keys(migrated.restRitualHistory)).toEqual(["1"]);
   });
 
-  it("migrates legacy saves with session defaults", () => {
+  it("clears saves from storage versions before the synthesis archive", () => {
     const migrated = storeModule.migrateGameState({
       started: true,
       chapter: 2,
       phase: "night",
       quality: "regular",
       unlockedClueIds: ["ticket-date"],
-    });
+    }, 17);
 
+    expect(migrated.started).toBe(false);
+    expect(migrated.chapter).toBe(1);
+    expect(migrated.phase).toBe("day");
     expect(migrated.sleepMode).toBe("demo");
     expect(migrated.campaignId).toBe(DEFAULT_CAMPAIGN_ID);
     expect(migrated.campaignSaves).toEqual({});
@@ -318,12 +321,12 @@ describe("Night Shift game store", () => {
     expect(migrated.growthHistory).toEqual({});
     expect(migrated.societyHistory).toEqual({});
     expect(migrated.correspondenceHistory).toEqual({});
-    expect(migrated.journeySeed).toBe(DEMO_JOURNEY_SEED);
+    expect(migrated.journeySeed).toBe(0);
     expect(migrated.souvenirHistory).toEqual({});
     expect(migrated.opportunityHistory).toEqual({});
     expect(migrated.restRitualHistory).toEqual({});
     expect(migrated.receivedClueIds).toEqual([]);
-    expect(migrated.boardPositions).toEqual({});
+    expect(migrated.synthesizedEvidenceIds).toEqual([]);
     expect(migrated.nightSealIds).toEqual([]);
     expect(migrated.selectedPreparationId).toBe("");
   });
@@ -369,12 +372,8 @@ describe("Night Shift game store", () => {
       unlockedClueIds: ["ticket-date", "radio-warm-dial"],
       receivedClueIds: ["postcard", "radio-warm-dial"],
       unlockedCollectibleIds: ["torn-ticket", "radio-dial"],
-      confirmedRelations: ["mina-evelyn", rainRadioCampaign.relations[0].id],
+      synthesizedEvidenceIds: ["mina-evelyn", rainRadioCampaign.syntheses[0].id],
       choiceHistory: { 1: "source" },
-      boardPositions: {
-        "ticket-date": { x: 100, y: 100 },
-        "radio-warm-dial": { x: 200, y: 140 },
-      },
       growthHistory: {
         1: {
           chapter: 1,
@@ -392,10 +391,9 @@ describe("Night Shift game store", () => {
     expect(migrated.unlockedClueIds).toEqual(["radio-warm-dial"]);
     expect(migrated.receivedClueIds).toEqual(["radio-warm-dial"]);
     expect(migrated.unlockedCollectibleIds).toEqual(["radio-dial"]);
-    expect(migrated.confirmedRelations).toEqual([rainRadioCampaign.relations[0].id]);
+    expect(migrated.synthesizedEvidenceIds).toEqual([rainRadioCampaign.syntheses[0].id]);
     expect(migrated.choiceHistory).toEqual({});
     expect(migrated.growthHistory[1]?.choiceId).toBe("dial");
-    expect(migrated.boardPositions).toEqual({ "radio-warm-dial": { x: 200, y: 140 } });
   });
 
   it("repairs a pre-third-case save that carries a choice from another case", () => {
@@ -418,29 +416,15 @@ describe("Night Shift game store", () => {
     expect(migrated.growthHistory[1]?.choiceId).toBe("cabinet");
   });
 
-  it("persists valid evidence positions and can restore the default desk", () => {
+  it("only synthesizes ready evidence and persists the result", () => {
     const state = storeModule.useGameStore.getState();
-    expect(state.setBoardPosition("ticket-date", { x: 120, y: 90 })).toBe(false);
+    expect(state.synthesizeEvidence("mina-evelyn")).toBe(false);
 
     state.unlockBoard();
-    expect(storeModule.useGameStore.getState().setBoardPosition("ticket-date", { x: 418.5, y: 207 })).toBe(true);
-    expect(storeModule.useGameStore.getState().setBoardPosition("ticket-date", { x: Number.POSITIVE_INFINITY, y: 0 })).toBe(false);
-    expect(storeModule.useGameStore.getState().boardPositions).toEqual({ "ticket-date": { x: 418.5, y: 207 } });
-    expect(memoryStorage.getItem("night-shift-save-v1")).toContain('"ticket-date"');
-
-    storeModule.useGameStore.getState().resetBoardPositions();
-    expect(storeModule.useGameStore.getState().boardPositions).toEqual({});
-  });
-
-  it("drops malformed board coordinates while migrating older saves", () => {
-    const migrated = storeModule.migrateGameState({
-      boardPositions: {
-        "ticket-date": { x: 240, y: 160 },
-        broken: { x: "left", y: null },
-      },
-    });
-
-    expect(migrated.boardPositions).toEqual({ "ticket-date": { x: 240, y: 160 } });
+    expect(storeModule.useGameStore.getState().synthesizeEvidence("mina-evelyn")).toBe(true);
+    expect(storeModule.useGameStore.getState().synthesizeEvidence("mina-evelyn")).toBe(false);
+    expect(storeModule.useGameStore.getState().synthesizedEvidenceIds).toEqual(["mina-evelyn"]);
+    expect(memoryStorage.getItem("night-shift-save-v1")).toContain('"mina-evelyn"');
   });
 
   it("receives one whitelisted friend clue without advancing the case", () => {
@@ -455,7 +439,7 @@ describe("Night Shift game store", () => {
     expect(received.unlockedClueIds).toEqual(["flower-cycle"]);
     expect(received.receivedClueIds).toEqual(["flower-cycle"]);
     expect(received.completedReports).toEqual([]);
-    expect(received.confirmedRelations).toEqual([]);
+    expect(received.synthesizedEvidenceIds).toEqual([]);
     expect(received.receiveSharedClue("flower-cycle")).toBe("already-received");
 
     const migrated = storeModule.migrateGameState({
