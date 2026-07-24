@@ -6,6 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
+| [[plans/feat-tarot-card-draw-92]] | `feat/tarot-card-draw-92` | `in_progress` | `auto` | 0% | 定义夜兆牌组与每日抽取契约 |
 
 ## 使用规则
 
