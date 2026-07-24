@@ -131,7 +131,7 @@ test("returns to the surface that opened demo controls", async ({ page }) => {
   await runDemoShortcut(page, /03 没有退房的307/);
 
   const surfaces = [
-    { name: "今晨", locator: ".empty-report" },
+    { name: "今晨", locator: ".report-wrap" },
     { name: "案件板", locator: ".board-page" },
     { name: "今晚", locator: ".tonight-page" },
     { name: "收藏", locator: ".collection-page" },
@@ -348,6 +348,88 @@ test("rest intention requests an AI note only after explicit consent", async ({ 
   });
   expect(requestBody).not.toHaveProperty("sleepData");
   expect(requestBody).not.toHaveProperty("history");
+});
+
+test("keeps the latest morning report stable while evidence is filed and after the day ends", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /DEMO MODE/ }).click();
+  await runDemoShortcut(page, /02 每隔四十三天的花/);
+  await page.getByRole("button", { name: /给米娜一次说谎的机会/ }).click();
+  await page.getByRole("button", { name: /夜香花笺/ }).click();
+  await page.locator(".quality-tabs").getByRole("button", { name: /8小时 · 安稳/ }).click();
+  await page.getByLabel("放下纸条").fill("明天再整理花店的回信，今晚先休息。");
+  await page.getByRole("button", { name: /今晚交给你了/ }).click();
+  await page.getByRole("button", { name: /跳到清晨/ }).click();
+
+  const reportHeading = page.locator(".report-hero").getByRole("heading", { name: "每隔四十三天的花" });
+  const readReportFingerprint = async () => ({
+    hero: await page.locator(".report-hero").innerText(),
+    watch: await page.locator(".city-watch-report").innerText(),
+    rest: await page.locator(".rest-reflection-card").innerText(),
+    character: await page.locator(".character-encounter").innerText(),
+    souvenir: await page.locator(".souvenir-reveal").innerText(),
+    society: {
+      title: await page.locator(".society-memory-letter h3").innerText(),
+      letter: await page.locator(".society-memory-letter .paper-card > blockquote").innerText(),
+      reason: await page.locator(".society-postscript").innerText(),
+    },
+    sleep: await page.locator(".sleep-summary").innerText(),
+    preparation: await page.locator(".preparation-echo").innerText(),
+    route: await page.locator(".route-report").innerText(),
+    evidence: await page.locator(".discoveries").innerText(),
+    contradiction: await page.locator(".contradiction").innerText(),
+  });
+  await expect(reportHeading).toBeVisible();
+  const originalReport = await readReportFingerprint();
+  expect(originalReport.sleep).toContain("8 小时");
+  expect(originalReport.sleep).toContain("雾散得很早");
+  expect(originalReport.preparation).toContain("夜香花笺");
+  expect(originalReport.rest).toContain("明天再整理花店的回信，今晚先休息。");
+  await page.reload();
+  await expect(reportHeading).toBeVisible();
+  expect(await readReportFingerprint()).toEqual(originalReport);
+
+  await page.getByRole("button", { name: /去案件板整理线索/ }).click();
+  await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
+  await page.getByRole("button", { name: /^OBJECT · 02 未寄出的明信片/ }).click();
+  await page.getByRole("button", { name: /核对这两件证物/ }).click();
+  await expect(page.locator(".relation-ledger").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
+
+  await page.getByRole("button", { name: "今晨", exact: true }).click();
+  await expect(reportHeading).toBeVisible();
+  await expect(page.getByText("最新晨报重读")).toHaveCount(0);
+  expect(await readReportFingerprint()).toEqual(originalReport);
+  let saved = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state);
+  expect(saved).toMatchObject({ chapter: 2, phase: "morning" });
+  expect(saved.confirmedRelations).toContain("mina-evelyn");
+
+  await page.getByRole("button", { name: "收藏", exact: true }).click();
+  await expect(page.locator(".collection-page")).toBeVisible();
+  await page.getByRole("button", { name: "档案", exact: true }).click();
+  await expect(page.locator(".archive-page")).toBeVisible();
+  await page.getByRole("button", { name: "今晨", exact: true }).click();
+  expect(await readReportFingerprint()).toEqual(originalReport);
+
+  await page.getByRole("button", { name: /结束今日，准备下一夜/ }).click();
+  await expect(page.locator(".tonight-page")).toBeVisible();
+  saved = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state);
+  expect(saved).toMatchObject({ chapter: 3, phase: "day" });
+
+  await page.getByRole("button", { name: "今晨", exact: true }).click();
+  await expect(reportHeading).toBeVisible();
+  await expect(page.getByText("最新晨报重读")).toBeVisible();
+  await expect(page.getByRole("button", { name: /去案件板整理线索/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /去准备今晚/ })).toBeVisible();
+  await expect(page.locator(".correspondence-replies button")).toBeDisabled();
+  await expect(page.getByText(/今日已经结束；这封未寄出的答复作为空白留在档案里/)).toBeVisible();
+  const correspondenceBeforeReload = (await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state)).correspondenceHistory;
+  expect(await readReportFingerprint()).toEqual(originalReport);
+  await page.reload();
+  await page.getByRole("button", { name: "今晨", exact: true }).click();
+  await expect(reportHeading).toBeVisible();
+  await expect(page.getByText("最新晨报重读")).toBeVisible();
+  expect((await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state)).correspondenceHistory).toEqual(correspondenceBeforeReload);
+  expect(await readReportFingerprint()).toEqual(originalReport);
 });
 
 test("sleep hardware authorizes a virtual ring and returns a local morning receipt", async ({ page }) => {
@@ -638,7 +720,7 @@ test("files an optional daytime notice and returns its echo after the next night
   await openFirstNight(page);
   await page.getByRole("button", { name: /今晚交给你了/ }).click();
   await page.getByRole("button", { name: /跳到清晨/ }).click();
-  await page.getByRole("button", { name: /整理线索，准备下一夜/ }).click();
+  await page.getByRole("button", { name: /结束今日，准备下一夜/ }).click();
   await page.getByRole("button", { name: /^今晚$/ }).click();
 
   await expect(page.getByText("门缝下的三张纸")).toBeVisible();
@@ -653,7 +735,7 @@ test("files an optional daytime notice and returns its echo after the next night
   await expect(page.locator(".opportunity-echo")).toBeVisible();
   await expect(page.getByText(/不改变案件成果或结局资格/)).toBeVisible();
 
-  await page.getByRole("button", { name: /整理线索，准备下一夜/ }).click();
+  await page.getByRole("button", { name: /结束今日，准备下一夜/ }).click();
   await page.getByRole("button", { name: /收藏/ }).click();
   await expect(page.getByText("城市剪报册")).toBeVisible();
   await expect(page.locator(".city-clipping-book article.filed")).toHaveCount(1);
@@ -679,7 +761,7 @@ test("restores and settles a real night after reload", async ({ page }) => {
   await expect(page.getByText("真实夜班")).toBeVisible();
   await expect(page.locator(".wake-echo-report")).toContainText("你短暂醒来时，夜班没有结束");
   await expect(page.locator(".wake-echo-report")).toContainText("不是奖励");
-  await page.getByRole("button", { name: /整理线索，准备下一夜/ }).click();
+  await page.getByRole("button", { name: /结束今日，准备下一夜/ }).click();
   await page.getByRole("button", { name: "收藏", exact: true }).click();
   await expect(page.getByText("睡隙回声簿")).toBeVisible();
   await expect(page.locator(".sleep-gap-entry.returned")).toHaveCount(1);
@@ -862,7 +944,7 @@ test("completes all five nights from a new save without chapter jumps", async ({
     await page.getByRole("button", { name: /跳到清晨/ }).click();
     await expect(page.locator(".report-hero").getByRole("heading", { name: reportTitles[chapter - 1] })).toBeVisible();
     await expect(page.locator(".sleep-summary").getByText(`第 ${chapter} 枚夜印`)).toBeVisible();
-    await page.getByRole("button", { name: chapter === 5 ? /做出最终决定/ : /整理线索，准备下一夜/ }).click();
+    await page.getByRole("button", { name: chapter === 5 ? /做出最终决定/ : /结束今日，准备下一夜/ }).click();
   }
 
   await expect(page.getByRole("heading", { name: /最后的决定/ })).toBeVisible();
@@ -889,7 +971,7 @@ test("switches to the rain-radio campaign and completes its five-night story", a
     await page.getByRole("button", { name: /今晚交给你了/ }).click();
     await page.getByRole("button", { name: /跳到清晨/ }).click();
     await expect(page.locator(".report-hero").getByRole("heading", { name: reportTitles[chapter - 1] })).toBeVisible();
-    await page.getByRole("button", { name: chapter === 5 ? /做出最终决定/ : /整理线索，准备下一夜/ }).click();
+    await page.getByRole("button", { name: chapter === 5 ? /做出最终决定/ : /结束今日，准备下一夜/ }).click();
   }
 
   await expect(page.getByRole("heading", { name: /最后一次广播/ })).toBeVisible();
@@ -921,7 +1003,7 @@ test("switches to the thirteenth-loaf campaign and completes its five-night stor
     await page.getByRole("button", { name: /跳到清晨/ }).click();
     await expect(page.locator(".report-hero").getByRole("heading", { name: reportTitles[chapter - 1] })).toBeVisible();
     await expect(page.locator(".report-hero-art")).toHaveAttribute("src", /cases\/thirteenth-loaf\/headers\/morning-report-v1/);
-    await page.getByRole("button", { name: chapter === 5 ? /做出最终决定/ : /整理线索，准备下一夜/ }).click();
+    await page.getByRole("button", { name: chapter === 5 ? /做出最终决定/ : /结束今日，准备下一夜/ }).click();
   }
 
   await expect(page.getByRole("heading", { name: /房契还给十二人以后/ })).toBeVisible();
@@ -1046,13 +1128,13 @@ test.describe("mobile 390x844", () => {
     await expect(page.locator(".city-watch-report")).toBeHidden();
     const compactReportHeight = await page.evaluate(() => document.documentElement.scrollHeight);
     expect(compactReportHeight).toBeLessThan(6000);
-    await page.getByRole("button", { name: /整理线索，准备下一夜/ }).scrollIntoViewIfNeeded();
-    await expect(page.getByRole("button", { name: /整理线索，准备下一夜/ })).toBeVisible();
+    await page.getByRole("button", { name: /结束今日，准备下一夜/ }).scrollIntoViewIfNeeded();
+    await expect(page.getByRole("button", { name: /结束今日，准备下一夜/ })).toBeVisible();
     await page.locator(".report-archive-details > summary").click();
     await expect(page.locator(".city-watch-report")).toBeVisible();
     await expect(page.locator(".wake-echo-report")).toContainText("纸纤维里的第二场雨");
     await expectNoPageOverflow(page);
-    await page.getByRole("button", { name: /整理线索，准备下一夜/ }).click();
+    await page.getByRole("button", { name: /结束今日，准备下一夜/ }).click();
     await expect(page.getByRole("button", { name: "案件板" })).toBeVisible();
   });
 
