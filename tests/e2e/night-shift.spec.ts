@@ -699,6 +699,21 @@ test("files an optional daytime notice and returns its echo after the next night
   await page.getByRole("button", { name: /收藏/ }).click();
   await expect(page.getByText("城市剪报册")).toBeVisible();
   await expect(page.locator(".city-clipping-book article.filed")).toHaveCount(1);
+  await expect(page.locator(".city-clipping-book article.pending")).toHaveCount(3);
+  await expect(page.locator(".clipping-envelope")).toHaveCount(4);
+  const clippingCards = await page.locator(".clipping-envelope-grid article").evaluateAll((cards) => cards.map((card) => {
+    const box = card.getBoundingClientRect();
+    return { width: box.width, height: box.height };
+  }));
+  expect(Math.max(...clippingCards.map((card) => card.width)) - Math.min(...clippingCards.map((card) => card.width))).toBeLessThanOrEqual(1);
+  expect(Math.max(...clippingCards.map((card) => card.height)) - Math.min(...clippingCards.map((card) => card.height))).toBeLessThanOrEqual(1);
+  const [clippingHeading, clippingGrid] = await Promise.all([
+    page.locator(".clipping-book-heading").boundingBox(),
+    page.locator(".clipping-envelope-grid").boundingBox(),
+  ]);
+  expect(clippingHeading).not.toBeNull();
+  expect(clippingGrid).not.toBeNull();
+  expect(Math.abs(clippingHeading!.x - clippingGrid!.x)).toBeLessThanOrEqual(1);
 });
 
 test("restores and settles a real night after reload", async ({ page }) => {
@@ -1265,6 +1280,10 @@ test.describe("mobile 390x844", () => {
     await expect(page.locator("#collection-core-evidence")).toBeHidden();
     await page.getByRole("button", { name: /城市回声/ }).click();
     await expect(page.getByText("城市人情簿")).toBeVisible();
+    await expect(page.locator(".clipping-envelope")).toHaveCount(4);
+    await expect(page.locator(".clipping-envelope-grid")).toHaveCSS("grid-template-columns", /.+/);
+    expect(await page.locator(".clipping-envelope-grid").evaluate((grid) => getComputedStyle(grid).gridTemplateColumns.split(" ").length)).toBe(1);
+    await expectNoPageOverflow(page);
     await expect(page.locator(".night-greenhouse")).toBeHidden();
     await page.getByRole("button", { name: /口袋小物/ }).click();
     await expect(page.getByText("口袋抽屉")).toBeVisible();
