@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-case-board-letter-reveal]] | `codex/case-board-letter-reveal` | `in_progress` | `manual` | 0/6 | 提取未结关系与兼容候选派生逻辑 |
+| [[plans/codex-case-board-letter-reveal]] | `codex/case-board-letter-reveal` | `in_progress` | `manual` | 5/6 | 运行完整工程验证并完成计划 |
 
 ## 使用规则
 
