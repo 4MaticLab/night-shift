@@ -56,6 +56,16 @@
 
 ## 验证命令
 
+面向 `main` 的 Pull Request 由 `.github/workflows/ci.yml` 提供统一远端门禁：
+
+- `Quality` 运行单元／内容测试、ESLint、原生 Next.js 构建与文档双链检查。
+- `Platform` 运行 Vinext/Cloudflare render、Hardhat 编译与本地合约测试；不读取部署私钥或发起链上写入。
+- `End-to-end` 在临时 Ubuntu runner 安装 Google Chrome 与系统依赖，串行执行完整 Playwright 回归。CI 禁止复用已有服务器，失败重试一次并上传七天有效的 HTML、trace 与错误上下文。
+- `CI Gate` 汇总以上三项；任一任务失败、跳过或取消都会让门禁失败。Vercel 部署状态不进入该汇总，外部贡献者无需取得部署团队权限才能提供测试证据。
+- `.github/workflows/windows-smoke.yml` 每周及手动运行 Windows 核心 smoke，只覆盖 npm、单元／内容测试、lint、Next 构建与 docs check；完整 E2E 仍以 Ubuntu/Chrome 为合并权威环境。
+
+本地开发按改动范围运行最小验证：代码至少运行 `npm test` 与 `npm run lint`，文档运行 `npm run docs:check`，入口／构建变化补充 `npm run build`。Sites、合约或关键浏览器路径的直接改动应运行下列对应专项命令；其他完整验证可以交给 PR CI，失败后必须本地复现和修复。
+
 ```bash
 npm test
 npm run lint
@@ -65,6 +75,7 @@ npm run test:render
 npm run contract:compile
 npm run contract:test
 npm run docs:check
+npm run test:e2e
 ```
 
 Playwright Happy Path 位于 `tests/e2e/night-shift.spec.ts`：除既有 Demo／真实夜班、晨报、联合推理、二维码、拖动持久化和结案往返外，还会从新档分别完成三案五夜循环，验证案件书架切换、未开封案件启动、各案结局、案件感知好友线索与独立存档，并覆盖第三案晨报／结局专属美术和放下纸条的显式 AI 授权、最小请求与晨报回信。Injective 路径额外覆盖未配置诚实降级、模拟既有 token 回执、刷新保留，以及 390 × 844、820 × 1180、1440 × 900 无横向溢出与触控尺寸。首载路径会人为延迟首页主视觉，验证加载幕持续可见、背景不可交互并在资源就绪后放行，同时断言首案主卷宗与推荐标识；自动本地化路径验证英文浏览器首帧、两个未翻译案件回退、中文 Cookie 覆盖、刷新保持和旧本地偏好迁移。820 × 1180 路径验证平板竖屏案件板的触控文档流、画布宽度、推理台衔接和无横向溢出；390 × 844 路径验证三张案件入口、触摸目标和无横向溢出。英文完整路径会在桌面端验证首夜交接、晨报、案板、收藏与档案无可见汉字，并在 390 × 844 验证交接触摸目标和无横向溢出。其余移动路径额外检查最大长度无断点纸条、首夜闭环、长收藏／档案、移动案件板和结案卷宗；桌面路径另覆盖虚拟戒指完整回执、桥接预演、真实夜班刷新恢复与晨报幂等。`tests/i18n.test.ts` 覆盖 Cookie 优先级、语言地区标签、质量权重、未知语言、序列化和全部准备物英文投影；`tests/game-store.test.ts` 在内存浏览器存储上覆盖默认首案、三案主循环、切换隔离、纸条历史、跨案件脏数据过滤、已退役案件回落、旧结构迁移和结局；内容测试覆盖三案 manifest、第三案 34 张资产消费、首案英文 ID／规则一致性和确定性内容护栏。浏览器测试使用本机 Chrome channel。

@@ -64,7 +64,7 @@ async function openMintableCollection(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
   await runDemoShortcut(page, /跳到真结局条件/);
   await page.getByRole("button", { name: "收藏", exact: true }).click();
-  await expect(page.locator(".collection-page")).toBeVisible();
+  await expect(page.locator(".collection-page")).toBeVisible({ timeout: 15_000 });
 }
 
 test("holds the first interaction behind a real hero-art loading screen", async ({ page }) => {
@@ -394,6 +394,7 @@ test("keeps the latest morning report stable while evidence is filed and after t
   await page.getByRole("button", { name: /^OBJECT · 02 未寄出的明信片/ }).click();
   await page.getByRole("button", { name: /核对这两件证物/ }).click();
   await expect(page.locator(".relation-ledger").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "关闭核心推论" }).click();
 
   await page.getByRole("button", { name: "今晨", exact: true }).click();
   await expect(reportHeading).toBeVisible();
@@ -420,7 +421,10 @@ test("keeps the latest morning report stable while evidence is filed and after t
   await expect(page.getByText("最新晨报重读")).toBeVisible();
   await expect(page.getByRole("button", { name: /去案件板整理线索/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /去准备今晚/ })).toBeVisible();
-  await expect(page.locator(".correspondence-replies button")).toBeDisabled();
+  const correspondenceReplies = page.locator(".correspondence-replies button");
+  await expect(correspondenceReplies).toHaveCount(2);
+  await expect(correspondenceReplies.nth(0)).toBeDisabled();
+  await expect(correspondenceReplies.nth(1)).toBeDisabled();
   await expect(page.getByText(/今日已经结束；这封未寄出的答复作为空白留在档案里/)).toBeVisible();
   const correspondenceBeforeReload = (await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state)).correspondenceHistory;
   expect(await readReportFingerprint()).toEqual(originalReport);

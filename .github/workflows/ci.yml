@@ -1,0 +1,134 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  quality:
+    name: Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit and content tests
+        run: npm test
+
+      - name: Lint source
+        run: npm run lint
+
+      - name: Build Next.js application
+        run: npm run build
+
+      - name: Check documentation links
+        run: npm run docs:check
+
+  platform:
+    name: Platform
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and render Cloudflare target
+        run: npm run test:render
+
+      - name: Compile keepsake contract
+        run: npm run contract:compile
+
+      - name: Test keepsake contract
+        run: npm run contract:test
+
+  end-to-end:
+    name: End-to-end
+    needs:
+      - quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Google Chrome and system dependencies
+        run: npx playwright install --with-deps chrome
+
+      - name: Run browser regression suite
+        run: npm run test:e2e -- --fail-on-flaky-tests
+
+      - name: Upload Playwright failure report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  gate:
+    name: CI Gate
+    if: ${{ always() }}
+    needs:
+      - quality
+      - platform
+      - end-to-end
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify required jobs
+        env:
+          QUALITY_RESULT: ${{ needs.quality.result }}
+          PLATFORM_RESULT: ${{ needs.platform.result }}
+          E2E_RESULT: ${{ needs.end-to-end.result }}
+        run: |
+          printf 'Quality: %s\nPlatform: %s\nEnd-to-end: %s\n' \
+            "$QUALITY_RESULT" "$PLATFORM_RESULT" "$E2E_RESULT"
+          test "$QUALITY_RESULT" = "success"
+          test "$PLATFORM_RESULT" = "success"
+          test "$E2E_RESULT" = "success"
