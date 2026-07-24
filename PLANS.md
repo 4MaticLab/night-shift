@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-lost-property-case]] | `codex/lost-property-case` | `in_progress` | `manual` | 3/8 | 实现并注册完整五夜案件 manifest |
+| [[plans/codex-lost-property-case]] | `codex/lost-property-case` | `in_progress` | `manual` | 5/8 | 更新稳定文档与资产索引 |
 
 ## 使用规则
 
