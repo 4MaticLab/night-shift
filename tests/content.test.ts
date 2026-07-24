@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { nightShiftCase } from "@/src/content/case";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import { preparations } from "@/src/content/preparations";
@@ -149,6 +151,14 @@ describe("Night Shift case content", () => {
       results[0].clueIds,
       results[0].clueIds,
     ]);
+  });
+
+  it("serves preparation art locally as WebP", () => {
+    expect(new Set(preparations.map((item) => item.imageSrc))).toHaveLength(preparations.length);
+    for (const item of preparations) {
+      expect(item.imageSrc).toMatch(/^\/art\/preparations\/.+\.webp$/);
+      expect(existsSync(join(process.cwd(), "public", item.imageSrc.slice(1)))).toBe(true);
+    }
   });
 
   it("defines three complete and distinct route directions for every night", () => {

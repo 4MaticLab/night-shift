@@ -68,12 +68,13 @@ export function BotanicalSpecimen({ chapter, progress = 100, compact = false }: 
   const normalizedProgress = Math.max(0, Math.min(100, progress));
   const visibleProgress = Math.max(7, normalizedProgress);
   const stage = growthStageFromProgress(normalizedProgress);
-  return <div className={`botanical-specimen ${compact ? "compact" : ""}`} data-stage={stage}><Image className="botanical-ghost" src={art.src} alt="" width={256} height={384} /><span className="botanical-fill" style={{ clipPath: `inset(${100 - visibleProgress}% 0 0)` }}><Image src={art.src} alt={art.alt} width={256} height={384} /></span><div><small>{stage.toUpperCase()} · {Math.round(normalizedProgress)}%</small><b>{botanical.name}</b></div></div>;
+  const sizes = compact ? "150px" : "256px";
+  return <div className={`botanical-specimen ${compact ? "compact" : ""}`} data-stage={stage}><Image className="botanical-ghost" src={art.src} alt="" width={256} height={384} sizes={sizes} /><span className="botanical-fill" style={{ clipPath: `inset(${100 - visibleProgress}% 0 0)` }}><Image src={art.src} alt={art.alt} width={256} height={384} sizes={sizes} /></span><div><small>{stage.toUpperCase()} · {Math.round(normalizedProgress)}%</small><b>{botanical.name}</b></div></div>;
 }
 
 export function SocietyCrest({ societyId, compact = false, featured = false }: { societyId: SocietyId; compact?: boolean; featured?: boolean }) {
   const { localize } = useI18n();
   const society = localize(getCitySociety(societyId));
   const art = getAsset(society.assetId);
-  return <div className={`society-crest ${compact ? "compact" : ""}`}><Image src={art.src} alt={art.alt} width={1024} height={1024} sizes={compact ? "150px" : featured ? "(max-width: 600px) calc(100vw - 28px), 466px" : "240px"} priority={featured} unoptimized={featured} /></div>;
+  return <div className={`society-crest ${compact ? "compact" : ""}`}><Image src={art.src} alt={art.alt} width={1024} height={1024} sizes={compact ? "150px" : featured ? "(max-width: 600px) calc(100vw - 28px), 466px" : "240px"} preload={featured} /></div>;
 }

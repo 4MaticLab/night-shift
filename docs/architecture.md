@@ -77,7 +77,7 @@ Demo、睡眠硬件、好友线索、Injective、证物信笺和推论信笺共�
 
 ## 状态模型
 
-`AppBootBoundary` 在应用首次进入时把真实产品内容标记为 `inert`，避免半水合页面被误点；它等待 `window.load`、`document.fonts.ready` 与当前案件首页主视觉的加载或失败结果。加载幕至少保留 700 ms 以避免冷暖缓存之间闪烁，最迟 7 秒主动放行，图片失败也会安全进入产品。退出后不会因切换案件重复播放整页加载幕。案件板、夜间循环、结局与硬件中心通过 `next/dynamic` 从首页入口拆分，在真正进入对应界面时使用轻量局部反馈。
+`AppBootBoundary` 在应用首次进入时把真实产品内容标记为 `inert`，避免半水合页面被误点；它等待 `window.load` 与 `document.fonts.ready`，首页主视觉则由 Next Image 的单一 preload 路径负责，不再用另一条裸 URL 重复请求。加载幕至少保留 700 ms 以避免冷暖缓存之间闪烁，最迟 7 秒主动放行，图片失败也会安全进入产品。退出后不会因切换案件重复播放整页加载幕。案件板、夜间循环、结局与硬件中心通过 `next/dynamic` 从首页入口拆分，在真正进入对应界面时使用轻量局部反馈。
 
 主要阶段为 `day → ready → night → morning → ending`。章节结算只通过当前案件 manifest 的确定性内容函数产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 18。`campaignId` 标识活动案件，活动进度仍保持扁平供组件读取；切换时先把它快照到 `campaignSaves[campaignId]`，再恢复目标案件或创建新档。章节、线索、已合成推论、密文解答、结局、夜间历史和放下纸条因此按案隔离。v18 将旧二元关系与画布坐标替换为推论库存；`persist.migrate` 对任何低于 18 的版本直接返回首案新档，不保留旧进度。同版本读取仍按当前 manifest 白名单修复非法案件与内容 ID。
 
