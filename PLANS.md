@@ -6,6 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
+| [[plans/codex-evidence-synthesis-archive]] | `codex/evidence-synthesis-archive` | `in_progress` | `manual` | 0/7 | 定义推理配方契约与存档重置边界 |
 
 ## 使用规则
 
