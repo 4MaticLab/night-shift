@@ -125,6 +125,40 @@ test("opens demo controls without changing a fresh save and confirms snapshot wr
   await page.keyboard.press("Escape");
 });
 
+test("returns to the surface that opened demo controls", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /DEMO MODE/ }).click();
+  await runDemoShortcut(page, /03 没有退房的307/);
+
+  const surfaces = [
+    { name: "今晨", locator: ".empty-report" },
+    { name: "案件板", locator: ".board-page" },
+    { name: "今晚", locator: ".tonight-page" },
+    { name: "收藏", locator: ".collection-page" },
+    { name: "档案", locator: ".archive-page" },
+  ];
+  for (const surface of surfaces) {
+    const navItem = page.getByRole("button", { name: surface.name, exact: true });
+    await navItem.click();
+    await expect(page.locator(surface.locator)).toBeVisible();
+    await page.getByRole("button", { name: "DEMO", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: "演示控制台" });
+    await dialog.getByRole("button", { name: "关闭演示控制台" }).click();
+    await expect(dialog).toHaveCount(0);
+    await expect(navItem).toHaveAttribute("aria-current", "page");
+    await expect(page.locator(surface.locator)).toBeVisible();
+  }
+
+  await page.getByRole("button", { name: /夜班侦探 NIGHT SHIFT/ }).click();
+  const library = page.getByRole("region", { name: "案件剧本选择" });
+  await expect(library).toBeVisible();
+  await page.getByRole("button", { name: /DEMO MODE/ }).click();
+  const libraryDialog = page.getByRole("dialog", { name: "演示控制台" });
+  await libraryDialog.getByRole("button", { name: "关闭演示控制台" }).click();
+  await expect(libraryDialog).toHaveCount(0);
+  await expect(library).toBeVisible();
+});
+
 test.describe("automatic browser locale", () => {
   test.use({ locale: "en-US" });
 

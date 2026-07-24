@@ -113,7 +113,7 @@ function GamePage() {
   const hardwarePanel = <AnimatePresence>{hardwareOpen && <SleepHardwarePanel onClose={() => setHardwareOpen(false)} />}</AnimatePresence>;
 
   if (libraryOpen || (!game.started && !intro)) {
-    return <>{clueNotice}<Hero interactive={hydrated} onStart={() => { setLibraryOpen(false); if (game.started) setIntro(false); else setIntro(true); }} onDemo={() => { setLibraryOpen(false); setDemo(true); }} /><AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={changeView} />}</AnimatePresence></>;
+    return <>{clueNotice}<Hero interactive={hydrated} onStart={() => { setLibraryOpen(false); if (game.started) setIntro(false); else setIntro(true); }} onDemo={() => setDemo(true)} /><AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={(nextView) => { setLibraryOpen(false); changeView(nextView); }} />}</AnimatePresence></>;
   }
   if (intro && !game.started) return <>{clueNotice}<Intro onDone={() => { game.begin(); setIntro(false); }} /></>;
   if (game.phase === "night") return <>{clueNotice}<NightRun onFinish={game.finishNight} onHardware={() => setHardwareOpen(true)} />{hardwarePanel}</>;
