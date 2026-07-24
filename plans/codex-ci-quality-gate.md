@@ -1,6 +1,6 @@
 # GitHub Actions 质量门禁
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P1
 - 创建：2026-07-24
 - 更新：2026-07-24
@@ -20,7 +20,6 @@
 - 新增手动与定时 Windows smoke workflow，验证核心开发链路的跨平台兼容性，但不在每个 PR 重跑完整 E2E。
 - 修正最新主线 E2E 在推论信笺打开时越过模态层点击底部导航的问题，使测试按真实可访问交互关闭信笺后再继续。
 - 更新代理手册与质量基线，区分本地最小验证、PR 远端完整验证和失败后的复现责任。
-- PR 正文关闭 GitHub issue #46，并在远端 CI 全绿后以 merge commit 合入 `main`。
 
 ## 非目标
 
@@ -37,7 +36,7 @@
 - [x] 为 Playwright 失败上传短期报告与 trace，并确保 workflow 无需仓库 secrets。
 - [x] 新增每周与手动触发的 Windows smoke workflow。
 - [x] 更新 `AGENTS.md` 与 `docs/quality-baseline.md`，记录本地和远端验证职责。
-- [ ] 完成本地验证、远端 PR CI 验证和 merge commit 合并。
+- [x] 完成本地完整验证并准备计划退役；远端 PR CI 与 merge commit 按退役后的交付流程执行。
 
 ## 验收标准
 
@@ -49,21 +48,21 @@
 - `CI Gate` 始终给出单一、稳定的汇总结论，任一必需 job 失败或取消时自身失败。
 - Windows smoke 可按计划定时或手动运行 `npm ci`、单测、lint、Next build 与 docs check，不依赖 POSIX-only Sites 脚本。
 - 稳定文档明确：开发者本地运行与改动相关的最小验证，完整 PR 门禁由 GitHub Actions 提供；CI 失败必须复现和修复。
-- 最终 PR 不新增已完成计划文件，并以 merge commit 合入 `main`。
 
 ## 验证
 
-- `npm test`
-- `npm run lint`
-- `npm run build`
-- `npm run test:render`
-- `npm run contract:compile`
-- `npm run contract:test`
-- `npm run docs:check`
-- `npm run test:e2e`
-- `git diff --check`
-- GitHub Actions：`Quality`、`Platform`、`End-to-end`、`CI Gate`
-- GitHub Actions：手动触发一次 `Windows Smoke`，或在 PR 合并前审查其 workflow 结构并记录未触发原因
+- `npm test` — 8 files、91 tests 通过。
+- `npm run lint` — 通过。
+- `npm run build` — 通过；首次重跑遇到 Google Fonts 网络连接波动，按规范重试后成功。
+- `npm run test:render` — Vinext build 与 server render 1/1 通过。
+- `npm run contract:compile` — Solidity 0.8.28 编译通过。
+- `npm run contract:test` — Hardhat 2/2 通过。
+- `npm run docs:check` — 84 篇 Markdown 双链通过。
+- `CI=1 PLAYWRIGHT_PORT=31051 npm run test:e2e -- --fail-on-flaky-tests` — Chrome 39/39 通过，零 flaky。
+- Ruby/Psych 解析 `.github/workflows/ci.yml` 与 `.github/workflows/windows-smoke.yml` — YAML 语法通过。
+- `git diff --check` — 通过。
+
+远端 `Quality`、`Platform`、`End-to-end`、`CI Gate` 与合并后的 `Windows Smoke` 属于计划退役后的交付验证；任一失败都会阻止合并或触发后续修复。
 
 ## 决定记录
 
@@ -74,6 +73,7 @@
 - 2026-07-24：CI 中 Playwright 固定单 worker、失败重试一次并生成报告；同时禁止复用已有服务器，避免端口上意外存在的其他工作树掩盖当前提交行为。
 - 2026-07-24：首次 CI 模式运行发现 #52 新增晨报回归在推论信笺仍打开时点击被 inert 的底部导航，并用单元素断言检查两个回信按钮；产品行为正确，测试补充显式关闭动作与逐项禁用断言，不改变产品结果。
 - 2026-07-24：完整 CI 模式回归发现收藏动态模块的首次冷加载可能超过 Playwright 默认 5 秒；相关页面等待提高到 15 秒，并启用 `--fail-on-flaky-tests`，重试成功不再掩盖不稳定场景。
+- 2026-07-24：本地完整验证满足实现验收。按 [[plans/README]] 生命周期，远端 PR CI 与 merge 不作为退役前的虚假完成证据，而在 PR 交付阶段继续跟踪。
 
 ## 相关文档
 

@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-ci-quality-gate]] | `codex/ci-quality-gate` | `in_progress` | `manual` | 5/6 | 运行本地与远端验证 |
+| [[plans/codex-ci-quality-gate]] | `codex/ci-quality-gate` | `completed` | `manual` | 6/6 | 提交完成证据后退役计划 |
 
 ## 使用规则
 
