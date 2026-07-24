@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/feat-global-bgm-84]] | `feat/global-bgm-84` | `in_progress` | `auto` | 0% | 实现全局音频生命周期与右上角控制器 |
+| [[plans/feat-global-bgm-84]] | `feat/global-bgm-84` | `completed` | `auto` | 100% | 真实 MP3、自动播放、全局控制、测试与文档已完成 |
 
 ## 使用规则
 
