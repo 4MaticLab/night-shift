@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-lean-pr-ci]] | `codex/lean-pr-ci` | `in_progress` | `auto` | 0/5 | 精简 CI Gate 为 Quality-only |
+当前 checkout 没有尚未退役的临时计划；已退役计划不再列入活动索引。
 
 ## 使用规则
 
