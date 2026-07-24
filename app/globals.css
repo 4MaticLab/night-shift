@@ -13,6 +13,7 @@
   --red: #a86158;
   --moss: #72836b;
   --fog: #aeb7c2;
+  --primary: #c59a5a;
   --topbar-height: 74px;
   --nav-clearance: 96px;
 }
@@ -11475,6 +11476,73 @@ blockquote {
 .landing-nav-actions { display: flex; align-items: center; gap: 8px; }
 .language-button { color: var(--amber); }
 .campaign-shelf .locale-availability { margin: 9px 2px 0; color: #a49a89; font: 7px/1.5 monospace; letter-spacing: .04em; }
+
+.campaign-wheel {
+  position: absolute;
+  z-index: 4;
+  right: 0;
+  top: 0;
+  width: min(720px, 58vw);
+  height: 100vh;
+  transform: none;
+}
+
+.campaign-wheel .option-wheel {
+  height: 100%;
+}
+
+.campaign-wheel .option-wheel__item {
+  font-family: var(--font-playfair), var(--font-noto-serif-sc);
+}
+
+.campaign-wheel.inert {
+  pointer-events: none;
+}
+
+.campaign-wheel .locale-availability { position: absolute; right: 24px; bottom: 0; margin: 0; color: #a49a89; font: 7px/1.5 monospace; letter-spacing: .04em; }
+
+.option-wheel {
+  --ow-text-color: #a6a6a6;
+  --ow-active-color: #ffffff;
+  --ow-font-size: 3rem;
+  --ow-inset: 80px;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  outline: none;
+}
+
+.option-wheel--dragging {
+  cursor: grabbing;
+}
+
+.option-wheel__item {
+  position: absolute;
+  top: 50%;
+  left: var(--ow-inset);
+  white-space: nowrap;
+  font-size: var(--ow-font-size);
+  line-height: 1;
+  font-weight: 200;
+  transform-origin: left center;
+  cursor: pointer;
+  will-change: transform, opacity, filter;
+  color: color-mix(in srgb, var(--ow-active-color) calc(var(--ow-p, 0) * 100%), var(--ow-text-color));
+}
+
+.option-wheel--right .option-wheel__item {
+  left: auto;
+  right: var(--ow-inset);
+  transform-origin: right center;
+}
+
+.option-wheel__item--selected {
+  font-weight: 500;
+}
 
 @media (max-width: 900px) {
   .clue-index {
