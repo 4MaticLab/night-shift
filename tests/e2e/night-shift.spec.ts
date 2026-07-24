@@ -764,6 +764,27 @@ test("restores and settles a real night after reload", async ({ page }) => {
   await page.getByRole("button", { name: "收藏", exact: true }).click();
   await expect(page.getByText("睡隙回声簿")).toBeVisible();
   await expect(page.locator(".sleep-gap-entry.returned")).toHaveCount(1);
+  await expect(page.locator(".sleep-gap-entry")).toHaveCount(5);
+  const [watchLedger, sleepGapLedger, sleepGapHeading, sleepGapGrid] = await Promise.all([
+    page.locator(".city-watch-ledger").boundingBox(),
+    page.locator(".sleep-gap-ledger").boundingBox(),
+    page.locator(".sleep-gap-ledger-heading").boundingBox(),
+    page.locator(".sleep-gap-ledger-grid").boundingBox(),
+  ]);
+  expect(watchLedger).not.toBeNull();
+  expect(sleepGapLedger).not.toBeNull();
+  expect(sleepGapHeading).not.toBeNull();
+  expect(sleepGapGrid).not.toBeNull();
+  expect(Math.abs(watchLedger!.x - sleepGapLedger!.x)).toBeLessThanOrEqual(1);
+  expect(Math.abs(watchLedger!.width - sleepGapLedger!.width)).toBeLessThanOrEqual(1);
+  expect(Math.abs(sleepGapHeading!.x - sleepGapGrid!.x)).toBeLessThanOrEqual(1);
+  expect(Math.abs(sleepGapLedger!.y - (watchLedger!.y + watchLedger!.height))).toBeLessThanOrEqual(1);
+  const sleepGapCards = await page.locator(".sleep-gap-entry").evaluateAll((cards) => cards.map((card) => {
+    const box = card.getBoundingClientRect();
+    return { width: box.width, height: box.height };
+  }));
+  expect(Math.max(...sleepGapCards.map((card) => card.width)) - Math.min(...sleepGapCards.map((card) => card.width))).toBeLessThanOrEqual(1);
+  expect(Math.max(...sleepGapCards.map((card) => card.height)) - Math.min(...sleepGapCards.map((card) => card.height))).toBeLessThanOrEqual(1);
 });
 
 test("reads, searches, and synthesizes evidence without pair guessing", async ({ page }) => {
@@ -1279,6 +1300,8 @@ test.describe("mobile 390x844", () => {
     await expect(page.locator(".clipping-envelope")).toHaveCount(4);
     await expect(page.locator(".clipping-envelope-grid")).toHaveCSS("grid-template-columns", /.+/);
     expect(await page.locator(".clipping-envelope-grid").evaluate((grid) => getComputedStyle(grid).gridTemplateColumns.split(" ").length)).toBe(1);
+    await expect(page.locator(".sleep-gap-entry")).toHaveCount(5);
+    expect(await page.locator(".sleep-gap-ledger-grid").evaluate((grid) => getComputedStyle(grid).gridTemplateColumns.split(" ").length)).toBe(1);
     await expectNoPageOverflow(page);
     await expect(page.locator(".night-greenhouse")).toBeHidden();
     await page.getByRole("button", { name: /口袋小物/ }).click();
