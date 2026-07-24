@@ -54,18 +54,18 @@ CASE 005 的运行时视觉必须以首案现有成品为直接媒介参考，�
 
 ### 植物标本（2:3）
 
-1. `botany/night-01-double-shadow-fern-v1.webp`：一根茎投下两种叶影的双影蕨。
-2. `botany/night-02-tongueless-bellflower-v1.webp`：钟形花冠内部没有花蕊的无舌钟花。
+1. `botany/night-01-double-shadow-fern-v1.webp`：覆着白尘、卷叶间垂着微小钟花的钟尘蕨。
+2. `botany/night-02-tongueless-bellflower-v1.webp`：深色藤蔓缠成两根猎手杖、只开一朵旧酒红花的帷刺藤。
 3. `botany/night-03-cylinder-reed-v1.webp`：两枚蜡筒状种荚共享声纹根系的双录芦。
-4. `botany/night-04-missing-minute-moss-v1.webp`：环形苔叶留下窄小缺口的失分钟苔。
-5. `botany/night-05-nameless-echo-bloom-v1.webp`：两朵交换花蕊与叶脉的无狼回声花，中央保持开放。
+4. `botany/night-04-missing-minute-moss-v1.webp`：浅色放射花冠留下完整花瓣缺口的失分钟花。
+5. `botany/night-05-nameless-echo-bloom-v1.webp`：深浅两片花冠围住钟形空白的见证钟兰。
 
 ### 人物肖像（4:5）
 
-1. `characters/laplace-portrait-v1.webp`：拉普拉斯半身档案肖像，浅色乱发、不成对手套、染血银铃，清醒直视。
-2. `characters/theresa-vale-portrait-v1.webp`：特蕾莎半身档案肖像，整齐夜运制服、手杖、黄铜调度夹，克制直视。
-3. `characters/ada-morne-portrait-v1.webp`：艾达·莫恩半身档案肖像，蜡筒、音叉、卷袖工具围裙。
-4. `characters/felix-rowe-portrait-v1.webp`：费利克斯·罗半身档案肖像，白粉笔尘、折叠最终报告、普通而固执。
+1. `characters/laplace-portrait-v1.webp`：拉普拉斯半身档案肖像，深色乱发带一缕浅色、黄铜听音器，警觉望向画外回声。
+2. `characters/theresa-vale-portrait-v1.webp`：特蕾莎半身档案肖像，整齐夜运制服、浅色工作手套、黄铜调度扣，克制直视。
+3. `characters/ada-morne-portrait-v1.webp`：艾达·莫恩半身档案肖像，护目镜、音叉与实用工作衣。
+4. `characters/felix-rowe-portrait-v1.webp`：费利克斯·罗半身档案肖像，衣襟残留白粉笔尘，普通而固执。
 
 ### 城区版画（3:2）
 

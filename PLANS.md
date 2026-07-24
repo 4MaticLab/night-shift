@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-lost-property-case]] | `codex/lost-property-case` | `in_progress` | `manual` | 2/8 | 生成并登记 34 张专属运行时资产 |
+| [[plans/codex-lost-property-case]] | `codex/lost-property-case` | `in_progress` | `manual` | 3/8 | 实现并注册完整五夜案件 manifest |
 
 ## 使用规则
 
