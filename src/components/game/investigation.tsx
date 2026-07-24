@@ -225,7 +225,7 @@ export function CaseBoard() {
 
   const confirmedEdges: Edge[] = campaign.relations.flatMap((relation, index) => {
     if (!confirmedRelations.includes(relation.id) || !relation.clueIds.every((clueId) => unlockedClueIds.includes(clueId))) return [];
-    // A taut old-wine thread runs pin-to-pin, like a physical detective board.
+    // A taut old-wine thread runs pin-to-pin, above the cards like a physical detective board.
     const stroke = "#641f2a";
     return [{
       id: relation.id,
@@ -233,7 +233,8 @@ export function CaseBoard() {
       target: relation.clueIds[1],
       type: "straight",
       animated: false,
-      zIndex: 4,
+      // Keep threads above every evidence card (including selected/dragged nodes).
+      zIndex: 1000,
       style: {
         stroke,
         strokeWidth: index === 1 ? 2.8 : 2.5,
@@ -249,7 +250,7 @@ export function CaseBoard() {
       target: clueId,
       type: "straight",
       className: "board-preview-edge",
-      zIndex: 3,
+      zIndex: 999,
       style: { stroke: "#641f2a", strokeWidth: 2, strokeDasharray: "7 7" },
     }))
     : [];
@@ -301,6 +302,7 @@ export function CaseBoard() {
             minZoom={0.5}
             maxZoom={1.6}
             nodesDraggable={!isCompactBoard}
+            elevateNodesOnSelect={false}
             panOnDrag={false}
             zoomOnPinch={false}
             zoomOnScroll={false}

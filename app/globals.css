@@ -4361,11 +4361,45 @@ blockquote {
   left: 50% !important;
 }
 
-/* Confirmed pairings: solid paper-thread stroke above the board, never green dashed. */
-.board-page-lettered .react-flow__edges {
-  z-index: 5 !important;
+/*
+ * Keep red relation threads above every evidence card.
+ * React Flow paints nodes after edges by default; selected nodes also elevate
+ * themselves, so force the whole edges SVG above the nodes layer and stop
+ * node elevation from covering the stroke.
+ */
+.board-page-lettered .board-flow .react-flow__viewport {
+  isolation: isolate;
 }
 
+.board-page-lettered .board-flow .react-flow__edges {
+  z-index: 1000 !important;
+  position: absolute !important;
+  pointer-events: none !important;
+}
+
+.board-page-lettered .board-flow .react-flow__edge,
+.board-page-lettered .board-flow .react-flow__edge-path,
+.board-page-lettered .board-flow .react-flow__connection-path {
+  pointer-events: none !important;
+}
+
+.board-page-lettered .board-flow .react-flow__nodes {
+  z-index: 1 !important;
+  position: absolute !important;
+}
+
+.board-page-lettered .board-flow .react-flow__node {
+  z-index: 1 !important;
+}
+
+.board-page-lettered .board-flow .react-flow__node.selected,
+.board-page-lettered .board-flow .react-flow__node.dragging,
+.board-page-lettered .board-flow .react-flow__node:focus,
+.board-page-lettered .board-flow .react-flow__node:focus-within {
+  z-index: 2 !important;
+}
+
+/* Confirmed pairings: solid paper-thread stroke above the cards, never green dashed. */
 .board-page-lettered .react-flow__edge-path,
 .board-page-lettered .react-flow__connection-path {
   stroke-dasharray: none !important;
