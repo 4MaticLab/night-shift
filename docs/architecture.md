@@ -11,13 +11,15 @@
 | 模块 | 位置 | 职责 |
 |---|---|---|
 | 案件包契约 | `src/content/campaigns/types.ts` | `CampaignManifest`、引用完整性校验与案件内容查询 |
-| 案件注册表 | `src/content/campaigns/registry.ts` | 当前三案、默认案件和合法 `campaignId` 白名单 |
+| 案件注册表 | `src/content/campaigns/registry.ts` | 当前四案、默认案件和合法 `campaignId` 白名单 |
 | 首案内容包 | `src/content/campaigns/last-tram.ts` | 组合既有首案模块与视觉／结局规则 |
 | 本地化核心 | `src/i18n/core.ts`、`src/i18n/server.ts`、`src/i18n/request-locale-provider.tsx`、`src/i18n/provider.tsx` | Cookie／请求语言协商、案件能力回退、递归内容投影和界面翻译上下文 |
 | 首案英文目录 | `src/i18n/en-catalog.ts`、`src/i18n/en-overrides.ts` | 首案完整英文覆盖与关键文学文本人工润色 |
 | 第二案内容包 | `src/content/campaigns/rain-radio.ts` | 《只在雨中播出的电台》的五夜完整内容 |
 | 第三案内容包 | `src/content/campaigns/thirteenth-loaf.ts` | 《黎明前出炉的第十三个面包》的五夜完整内容 |
 | 第三案视觉包 | `src/content/thirteenth-loaf-assets.ts` | 第三案 34 张专属横幅、夜印、明信片、植物、收藏、人物与城区资产 |
+| 第四案内容包 | `src/content/campaigns/chihaya-noa.ts` | 《千早诺亚的第十三次旅行》的五夜完整内容 |
+| 第四案视觉包 | `src/content/chihaya-noa-assets.ts` | 第四案 34 张专属横幅、夜印、明信片、植物、收藏、人物与城区资产 |
 | 首案核心内容 | `src/content/case.ts` | 首案五夜章节、12 条线索、8 件藏品与固定报告文本 |
 | 随身物内容 | `src/content/preparations.ts` | 三件准备物、五夜各自的确定性环境回响 |
 | 归来明信片 | `src/content/postcards.ts` | 五夜地点、城市传闻、背面短笺与三种随身物附言 |
@@ -80,7 +82,7 @@ Demo、睡眠硬件、好友线索、Injective、证物信笺和推论信笺共�
 
 `I18nProvider` 根据当前案件把偏好解析为有效展示语言：`case-001` 与 `case-002` 支持 `zh-CN` 与 `en`，未翻译案件明确回退中文；切回已翻译案件后继续使用原偏好。英文模式只递归投影 manifest 的字符串值，稳定 ID、引用、数字、规则和存档键保持原样，因此切换语言或刷新不会复制、重置或迁移游戏进度。案件级英文词典按案拆分在 `src/i18n/campaigns/` 下，与遗留总表和覆写表在 `src/i18n/en.ts` 合并。
 
-案件 manifest 同时提供章节数、线索数、藏品数、真结局门槛、档案标题和逐夜视觉。`resolveNight`、关系匹配、结局资格、迁移过滤和页面投影都显式接收当前 manifest；通用模块不按具体案件 ID 写业务分支。`defineCampaign` 要求章节从 1 连续排列、每个 choice 有路线、每夜拥有明信片／植物／四时辰回声／睡隙回声／夜印，并拒绝跨案件线索引用和不可达门槛。
+案件 manifest 同时提供章节数、线索数、藏品数、真结局门槛、档案标题和逐夜视觉。`resolveNight`、关系匹配、结局资格、迁移过滤和页面投影都显式接收当前 manifest；通用模块不按具体案件 ID 写业务分支。`defineCampaign` 要求案件恰好五夜、章节从 1 连续排列、每个 choice 有路线、每夜拥有明信片／植物／四时辰回声／睡隙回声／夜印，并拒绝跨案件线索引用和不可达门槛。
 
 睡眠质量为 `interrupted`、`regular`、`restful`：三者都至少解锁一条主线线索；差异只体现在路线长度、收藏数量、回声事件和环境观察。`selectedPreparationId` 记录当前随身物，`preparationHistory` 按章节保存已经归来的准备；`selectedChoice` 记录当前方向，`choiceHistory` 按章节保存路线履历。方向决定四个路线节点、五段夜间事件、城市遭遇与归来来信，但同章节三个方向的线索和藏品结果保持一致。完成一夜后，章节编号会加入持久化的 `nightSealIds` 与 `completedReports`，旅程册据此解锁明信片与路线履历。
 
@@ -97,6 +99,8 @@ Demo、睡眠硬件、好友线索、Injective、证物信笺和推论信笺共�
 `journeySeed` 在新存档第一次开始夜班时只生成一次：Demo 使用固定值，真实夜班使用本地随机值。`selectSouvenir` 先排除 `souvenirHistory` 已出现的物件，再用种子、章节、方向、随身物与物件 ID 的稳定哈希排序；同社团方向和同随身物亲和只影响排序，不改变主线奖励。首次结算把结果与当夜路线、准备、种子和时间写成快照，此后重复结算直接返回原记录。v8 迁移使用固定旧档种子，按已完成章节顺序重建，确保五夜不重复且刷新不重抽。
 
 第一夜归来后的四个白天各由 `getOpportunityCandidates` 从十二张告示中稳定取三张，并排除 `opportunityHistory` 里所有曾展示的 ID。选择一张会保存对应答复，全部收起则只保存三张展示记录；两种方式都不会重抽或阻断调查。下一份晨报读取同章节记录显示一句回响，收藏页剪报册保存结果。v9 迁移不替旧档伪造白天选择，Demo 跳章才生成明确的第一选项演示履历。
+
+第四案同样把 34 张专属图像作为静态 WebP 提交，提示词与映射见 [[docs/art-prompts/chihaya-noa-visual-archive]]；两案都不在运行时生成画面或事实。
 
 ## 内容边界
 
@@ -120,7 +124,7 @@ React Flow 使用本地受控节点承接拖动过程，只在桌面端从图钉
 
 好友线索使用 `?case=<案件 ID>&clue=<稳定线索 ID>` 的 local-first 深链接。分享端只从当前案件白名单生成链接和二维码；接收端在 hydration 后先验证案件，再验证该案线索，切换到对应存档后才经 `receiveSharedClue` 写入 `unlockedClueIds` 与 `receivedClueIds`，随后从地址栏移除两个 query。跨案件组合与未知 ID 不创建或污染存档，旧的仅含 `clue` 链接继续默认解释为 `case-001`。重复链接保持幂等，不传送其他进度，也不会确认关系或推进章节。赠送线索可参与普通阅档与联合推理，但真结局只计算非 `receivedClueIds` 的亲自取得线索；玩家后来完成对应夜班时，该 ID 会从好友来源表移除，转为亲自取得。
 
-密文关卡使用独立的 `solvedCipherIds` 保存已经核对的稳定 ID。每个案件注册一份 `CipherDeskDefinition`，同时提供标题、说明、三段关卡、最终接线与全关完成回执；单个关卡可选 `CipherDial`，声明范围、步长、初始值、目标、精度和显示模式。刻度盘值先按范围与步长对齐并按精度截断，再格式化为时刻或 MHz 文本，最终仍通过同一答案白名单进入 `solveCipher`，避免浮点漂移或绕过作者答案。文本答案经 NFKC、大小写和常见分隔符归一化后精确匹配，最终接线则要求碎片 ID 数量、唯一性与顺序完全一致，全部不使用模糊判断或生成模型。只有成功关卡和接线 ID 持久化；未提交刻度与临时排序只存在组件状态。迁移会按当前案件的三关与接线 ID 合集过滤未知和跨案件值。未注册密文的案件不显示空面板。
+密文关卡使用独立的 `solvedCipherIds` 保存已经核对的稳定 ID。每个案件注册一份 `CipherDeskDefinition`，同时提供标题、说明、三段关卡、最终接线与全关完成回执；单个关卡可选 `CipherDial`，声明范围、步长、初始值、目标、精度和显示模式。显示模式支持时刻、MHz 和案件通用计数，并可由内容提供仪表及信号标签；刻度盘值先按范围与步长对齐并按精度截断，最终仍通过同一答案白名单进入 `solveCipher`，避免浮点漂移或绕过作者答案。文本答案经 NFKC、大小写和常见分隔符归一化后精确匹配，最终接线则要求碎片 ID 数量、唯一性与顺序完全一致，全部不使用模糊判断或生成模型。只有成功关卡和接线 ID 持久化；未提交刻度与临时排序只存在组件状态。迁移会按当前案件的三关与接线 ID 合集过滤未知和跨案件值。未注册密文的案件不显示空面板。
 
 真结局资格由 `canUnlockTrueEnding` 统一判断，界面锁定与存档动作共用同一规则；因此不能通过绕开按钮直接写入未满足条件的真结局。旧存档迁移由可独立测试的 `migrateGameState` 提供。
 

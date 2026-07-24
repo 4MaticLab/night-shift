@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-unified-campaign-intake|剧本一统一生命周期与视觉接入]] | `codex/unified-campaign-intake` | `in_progress` | `manual` | 剧本一已完成结构提取 | 按五夜适配卡实现《千早诺亚的第十三次旅行》案件包与完整资产组 |
+| [[plans/codex-unified-campaign-intake|剧本一统一生命周期与视觉接入]] | `codex/unified-campaign-intake` | `in_progress` | `manual` | manifest、返照镜台、34 张资产与自动测试完成 | 本机浏览器逐夜重放，并完成桌面、iPad 竖屏与手机验收 |
 
 ## 使用规则
 
