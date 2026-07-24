@@ -1,6 +1,6 @@
 # Wagmi 3 钱包连接
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P1
 - 创建：2026-07-24
 - 更新：2026-07-24
@@ -35,7 +35,7 @@
 - [x] 把全局客户端 provider 接入 Next 应用。
 - [x] 将 mint 对话框迁移到 wagmi 钱包发现、连接、切链与 wallet client。
 - [x] 覆盖钱包选择、无 provider 和 mint 主路径测试。
-- [ ] 更新稳定文档并完成全量最小验证。
+- [x] 更新稳定文档并完成全量最小验证。
 
 ## 验收标准
 
@@ -54,12 +54,23 @@
 - `npm run docs:check`
 - `git diff --check`
 
+## 最终验证证据
+
+- `npm test`：通过，9 个文件、100 项测试。
+- `npm run lint`：通过；保留一个本分支修改前已存在的 `landing.tsx` 未使用 import 警告，无 error。
+- `npm run build`：Next.js 16.2.11 Turbopack production build、TypeScript 和页面生成均通过。
+- `PLAYWRIGHT_PORT=3098 npx playwright test tests/e2e/night-shift.spec.ts --grep "Injective|injected-only"`：3 项通过，覆盖未配置态、EIP-6963 钱包选择／既有 mint 回执、无 provider 提示。
+- `npm run docs:check`：通过，86 个 Markdown 文件的双链均可解析。
+- `git diff --check`：通过。
+- `package-lock.json` 中 `@walletconnect/` package 数量为 0；wagmi 版本为 `^3.7.4`。
+
 ## 决定记录
 
 - 2026-07-24：用户选择 wagmi 3，原因是维护活跃。
 - 2026-07-24：比赛范围只支持 injected/EIP-6963 钱包；不配置 WalletConnect，接受普通手机浏览器和无扩展内嵌浏览器不能连接的边界。
 - 2026-07-24：保留现有夜班视觉，自建轻量钱包列表，不引入完整钱包 Kit。
 - 2026-07-24：传统 `window.ethereum` 与 EIP-6963 公告指向同一 provider 时，钱包列表按 provider 身份去重，并优先使用带钱包名称的 connector。
+- 2026-07-24：Next production build 首次因 Google Fonts 临时下载失败；网络恢复后原命令完整通过，不需要代码规避。
 
 ## 相关文档
 
