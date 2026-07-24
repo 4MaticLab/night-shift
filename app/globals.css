@@ -411,12 +411,13 @@ blockquote {
   opacity: .2;
   pointer-events: none;
   background: repeating-linear-gradient(105deg, transparent 0 33px, rgba(215, 224, 226, .22) 34px, transparent 35px 67px);
-  animation: rain 1.8s linear infinite;
+  animation: rain 5.4s linear infinite;
 }
 
+/* one 67px stripe period along the 105deg gradient normal, so the loop point is seamless */
 @keyframes rain {
   to {
-    transform: translate(-50px, 100px);
+    transform: translate(-64.72px, -17.34px);
   }
 }
 
