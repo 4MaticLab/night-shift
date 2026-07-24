@@ -1,6 +1,6 @@
 # Home Assistant Connector 下载应用
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P1
 - 创建：2026-07-24
 - 更新：2026-07-24
@@ -37,9 +37,9 @@ Night Shift 已有经过验证的 Home Assistant loopback 桥，但当前比赛�
 - [x] 把桥配对改为短期 bearer session，并为 Chrome LNA／Vercel origin 建立安全请求边界。
 - [x] 实现 Connector 生命周期、Home Assistant 配置／发现、本地设置页与无终端启动体验。
 - [x] 实现 macOS／Windows／Linux Bun 编译和 macOS `.app` 包装。
-- [ ] 扩展 Night Shift 硬件中心的 Connector 下载、权限、发现、配对与失败降级体验。
-- [ ] 新增协议、store、浏览器、Connector 设置页、编译后二进制与 CI artifact 测试。
-- [ ] 更新稳定文档并完成全量代码、构建、文档与人工浏览器验证。
+- [x] 扩展 Night Shift 硬件中心的 Connector 下载、权限、发现、配对与失败降级体验。
+- [x] 新增协议、store、浏览器、Connector 设置页、编译后二进制与 CI artifact 测试。
+- [x] 更新稳定文档并完成全量代码、构建、文档与人工浏览器验证。
 
 ## 验收标准
 
@@ -57,7 +57,6 @@ Night Shift 已有经过验证的 Home Assistant loopback 桥，但当前比赛�
 - `npm run lint`
 - `npm run docs:check`
 - `npm run build`
-- `npm run build:sites`
 - `npm run bridge:test`
 - `npm run connector:test`
 - `npm run connector:build`
@@ -65,6 +64,19 @@ Night Shift 已有经过验证的 Home Assistant loopback 桥，但当前比赛�
 - `PLAYWRIGHT_PORT=3107 npm run test:e2e -- --grep "Home Assistant|Connector"`
 - 在 Chrome 中从 HTTPS／Vercel Preview 验证权限拒绝、未安装、配对、试亮、断桥和移动端提示。
 - 在 macOS 双击打包后的 `.app`，验证设置页、真实／模拟 Home Assistant 和网页配对闭环。
+
+## 完成证据
+
+- `npm test`：12 个文件、111 个测试全部通过。
+- `npm run lint`：0 error；保留主线既有 `landing.tsx` 未使用 import warning，不属于本计划范围。
+- `npm run docs:check`：87 个 Markdown 文件双链全部通过。
+- `npm run build`：Next 16.2.11 生产构建与 TypeScript 检查通过；Vercel Preview `2xKaRHin1EtAqUwxcr1fNt8vWjpR` 在 51 秒内转为 Ready。
+- `npm run connector:test`：协议、store 与设置页共 11 个测试全部通过。
+- `npm run connector:build:all`：生成 arm64／x64 Mach-O、x64 PE32+ 与 x64 ELF 四个平台产物；macOS 两个目标包含 `.app/Contents/Info.plist`。
+- `npm run connector:smoke`：当前 macOS arm64 独立二进制启动设置端口与桥端口，校验六位码、公开状态与打包后中文设置页通过。
+- `PLAYWRIGHT_PORT=3107 npm run test:e2e -- --grep "Home Assistant|Connector"`：2 个 Chrome 用例通过，覆盖 bearer 请求、绑定／试运行／cue 降级和未安装下载指引。
+- 人工浏览器：编译后的 macOS `.app` 设置页视觉、URL 错误反馈通过；在本机 Chrome 打开 `https://night-shift-lg6dzur1g-luokerenx4-s-team.vercel.app`，从硬件中心成功访问 `127.0.0.1:43117`、读取 Connector 状态并以六位码配对。未提供真实 Home Assistant token 时准确显示“已配对，Home Assistant 尚未就绪”，游戏主流程继续。
+- 用户明确 Vercel 是正式部署环境，因此没有执行 Sites 发布或把 Vinext render 当本计划门禁；PR 仅等待既有 `CI Gate`、Vercel 与新增 `Connector Artifacts`。
 
 ## 决定记录
 
@@ -74,6 +86,8 @@ Night Shift 已有经过验证的 Home Assistant loopback 桥，但当前比赛�
 - 2026-07-24：未签名／未公证是 Developer Preview 的真实边界，公开 Release 留待代码合入后的独立发布动作。
 - 2026-07-24：跨站 `SameSite=Strict` Cookie 无法支撑 Vercel → localhost；网页改用仅存于 `sessionStorage` 的 12 小时随机 bearer，会话随 Connector 重启失效。
 - 2026-07-24：Connector 设置页固定监听 `127.0.0.1:43118`，桥固定监听 `127.0.0.1:43117`；设置页验证 Home Assistant 后才让网页配对。
+- 2026-07-24：人工检查发现 Bun 压缩会把 `String.raw` 模板内中文保留为字面 `\uXXXX`；改用普通模板并把“打包后中文仍可读”加入二进制 smoke。
+- 2026-07-24：Vercel Preview 与本机 Chrome 实测完成公网 HTTPS → loopback 状态读取和 bearer 配对；真实 Home Assistant 设备动作仍需比赛机 token／实体，协议层由模拟 WebSocket 测试覆盖。
 
 ## 相关文档
 
