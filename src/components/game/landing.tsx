@@ -42,7 +42,7 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
       <nav className="landing-nav">
         <div className="brand-mark"><span aria-hidden="true" /><div><b>{t("夜班侦探")}</b><small>NIGHT SHIFT</small></div></div>
         <div className="landing-nav-actions">
-          <button className="ghost-button language-button" disabled={!interactive} aria-label={preferredLocale === "en" ? "切换到中文" : "Switch to English"} title={preferredLocale === "en" ? "切换到中文" : "Switch to English"} onClick={() => setLocale(preferredLocale === "en" ? "zh-CN" : "en")}><LanguagesIcon size={15} /></button>
+          <button className="ghost-button language-button" disabled={!interactive} aria-label={preferredLocale === "en" ? "切换到中文" : "Switch to English"} title={preferredLocale === "en" ? "切换到中文" : "Switch to English"} onClick={() => setLocale(preferredLocale === "en" ? "zh-CN" : "en")}><LanguagesIcon size={22} /></button>
           <button className="ghost-button" disabled={!interactive} onClick={onDemo}><Zap size={15} /> DEMO MODE</button>
         </div>
       </nav>

@@ -12281,7 +12281,7 @@ blockquote {
 
 /* Localized landing controls */
 .landing-nav-actions { display: flex; align-items: center; gap: 8px; }
-.language-button { color: var(--amber); padding: 11px; }
+.language-button { color: var(--amber); padding: 11px; border: none; background: none; }
 .campaign-shelf .locale-availability { margin: 9px 2px 0; color: #a49a89; font: 7px/1.5 monospace; letter-spacing: .04em; }
 
 .campaign-wheel {
