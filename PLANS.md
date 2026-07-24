@@ -6,7 +6,6 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-lost-property-case]] | `codex/lost-property-case` | `completed` | `manual` | 8/8 | 记录完成证据并退役计划 |
 
 ## 使用规则
 
