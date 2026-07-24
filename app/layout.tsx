@@ -3,6 +3,7 @@ import { Libre_Baskerville, Noto_Serif_SC, Playfair_Display } from "next/font/go
 import { headers } from "next/headers";
 import { ClickSpark } from "@/src/components/click-spark";
 import { SmoothCursor } from "@/src/components/ui/smooth-cursor";
+import { BackgroundMusic } from "@/src/components/background-music";
 import { InjectiveWalletProvider } from "@/src/components/injective-wallet-provider";
 import { RequestLocaleProvider } from "@/src/i18n/request-locale-provider";
 import { getRequestLocale } from "@/src/i18n/server";
@@ -31,5 +32,5 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const requestLocale = await getRequestLocale();
-  return <html lang={requestLocale}><body className={`${playfair.variable} ${baskerville.variable} ${notoSerifSC.variable}`}><RequestLocaleProvider initialLocale={requestLocale}><InjectiveWalletProvider>{children}<ClickSpark /><SmoothCursor /></InjectiveWalletProvider></RequestLocaleProvider></body></html>;
+  return <html lang={requestLocale}><body className={`${playfair.variable} ${baskerville.variable} ${notoSerifSC.variable}`}><RequestLocaleProvider initialLocale={requestLocale}><InjectiveWalletProvider>{children}<BackgroundMusic /><ClickSpark /><SmoothCursor /></InjectiveWalletProvider></RequestLocaleProvider></body></html>;
 }
