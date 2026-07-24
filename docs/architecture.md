@@ -72,10 +72,13 @@
 | 游戏框架 | `src/components/game/shell.tsx` | 顶栏、底部导航与 Demo 控制台 |
 | 共享游戏 UI | `src/components/game/shared.tsx` | 纸卡、印章、城市路线与睡眠文案 |
 | 视觉系统 | `app/globals.css` | 色板、纸张、地图、雨雾、响应式与动效 |
+| 全局背景音乐 | `src/components/background-music.tsx` | 根布局单实例音频、自动播放重试、可见性暂停与本地关闭偏好 |
 
 收藏页把内容映射为五个显示组：核心物证、夜班归来、城市回声、夜兆牌桌与口袋小物。前四类案件成果只读取既有 game store；夜兆使用完全独立的 `night-shift-tarot-v1` 本地存档，按案件与本地自然日保存一张文学旁注，绝不写回游戏进度。CSS `order` 让核心物证在桌面连续长卷中位于首位；900 px 以下只显示当前 `activeCollectionCategory` 对应的 section。分类状态不持久化、不参与解锁或结局，夜兆边界见 [[docs/tarot-night-omens]]。
 
 Demo、睡眠硬件、好友线索、Injective、证物信笺和推论信笺共用 `src/lib/use-accessible-dialog.ts`：挂载时记录触发焦点、锁定 Body 滚动，并沿弹层到 `body` 的祖先链把旁支节点设为 `inert` 与 `aria-hidden`；Tab 在当前对话框的可见可聚焦元素中循环，Escape 关闭；卸载时精确恢复原属性、滚动和焦点。弹层根节点使用 `data-dialog-layer`，确保遮罩仍可关闭，同时背景不能被指针或键盘访问。
+
+全局背景音乐挂在根布局，案件库、序章、游戏和海报共享同一个 `<audio>`，站内路由不重建曲目。它读取独立布尔偏好 `night-shift-bgm-enabled-v1`，不进入 game store；默认立即尝试有声播放，浏览器策略拒绝时只在下一次可信交互中重试。标签页隐藏时暂停，音频缺失或解码失败只改变右上角控制器状态，不阻断任何页面。固定曲目路径和浏览器边界见 [[docs/background-music]]。
 
 打开 Demo 控制台不再调用 `begin()`。`DemoDrawer` 只在玩家确认具体操作后调用现有 `jumpToChapter`、`unlockBoard` 或 `reset`；“完整案件板”确认路径先显式 `begin()`，其余章节快照由游戏 store 自身标记开始。确认层只解释并约束 UI 写入时机，不改变这些 store action 的确定性结果与案件隔离。
 | 资产清单 | `src/content/assets.ts` | 四幕页头／结局画面、物证、夜印、明信片、植物、社团纹章、纪念物、人物与地区的 manifest 和解析函数 |

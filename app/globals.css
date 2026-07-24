@@ -48,6 +48,70 @@ body {
   user-select: none;
 }
 
+.background-music-control {
+  position: fixed;
+  z-index: 1100;
+  top: max(15px, env(safe-area-inset-top));
+  right: max(15px, env(safe-area-inset-right));
+}
+
+.background-music-control>audio {
+  display: none;
+}
+
+.background-music-control>button {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  color: #aeb8c5;
+  background: transparent;
+  cursor: pointer;
+  filter: drop-shadow(0 3px 8px #000c);
+  transition: color .2s ease, opacity .2s ease, transform .2s ease;
+}
+
+.background-music-control>button:hover {
+  color: #ead9ba;
+  transform: translateY(-1px);
+}
+
+.background-music-control>button:focus-visible {
+  outline: 2px solid #d1a766;
+  outline-offset: 3px;
+}
+
+.background-music-control.state-playing>button {
+  color: #e5c993;
+}
+
+.background-music-control.state-missing>button,
+.background-music-control.state-error>button {
+  color: #8290a1;
+  opacity: .72;
+}
+
+.background-music-icon {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+}
+
+.background-music-icon>svg {
+  width: 19px;
+  height: 19px;
+}
+
+.landing-nav-actions,
+.topbar-actions {
+  margin-right: 52px;
+}
+
 body.app-is-booting {
   overflow: hidden;
 }
@@ -957,6 +1021,7 @@ blockquote {
 
 .case-prologue-header>span {
   justify-self: end;
+  margin-right: 56px;
   color: #858f9c;
   font: 10px/1 monospace;
   letter-spacing: .12em;
@@ -11024,6 +11089,12 @@ blockquote {
   .app-boot-progress span {
     width: 70%;
     animation: none;
+  }
+}
+
+@media print {
+  .background-music-control {
+    display: none !important;
   }
 }
 

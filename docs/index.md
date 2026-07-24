@@ -25,6 +25,7 @@
 - [[docs/privacy-and-guardrails]] — 健康数据最小化、授权、撤销和非医疗边界。
 - [[docs/injective-keepsake-mint]] — Injective EVM Testnet 藏品领取、合约、部署与真实边界。
 - [[docs/tarot-night-omens]] — 收藏页每日塔罗画风夜兆的入口、确定性抽取、本地存档与非奖励护栏。
+- [[docs/background-music]] — 全局 C 小调夜曲的文件契约、自动播放限制、控制器、持久化与验收。
 
 ## 工程
 

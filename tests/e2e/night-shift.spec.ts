@@ -1,5 +1,25 @@
 import { expect, test } from "@playwright/test";
 
+function createSilentWav() {
+  const sampleRate = 8000;
+  const dataLength = 800;
+  const wav = Buffer.alloc(44 + dataLength);
+  wav.write("RIFF", 0);
+  wav.writeUInt32LE(36 + dataLength, 4);
+  wav.write("WAVEfmt ", 8);
+  wav.writeUInt32LE(16, 16);
+  wav.writeUInt16LE(1, 20);
+  wav.writeUInt16LE(1, 22);
+  wav.writeUInt32LE(sampleRate, 24);
+  wav.writeUInt32LE(sampleRate, 28);
+  wav.writeUInt16LE(1, 32);
+  wav.writeUInt16LE(8, 34);
+  wav.write("data", 36);
+  wav.writeUInt32LE(dataLength, 40);
+  wav.fill(128, 44);
+  return wav;
+}
+
 async function openFirstNight(page: import("@playwright/test").Page) {
   await page.goto("/");
   await page.getByRole("button", { name: /开始第 001 宗案件/ }).click();
@@ -91,6 +111,66 @@ test("holds the first interaction behind a real hero-art loading screen", async 
   const caseLibrary = page.getByRole("region", { name: "案件剧本选择" });
   await expect(caseLibrary.getByRole("option", { name: "零点四十三分的末班车" })).toHaveAttribute("aria-selected", "true");
   await expect(page.locator(".case-teaser")).toHaveCount(0);
+});
+
+test("keeps one global background track controllable and remembers when it is off", async ({ page }) => {
+  await page.route("**/audio/c-minor-nocturne.mp3", (route) => route.fulfill({
+    status: 200,
+    contentType: "audio/wav",
+    body: createSilentWav(),
+  }));
+  await page.addInitScript(() => {
+    const counters = window as Window & { __bgmPlayCalls?: number; __bgmPauseCalls?: number };
+    counters.__bgmPlayCalls = 0;
+    counters.__bgmPauseCalls = 0;
+    Object.defineProperty(HTMLMediaElement.prototype, "play", {
+      configurable: true,
+      value(this: HTMLMediaElement) {
+        counters.__bgmPlayCalls = (counters.__bgmPlayCalls ?? 0) + 1;
+        this.dispatchEvent(new Event("play"));
+        return Promise.resolve();
+      },
+    });
+    Object.defineProperty(HTMLMediaElement.prototype, "pause", {
+      configurable: true,
+      value(this: HTMLMediaElement) {
+        counters.__bgmPauseCalls = (counters.__bgmPauseCalls ?? 0) + 1;
+        this.dispatchEvent(new Event("pause"));
+      },
+    });
+  });
+
+  await page.goto("/");
+  const audio = page.locator(".background-music-control audio");
+  const musicControl = page.locator(".background-music-control");
+  await expect(audio).toHaveCount(1);
+  await expect(audio).toHaveAttribute("src", "/audio/c-minor-nocturne.mp3");
+  await expect(musicControl.locator(".background-music-tooltip, .background-music-icon i")).toHaveCount(0);
+  await expect(musicControl.locator("button")).not.toHaveAttribute("title");
+  expect(await musicControl.locator("button").evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { borderWidth: style.borderWidth, backgroundColor: style.backgroundColor };
+  })).toEqual({ borderWidth: "0px", backgroundColor: "rgba(0, 0, 0, 0)" });
+  expect(await audio.evaluate((element) => ({ loop: (element as HTMLAudioElement).loop, volume: (element as HTMLAudioElement).volume }))).toEqual({ loop: true, volume: .22 });
+  await expect.poll(() => page.evaluate(() => (window as Window & { __bgmPlayCalls?: number }).__bgmPlayCalls)).toBeGreaterThan(0);
+
+  await audio.evaluate((element) => { element.dataset.instance = "global-bgm"; });
+  await expect(page.getByRole("button", { name: "关闭背景音乐" })).toBeVisible();
+  await page.getByRole("button", { name: /开始第 001 宗案件/ }).click();
+  await expect(page).toHaveURL("/case-intro");
+  await expect(page.locator(".background-music-control audio[data-instance='global-bgm']")).toHaveCount(1);
+
+  await page.getByRole("button", { name: "关闭背景音乐" }).click();
+  await expect(page.getByRole("button", { name: "开启背景音乐" })).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem("night-shift-bgm-enabled-v1"))).toBe("false");
+  await expect.poll(() => page.evaluate(() => (window as Window & { __bgmPauseCalls?: number }).__bgmPauseCalls)).toBeGreaterThan(0);
+
+  await page.reload();
+  await expect(page.getByRole("button", { name: "开启背景音乐" })).toBeVisible();
+  expect(await page.evaluate(() => (window as Window & { __bgmPlayCalls?: number }).__bgmPlayCalls)).toBe(0);
+  await page.getByRole("button", { name: "开启背景音乐" }).click();
+  await expect(page.getByRole("button", { name: "关闭背景音乐" })).toBeVisible();
+  await expect.poll(() => page.evaluate(() => (window as Window & { __bgmPlayCalls?: number }).__bgmPlayCalls)).toBeGreaterThan(0);
 });
 
 test("opens demo controls without changing a fresh save and confirms snapshot writes", async ({ page }) => {
