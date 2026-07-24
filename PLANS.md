@@ -6,7 +6,6 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/feat-five-day-print-posters]] | `feat/five-day-print-posters` | `completed` | `auto` | 100% | 五张海报、网页预览、A3 打印、二维码与印刷指南已完成验证 |
 
 ## 使用规则
 
