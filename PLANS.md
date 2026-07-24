@@ -6,6 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
+| [[plans/codex-campaign-entry-prologue]] | `codex/campaign-entry-prologue` | `in_progress` | `manual` | 0/6 | 定义案件序章内容契约与共享首夜导入流程 |
 
 ## 使用规则
 
