@@ -21,7 +21,15 @@ Night Shift 使用受信任的编译期案件包，而不是把某一份剧本�
 - `endings` 与 `rules`：三种裁决文本、真结局 ID，以及线索／收藏／关系门槛。
 - `postcards`、`botanicals`、`watchEchoes`、`wakeEchoes`：每夜归来与等待叙事。
 - `characters`、`districts`：可选的人物和地区档案；空人物表会让通用档案页隐藏该区块。
-- `presentation`：档案编号、城市与侦探称呼、首页介绍、四幕图像、逐夜夜印和结案文案。
+- `presentation`：档案编号、城市与侦探称呼、首页介绍、案件序章、四幕图像、逐夜夜印和结案文案。
+
+每个 `presentation.prologue` 都必须提供按 `incident → evidence → handoff` 排列的三幕：
+
+1. `incident` 让玩家在第一屏看见本案专属异象和案名；
+2. `evidence` 交代委托／证物、核心疑问和一条仍未解释的异常；
+3. `handoff` 写明林渡为什么要在第一夜出门，并以“接下案件／进入事务所”结束。
+
+三幕各自拥有 `eyebrow`、`title`、`body`、`aside` 和已登记的 `assetId`。它们是确定性的案件资产，不提供选择、数值或路线分叉；可以复用本案已过审的主视觉、藏品和交接图，但不能引用其他案件资产。`defineCampaign` 会拒绝缺幕、错序、空文本和不存在的图片。
 
 `defineCampaign` 会在模块载入时拒绝不是恰好五夜的案件、重复 ID、非连续章节、缺失路线、每夜配套内容不完整、跨案件引用和不可达的真结局条件。Zod schema 继续校验单条内容字段与文学文本下限。
 
@@ -31,7 +39,7 @@ Night Shift 使用受信任的编译期案件包，而不是把某一份剧本�
 2. 在 `src/content/campaigns/` 新建案件模块，定义完整的五夜内容；用 `defineCampaign({...})` 导出 manifest，案件 ID 与 `case.id` 必须一致。
 3. 在 `registry.ts` 登记 manifest。除非要增加全新的玩法能力，不应修改 store、引擎或通用页面。
 4. 为固定真相新增一篇故事圣经并从 [[docs/index]] 索引。
-5. 增加内容测试、完整五夜主循环、案件切换／独立存档测试，以及桌面与 390 × 844 冒烟路径。
+5. 增加内容测试、案件序章、完整五夜主循环、案件切换／独立存档测试，以及桌面、820 × 1180 与 390 × 844 冒烟路径。
 6. 运行 [[docs/quality-baseline#验证命令|完整验证命令]]。
 
 目前案件包随前端构建发布，不从远程加载代码。若未来需要可下载剧本或 Fallen London 式 storylet 条件／效果 DSL，应另立计划并重新评估内容签名、版本迁移和安全边界。

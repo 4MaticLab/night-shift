@@ -423,6 +423,34 @@ export const thirteenthLoafCampaign = defineCampaign({
     endingQuestion: "房契还给十二人以后，第十三份该属于谁？",
     endingPrompt: "火灾责任、十二名成员与地下公共炉都已查明。最后要决定的是公开、保护，还是让一项权利永远没有私人所有者。",
     closingRefrain: "天已经亮了，街边柜仍替下一位没有名字的人留着余温。",
+    prologue: {
+      scenes: [
+        {
+          stage: "incident",
+          eyebrow: "清晨 05:46 · 街边保温柜",
+          title: "停业十七年后，第十三只面包仍会出炉",
+          body: "煤钟街合作面包房只登记过十二名烘焙师。火灾让它停业以后，街边保温柜却每天清晨多出第十三只面包，温度、重量与刀口都像刚离开一座仍在工作的炉。",
+          aside: "包面包的纸从不写姓名，只盖着一句旧章：给尚未拥有份额的人。",
+          assetId: "case.thirteenth-loaf.header.handoff",
+        },
+        {
+          stage: "evidence",
+          eyebrow: "接案物证 · 黄铜持份环",
+          title: "十二个人共同保管着第十三份",
+          body: "面包篮底藏着十二枚黄铜持份环，内槽都有新鲜面粉。旧房契只承认十二份产权，烧焦的炉门却留下十三种长期使用的痕迹。",
+          aside: "你将核对份额、火灾与酵母。林渡会沿着余温寻找那位从未被登记的烘焙者。",
+          assetId: "collectible.thirteenth-loaf.tally-ring",
+        },
+        {
+          stage: "handoff",
+          eyebrow: "第一夜交接 · 林渡",
+          title: "今晚守着不会冷掉的面包",
+          body: "林渡把第十三只面包装进纸袋，沿市政蒸汽管寻找仍在供热的地下炉。他不会先问面包属于谁，只会确认是谁一直替陌生人保留一份早餐。",
+          aside: "“等你醒来，我们至少该知道：这份余温为什么比产权活得更久。”",
+          assetId: "case.thirteenth-loaf.header.night",
+        },
+      ],
+      acceptLabel: "接下案件，进入事务所",
+    },
   },
 });
-

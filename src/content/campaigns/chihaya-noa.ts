@@ -461,5 +461,34 @@ export const chihayaNoaCampaign = defineCampaign({
     endingQuestion: "十三段人生都能自证以后，谁还有资格指定唯一原本？",
     endingPrompt: "入境记录、未成线住址与观察者协议都已查明。最后要决定的是公开、保护，还是把名字、出口与沉默权逐一交还。",
     closingRefrain: "天已经亮了，十三扇门仍分别通向自己的清晨。",
+    prologue: {
+      scenes: [
+        {
+          stage: "incident",
+          eyebrow: "雾港 22:08 · 第十三号停用站台",
+          title: "同一名少女已经抵达十二次",
+          body: "雾港保存着十二份千早诺亚的合法入境记录：日期、衣着和行李互不相同，指纹却全部通过检验。今晚，她本人带着第十三张车票走进事务所。",
+          aside: "那张票要到明天才发售，边缘却已经被许多年的旅途磨旧。",
+          assetId: "case.chihaya-noa.header.handoff",
+        },
+        {
+          stage: "evidence",
+          eyebrow: "接案物证 · 十三份互斥证词",
+          title: "她们都记得自己怎样长大",
+          body: "十三张寄宿学校照片各有不同的童年，十二个住址指向地图上从未建成的街区。诺亚不要求事务所找出赝品，只要求在观察者抵达以前证明：矛盾不等于虚假。",
+          aside: "你将核对车票、纸结与返照镜。林渡会沿每一段未成线人生分别取证。",
+          assetId: "collectible.chihaya-noa.future-ticket",
+        },
+        {
+          stage: "handoff",
+          eyebrow: "第一夜交接 · 林渡",
+          title: "今晚不替任何人挑选原本",
+          body: "林渡把十三张车票分装进十三只透明袋，没有在任何一只上写“副本”。他先去寄宿学校旧档室，再赶往雾港核对那些被制度判作互斥的抵达。",
+          aside: "“你去睡。我保证带回来的每一份证词，都拥有自己的名字。”",
+          assetId: "case.chihaya-noa.header.night",
+        },
+      ],
+      acceptLabel: "接下案件，进入事务所",
+    },
   },
 });

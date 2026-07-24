@@ -233,7 +233,28 @@ test("starts an unopened case after returning from a campaign with progress", as
   await page.getByRole("button", { name: /夜班侦探 NIGHT SHIFT/ }).click();
   await selectCampaign(page, "零点四十三分的末班车");
   await page.getByRole("button", { name: /开始第 001 宗案件/ }).click();
-  await expect(page.getByRole("heading", { name: "你们从未同时醒着。" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "一张来自昨天的旧车票" })).toBeVisible();
+});
+
+test("introduces a new case through incident, evidence, and handoff before the first night", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /开始第 001 宗案件/ }).click();
+  const prologue = page.locator(".case-prologue");
+
+  await expect(prologue.getByRole("heading", { name: "一张来自昨天的旧车票" })).toBeVisible();
+  await expect(prologue).toContainText("事务所门缝");
+  await expect(prologue.getByRole("button", { name: "返回案件库" })).toBeVisible();
+  await page.getByRole("button", { name: "继续" }).click();
+  await expect(prologue.getByRole("heading", { name: "有人仍在为一条废线守夜" })).toBeVisible();
+  await expect(prologue).toContainText("被撕掉的终点");
+  await page.getByRole("button", { name: "上一幕" }).click();
+  await expect(prologue.getByRole("heading", { name: "一张来自昨天的旧车票" })).toBeVisible();
+  await page.getByRole("button", { name: "继续" }).click();
+  await page.getByRole("button", { name: "继续" }).click();
+  await expect(prologue.getByRole("heading", { name: "今晚先让纸张开口" })).toBeVisible();
+  await expect(prologue).toContainText("你负责白天推理");
+  await page.getByRole("button", { name: /接下案件，进入事务所/ }).click();
+  await expect(page.locator(".tonight-page")).toBeVisible();
 });
 
 test("plays the first case in English and preserves the language preference", async ({ page, context }) => {
@@ -247,7 +268,7 @@ test("plays the first case in English and preserves the language preference", as
   await page.getByRole("button", { name: /Begin Case 001/ }).click();
   await page.getByRole("button", { name: "Continue" }).click();
   await page.getByRole("button", { name: "Continue" }).click();
-  await page.getByRole("button", { name: /Enter the agency/ }).click();
+  await page.getByRole("button", { name: /enter the agency/i }).click();
   await expect(page.getByText("The Ticket That Never Existed")).toBeVisible();
   await expectNoVisibleHan(page);
 
@@ -1063,6 +1084,20 @@ test("switches to the Chihaya Noa campaign and completes its five-night story", 
 test.describe("tablet portrait 820x1180", () => {
   test.use({ viewport: { width: 820, height: 1180 } });
 
+  test("keeps the three-act case prologue readable and touchable", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: /开始第 001 宗案件/ }).click();
+    const prologue = page.locator(".case-prologue");
+
+    await expect(prologue.getByRole("heading", { name: "一张来自昨天的旧车票" })).toBeVisible();
+    await expectMinimumTapTargets(prologue.locator("button"));
+    await expectNoPageOverflow(page);
+    await page.getByRole("button", { name: "继续" }).click();
+    await page.getByRole("button", { name: "继续" }).click();
+    await expect(prologue.getByRole("heading", { name: "今晚先让纸张开口" })).toBeVisible();
+    await expectNoPageOverflow(page);
+  });
+
   test("stacks the pre-investigation handoff into a calm reading flow", async ({ page }) => {
     await openFirstNight(page);
 
@@ -1149,6 +1184,23 @@ test.describe("tablet portrait 820x1180", () => {
 
 test.describe("mobile 390x844", () => {
   test.use({ viewport: { width: 390, height: 844 } });
+
+  test("keeps the case prologue inside the phone viewport", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: /开始第 001 宗案件/ }).click();
+    const prologue = page.locator(".case-prologue");
+
+    await expect(prologue.getByRole("heading", { name: "一张来自昨天的旧车票" })).toBeVisible();
+    await expectMinimumTapTargets(prologue.locator("button"));
+    await expectNoPageOverflow(page);
+    await page.getByRole("button", { name: "继续" }).click();
+    await expect(prologue.getByRole("heading", { name: "有人仍在为一条废线守夜" })).toBeVisible();
+    await expectNoPageOverflow(page);
+    await page.getByRole("button", { name: "继续" }).click();
+    await expect(prologue.getByRole("button", { name: /接下案件，进入事务所/ })).toBeVisible();
+    await expectMinimumTapTargets(prologue.locator("button"));
+    await expectNoPageOverflow(page);
+  });
 
   test("switches campaign wheel options without overflow on the landing page", async ({ page }) => {
     await page.goto("/");
