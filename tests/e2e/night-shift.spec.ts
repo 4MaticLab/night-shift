@@ -321,6 +321,19 @@ test("starts a case and reaches the first morning report", async ({ page }) => {
   await expect(page.getByText("错页登记处来函")).toBeVisible();
   await expect(page.getByRole("heading", { name: "致「待核旁注」" })).toBeVisible();
   await expect(page.getByText(/你让一张作废票据反过来审问了出票制度/)).toBeVisible();
+  const [societyCrest, societyLetter] = await Promise.all([
+    page.locator(".society-memory-letter > .society-crest").boundingBox(),
+    page.locator(".society-memory-letter > .paper-card").boundingBox(),
+  ]);
+  expect(societyCrest).not.toBeNull();
+  expect(societyLetter).not.toBeNull();
+  expect(Math.abs(societyCrest!.width - societyLetter!.width)).toBeLessThanOrEqual(1);
+  expect(Math.abs(societyCrest!.height - societyLetter!.height)).toBeLessThanOrEqual(1);
+  expect(Math.abs(societyCrest!.y - societyLetter!.y)).toBeLessThanOrEqual(1);
+  await expect.poll(() => page.locator(".society-memory-letter > .society-crest img").evaluate((image) => {
+    const source = image as HTMLImageElement;
+    return source.complete && source.naturalWidth > 0;
+  })).toBe(true);
   await page.getByRole("button", { name: /让错字继续保护地址/ }).click();
   await expect(page.getByText("答复已寄出")).toBeVisible();
   await expect(page.getByText(/让空白先保护活人/)).toBeVisible();
