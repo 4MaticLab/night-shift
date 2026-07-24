@@ -6,6 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
+| [[plans/codex-game-surface-routing]] | `codex/game-surface-routing` | `in_progress` | `auto` | 0% | 建立共享路由外壳与阶段守卫 |
 
 ## 使用规则
 
