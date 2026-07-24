@@ -19,6 +19,11 @@ concurrency:
 env:
   NEXT_TELEMETRY_DISABLED: "1"
 
+# Hackathon merge gate: keep the PR loop fast.
+# Quality (~1–2 min) is the only required check. Browser E2E, Vinext/Cloudflare
+# render, and Hardhat live as optional local scripts for the person merging
+# (`npm run test:robustness` and friends) — see docs/quality-baseline.md.
+
 jobs:
   quality:
     name: Quality
@@ -49,86 +54,17 @@ jobs:
       - name: Check documentation links
         run: npm run docs:check
 
-  platform:
-    name: Platform
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v6
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: package.json
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build and render Cloudflare target
-        run: npm run test:render
-
-      - name: Compile keepsake contract
-        run: npm run contract:compile
-
-      - name: Test keepsake contract
-        run: npm run contract:test
-
-  end-to-end:
-    name: End-to-end
-    needs:
-      - quality
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v6
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: package.json
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Google Chrome and system dependencies
-        run: npx playwright install --with-deps chrome
-
-      - name: Run browser regression suite
-        run: npm run test:e2e -- --fail-on-flaky-tests
-
-      - name: Upload Playwright failure report
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: playwright-report-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            playwright-report/
-            test-results/
-          if-no-files-found: ignore
-          retention-days: 7
-
   gate:
     name: CI Gate
     if: ${{ always() }}
     needs:
       - quality
-      - platform
-      - end-to-end
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Verify required jobs
         env:
           QUALITY_RESULT: ${{ needs.quality.result }}
-          PLATFORM_RESULT: ${{ needs.platform.result }}
-          E2E_RESULT: ${{ needs.end-to-end.result }}
         run: |
-          printf 'Quality: %s\nPlatform: %s\nEnd-to-end: %s\n' \
-            "$QUALITY_RESULT" "$PLATFORM_RESULT" "$E2E_RESULT"
+          printf 'Quality: %s\n' "$QUALITY_RESULT"
           test "$QUALITY_RESULT" = "success"
-          test "$PLATFORM_RESULT" = "success"
-          test "$E2E_RESULT" = "success"

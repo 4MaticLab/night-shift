@@ -15,6 +15,7 @@
     "test": "vitest run",
     "test:render": "npm run build:sites && node --test tests/rendered-html.test.mjs",
     "test:e2e": "playwright test",
+    "test:robustness": "npm run test:render && npm run contract:compile && npm run contract:test && npm run test:e2e",
     "contract:compile": "hardhat compile --build-profile production",
     "contract:test": "hardhat test nodejs",
     "contract:deploy": "hardhat ignition deploy ignition/modules/NightShiftKeepsake.ts --network injectiveTestnet",
