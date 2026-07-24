@@ -3,7 +3,8 @@
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
 import { AnimatePresence } from "motion/react";
-import { Hero, Intro } from "@/src/components/game/landing";
+import { Hero } from "@/src/components/game/landing";
+import { CasePrologue } from "@/src/components/game/case-prologue";
 import { BottomNav, DemoDrawer, TopBar } from "@/src/components/game/shell";
 import type { GameView } from "@/src/components/game/types";
 import { useGameStore } from "@/src/stores/game-store";
@@ -125,7 +126,7 @@ function GamePage() {
   if (libraryOpen || (!game.started && !intro)) {
     return <>{clueNotice}<Hero interactive={hydrated} onStart={() => { setUserToggledLibrary(false); if (game.started) setIntro(false); else setIntro(true); }} onDemo={() => setDemo(true)} /><AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={(nextView) => { setUserToggledLibrary(false); changeView(nextView); }} />}</AnimatePresence></>;
   }
-  if (intro && !game.started) return <>{clueNotice}<Intro onDone={() => { game.begin(); setIntro(false); }} /></>;
+  if (intro && !game.started) return <>{clueNotice}<CasePrologue onBack={() => { setIntro(false); setUserToggledLibrary(true); }} onDone={() => { game.begin(); setIntro(false); }} /></>;
   if (game.phase === "night") return <>{clueNotice}<NightRun onFinish={game.finishNight} onHardware={() => setHardwareOpen(true)} />{hardwarePanel}</>;
   if (game.phase === "ending") return <>{clueNotice}<Ending onOpenLibrary={() => setUserToggledLibrary(true)} /></>;
 

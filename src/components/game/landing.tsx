@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight, BookOpen, ChevronRight, Languages, Moon, TramFront, Zap } from "lucide-react";
+import { ArrowRight, BookOpen, Languages, Moon, Zap } from "lucide-react";
 import { getAsset } from "@/src/content/assets";
 import { campaignRegistry } from "@/src/content/campaigns/registry";
 import { useGameStore } from "@/src/stores/game-store";
@@ -29,6 +28,7 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
   const primaryLabel = started
     ? locale === "en" ? `Continue ${campaign.case.title}` : `继续《${campaign.case.title}》`
     : locale === "en" ? `Begin ${campaign.case.title}` : `开始《${campaign.case.title}》`;
+
   return (
     <main className="hero-shell">
       <div className="rain" aria-hidden="true" />
@@ -82,27 +82,5 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
       </section>
       <div className="landing-footnote" aria-hidden="true"><span>LOCAL-FIRST</span><i /><span>NO ACCOUNT</span><i /><span>SAVE ON THIS DEVICE</span></div>
     </main>
-  );
-}
-
-export function Intro({ onDone }: { onDone: () => void }) {
-  useGameStore((state) => state.campaignId);
-  const { campaign, locale, t } = useI18n();
-  const [step, setStep] = useState(0);
-  const lines = [
-    [t("你们从未同时醒着。"), t("当你合上眼睛，林渡才穿上外套。")],
-    [t("白天，你整理他带回的线索。"), locale === "en" ? `The evidence and contradictions of ${campaign.case.title} are waiting for you to connect them.` : `${campaign.case.title}的证物与矛盾，都在等你连接。`],
-    [t("夜晚，他替你进入城市。"), t("今晚的调查，交给他吧。")],
-  ];
-  return (
-    <motion.div className="intro-screen" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <div className="intro-window"><TramFront /><span className="window-light" /></div>
-      <AnimatePresence mode="wait">
-        <motion.div key={step} className="intro-copy" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
-          <span>0{step + 1} / 03</span><h2>{lines[step][0]}</h2><p>{lines[step][1]}</p>
-        </motion.div>
-      </AnimatePresence>
-      <div className="intro-footer"><div className="intro-dots">{lines.map((_, i) => <i className={i === step ? "active" : ""} key={i} />)}</div><button className="primary-button" onClick={() => step < 2 ? setStep(step + 1) : onDone()}>{step < 2 ? t("继续") : t("进入事务所")}<ChevronRight size={18} /></button></div>
-    </motion.div>
   );
 }

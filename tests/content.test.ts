@@ -82,6 +82,14 @@ describe("Night Shift case content", () => {
       expect(campaign.botanicals).toHaveLength(campaign.case.chapters.length);
       expect(campaign.wakeEchoes).toHaveLength(campaign.case.chapters.length);
       expect(campaign.presentation.nightSealAssetIds).toHaveLength(campaign.case.chapters.length);
+      expect(campaign.presentation.prologue.scenes.map((scene) => scene.stage)).toEqual(["incident", "evidence", "handoff"]);
+      expect(campaign.presentation.prologue.acceptLabel.length).toBeGreaterThan(0);
+      for (const scene of campaign.presentation.prologue.scenes) {
+        expect(scene.title.length).toBeGreaterThan(0);
+        expect(scene.body.length).toBeGreaterThanOrEqual(30);
+        expect(scene.aside.length).toBeGreaterThanOrEqual(12);
+        expect(getAsset(scene.assetId).status).toBe("complete");
+      }
       for (const chapter of campaign.case.chapters) {
         for (const quality of ["interrupted", "regular", "restful"] as const) {
           expect(resolveNight(campaign, chapter.number, quality).clueIds.length).toBeGreaterThan(0);

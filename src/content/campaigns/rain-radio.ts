@@ -349,5 +349,34 @@ export const rainRadioCampaign = defineCampaign({
     endingQuestion: "最后一次广播，由谁按下开关？",
     endingPrompt: "严洛把完整证词留在控制台，却把话筒推回居民面前。公开、保护与归还，每一种都要承担自己的回声。",
     closingRefrain: "雨已经停了，仍有人在九十七点三兆赫上轮流守夜。",
+    prologue: {
+      scenes: [
+        {
+          stage: "incident",
+          eyebrow: "雨夜 23:17 · 九十七点三兆赫",
+          title: "停播十二年的电台重新报时",
+          body: "第一场雨落下时，事务所那台没有接电的收音机亮了。一个女人读出明天的停电名单，又逐户念过四十七个早已从地图上消失的门牌。",
+          aside: "广播最后重复三遍：请在天亮以前证明，我们不是杂音。",
+          assetId: "header.night-shift.hero",
+        },
+        {
+          stage: "evidence",
+          eyebrow: "接案物证 · 仍有余温的旋钮",
+          title: "有人把整片街区藏进雨里",
+          body: "旋钮背面刻着废弃电台的呼号，铜轴仍是温的。旧电话线从封死的播音间伸向城市排水沟；只有雨水接通线路时，那四十七户人家才重新拥有声音。",
+          aside: "你将整理频率、电话与住址。林渡会在雨里寻找广播真正的听众。",
+          assetId: "header.morning-report",
+        },
+        {
+          stage: "handoff",
+          eyebrow: "第一夜交接 · 林渡",
+          title: "今晚从无人频率开始",
+          body: "林渡把便携收音机调到九十七点三兆赫，红灯在静电里一明一灭。他要先找到发射源，再确认明日新闻究竟是预言，还是一群人留下的求生暗号。",
+          aside: "“睡吧。只要雨还在下，我就不会让他们重新变成噪音。”",
+          assetId: "header.night-expedition",
+        },
+      ],
+      acceptLabel: "接下案件，进入事务所",
+    },
   },
 });

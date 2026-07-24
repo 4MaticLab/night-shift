@@ -19,6 +19,22 @@ export interface CampaignRules {
   requiredRelationCount: number;
 }
 
+export type CampaignPrologueStage = "incident" | "evidence" | "handoff";
+
+export interface CampaignPrologueScene {
+  stage: CampaignPrologueStage;
+  eyebrow: string;
+  title: string;
+  body: string;
+  aside: string;
+  assetId: string;
+}
+
+export interface CampaignPrologue {
+  scenes: [CampaignPrologueScene, CampaignPrologueScene, CampaignPrologueScene];
+  acceptLabel: string;
+}
+
 export interface CampaignPresentation {
   archiveNumber: string;
   teaser: string;
@@ -33,6 +49,7 @@ export interface CampaignPresentation {
   endingQuestion: string;
   endingPrompt: string;
   closingRefrain: string;
+  prologue: CampaignPrologue;
 }
 
 export interface CampaignManifest {
@@ -68,6 +85,19 @@ export function defineCampaign<const T extends CampaignManifest>(manifest: T): T
   }
   if (manifest.presentation.nightSealAssetIds.length !== manifest.case.chapters.length) {
     throw new Error(`Campaign ${manifest.id} needs one night-seal asset for every chapter`);
+  }
+  const prologueStages: CampaignPrologueStage[] = ["incident", "evidence", "handoff"];
+  if (manifest.presentation.prologue.scenes.length !== prologueStages.length
+    || manifest.presentation.prologue.scenes.some((scene, index) => scene.stage !== prologueStages[index])) {
+    throw new Error(`Campaign ${manifest.id} needs incident, evidence, and handoff prologue scenes in order`);
+  }
+  if (manifest.presentation.prologue.scenes.some((scene) => !scene.eyebrow.trim()
+    || !scene.title.trim()
+    || !scene.body.trim()
+    || !scene.aside.trim()
+    || !scene.assetId.trim())
+    || !manifest.presentation.prologue.acceptLabel.trim()) {
+    throw new Error(`Campaign ${manifest.id} has incomplete prologue content`);
   }
   if (clueIds.size !== manifest.case.clues.length) throw new Error(`Campaign ${manifest.id} has duplicate clue ids`);
   if (collectibleIds.size !== manifest.case.collectibles.length) throw new Error(`Campaign ${manifest.id} has duplicate collectible ids`);

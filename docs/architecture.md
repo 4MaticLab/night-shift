@@ -11,6 +11,7 @@
 | 模块 | 位置 | 职责 |
 |---|---|---|
 | 案件包契约 | `src/content/campaigns/types.ts` | `CampaignManifest`、引用完整性校验与案件内容查询 |
+| 案件序章 | `src/components/game/case-prologue.tsx` | 首次开案的三幕案件导入、返回与接案动作 |
 | 案件注册表 | `src/content/campaigns/registry.ts` | 当前四案、默认案件和合法 `campaignId` 白名单 |
 | 首案内容包 | `src/content/campaigns/last-tram.ts` | 组合既有首案模块与视觉／结局规则 |
 | 本地化核心 | `src/i18n/core.ts`、`src/i18n/server.ts`、`src/i18n/request-locale-provider.tsx`、`src/i18n/provider.tsx` | Cookie／请求语言协商、案件能力回退、递归内容投影和界面翻译上下文 |
@@ -52,7 +53,7 @@
 | 结局资格 | `src/lib/game-engine/ending.ts` | 三结局白名单与真结局的线索、藏品、关系门槛 |
 | 游戏存档 | `src/stores/game-store.ts` | Zustand 状态、阶段转换与浏览器持久化 |
 | 产品外壳 | `app/page.tsx` | 阶段判断、视图编排、Demo 抽屉开关与顶层导航 |
-| 落地叙事 | `src/components/game/landing.tsx` | 首页主视觉与三幕开场 |
+| 落地叙事 | `src/components/game/landing.tsx` | 首页主视觉与案件书架 |
 | 夜间循环 | `src/components/game/night-cycle.tsx` | 睡前准备、夜班会话、晨报与空晨报状态 |
 | 调查与归档 | `src/components/game/investigation.tsx` | 案件板、收藏柜、档案与结局 |
 | 案件板派生提示 | `src/lib/game-engine/evidence-board.ts` | 未结关系、可核对线索与当前兼容候选的只读投影 |
@@ -83,6 +84,8 @@ Demo、睡眠硬件、好友线索、Injective、证物信笺和推论信笺共�
 `I18nProvider` 根据当前案件把偏好解析为有效展示语言：`case-001` 与 `case-002` 支持 `zh-CN` 与 `en`，未翻译案件明确回退中文；切回已翻译案件后继续使用原偏好。英文模式只递归投影 manifest 的字符串值，稳定 ID、引用、数字、规则和存档键保持原样，因此切换语言或刷新不会复制、重置或迁移游戏进度。案件级英文词典按案拆分在 `src/i18n/campaigns/` 下，与遗留总表和覆写表在 `src/i18n/en.ts` 合并。
 
 案件 manifest 同时提供章节数、线索数、藏品数、真结局门槛、档案标题和逐夜视觉。`resolveNight`、关系匹配、结局资格、迁移过滤和页面投影都显式接收当前 manifest；通用模块不按具体案件 ID 写业务分支。`defineCampaign` 要求案件恰好五夜、章节从 1 连续排列、每个 choice 有路线、每夜拥有明信片／植物／四时辰回声／睡隙回声／夜印，并拒绝跨案件线索引用和不可达门槛。
+
+新案件第一次从书架打开时，`app/page.tsx` 先显示 manifest 提供的三幕 `CampaignPrologue`，再在玩家明确接案后调用 `begin()` 进入 `tonight`。序章只拥有当前幕这一项组件内展示状态，不写存档，也不改变章节、路线或结算；玩家返回书架不会误开案件。已有 `started` 存档继续直接恢复原视图，重置本案后才会再次看见序章。由此所有案件共享“案件库 → 案件导入 → 今夜交接 → 等待 → 晨报”的首夜生命周期，同时保留各案自己的文字与美术。
 
 睡眠质量为 `interrupted`、`regular`、`restful`：三者都至少解锁一条主线线索；差异只体现在路线长度、收藏数量、回声事件和环境观察。`selectedPreparationId` 记录当前随身物，`preparationHistory` 按章节保存已经归来的准备；`selectedChoice` 记录当前方向，`choiceHistory` 按章节保存路线履历。方向决定四个路线节点、五段夜间事件、城市遭遇与归来来信，但同章节三个方向的线索和藏品结果保持一致。完成一夜后，章节编号会加入持久化的 `nightSealIds` 与 `completedReports`，旅程册据此解锁明信片与路线履历。
 
@@ -151,7 +154,8 @@ React Flow 使用本地受控节点承接拖动过程，只在桌面端从图钉
 当前组件按以下功能边界拆分：
 
 - `app/page.tsx`：阶段与视图编排，并统一承担视图切换／重复点击导航时的页面回顶；不拥有章节结算或功能域展示细节。
-- `landing.tsx`：落地页、案件书架与开场，不读取游戏结算规则。
+- `landing.tsx`：落地页与案件书架，不读取游戏结算规则。
+- `case-prologue.tsx`：读取当前案件的三幕序章，拥有幕间导航，不写进度或结算。
 - `night-cycle.tsx`：调查方向、随身物、林渡交接肖像与交接单、Demo／真实模式、夜印显影、归来明信片和晨报。
 - `investigation.tsx`：案件板、明信片旅程册、夜印收藏、物证档案与 manifest 驱动的结案卷宗。
 - `clue-sharing.tsx`：单条证物二维码、复制链接与接收结果提示；不拥有存档校验规则。
