@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import Link from "next/link";
 import { motion } from "motion/react";
 import { Archive, ChevronRight, Coffee, Gift, Moon, RotateCcw, Search, Sparkles, X, Zap } from "lucide-react";
 import { useGameStore } from "@/src/stores/game-store";
@@ -9,6 +10,7 @@ import type { GameView } from "./types";
 import { SleepHardwareStatus } from "./sleep-hardware-status";
 import { useAccessibleDialog } from "@/src/lib/use-accessible-dialog";
 import { getReadyEvidenceSyntheses } from "@/src/lib/game-engine/evidence-synthesis";
+import { getGameViewPath } from "@/src/lib/game-routes";
 
 export function TopBar({ chapter, onDemo, onHome, onHardware }: { chapter: number; onDemo: () => void; onHome: () => void; onHardware: () => void }) {
   useGameStore((state) => state.campaignId);
@@ -22,7 +24,7 @@ export function TopBar({ chapter, onDemo, onHome, onHardware }: { chapter: numbe
   );
 }
 
-export function BottomNav({ view, setView }: { view: GameView; setView: (view: GameView) => void }) {
+export function BottomNav({ view }: { view: GameView }) {
   const { unlockedClueIds, synthesizedEvidenceIds } = useGameStore();
   const { campaign, locale, t } = useI18n();
   const readyCount = getReadyEvidenceSyntheses({
@@ -33,7 +35,7 @@ export function BottomNav({ view, setView }: { view: GameView; setView: (view: G
   const items: [GameView, ReactNode, string][] = [
     ["report", <Coffee key="c" />, t("今晨")], ["board", <Search key="s" />, t("案件板")], ["tonight", <Moon key="m" />, t("今晚")], ["collection", <Gift key="g" />, t("收藏")], ["archive", <Archive key="a" />, t("档案")],
   ];
-  return <nav className="bottom-nav" aria-label={t("主要导航")}>{items.map(([id, icon, label]) => <button type="button" aria-current={view === id ? "page" : undefined} className={view === id ? "active" : ""} key={id} onClick={() => setView(id)}>{icon}<span>{label}</span>{id === "board" && readyCount > 0 && <i className="nav-ready-badge" aria-label={locale === "en" ? `${readyCount} inferences ready` : `${readyCount} 条推论可以整理`}>{readyCount}</i>}</button>)}</nav>;
+  return <nav className="bottom-nav" aria-label={t("主要导航")}>{items.map(([id, icon, label]) => <Link href={getGameViewPath(id)} aria-current={view === id ? "page" : undefined} className={view === id ? "active" : ""} key={id} onClick={(event) => { if (view !== id) return; event.preventDefault(); window.scrollTo({ top: 0, left: 0 }); }}>{icon}<span>{label}</span>{id === "board" && readyCount > 0 && <i className="nav-ready-badge" aria-label={locale === "en" ? `${readyCount} inferences ready` : `${readyCount} 条推论可以整理`}>{readyCount}</i>}</Link>)}</nav>;
 }
 
 export function DemoDrawer({ onClose, setView }: { onClose: () => void; setView: (view: GameView) => void }) {

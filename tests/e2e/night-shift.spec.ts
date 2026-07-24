@@ -71,7 +71,7 @@ async function openMintableCollection(page: import("@playwright/test").Page) {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
   await runDemoShortcut(page, /跳到真结局条件/);
-  await page.getByRole("button", { name: "收藏", exact: true }).click();
+  await page.getByRole("link", { name: "收藏", exact: true }).click();
   await expect(page.locator(".collection-page")).toBeVisible();
 }
 
@@ -138,18 +138,19 @@ test("returns to the surface that opened demo controls", async ({ page }) => {
   await runDemoShortcut(page, /03 没有退房的307/);
 
   const surfaces = [
-    { name: "今晨", locator: ".report-wrap" },
-    { name: "案件板", locator: ".board-page" },
-    { name: "今晚", locator: ".tonight-page" },
-    { name: "收藏", locator: ".collection-page" },
-    { name: "档案", locator: ".archive-page" },
+    { name: "今晨", locator: ".report-wrap", path: "/game/report" },
+    { name: "案件板", locator: ".board-page", path: "/game/board" },
+    { name: "今晚", locator: ".tonight-page", path: "/game/tonight" },
+    { name: "收藏", locator: ".collection-page", path: "/game/collection" },
+    { name: "档案", locator: ".archive-page", path: "/game/archive" },
   ];
   for (const surface of surfaces) {
-    const navItem = page.getByRole("button", {
+    const navItem = page.getByRole("link", {
       name: surface.name === "案件板" ? /^案件板/ : surface.name,
       exact: surface.name !== "案件板",
     });
     await navItem.click();
+    await expect(page).toHaveURL(surface.path);
     await expect(page.locator(surface.locator)).toBeVisible();
     await page.getByRole("button", { name: "DEMO", exact: true }).click();
     const dialog = page.getByRole("dialog", { name: "演示控制台" });
@@ -167,6 +168,46 @@ test("returns to the surface that opened demo controls", async ({ page }) => {
   await libraryDialog.getByRole("button", { name: "关闭演示控制台" }).click();
   await expect(libraryDialog).toHaveCount(0);
   await expect(library).toBeVisible();
+});
+
+test("uses stable routes for direct access, navigation history, refresh, and resume", async ({ page }) => {
+  await page.goto("/game/board");
+  await expect(page).toHaveURL("/");
+  await expect(page.getByRole("region", { name: "案件剧本选择" })).toBeVisible();
+
+  await page.getByRole("button", { name: /DEMO MODE/ }).click();
+  await runDemoShortcut(page, /03 没有退房的307/);
+  await expect(page).toHaveURL("/game/tonight");
+
+  await page.getByRole("link", { name: /^案件板/ }).click();
+  await expect(page).toHaveURL("/game/board");
+  await expect(page.locator(".board-page")).toBeVisible();
+  await page.getByRole("link", { name: "收藏", exact: true }).click();
+  await expect(page).toHaveURL("/game/collection");
+  await page.goBack();
+  await expect(page).toHaveURL("/game/board");
+  await expect(page.locator(".board-page")).toBeVisible();
+
+  await page.reload();
+  await expect(page).toHaveURL("/game/board");
+  await expect(page.locator(".board-page")).toBeVisible();
+  await page.getByRole("button", { name: /夜班侦探 NIGHT SHIFT/ }).click();
+  await expect(page).toHaveURL("/");
+  await page.getByRole("button", { name: /继续当前案件/ }).click();
+  await expect(page).toHaveURL("/game/tonight");
+});
+
+test("keeps an active night on its canonical route across browser history", async ({ page }) => {
+  await openFirstNight(page);
+  await expect(page).toHaveURL("/game/tonight");
+  await page.getByRole("button", { name: /今晚交给你了/ }).click();
+  await expect(page).toHaveURL("/game/night");
+  await page.goBack();
+  await expect(page).toHaveURL("/game/night");
+  await expect(page.getByText("夜班进行中")).toBeVisible();
+  await page.getByRole("button", { name: /跳到清晨/ }).click();
+  await expect(page).toHaveURL("/game/report");
+  await expect(page.getByText("昨夜调查完成")).toBeVisible();
 });
 
 test.describe("small widescreen 963x768", () => {
@@ -284,13 +325,13 @@ test("plays the first case in English and preserves the language preference", as
   await expect(page.getByText(/Rain had washed the signs of Lantern Wharf quiet/)).toBeVisible();
   await expectNoVisibleHan(page);
 
-  await page.getByRole("button", { name: "Caseboard", exact: true }).click();
+  await page.getByRole("link", { name: "Caseboard", exact: true }).click();
   await expect(page.getByText("Read what returned.", { exact: false })).toBeVisible();
   await expectNoVisibleHan(page);
-  await page.getByRole("button", { name: "Collection", exact: true }).click();
+  await page.getByRole("link", { name: "Collection", exact: true }).click();
   await expect(page.getByText("Time did not vanish.", { exact: false })).toBeVisible();
   await expectNoVisibleHan(page);
-  await page.getByRole("button", { name: "Archive", exact: true }).click();
+  await page.getByRole("link", { name: "Archive", exact: true }).click();
   await expect(page.getByRole("heading", { name: "The Last Tram at 00:43" })).toBeVisible();
   await expectNoVisibleHan(page);
   await expect(page.evaluate(() => localStorage.getItem("night-shift-locale"))).resolves.toBe("en");
@@ -373,7 +414,7 @@ test("starts a case and reaches the first morning report", async ({ page }) => {
   await expect(page.getByText(/让空白先保护活人/)).toBeVisible();
   await expect(page.getByText(/断续|普通|安稳/).first()).toBeVisible();
   await expect(page.getByText(/为什么一张已经停运七年的车票/)).toBeVisible();
-  await page.getByRole("button", { name: "案件板", exact: true }).click();
+  await page.getByRole("link", { name: "案件板", exact: true }).click();
   await expect(page.locator(".evidence-archive-page")).toBeVisible();
 });
 
@@ -631,15 +672,15 @@ test("anchors the desktop handoff and resets long-view scroll positions", async 
   await page.keyboard.press("Tab");
   await expect.poll(() => page.evaluate(() => getComputedStyle(document.activeElement!).outlineStyle)).toBe("solid");
 
-  await page.getByRole("button", { name: "收藏", exact: true }).click();
+  await page.getByRole("link", { name: "收藏", exact: true }).click();
   await expect(page.locator(".collection-page")).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, 1200));
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1000);
-  await page.getByRole("button", { name: "收藏", exact: true }).click();
+  await page.getByRole("link", { name: "收藏", exact: true }).click();
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
 
   await page.evaluate(() => window.scrollTo(0, 1200));
-  await page.getByRole("button", { name: "档案", exact: true }).click();
+  await page.getByRole("link", { name: "档案", exact: true }).click();
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
 });
 
@@ -647,7 +688,7 @@ test("keeps returned postcards in the journey album", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
   await runDemoShortcut(page, /03 没有退房的307/);
-  await page.getByRole("button", { name: /收藏/ }).click();
+  await page.getByRole("link", { name: /收藏/ }).click();
 
   await expect(page.getByText("灯港拒收件")).toBeVisible();
   await expect(page.getByText("寄往无人之处")).toBeVisible();
@@ -667,7 +708,7 @@ test("keeps returned postcards in the journey album", async ({ page }) => {
   await expect(page.getByText("让错字继续保护地址")).toBeVisible();
   await expect(page.getByRole("heading", { name: "票根灯蕨" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "四十三日夜香" })).toBeVisible();
-  await page.getByRole("button", { name: "档案", exact: true }).click();
+  await page.getByRole("link", { name: "档案", exact: true }).click();
   await expect(page.getByText("雾灯城分区志")).toBeVisible();
   await expect(page.getByRole("heading", { name: "灯港区" })).toBeVisible();
   await expect(page.locator(".district-entry.unlocked")).toHaveCount(1);
@@ -862,7 +903,7 @@ test("stores an Injective explorer receipt after the wallet finds an existing mi
   await dialog.getByRole("button", { name: "收好回执" }).click();
   await expect(page.getByRole("button", { name: "此浏览器已有链上回执" }).first()).toBeVisible();
   await page.reload();
-  await page.getByRole("button", { name: "收藏", exact: true }).click();
+  await page.getByRole("link", { name: "收藏", exact: true }).click();
   await expect(page.getByRole("button", { name: "此浏览器已有链上回执" }).first()).toBeVisible();
 });
 
@@ -926,7 +967,7 @@ test("files an optional daytime notice and returns its echo after the next night
   await expect(page.getByText(/不改变案件成果或结局资格/)).toBeVisible();
 
   await page.getByRole("button", { name: /结束今日，准备下一夜|整理线索，准备下一夜/ }).click();
-  await page.getByRole("button", { name: /收藏/ }).click();
+  await page.getByRole("link", { name: /收藏/ }).click();
   await expect(page.getByText("城市剪报册")).toBeVisible();
   await expect(page.locator(".city-clipping-book article.filed")).toHaveCount(1);
   await expect(page.locator(".city-clipping-book article.pending")).toHaveCount(3);
@@ -967,7 +1008,7 @@ test("restores and settles a real night after reload", async ({ page }) => {
   await expect(page.locator(".wake-echo-report")).toContainText("你短暂醒来时，夜班没有结束");
   await expect(page.locator(".wake-echo-report")).toContainText("不是奖励");
   await page.getByRole("button", { name: /结束今日，准备下一夜|整理线索，准备下一夜/ }).click();
-  await page.getByRole("button", { name: "收藏", exact: true }).click();
+  await page.getByRole("link", { name: "收藏", exact: true }).click();
   await expect(page.getByText("睡隙回声簿")).toBeVisible();
   await expect(page.locator(".sleep-gap-entry.returned")).toHaveCount(1);
   await expect(page.locator(".sleep-gap-entry")).toHaveCount(5);
@@ -1041,7 +1082,7 @@ test("shares one clue as a QR deep link", async ({ page }) => {
   await expect(dialog).toBeVisible();
   await expectDialogLifecycle(page, dialog);
   await expect(dialog.getByText(/不会附带你的夜班进度/)).toBeVisible();
-  await expect(dialog.getByLabel("好友线索链接")).toHaveValue(`${new URL(page.url()).origin}/?case=case-001&clue=flower-cycle`);
+  await expect(dialog.getByLabel("好友线索链接")).toHaveValue(`${new URL(page.url()).origin}/game/board?case=case-001&clue=flower-cycle`);
   await expect(dialog.getByRole("img", { name: /分享线索「四十三天」的二维码/ })).toHaveAttribute("src", /^data:image\/png;base64,/);
   await dialog.getByRole("button", { name: "复制链接" }).click();
   await expect(dialog.getByRole("button", { name: "链接已复制" })).toBeVisible();
@@ -1056,7 +1097,7 @@ test("receives a friend clue from a validated query without advancing the case",
   await page.goto("/?clue=postcard");
 
   await expect(page.locator(".clue-gift-notice")).toContainText("好友送来「未寄出的明信片」");
-  await expect(page).toHaveURL("/");
+  await expect(page).toHaveURL("/game/board");
   await expect(page.getByRole("heading", { name: /先把线索读清/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /打开证物档案：未寄出的明信片/ })).toContainText("好友送达");
   const importedState = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state);
@@ -1080,7 +1121,7 @@ test("routes a shared clue to its campaign and keeps the other save isolated", a
   await page.goto("/?case=case-002&clue=radio-warm-dial");
 
   await expect(page.locator(".clue-gift-notice")).toContainText("好友送来「仍有余温的旋钮」");
-  await expect(page).toHaveURL("/");
+  await expect(page).toHaveURL("/game/board");
   await expect(page.getByRole("heading", { name: /先把线索读清/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /打开证物档案：仍有余温的旋钮/ })).toContainText("好友送达");
   const importedState = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state);
@@ -1118,7 +1159,7 @@ test("remembers a synthesized inference after reload", async ({ page }) => {
     JSON.parse(localStorage.getItem("night-shift-save-v1")!).state.synthesizedEvidenceIds,
   )).toContain("mina-evelyn");
   await page.reload();
-  await page.getByRole("button", { name: "案件板" }).click();
+  await page.getByRole("link", { name: "案件板" }).click();
   await expect(page.locator(".filed-inference-list")).toContainText("米娜知道伊芙琳仍然活着");
   await expect(page.getByRole("button", { name: /查看推论：米娜知道伊芙琳仍然活着/ })).toBeVisible();
 });
@@ -1422,7 +1463,7 @@ test.describe("mobile 390x844", () => {
     await expectNoOverlap(page.locator(".scene-copy"), page.locator(".handoff-portrait"));
     await expectNoOverlap(page.locator(".handoff-docket"), page.locator(".handoff-portrait"));
     await expectNoPageOverflow(page);
-    await expectMinimumTapTargets(page.locator(".bottom-nav button, .mode-toggle button, .quality-tabs button"));
+    await expectMinimumTapTargets(page.locator(".bottom-nav a, .mode-toggle button, .quality-tabs button"));
     await page.locator(".quality-tabs").getByRole("button", { name: "断续" }).click();
     await page.getByRole("button", { name: /今晚交给你了/ }).scrollIntoViewIfNeeded();
     await expectNoOverlap(page.getByRole("button", { name: /今晚交给你了/ }), page.getByRole("navigation", { name: "主要导航" }));
@@ -1444,7 +1485,7 @@ test.describe("mobile 390x844", () => {
     await expect(page.locator(".wake-echo-report")).toContainText("纸纤维里的第二场雨");
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /结束今日，准备下一夜|整理线索，准备下一夜/ }).click();
-    await expect(page.getByRole("button", { name: "案件板" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "案件板" })).toBeVisible();
   });
 
   test("keeps a maximum unbroken local rest intention inside the mobile report", async ({ page }) => {
@@ -1490,7 +1531,7 @@ test.describe("mobile 390x844", () => {
     await page.goto("/");
     await page.getByRole("button", { name: /DEMO MODE/ }).click();
     await runDemoShortcut(page, /04 地图上被刮掉的线/);
-    await page.getByRole("button", { name: "收藏", exact: true }).click();
+    await page.getByRole("link", { name: "收藏", exact: true }).click();
     await expect(page.locator(".collection-page")).toBeVisible();
     const archiveIndex = page.getByRole("navigation", { name: "收藏档案分类" });
     await expectMinimumTapTargets(archiveIndex.locator("button"));
@@ -1516,7 +1557,7 @@ test.describe("mobile 390x844", () => {
     await page.getByRole("button", { name: /核心物证/ }).click();
     await expect(page.locator("#collection-core-evidence")).toBeVisible();
     await expectNoPageOverflow(page);
-    await page.getByRole("button", { name: "档案", exact: true }).click();
+    await page.getByRole("link", { name: "档案", exact: true }).click();
     await expect(page.getByText("雾灯城分区志")).toBeVisible();
     await expectNoPageOverflow(page);
 
@@ -1607,7 +1648,7 @@ test("keeps the latest morning report stable while evidence is filed and after t
   await expect(page.locator(".filed-inference-list").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "关闭核心推论" }).click();
 
-  await page.getByRole("button", { name: "今晨", exact: true }).click();
+  await page.getByRole("link", { name: "今晨", exact: true }).click();
   await expect(reportHeading).toBeVisible();
   await expect(page.getByText("最新晨报重读")).toHaveCount(0);
   expect(await readReportFingerprint()).toEqual(originalReport);
@@ -1615,11 +1656,11 @@ test("keeps the latest morning report stable while evidence is filed and after t
   expect(saved).toMatchObject({ chapter: 2, phase: "morning" });
   expect(saved.synthesizedEvidenceIds).toContain("mina-evelyn");
 
-  await page.getByRole("button", { name: "收藏", exact: true }).click();
+  await page.getByRole("link", { name: "收藏", exact: true }).click();
   await expect(page.locator(".collection-page")).toBeVisible();
-  await page.getByRole("button", { name: "档案", exact: true }).click();
+  await page.getByRole("link", { name: "档案", exact: true }).click();
   await expect(page.locator(".archive-page")).toBeVisible();
-  await page.getByRole("button", { name: "今晨", exact: true }).click();
+  await page.getByRole("link", { name: "今晨", exact: true }).click();
   expect(await readReportFingerprint()).toEqual(originalReport);
 
   await page.getByRole("button", { name: /结束今日，准备下一夜/ }).click();
@@ -1627,7 +1668,7 @@ test("keeps the latest morning report stable while evidence is filed and after t
   saved = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state);
   expect(saved).toMatchObject({ chapter: 3, phase: "day" });
 
-  await page.getByRole("button", { name: "今晨", exact: true }).click();
+  await page.getByRole("link", { name: "今晨", exact: true }).click();
   await expect(reportHeading).toBeVisible();
   await expect(page.getByText("最新晨报重读")).toBeVisible();
   await expect(page.getByRole("button", { name: /新推论可以整理|去线索档案继续整理/ })).toBeVisible();
@@ -1640,7 +1681,7 @@ test("keeps the latest morning report stable while evidence is filed and after t
   const correspondenceBeforeReload = (await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state)).correspondenceHistory;
   expect(await readReportFingerprint()).toEqual(originalReport);
   await page.reload();
-  await page.getByRole("button", { name: "今晨", exact: true }).click();
+  await page.getByRole("link", { name: "今晨", exact: true }).click();
   await expect(reportHeading).toBeVisible();
   await expect(page.getByText("最新晨报重读")).toBeVisible();
   expect((await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state)).correspondenceHistory).toEqual(correspondenceBeforeReload);
