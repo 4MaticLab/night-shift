@@ -22,6 +22,18 @@
   box-sizing: border-box;
 }
 
+@media (any-hover: hover) and (any-pointer: fine) {
+  * {
+    cursor: none !important;
+  }
+
+  input,
+  textarea,
+  select {
+    cursor: text !important;
+  }
+}
+
 html {
   background: var(--ink);
   scroll-behavior: auto;
