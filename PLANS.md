@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-translation-workflow]] | `codex/translation-workflow` | `in_progress` | `manual` | 0/5 | 编写并索引仓库翻译规范 |
+| [[plans/codex-translation-workflow]] | `codex/translation-workflow` | `in_progress` | `manual` | 4/5 | 完成文档验证并退役计划 |
 
 ## 使用规则
 
