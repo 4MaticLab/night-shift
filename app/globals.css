@@ -4362,13 +4362,42 @@ blockquote {
 }
 
 /*
- * Keep red relation threads above every evidence card.
- * React Flow paints nodes after edges by default; selected nodes also elevate
- * themselves, so force the whole edges SVG above the nodes layer and stop
- * node elevation from covering the stroke.
+ * Layer order on the lettered board:
+ *   0 — dashed preview threads (behind cards)
+ *   1 — evidence cards
+ *   1000 — confirmed solid red threads (above cards)
  */
 .board-page-lettered .board-flow .react-flow__viewport {
   isolation: isolate;
+}
+
+/* Preview threads portal into the viewport and sit under the node layer. */
+.board-page-lettered .board-flow .board-preview-threads {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.board-page-lettered .board-flow .board-preview-thread {
+  fill: none;
+  stroke: #641f2a;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 7 7;
+  opacity: .88;
+  animation: board-preview-thread 1.1s linear infinite;
+  filter: drop-shadow(0 1px 1px #220e12aa);
+}
+
+@keyframes board-preview-thread {
+  to {
+    stroke-dashoffset: -28;
+  }
 }
 
 .board-page-lettered .board-flow .react-flow__edges {
@@ -4399,7 +4428,7 @@ blockquote {
   z-index: 2 !important;
 }
 
-/* Confirmed pairings: solid paper-thread stroke above the cards, never green dashed. */
+/* Confirmed pairings: solid paper-thread stroke above the cards. */
 .board-page-lettered .react-flow__edge-path,
 .board-page-lettered .react-flow__connection-path {
   stroke-dasharray: none !important;
@@ -4410,19 +4439,6 @@ blockquote {
 .board-page-lettered .react-flow__edge.animated path {
   stroke-dasharray: none !important;
   animation: none !important;
-}
-
-.board-page-lettered .react-flow__edge.board-preview-edge path {
-  stroke-dasharray: 7 7 !important;
-  opacity: .9 !important;
-  animation: board-preview-thread 1.1s linear infinite !important;
-  filter: drop-shadow(0 1px 1px #220e12aa);
-}
-
-@keyframes board-preview-thread {
-  to {
-    stroke-dashoffset: -28;
-  }
 }
 
 .board-node-drag-handle {

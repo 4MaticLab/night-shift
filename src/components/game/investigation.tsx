@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, FileCheck2, FileText, Flower2, KeyRound, RotateCcw, Search, Sparkles, X } from "lucide-react";
-import { Controls, Handle, Position, ReactFlow, useNodesState, type Edge, type Node, type NodeProps } from "@xyflow/react";
+import { Controls, Handle, Position, ReactFlow, useNodesState, useStore, ViewportPortal, type Edge, type Node, type NodeProps } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { getAsset } from "@/src/content/assets";
 import { getPreparation } from "@/src/content/preparations";
@@ -88,6 +88,45 @@ function EvidenceNodeCard({ data }: NodeProps<EvidenceNode>) {
 }
 
 const evidenceNodeTypes = { evidence: EvidenceNodeCard };
+
+/** Pin sits on the card top midpoint (matches .board-connection-handle placement). */
+function pinPoint(node: Node | undefined) {
+  if (!node) return null;
+  const width = node.measured?.width ?? node.width ?? 190;
+  return {
+    x: node.position.x + width / 2,
+    y: node.position.y + 9,
+  };
+}
+
+/**
+ * Compatible-pair preview threads live in a portal under the cards.
+ * Confirmed solid edges stay in React Flow's edges layer above the cards.
+ */
+function BoardPreviewThreads({ sourceId, targetIds }: { sourceId: string | null; targetIds: string[] }) {
+  const nodes = useStore((state) => state.nodes);
+  if (!sourceId || targetIds.length === 0) return null;
+
+  const source = pinPoint(nodes.find((node) => node.id === sourceId));
+  if (!source) return null;
+
+  return <ViewportPortal>
+    <svg className="board-preview-threads" aria-hidden="true">
+      {targetIds.map((targetId) => {
+        const target = pinPoint(nodes.find((node) => node.id === targetId));
+        if (!target) return null;
+        return <line
+          className="board-preview-thread"
+          key={targetId}
+          x1={source.x}
+          y1={source.y}
+          x2={target.x}
+          y2={target.y}
+        />;
+      })}
+    </svg>
+  </ViewportPortal>;
+}
 
 function defaultBoardPosition(index: number, total: number) {
   const columns = Math.min(4, Math.max(1, Math.ceil(Math.sqrt(total))));
@@ -223,7 +262,9 @@ export function CaseBoard() {
     }));
   }, [checkableClueIds, compatibleClueIds, dossierClueId, openDossier, receivedClueIds, selectEvidence, selectedClueIds, setNodes]);
 
-  const confirmedEdges: Edge[] = campaign.relations.flatMap((relation, index) => {
+  // Only confirmed pairings use React Flow edges (drawn above cards).
+  // Compatible previews are drawn behind cards via BoardPreviewThreads.
+  const edges: Edge[] = campaign.relations.flatMap((relation, index) => {
     if (!confirmedRelations.includes(relation.id) || !relation.clueIds.every((clueId) => unlockedClueIds.includes(clueId))) return [];
     // A taut old-wine thread runs pin-to-pin, above the cards like a physical detective board.
     const stroke = "#641f2a";
@@ -233,7 +274,6 @@ export function CaseBoard() {
       target: relation.clueIds[1],
       type: "straight",
       animated: false,
-      // Keep threads above every evidence card (including selected/dragged nodes).
       zIndex: 1000,
       style: {
         stroke,
@@ -243,18 +283,8 @@ export function CaseBoard() {
       },
     }];
   });
-  const previewEdges: Edge[] = selectedClueIds.length === 1
-    ? Array.from(compatibleClueIds, (clueId) => ({
-      id: `preview-${selectedClueIds[0]}-${clueId}`,
-      source: selectedClueIds[0],
-      target: clueId,
-      type: "straight",
-      className: "board-preview-edge",
-      zIndex: 999,
-      style: { stroke: "#641f2a", strokeWidth: 2, strokeDasharray: "7 7" },
-    }))
-    : [];
-  const edges = [...confirmedEdges, ...previewEdges];
+  const previewSourceId = selectedClueIds.length === 1 ? selectedClueIds[0] : null;
+  const previewTargetIds = previewSourceId ? Array.from(compatibleClueIds) : [];
 
   const restoreBoardLayout = () => {
     resetBoardPositions();
@@ -309,7 +339,10 @@ export function CaseBoard() {
             zoomOnDoubleClick={false}
             preventScrolling={false}
             proOptions={{ hideAttribution: true }}
-          >{!isCompactBoard && <Controls showInteractive={false} />}</ReactFlow> : <div className="board-empty"><Search /><h3>{t("案件板还很安静")}</h3><p>{t("完成第一夜调查，林渡带回的证物会出现在这里。")}</p></div>}</div>
+          >
+            <BoardPreviewThreads sourceId={previewSourceId} targetIds={previewTargetIds} />
+            {!isCompactBoard && <Controls showInteractive={false} />}
+          </ReactFlow> : <div className="board-empty"><Search /><h3>{t("案件板还很安静")}</h3><p>{t("完成第一夜调查，林渡带回的证物会出现在这里。")}</p></div>}</div>
         </div>
       </div>
     </div>
