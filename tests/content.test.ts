@@ -56,7 +56,7 @@ describe("Night Shift case content", () => {
     expect(english.rules).toEqual(lastTramCampaign.rules);
     expect(collectStrings(english).filter((text) => /\p{Script=Han}/u.test(text))).toEqual([]);
     expect(campaignSupportsLocale(lastTramCampaign.id, "en")).toBe(true);
-    expect(campaignSupportsLocale(rainRadioCampaign.id, "en")).toBe(false);
+    expect(campaignSupportsLocale(rainRadioCampaign.id, "en")).toBe(true);
     expect(campaignSupportsLocale(thirteenthLoafCampaign.id, "en")).toBe(false);
   });
 

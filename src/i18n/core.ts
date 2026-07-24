@@ -1,5 +1,6 @@
 import type { CampaignManifest } from "@/src/content/campaigns/types";
 import { LAST_TRAM_CAMPAIGN_ID } from "@/src/content/campaigns/last-tram";
+import { RAIN_RADIO_CAMPAIGN_ID } from "@/src/content/campaigns/rain-radio";
 import { englishText } from "./en";
 
 export const appLocales = ["zh-CN", "en"] as const;
@@ -66,7 +67,7 @@ export function serializeLocaleCookie(locale: AppLocale): string {
 }
 
 export function campaignSupportsLocale(campaignId: string, locale: AppLocale): boolean {
-  return locale === "zh-CN" || campaignId === LAST_TRAM_CAMPAIGN_ID;
+  return locale === "zh-CN" || campaignId === LAST_TRAM_CAMPAIGN_ID || campaignId === RAIN_RADIO_CAMPAIGN_ID;
 }
 
 export function translateText(source: string, locale: AppLocale): string {
