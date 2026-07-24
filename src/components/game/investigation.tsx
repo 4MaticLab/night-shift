@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, FileCheck2, FileText, Flower2, KeyRound, Link2, QrCode, RotateCcw, Search, Sparkles, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, FileCheck2, FileText, Flower2, KeyRound, RotateCcw, Search, Sparkles, X } from "lucide-react";
 import { Controls, Handle, Position, ReactFlow, useNodesState, type Edge, type Node, type NodeProps } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { getAsset } from "@/src/content/assets";
@@ -18,13 +18,14 @@ import { getCampaignNightSealAssetId, getCampaignRouteDirection, getCampaignWake
 import { useGameStore } from "@/src/stores/game-store";
 import { canUnlockTrueEnding, type EndingId } from "@/src/lib/game-engine/ending";
 import { formatSleepDuration } from "@/src/lib/game-engine/sleep-session";
-import type { Clue, Collectible, CorrespondenceRecord, EvidenceRelation, SocietyMemoryRecord } from "@/src/lib/game-engine/schema";
+import type { Clue, Collectible, CorrespondenceRecord, SocietyMemoryRecord } from "@/src/lib/game-engine/schema";
 import { BotanicalSpecimen, PaperCard, qualityCopy, Seal, SocietyCrest } from "./shared";
 import { ClueShareDialog } from "./clue-sharing";
 import { useI18n } from "@/src/i18n/provider";
 import { CipherDesk } from "./cipher-desk";
 import { InjectiveMintDialog } from "./injective-mint";
 import { readMintReceipts } from "@/src/lib/injective/client";
+import { ClueDossierDialog, RelationRevealDialog } from "./evidence-letters";
 
 type EvidenceNode = Node<{
   clue: Clue;
@@ -66,6 +67,7 @@ function EvidenceNodeCard({ data }: NodeProps<EvidenceNode>) {
         className="board-node-dossier"
         aria-label={`${t("打开证物档案")}：${clue.title}`}
         title={t("打开证物档案")}
+        onPointerDown={(event) => event.stopPropagation()}
         onClick={(event) => {
           event.stopPropagation();
           onOpenDossier(clue.id);
@@ -94,64 +96,6 @@ function defaultBoardPosition(index: number, total: number) {
   const itemsInRow = Math.min(columns, total - row * columns);
   const centeredRowOffset = (columns - itemsInRow) * 120;
   return { x: 70 + centeredRowOffset + column * 240, y: 70 + row * 210 };
-}
-
-function BoardLetterScrim({ children, onClose, labelledBy }: { children: ReactNode; onClose: () => void; labelledBy: string }) {
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onClose]);
-
-  return <motion.div className="board-letter-scrim" role="presentation" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-    <motion.section className="board-letter" role="dialog" aria-modal="true" aria-labelledby={labelledBy} initial={{ opacity: 0, y: 22, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 14, scale: .98 }}>
-      {children}
-    </motion.section>
-  </motion.div>;
-}
-
-function ClueDossierLetter({ clue, received, relations, detectiveName, onClose, onShare }: {
-  clue: Clue;
-  received: boolean;
-  relations: EvidenceRelation[];
-  detectiveName: string;
-  onClose: () => void;
-  onShare: () => void;
-}) {
-  const { t } = useI18n();
-  return <BoardLetterScrim labelledBy="clue-dossier-title" onClose={onClose}>
-    <button className="board-letter-close" type="button" aria-label={t("关闭证物档案")} onClick={onClose}><X /></button>
-    <div className="board-letter-seal" aria-hidden="true"><span /><span /></div>
-    <header className="board-letter-head">
-      <small>OPEN DOSSIER · NIGHT 0{clue.chapter}</small>
-      <span>{clue.type.toUpperCase()}{received ? ` · ${t("好友送达")}` : ""}</span>
-      <h2 id="clue-dossier-title">{clue.title}</h2>
-    </header>
-    <button className="clue-share-trigger" type="button" onClick={onShare}><QrCode /> {t("送给好友")}</button>
-    <p className="board-letter-body">{clue.detail}</p>
-    <blockquote className="board-letter-quote"><small>{t("城市异议")}</small>“{clue.cityObjection}”</blockquote>
-    <div className="board-letter-note"><small>{detectiveName} · {t("页边批注")}</small>{clue.marginNote}</div>
-    {relations.length > 0 && <footer className="board-letter-footer"><small>{t("这份证物已经参与作证")}</small>{relations.map((relation) => <b key={relation.id}><Link2 /> {relation.statement}</b>)}</footer>}
-  </BoardLetterScrim>;
-}
-
-function RelationLetter({ relation, onClose }: { relation: EvidenceRelation; onClose: () => void }) {
-  const { t } = useI18n();
-  return <BoardLetterScrim labelledBy="relation-letter-title" onClose={onClose}>
-    <button className="board-letter-close" type="button" aria-label={t("关闭核心推论")} onClick={onClose}><X /></button>
-    <div className="board-letter-seal match" aria-hidden="true"><span /><span /></div>
-    <header className="board-letter-head">
-      <small>CORE INFERENCE · {t("核心推论")}</small>
-      <span>CONFIRMED · {t("已自动配对")}</span>
-      <h2 id="relation-letter-title">{relation.statement}</h2>
-    </header>
-    <p className="board-letter-body">{relation.explanation}</p>
-    <footer className="board-letter-footer letter-soft">
-      <small>{t("这封信笺会留在屏幕底端的核心推论栏。")}</small>
-    </footer>
-  </BoardLetterScrim>;
 }
 
 export function CaseBoard() {
@@ -401,7 +345,7 @@ export function CaseBoard() {
     </AnimatePresence>
 
     <AnimatePresence>
-      {dossierClue && !letterRelation && <ClueDossierLetter
+      {dossierClue && !letterRelation && <ClueDossierDialog
         key={`dossier-${dossierClue.id}`}
         clue={dossierClue}
         received={receivedClueIds.includes(dossierClue.id)}
@@ -416,7 +360,7 @@ export function CaseBoard() {
     </AnimatePresence>
 
     <AnimatePresence>
-      {letterRelation && <RelationLetter
+      {letterRelation && <RelationRevealDialog
         key={`relation-${letterRelation.id}`}
         relation={letterRelation}
         onClose={() => setLetterRelationId(null)}
@@ -555,7 +499,7 @@ export function Ending({ onOpenLibrary }: { onOpenLibrary: () => void }) {
   const trueReady = canUnlockTrueEnding({ unlockedClueIds: earnedClueIds, unlockedCollectibleIds, confirmedRelations }, campaign.rules);
   const dominantStance = getDominantCorrespondenceStance(correspondenceHistory);
   const cityAfterword = localize(dominantStance ? correspondencePostures[dominantStance] : { title: "未寄出的答复", note: "你没有让任何社团替你固定立场。雾灯城把那些空信封也归了档：沉默不是失败，只是一种尚未交出的决定。" });
-  const icons: Record<EndingId, React.ReactNode> = { public: <FileText />, protect: <KeyRound />, return: <Flower2 /> };
+  const icons: Record<EndingId, ReactNode> = { public: <FileText />, protect: <KeyRound />, return: <Flower2 /> };
   const selected = campaign.endings.find((item) => item.id === endingId);
   const endingArt = getAsset(campaign.presentation.endingAssetId);
   const journeyNights = [...completedReports].sort((a, b) => a - b).flatMap((chapterNumber) => {

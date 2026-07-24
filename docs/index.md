@@ -24,6 +24,7 @@
 - [[docs/campaign-authoring]] — `CampaignManifest` 契约、新案件与本地化接入、存档及链接边界。
 - [[docs/decision-log]] — 重要技术与产品取舍及其原因。
 - [[docs/documentation-guide]] — 双链、文档生命周期和更新触发条件。
+- [[docs/translation-guide]] — 中译英的文件组织、固定术语、文学语气、分批施工、验收与 PR 规范。
 
 ## 视觉与内容资产
 
