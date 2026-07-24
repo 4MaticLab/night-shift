@@ -447,6 +447,151 @@ test("sleep hardware authorizes a virtual ring and returns a local morning recei
   expect(JSON.stringify(hardwareState)).not.toContain("samples");
 });
 
+test("Home Assistant pairs a safe room device and never blocks the night shift", async ({ page }) => {
+  let paired = false;
+  const bridgeCalls: Array<{ path: string; body?: Record<string, unknown> }> = [];
+  await page.route("http://127.0.0.1:43117/v1/**", async (route) => {
+    const request = route.request();
+    const url = new URL(request.url());
+    const path = url.pathname;
+    const body = request.postDataJSON() as Record<string, unknown> | null;
+    if (path === "/v1/status") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          bridge: "night-shift-home-assistant",
+          version: "0.1.0",
+          paired,
+          homeAssistant: paired ? "online" : "connecting",
+          instanceName: paired ? "Home Assistant 2026.7.0" : undefined,
+          entityCount: paired ? 3 : 0,
+        }),
+      });
+      return;
+    }
+    if (path === "/v1/pair") {
+      paired = body?.code === "654321";
+      bridgeCalls.push({ path, body: body ?? undefined });
+      await route.fulfill({
+        status: paired ? 200 : 401,
+        contentType: "application/json",
+        body: JSON.stringify(paired
+          ? { paired: true, sessionToken: "browser-session-token", expiresAt: Date.now() + 43_200_000 }
+          : { error: "bad code" }),
+      });
+      return;
+    }
+    if (paired && path !== "/v1/status") {
+      expect(request.headers().authorization).toBe("Bearer browser-session-token");
+    }
+    if (path === "/v1/entities") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          entities: [
+            {
+              id: "light.desk_lamp",
+              name: "Desk Lamp",
+              domain: "light",
+              state: "off",
+              available: true,
+              controllable: true,
+              capabilities: ["turn-on", "turn-off", "brightness", "color"],
+              attributes: {},
+            },
+            {
+              id: "sensor.room_temperature",
+              name: "Room Temperature",
+              domain: "sensor",
+              state: "21.5",
+              available: true,
+              controllable: false,
+              capabilities: ["read"],
+              attributes: { unit: "°C" },
+            },
+          ],
+        }),
+      });
+      return;
+    }
+    if (path === "/v1/bindings" && request.method() === "GET") {
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ bindings: {} }) });
+      return;
+    }
+    if (path === "/v1/bindings") {
+      bridgeCalls.push({ path, body: body ?? undefined });
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+      return;
+    }
+    if (path === "/v1/test") {
+      bridgeCalls.push({ path, body: body ?? undefined });
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ tested: "light.desk_lamp" }) });
+      return;
+    }
+    if (path === "/v1/cues") {
+      bridgeCalls.push({ path, body: body ?? undefined });
+      await route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "HA disconnected" }) });
+      return;
+    }
+    if (path === "/v1/events") {
+      await route.abort("blockedbyclient");
+      return;
+    }
+    await route.fulfill({ status: 200, contentType: "application/json", body: "{}" });
+  });
+
+  await openFirstNight(page);
+  await page.getByRole("button", { name: /打开睡眠硬件中心/ }).first().click();
+  await page.getByRole("tab", { name: /房间外设/ }).click();
+  await expect(page.getByText("本地桥已经找到")).toBeVisible();
+  await page.getByRole("textbox", { name: "六位配对码" }).fill("654321");
+  await page.getByRole("button", { name: "配对本地桥" }).click();
+  await expect(page.getByText("房间外设已经接入")).toBeVisible();
+  await expect(page.getByText("Room Temperature")).toBeVisible();
+
+  const departure = page.locator(".ambient-cue-list article").filter({ hasText: "夜班出发" });
+  await departure.getByRole("combobox").selectOption("light.desk_lamp");
+  await departure.getByRole("button", { name: "试运行" }).click();
+  await page.getByRole("button", { name: "开启夜班联动" }).click();
+  await expect(page.getByRole("button", { name: "夜班联动已开启" })).toHaveAttribute("aria-pressed", "true");
+
+  const persisted = await page.evaluate(() => localStorage.getItem("night-shift-ambient-hardware-v1"));
+  expect(persisted).toContain("light.desk_lamp");
+  expect(persisted).not.toContain("Desk Lamp");
+  expect(persisted).not.toContain("secret");
+
+  await page.getByRole("button", { name: "关闭", exact: true }).click();
+  await page.getByRole("button", { name: /今晚交给你了/ }).click();
+  await expect(page.locator(".night-run")).toBeVisible();
+  await expect.poll(() => bridgeCalls.some((call) => call.path === "/v1/cues"
+    && call.body?.cue === "night.started")).toBe(true);
+  expect(bridgeCalls.some((call) => call.path === "/v1/test"
+    && call.body?.entityId === "light.desk_lamp")).toBe(true);
+});
+
+test("Connector absence offers a Chrome permission retry and platform download", async ({ page }) => {
+  await page.route("http://127.0.0.1:43117/v1/**", (route) => route.abort("connectionfailed"));
+
+  await openFirstNight(page);
+  await page.getByRole("button", { name: /打开睡眠硬件中心/ }).first().click();
+  await page.getByRole("tab", { name: /房间外设/ }).click();
+
+  await expect(page.getByText("本地桥未运行")).toBeVisible();
+  await expect(page.getByText(/Chrome 142\+/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "下载 Connector" })).toHaveAttribute(
+    "href",
+    /github\.com\/4MaticLab\/night-shift\/releases/,
+  );
+  await expect(page.getByRole("link", { name: "打开本机设置页" })).toHaveAttribute(
+    "href",
+    "http://127.0.0.1:43118",
+  );
+  await page.getByRole("button", { name: "重新寻找本地桥" }).click();
+  await expect(page.getByText("本地桥未运行")).toBeVisible();
+});
+
 test("sleep hardware keeps the active device while browsing drafts and resets panel scroll", async ({ page }) => {
   await openFirstNight(page);
   await page.getByRole("button", { name: /打开睡眠硬件中心/ }).first().click();
@@ -825,6 +970,27 @@ test("restores and settles a real night after reload", async ({ page }) => {
   await page.getByRole("button", { name: "收藏", exact: true }).click();
   await expect(page.getByText("睡隙回声簿")).toBeVisible();
   await expect(page.locator(".sleep-gap-entry.returned")).toHaveCount(1);
+  await expect(page.locator(".sleep-gap-entry")).toHaveCount(5);
+  const [watchLedger, sleepGapLedger, sleepGapHeading, sleepGapGrid] = await Promise.all([
+    page.locator(".city-watch-ledger").boundingBox(),
+    page.locator(".sleep-gap-ledger").boundingBox(),
+    page.locator(".sleep-gap-ledger-heading").boundingBox(),
+    page.locator(".sleep-gap-ledger-grid").boundingBox(),
+  ]);
+  expect(watchLedger).not.toBeNull();
+  expect(sleepGapLedger).not.toBeNull();
+  expect(sleepGapHeading).not.toBeNull();
+  expect(sleepGapGrid).not.toBeNull();
+  expect(Math.abs(watchLedger!.x - sleepGapLedger!.x)).toBeLessThanOrEqual(1);
+  expect(Math.abs(watchLedger!.width - sleepGapLedger!.width)).toBeLessThanOrEqual(1);
+  expect(Math.abs(sleepGapHeading!.x - sleepGapGrid!.x)).toBeLessThanOrEqual(1);
+  expect(Math.abs(sleepGapLedger!.y - (watchLedger!.y + watchLedger!.height))).toBeLessThanOrEqual(1);
+  const sleepGapCards = await page.locator(".sleep-gap-entry").evaluateAll((cards) => cards.map((card) => {
+    const box = card.getBoundingClientRect();
+    return { width: box.width, height: box.height };
+  }));
+  expect(Math.max(...sleepGapCards.map((card) => card.width)) - Math.min(...sleepGapCards.map((card) => card.width))).toBeLessThanOrEqual(1);
+  expect(Math.max(...sleepGapCards.map((card) => card.height)) - Math.min(...sleepGapCards.map((card) => card.height))).toBeLessThanOrEqual(1);
 });
 
 test("reads, searches, and synthesizes evidence without pair guessing", async ({ page }) => {
@@ -1340,6 +1506,8 @@ test.describe("mobile 390x844", () => {
     await expect(page.locator(".clipping-envelope")).toHaveCount(4);
     await expect(page.locator(".clipping-envelope-grid")).toHaveCSS("grid-template-columns", /.+/);
     expect(await page.locator(".clipping-envelope-grid").evaluate((grid) => getComputedStyle(grid).gridTemplateColumns.split(" ").length)).toBe(1);
+    await expect(page.locator(".sleep-gap-entry")).toHaveCount(5);
+    expect(await page.locator(".sleep-gap-ledger-grid").evaluate((grid) => getComputedStyle(grid).gridTemplateColumns.split(" ").length)).toBe(1);
     await expectNoPageOverflow(page);
     await expect(page.locator(".night-greenhouse")).toBeHidden();
     await page.getByRole("button", { name: /口袋小物/ }).click();
