@@ -771,14 +771,31 @@ test("builds a core inference by connecting two evidence cards", async ({ page }
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
   await runDemoShortcut(page, /解锁完整案件板/);
+  const clueIndex = page.getByRole("region", { name: "线索索引" });
+  await expect(clueIndex).toContainText("12 份档案 · 3 条未结线");
+  await expect(page.locator(".board-node.checkable")).toHaveCount(6);
   await page.getByRole("button", { name: /^EVENT · 02 四十三天/ }).click();
   await expect(page.getByRole("heading", { name: "四十三天" })).toBeVisible();
   await expect(page.getByText(/某位顾客长期迟到而形成的礼貌习惯/)).toBeVisible();
   await expect(page.getByText(/有人七年没有忘记按时想念/)).toBeVisible();
   await expect(page.getByRole("region", { name: "联合推理操作台" })).toContainText("再点一张");
+  await expect(clueIndex).toContainText("铜绿亮起的证物能与 A 互相作证");
+  const matchingPostcard = page.locator('.react-flow__node[data-id="postcard"] .board-node');
+  await expect(matchingPostcard).toHaveClass(/compatible/);
+  const dossierTrigger = page.getByRole("button", { name: /打开证物档案：四十三天/ });
+  await dossierTrigger.click();
+  const dossierDialog = page.getByRole("dialog", { name: "四十三天" });
+  await expect(dossierDialog).toBeVisible();
+  await expectDialogLifecycle(page, dossierDialog);
+  await expect(dossierDialog.getByText(/有人七年没有忘记按时想念/)).toBeVisible();
+  await dossierDialog.getByRole("button", { name: "关闭证物档案" }).click();
+  await expect(dossierDialog).toHaveCount(0);
+  await expect(dossierTrigger).toBeFocused();
   await page.getByRole("button", { name: /^OBJECT · 02 未寄出的明信片/ }).click();
   await expect(page.getByRole("button", { name: /移除证物 A：四十三天/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /移除证物 B：未寄出的明信片/ })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "米娜知道伊芙琳仍然活着" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /查看核心推论：米娜知道伊芙琳仍然活着/ })).toHaveCount(0);
   const [board, panel, slotA, slotB, connectAction] = await Promise.all([
     page.locator(".board-shell").boundingBox(),
     page.locator(".relation-panel").boundingBox(),
@@ -797,10 +814,19 @@ test("builds a core inference by connecting two evidence cards", async ({ page }
   await expect(page.locator(".relation-panel > :last-child")).toHaveClass(/relation-ledger/);
   await page.getByRole("button", { name: /核对这两件证物/ }).click();
 
+  const relationDialog = page.getByRole("dialog", { name: "米娜知道伊芙琳仍然活着" });
+  await expect(relationDialog).toBeVisible();
+  await expectDialogLifecycle(page, relationDialog);
+  await expect(relationDialog).toContainText(/共同证明米娜一直替她维持联络/);
+  await relationDialog.getByRole("button", { name: "关闭核心推论" }).click();
+  await expect(relationDialog).toHaveCount(0);
   await expect(page.locator(".relation-ledger").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
   await expect(page.getByText(/共同证明米娜一直替她维持联络/)).toBeVisible();
   await expect(page.getByText("这份证物已经参与作证")).toBeVisible();
   await expect(page.locator(".react-flow__edge")).toHaveCount(1);
+  await expect(clueIndex).toContainText("12 份档案 · 2 条未结线");
+  await page.getByRole("button", { name: /查看核心推论：米娜知道伊芙琳仍然活着/ }).click();
+  await expect(page.getByRole("dialog", { name: "米娜知道伊芙琳仍然活着" })).toBeVisible();
 });
 
 test("shares one clue as a QR deep link", async ({ page }) => {
@@ -1022,6 +1048,7 @@ test.describe("tablet portrait 820x1180", () => {
     await runDemoShortcut(page, /解锁完整案件板/);
     await expect(page.locator(".demo-drawer")).toHaveCount(0);
 
+    await expect(page.getByRole("region", { name: "线索索引" })).toContainText("12 份档案 · 3 条未结线");
     await expect(page.locator(".board-workspace")).toHaveCSS("flex-direction", "column");
     await expect(page.locator(".board-flow .react-flow__pane")).toHaveCSS("touch-action", "pan-y");
     await expect(page.locator(".mobile-board-hint")).toBeVisible();
@@ -1208,6 +1235,7 @@ test.describe("mobile 390x844", () => {
     await page.getByRole("button", { name: /DEMO/ }).click();
     await runDemoShortcut(page, /解锁完整案件板/);
     await expect(page.locator(".demo-drawer")).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "线索索引" })).toContainText("12 份档案 · 3 条未结线");
     await expect(page.getByRole("region", { name: "联合推理操作台" })).toContainText("上下滑动可以继续阅档");
     await expect(page.locator(".board-node-drag-handle").first()).toBeHidden();
     await expect(page.locator(".board-flow .react-flow__pane")).toHaveCSS("touch-action", "pan-y");
@@ -1236,6 +1264,10 @@ test.describe("mobile 390x844", () => {
     expect(slotB!.y + slotB!.height).toBeLessThanOrEqual(connectAction!.y);
     await expect(page.locator(".relation-panel > :last-child")).toHaveClass(/relation-ledger/);
     await page.getByRole("button", { name: /核对这两件证物/ }).click();
+    const relationDialog = page.getByRole("dialog", { name: "米娜知道伊芙琳仍然活着" });
+    await expect(relationDialog).toBeVisible();
+    await expectDialogLifecycle(page, relationDialog);
+    await relationDialog.getByRole("button", { name: "关闭核心推论" }).click();
     await expect(page.locator(".relation-ledger").getByText("米娜知道伊芙琳仍然活着", { exact: true })).toBeVisible();
     await expectNoPageOverflow(page);
   });
