@@ -41,8 +41,13 @@
 - 部署日期：2026-07-24
 - owner／`claimSigner`：`0xC02b873Ef4F79Da50435c164C76e941365a7b7ca`
 - 验证状态：Blockscout 已验证 Solidity 源码和编译设置
+- 生产站点：[`https://www.shiftx.top`](https://www.shiftx.top)
+- 授权 API：[`https://www.shiftx.top/api/injective/mint-authorization`](https://www.shiftx.top/api/injective/mint-authorization)
+- Vercel 状态：production 已配置 signer secret、合约地址和固定 metadata origin
 
 这是比赛演示用 Injective EVM Testnet 部署；临时 owner／签名钱包不得复用于主网。Ignition 部署记录保存在 `ignition/deployments/chain-1439/`。公共 RPC 在这笔交易确认后曾短暂无法通过 `eth_getTransactionReceipt` 返回回执，但区块级回执、部署字节码、nonce、owner、`claimSigner`、名称、符号和 Blockscout 均已交叉验证；不得因单点回执缺失重复部署。
+
+2026-07-24 的 production smoke test 已确认：状态 API 返回 `configured: true`、chain ID `1439` 和上述合约地址；为首案 `torn-ticket` 请求的授权可由链上 `claimSigner` 通过 EIP-712 恢复验证，`tokenUriHash` 与内嵌 metadata 一致，图片和 `external_url` 均固定使用 `https://www.shiftx.top`。该验证只签发限时 voucher，没有代替玩家钱包调用 `redeem` 或铸造 NFT。
 
 ## 本地部署
 
