@@ -89,7 +89,7 @@ export function Tonight({ onLaunch, onHardware }: { onLaunch: (quality: SleepQua
   return (
     <div className="content-grid tonight-page">
       <section className={selectedDirection ? "desk-scene handoff-ready" : "desk-scene"}>
-        <div className="scene-copy"><p className="eyebrow"><Clock3 size={14} /> {t("今晚的任务 · 23:40 前交接")}</p><h2>{locale === "en" ? <>Lin Du is arranging<br />tonight&apos;s equipment.</> : <>林渡正在整理<br />今晚的装备。</>}</h2><p>{locale === "en" ? <>Choose an investigative direction.<br />However you sleep tonight, the story will continue.</> : <>选择一个调查方向。<br />无论你今晚睡得如何，故事都会继续。</>}</p></div>
+        <div className="scene-copy"><p className="eyebrow"><Clock3 size={14} /> {t("今晚的任务 · 23:40 前交接")}</p><h2 className={locale === "en" ? "scene-title scene-title-en" : "scene-title"}>{locale === "en" ? <><span>Lin Du is arranging</span><span>tonight&apos;s equipment.</span></> : <><span>林渡正在整理</span><span>今晚的装备。</span></>}</h2><p>{locale === "en" ? <>Choose an investigative direction.<br />However you sleep tonight, the story will continue.</> : <>选择一个调查方向。<br />无论你今晚睡得如何，故事都会继续。</>}</p></div>
         <motion.figure className="handoff-portrait" initial={{ opacity: 0, y: 12, rotate: 1.4 }} animate={{ opacity: 1, y: 0, rotate: selectedDirection ? .35 : 1.15 }} transition={{ duration: .7, ease: "easeOut" }}>
           <div className="handoff-portrait-image"><Image src={handoffPortrait.src} alt={handoffPortrait.alt} fill priority sizes="(max-width: 600px) 44vw, (max-width: 900px) 34vw, 24vw" /></div>
           <figcaption><small>LIN DU · NIGHT DETECTIVE</small><b>{campaign.presentation.detectiveName}</b><span>{selectedDirection ? t("已收到今晚的方向") : t("在等你写下方向")}</span></figcaption>

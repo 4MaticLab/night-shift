@@ -159,6 +159,25 @@ test("returns to the surface that opened demo controls", async ({ page }) => {
   await expect(library).toBeVisible();
 });
 
+test.describe("small widescreen 963x768", () => {
+  test.use({ viewport: { width: 963, height: 768 } });
+
+  test("keeps the pre-investigation handoff typography composed", async ({ page }) => {
+    await openFirstNight(page);
+
+    const titleLines = page.locator(".scene-title span");
+    await expect(titleLines).toHaveCount(2);
+    await expect(titleLines.nth(0)).toHaveText("林渡正在整理");
+    await expect(titleLines.nth(1)).toHaveText("今晚的装备。");
+    expect(await titleLines.evaluateAll((lines) => lines.every((line) => line.scrollWidth <= line.clientWidth + 1))).toBe(true);
+
+    await expect(page.locator(".tonight-page")).toHaveCSS("display", "grid");
+    await expectNoOverlap(page.locator(".scene-copy"), page.locator(".handoff-portrait"));
+    await expectNoOverlap(page.locator(".handoff-docket"), page.locator(".handoff-portrait"));
+    await expectNoPageOverflow(page);
+  });
+});
+
 test.describe("automatic browser locale", () => {
   test.use({ locale: "en-US" });
 
@@ -1045,6 +1064,22 @@ test("switches to the thirteenth-loaf campaign and completes its five-night stor
 
 test.describe("tablet portrait 820x1180", () => {
   test.use({ viewport: { width: 820, height: 1180 } });
+
+  test("stacks the pre-investigation handoff into a calm reading flow", async ({ page }) => {
+    await openFirstNight(page);
+
+    await expect(page.locator(".tonight-page")).toHaveCSS("display", "block");
+    await expectNoOverlap(page.locator(".scene-copy"), page.locator(".handoff-portrait"));
+    await expectNoOverlap(page.locator(".handoff-docket"), page.locator(".handoff-portrait"));
+    const [scene, plan] = await Promise.all([
+      page.locator(".desk-scene").boundingBox(),
+      page.locator(".plan-panel").boundingBox(),
+    ]);
+    expect(scene).not.toBeNull();
+    expect(plan).not.toBeNull();
+    expect(plan!.y).toBeGreaterThanOrEqual(scene!.y + scene!.height - 1);
+    await expectNoPageOverflow(page);
+  });
 
   test("keeps the case board and inference desk in one touch-scroll flow", async ({ page }) => {
     await page.goto("/");
