@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-当前 checkout 没有尚未退役的临时计划。
+| [[plans/fix-preserve-latest-morning-report]] | `fix/preserve-latest-morning-report` | `in_progress` | `manual` | 0/6 | 解耦案件板整理与结束当日，并重放最新晨报 |
 
 ## 使用规则
 
