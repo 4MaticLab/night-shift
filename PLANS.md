@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-lost-property-case]] | `codex/lost-property-case` | `in_progress` | `manual` | 5/8 | 更新稳定文档与资产索引 |
+| [[plans/codex-lost-property-case]] | `codex/lost-property-case` | `in_progress` | `manual` | 6/8 | 增加内容、存档与关键路径验证 |
 
 ## 使用规则
 
