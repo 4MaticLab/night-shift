@@ -8,6 +8,7 @@
 - 案件包创作：[[docs/campaign-authoring]]
 - 北极星与参考原则：[[docs/north-star]]
 - 工程与状态模型：[[docs/architecture]]
+- 剧本翻译：[[docs/translation-guide]]
 - 睡眠硬件与隐私：[[docs/sleep-hardware-bridge]]、[[docs/privacy-and-guardrails]]
 - 链上藏品：[[docs/injective-keepsake-mint]]
 - 视觉与素材：[[docs/art-direction]]、[[docs/asset-list]]、[[docs/art-prompts/global-style]]、[[docs/art-prompts/lin-du-handoff-portrait]]、[[docs/art-prompts/city-witness-portraits]]、[[docs/art-prompts/foglight-districts]]、[[docs/art-prompts/four-act-headers]]、[[docs/art-prompts/thirteenth-loaf-visual-archive]]
@@ -69,4 +70,7 @@
 - 默认 local-first；没有环境变量、登录、后端或 API Key 时必须能完成五夜主循环。
 - 健康数据默认最小化且可撤销；设备信号只丰富叙事，不得诊断、惩罚、锁线索或伪装未实现的真实连接，详见 [[docs/privacy-and-guardrails]]。
 - 保持“文学性地下都市 × 温暖异步等待”的原创统一语言，参见 [[docs/north-star]] 与 [[docs/art-direction]]。
-- 提交前至少运行 `npm test`、`npm run lint`、`npm run build` 和 `npm run docs:check`；仅改文档时至少运行 `npm run docs:check`。
+- 剧本翻译一次只处理一个案件；必须先读目标故事圣经与 [[docs/translation-guide]]。中英文共享稳定 ID、关系、规则和存档，全部覆盖与验证完成前不得在 `campaignSupportsLocale` 开启目标语言。个人 Skill 可用时调用 `$night-shift-campaign-translation`。
+- 本地提交前按改动范围运行最小验证：代码至少运行 `npm test` 与 `npm run lint`，仅改文档至少运行 `npm run docs:check`，构建配置或入口变化另运行 `npm run build`。
+- 面向 `main` 的 PR 必须等待 GitHub Actions `CI Gate` 成功。远端门禁**只**跑 `Quality`（单元／内容测试、lint、Next 构建、文档双链），目标是快速挡住装不上／测不过／构不出来，而不是做完整产品验收。
+- Vinext render、Hardhat、完整 Playwright **不进 PR 门禁**。它们是合并者本机可选的鲁棒性检验：需要时在合并前拉分支跑 `npm run test:robustness`（或单独的 `test:e2e` / `test:render` / `contract:*`）。贡献者默认不必跟 E2E 打乒乓球；设计／布局问题用预览与人工判断处理。

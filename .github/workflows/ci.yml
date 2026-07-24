@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
+# Hackathon merge gate: keep the PR loop fast.
+# Quality (~1–2 min) is the only required check. Browser E2E, Vinext/Cloudflare
+# render, and Hardhat live as optional local scripts for the person merging
+# (`npm run test:robustness` and friends) — see docs/quality-baseline.md.
+
+jobs:
+  quality:
+    name: Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit and content tests
+        run: npm test
+
+      - name: Lint source
+        run: npm run lint
+
+      - name: Build Next.js application
+        run: npm run build
+
+      - name: Check documentation links
+        run: npm run docs:check
+
+  gate:
+    name: CI Gate
+    if: ${{ always() }}
+    needs:
+      - quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify required jobs
+        env:
+          QUALITY_RESULT: ${{ needs.quality.result }}
+        run: |
+          printf 'Quality: %s\n' "$QUALITY_RESULT"
+          test "$QUALITY_RESULT" = "success"
