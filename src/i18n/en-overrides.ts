@@ -473,5 +473,9 @@ export const englishOverrides: Record<string, string> = {
   "已确认的论断会留在这里": "Confirmed statements stay here",
   "配对成功后，论断会出现在这里": "After a successful pair, the statement appears here",
   "论断已经归入底部核心推论浮窗，并在案件板上留下连线。": "The finding is filed in the core-inference dock below, with a thread left on the case board.",
+  "线头未接上": "Thread unsettled",
+  "这两份档案还对不上。": "These two files still do not line up.",
+  "它们或许各自成立，却还不能互相作证。先保留第一张，再试另一条线。": "Each may stand alone, but they cannot yet testify together. Keep the first card, then try another thread.",
+  "未能配对的证物": "Evidence that did not pair",
   "关闭提示": "Dismiss notice",
 };

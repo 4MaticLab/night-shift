@@ -44,7 +44,7 @@ function EvidenceNodeCard({ data }: NodeProps<EvidenceNode>) {
   const { t } = useI18n();
   const { clue, selected, selectionIndex, focused, received, checkable, compatible, paperVariant, onSelect, onOpenDossier } = data;
   return <div className="board-node-wrap">
-    <Handle className="board-connection-handle target" type="target" position={Position.Left} isConnectable={false} />
+    <Handle className="board-connection-handle target" type="target" position={Position.Top} isConnectable={false} />
     <span className="board-node-drag-handle" title={t("拖动图钉整理证物")}><span className="pin" /></span>
     <div
       role="button"
@@ -83,7 +83,7 @@ function EvidenceNodeCard({ data }: NodeProps<EvidenceNode>) {
         <span className={`evidence-relation-cue ${compatible ? "compatible" : ""}`} aria-hidden="true"><i /></span>
       </>}
     </div>
-    <Handle className="board-connection-handle source" type="source" position={Position.Right} isConnectable={false} />
+    <Handle className="board-connection-handle source" type="source" position={Position.Top} isConnectable={false} />
   </div>;
 }
 
@@ -104,7 +104,7 @@ export function CaseBoard() {
   const [selectedClueIds, setSelectedClueIds] = useState<string[]>([]);
   const [dossierClueId, setDossierClueId] = useState<string | null>(null);
   const [letterRelationId, setLetterRelationId] = useState<string | null>(null);
-  const [mismatchNotice, setMismatchNotice] = useState<string | null>(null);
+  const [mismatchNotice, setMismatchNotice] = useState<{ firstTitle: string; secondTitle: string } | null>(null);
   const [isCompactBoard, setIsCompactBoard] = useState(false);
   const [sharedClue, setSharedClue] = useState<Clue | null>(null);
   const available = useMemo(() => campaign.case.clues.filter((clue) => unlockedClueIds.includes(clue.id)), [campaign.case.clues, unlockedClueIds]);
@@ -149,8 +149,13 @@ export function CaseBoard() {
 
     const matched = matchCampaignEvidenceRelation(campaign, next[0], next[1]);
     if (!matched) {
+      const first = campaign.case.clues.find((clue) => clue.id === next[0]);
+      const second = campaign.case.clues.find((clue) => clue.id === next[1]);
       setSelectedClueIds([next[0]]);
-      setMismatchNotice(t("这两件证物还不能互相作证。换一种连接。"));
+      setMismatchNotice({
+        firstTitle: first?.title ?? next[0],
+        secondTitle: second?.title ?? next[1],
+      });
       return;
     }
 
@@ -160,7 +165,7 @@ export function CaseBoard() {
     setSelectedClueIds([]);
     setDossierClueId(null);
     setLetterRelationId(matched.id);
-  }, [campaign, confirmedRelations, connectClues, selectedClueIds, t]);
+  }, [campaign, confirmedRelations, connectClues, selectedClueIds]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia(
@@ -220,17 +225,18 @@ export function CaseBoard() {
 
   const confirmedEdges: Edge[] = campaign.relations.flatMap((relation, index) => {
     if (!confirmedRelations.includes(relation.id) || !relation.clueIds.every((clueId) => unlockedClueIds.includes(clueId))) return [];
-    // Solid thread between the two evidence cards — visible, not green dashed.
-    const stroke = index === 1 ? "#8b4f4c" : "#a8895c";
+    // A taut old-wine thread runs pin-to-pin, like a physical detective board.
+    const stroke = "#641f2a";
     return [{
       id: relation.id,
       source: relation.clueIds[0],
       target: relation.clueIds[1],
+      type: "straight",
       animated: false,
       zIndex: 4,
       style: {
         stroke,
-        strokeWidth: 3,
+        strokeWidth: index === 1 ? 2.8 : 2.5,
         strokeLinecap: "round" as const,
         strokeDasharray: "none",
       },
@@ -241,9 +247,10 @@ export function CaseBoard() {
       id: `preview-${selectedClueIds[0]}-${clueId}`,
       source: selectedClueIds[0],
       target: clueId,
+      type: "straight",
       className: "board-preview-edge",
       zIndex: 3,
-      style: { stroke: "#7fa39d", strokeWidth: 2, strokeDasharray: "7 7" },
+      style: { stroke: "#641f2a", strokeWidth: 2, strokeDasharray: "7 7" },
     }))
     : [];
   const edges = [...confirmedEdges, ...previewEdges];
@@ -342,10 +349,32 @@ export function CaseBoard() {
     </details>
 
     <AnimatePresence>
-      {mismatchNotice && <motion.aside className="board-match-notice error" role="status" initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
-        <FileText />
-        <div><small>NO MATCH</small><b>{mismatchNotice}</b></div>
-        <button type="button" aria-label={t("关闭提示")} onClick={() => setMismatchNotice(null)}><X /></button>
+      {mismatchNotice && <motion.aside
+        className="board-match-notice"
+        role="status"
+        aria-live="polite"
+        initial={{ opacity: 0, y: -10, scale: .98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: -8, scale: .98 }}
+        transition={{ duration: .22, ease: "easeOut" }}
+      >
+        <div className="board-match-notice-mark" aria-hidden="true">
+          <span />
+          <FileText />
+        </div>
+        <div className="board-match-notice-copy">
+          <small>THREAD UNSETTLED · {t("线头未接上")}</small>
+          <b>{t("这两份档案还对不上。")}</b>
+          <p>{t("它们或许各自成立，却还不能互相作证。先保留第一张，再试另一条线。")}</p>
+          <div className="board-match-notice-pair" aria-label={t("未能配对的证物")}>
+            <span>{mismatchNotice.firstTitle}</span>
+            <i aria-hidden="true" />
+            <span>{mismatchNotice.secondTitle}</span>
+          </div>
+        </div>
+        <button type="button" className="board-match-notice-close" aria-label={t("关闭提示")} onClick={() => setMismatchNotice(null)}>
+          <X />
+        </button>
       </motion.aside>}
     </AnimatePresence>
 
