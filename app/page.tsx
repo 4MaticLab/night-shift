@@ -129,7 +129,7 @@ function GamePage() {
 
   return (
     <><AmbientHardwareCoordinator /><div className="app-shell">
-      <TopBar chapter={game.chapter} onDemo={() => setDemo(true)} onHome={() => { setUserToggledLibrary(true); setIntro(false); }} onHardware={() => setHardwareOpen(true)} />
+      <TopBar chapter={game.chapter} onHome={() => { setUserToggledLibrary(true); setIntro(false); }} onHardware={() => setHardwareOpen(true)} />
       <main className="app-content">
         {activeView === "tonight" && <Tonight onLaunch={game.startNight} onHardware={() => setHardwareOpen(true)} />}
         {activeView === "report" && (latestReportChapter !== null
