@@ -3,8 +3,14 @@ import { nightShiftCase } from "@/src/content/case";
 import { getCorrespondencePrompt } from "@/src/content/correspondence";
 import { DEMO_JOURNEY_SEED } from "@/src/content/souvenirs";
 import { getOpportunityCandidates } from "@/src/content/opportunities";
-import { DEFAULT_CAMPAIGN_ID, RAIN_RADIO_CAMPAIGN_ID } from "@/src/content/campaigns/registry";
+import {
+  DEFAULT_CAMPAIGN_ID,
+  LAST_TRAM_CAMPAIGN_ID,
+  RAIN_RADIO_CAMPAIGN_ID,
+  THIRTEENTH_LOAF_CAMPAIGN_ID,
+} from "@/src/content/campaigns/registry";
 import { rainRadioCampaign } from "@/src/content/campaigns/rain-radio";
+import { thirteenthLoafCampaign } from "@/src/content/campaigns/thirteenth-loaf";
 
 type StoreModule = typeof import("@/src/stores/game-store");
 let storeModule: StoreModule;
@@ -33,6 +39,17 @@ beforeEach(() => {
 });
 
 describe("Night Shift game store", () => {
+  it("uses The Last Tram for new and invalid campaign saves", () => {
+    expect(DEFAULT_CAMPAIGN_ID).toBe(LAST_TRAM_CAMPAIGN_ID);
+    expect(storeModule.migrateGameState({ campaignId: "missing-case" }).campaignId).toBe(LAST_TRAM_CAMPAIGN_ID);
+    expect(storeModule.migrateGameState({
+      campaignId: "case-003",
+      campaignSaves: {
+        "case-003": { started: true, chapter: 4, phase: "night" },
+      },
+    }).campaignId).toBe(LAST_TRAM_CAMPAIGN_ID);
+  });
+
   it("completes the deterministic five-night loop", () => {
     storeModule.useGameStore.getState().begin();
 
@@ -121,6 +138,30 @@ describe("Night Shift game store", () => {
     expect(storeModule.useGameStore.getState().endingId).toBe("protect");
   });
 
+  it("completes the third campaign and reaches its own true ending", () => {
+    expect(storeModule.useGameStore.getState().switchCampaign(THIRTEENTH_LOAF_CAMPAIGN_ID)).toBe(true);
+    storeModule.useGameStore.getState().begin();
+
+    for (const chapter of thirteenthLoafCampaign.case.chapters) {
+      const state = storeModule.useGameStore.getState();
+      state.selectChoice(chapter.choices[0].id);
+      storeModule.useGameStore.getState().startNight("restful", "side-lamp", "demo");
+      storeModule.useGameStore.getState().finishNight();
+      storeModule.useGameStore.getState().continueDay();
+    }
+
+    const completed = storeModule.useGameStore.getState();
+    expect(completed.campaignId).toBe(THIRTEENTH_LOAF_CAMPAIGN_ID);
+    expect(completed.phase).toBe("ending");
+    expect(completed.completedReports).toHaveLength(thirteenthLoafCampaign.case.chapters.length);
+    expect(completed.unlockedClueIds).toEqual(thirteenthLoafCampaign.case.clues.map((clue) => clue.id));
+    for (const relation of thirteenthLoafCampaign.relations) {
+      expect(storeModule.useGameStore.getState().connectClues(relation.clueIds[0], relation.clueIds[1])).toBe(relation.id);
+    }
+    storeModule.useGameStore.getState().chooseEnding("return");
+    expect(storeModule.useGameStore.getState().endingId).toBe("return");
+  });
+
   it("keeps progress and received clues isolated while switching campaigns", () => {
     const first = storeModule.useGameStore.getState();
     first.begin();
@@ -140,6 +181,16 @@ describe("Night Shift game store", () => {
     expect(restoredFirst.unlockedClueIds).toEqual(["flower-cycle"]);
     expect(restoredFirst.switchCampaign(RAIN_RADIO_CAMPAIGN_ID)).toBe(true);
     expect(storeModule.useGameStore.getState().receivedClueIds).toEqual(["radio-warm-dial"]);
+
+    expect(storeModule.useGameStore.getState().switchCampaign(THIRTEENTH_LOAF_CAMPAIGN_ID)).toBe(true);
+    const third = storeModule.useGameStore.getState();
+    expect(third.started).toBe(false);
+    expect(third.receiveSharedClue("blank-guest-share")).toBe("received");
+    expect(third.receiveSharedClue("radio-warm-dial")).toBe("invalid");
+    expect(third.switchCampaign(RAIN_RADIO_CAMPAIGN_ID)).toBe(true);
+    expect(storeModule.useGameStore.getState().receivedClueIds).toEqual(["radio-warm-dial"]);
+    expect(storeModule.useGameStore.getState().switchCampaign(THIRTEENTH_LOAF_CAMPAIGN_ID)).toBe(true);
+    expect(storeModule.useGameStore.getState().receivedClueIds).toEqual(["blank-guest-share"]);
   });
 
   it("persists and rehydrates an active real night", async () => {
@@ -319,6 +370,26 @@ describe("Night Shift game store", () => {
     expect(migrated.choiceHistory).toEqual({});
     expect(migrated.growthHistory[1]?.choiceId).toBe("dial");
     expect(migrated.boardPositions).toEqual({ "radio-warm-dial": { x: 200, y: 140 } });
+  });
+
+  it("repairs a pre-third-case save that carries a choice from another case", () => {
+    const migrated = storeModule.migrateGameState({
+      campaignId: THIRTEENTH_LOAF_CAMPAIGN_ID,
+      started: true,
+      chapter: 5,
+      phase: "ending",
+      completedReports: [1, 2, 3, 4, 5],
+      choiceHistory: { 1: "source", 2: "roster", 3: "conduit", 4: "jars", 5: "announce" },
+      endingId: "public",
+    });
+
+    expect(migrated.choiceHistory).toEqual({
+      2: "roster",
+      3: "conduit",
+      4: "jars",
+      5: "announce",
+    });
+    expect(migrated.growthHistory[1]?.choiceId).toBe("cabinet");
   });
 
   it("persists valid evidence positions and can restore the default desk", () => {

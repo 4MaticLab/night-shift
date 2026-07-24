@@ -24,6 +24,15 @@
 
 睡眠摘要不得用于诊断、治疗建议、危险告警、雇佣或保险判断。睡眠质量和任何设备指标都不得减少线索、污染人物状态、锁定结局、制造失败或形成排行榜。
 
+## Injective 公开回执
+
+- 钱包连接与 mint 完全自愿；不连接时不减少内容，钱包地址不写入案件或睡眠硬件存档。
+- 钱包地址、token ID 和交易哈希一旦写入公链就是公开且难以撤销的信息。界面必须明确标注测试网、无购买、无通关证明和无游戏优势。
+- 浏览器只在 `night-shift-injective-mints-v1` 保存公开回执，不上传本地案件进度、睡眠摘要、纸条、好友线索来源或其他历史。
+- `INJECTIVE_MINT_SIGNER_PRIVATE_KEY` 只存在于 Next 服务端；API 返回限时 EIP-712 voucher，不返回私钥、部署密钥或可复用开放签名能力。
+- 元数据由受信任案件 manifest 生成，不能夹带玩家输入、健康数据或自由文本。部署域名进入永久元数据前应使用固定 origin。
+- 完整流程、环境变量与合约边界见 [[docs/injective-keepsake-mint]]。
+
 ## 未来真实接入门槛
 
 真实设备桥接至少需要：厂商最新文档复核、最小权限评审、令牌不落前端、撤销与删除路径、离线／无数据状态、数据保留周期、平台商店隐私声明，以及真实设备与模拟数据的视觉隔离。任何新增上传、账号或云同步都必须建立新的 `manual` 计划并由用户批准。
@@ -33,5 +42,5 @@
 - [[docs/sleep-hardware-bridge]]
 - [[docs/architecture]]
 - [[docs/product-overview]]
+- [[docs/injective-keepsake-mint]]
 - [[plans/0028-sleep-hardware-bridge]]
-

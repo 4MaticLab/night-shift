@@ -17,7 +17,10 @@ async function expectNoOverlap(first: import("@playwright/test").Locator, second
   const [a, b] = await Promise.all([first.boundingBox(), second.boundingBox()]);
   expect(a).not.toBeNull();
   expect(b).not.toBeNull();
-  expect(a!.x + a!.width <= b!.x || b!.x + b!.width <= a!.x || a!.y + a!.height <= b!.y || b!.y + b!.height <= a!.y).toBe(true);
+  expect(
+    a!.x + a!.width <= b!.x || b!.x + b!.width <= a!.x || a!.y + a!.height <= b!.y || b!.y + b!.height <= a!.y,
+    `Expected boxes not to overlap: ${JSON.stringify({ a, b })}`,
+  ).toBe(true);
 }
 
 async function expectMinimumTapTargets(locator: import("@playwright/test").Locator, minimum = 44) {
@@ -37,7 +40,174 @@ async function expectNoVisibleHan(page: import("@playwright/test").Page) {
   expect(visibleText).not.toMatch(/\p{Script=Han}/u);
 }
 
-test("plays the first case in English and preserves the language preference", async ({ page }) => {
+async function runDemoShortcut(page: import("@playwright/test").Page, name: string | RegExp) {
+  await page.getByRole("button", { name }).click();
+  const confirmation = page.locator(".demo-confirmation");
+  await expect(confirmation).toBeVisible();
+  await confirmation.getByRole("button", { name: /确认|Stage/ }).click();
+}
+
+async function expectDialogLifecycle(page: import("@playwright/test").Page, dialog: import("@playwright/test").Locator) {
+  await expect.poll(() => dialog.evaluate((element) => element.contains(document.activeElement))).toBe(true);
+  await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("hidden");
+  expect(await page.locator("[inert]").count()).toBeGreaterThan(0);
+  for (let index = 0; index < 8; index += 1) {
+    await page.keyboard.press("Tab");
+    expect(await dialog.evaluate((element) => element.contains(document.activeElement))).toBe(true);
+  }
+  await page.keyboard.press("Shift+Tab");
+  expect(await dialog.evaluate((element) => element.contains(document.activeElement))).toBe(true);
+}
+
+async function openMintableCollection(page: import("@playwright/test").Page) {
+  await page.goto("/");
+  await page.getByRole("button", { name: /DEMO MODE/ }).click();
+  await runDemoShortcut(page, /跳到真结局条件/);
+  await page.getByRole("button", { name: "收藏", exact: true }).click();
+  await expect(page.locator(".collection-page")).toBeVisible();
+}
+
+test("holds the first interaction behind a real hero-art loading screen", async ({ page }) => {
+  await page.route("**/art/headers/shift-handoff-v2.webp", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 900));
+    await route.continue();
+  });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const loadingScreen = page.locator(".app-boot-screen").last();
+  await expect(loadingScreen).toBeVisible();
+  await expect(loadingScreen).toContainText("夜班事务所正在亮灯");
+  await expect(page.locator(".app-boot-content")).toHaveAttribute("inert", "");
+  await expect(loadingScreen).toBeHidden({ timeout: 10_000 });
+  await expect(page.locator(".app-boot-content")).not.toHaveAttribute("inert", "");
+  await expect(page.getByRole("button", { name: /开始第 001 宗案件/ })).toBeEnabled();
+  const caseLibrary = page.getByRole("region", { name: "案件剧本选择" });
+  await expect(caseLibrary.locator(".featured-case")).toContainText("零点四十三分的末班车");
+  await expect(caseLibrary.locator(".featured-case")).toContainText("推荐起点");
+  await expect(page.locator(".case-teaser")).toHaveCount(0);
+});
+
+test("opens demo controls without changing a fresh save and confirms snapshot writes", async ({ page }) => {
+  await page.goto("/");
+  const trigger = page.getByRole("button", { name: /DEMO MODE/ });
+  await trigger.click();
+  const dialog = page.getByRole("dialog", { name: "演示控制台" });
+  await expect(dialog).toContainText("只打开控制台，不会改动存档");
+  await expect(dialog).toContainText("其他案件的独立存档不会改变");
+  await expectDialogLifecycle(page, dialog);
+  expect(await page.evaluate(() => localStorage.getItem("night-shift-save-v1"))).toBeNull();
+
+  await dialog.getByRole("button", { name: /03 没有退房的307/ }).click();
+  const confirmation = dialog.locator(".demo-confirmation");
+  await expect(confirmation).toContainText("替换成该夜开始时的固定演示快照");
+  expect(await page.evaluate(() => localStorage.getItem("night-shift-save-v1"))).toBeNull();
+  await confirmation.getByRole("button", { name: "取消" }).click();
+  await expect(confirmation).toHaveCount(0);
+  expect(await page.evaluate(() => localStorage.getItem("night-shift-save-v1"))).toBeNull();
+
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => document.body.style.overflow)).not.toBe("hidden");
+  await expect(trigger).toBeFocused();
+  expect(await page.evaluate(() => localStorage.getItem("night-shift-save-v1"))).toBeNull();
+
+  await trigger.click();
+  await runDemoShortcut(page, /03 没有退房的307/);
+  await expect(page.getByText("夜 3")).toBeVisible();
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state);
+  expect(saved).toMatchObject({ started: true, chapter: 3, phase: "day" });
+
+  await page.getByRole("button", { name: "DEMO", exact: true }).click();
+  await dialog.getByRole("button", { name: "重置当前案件存档" }).click();
+  await expect(dialog.locator(".demo-confirmation")).toContainText("其他案件的独立存档不会改变");
+  await dialog.locator(".demo-confirmation").getByRole("button", { name: "取消" }).click();
+  const unchanged = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state);
+  expect(unchanged).toMatchObject({ started: true, chapter: 3, phase: "day" });
+  await page.keyboard.press("Escape");
+});
+
+test("returns to the surface that opened demo controls", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /DEMO MODE/ }).click();
+  await runDemoShortcut(page, /03 没有退房的307/);
+
+  const surfaces = [
+    { name: "今晨", locator: ".empty-report" },
+    { name: "案件板", locator: ".board-page" },
+    { name: "今晚", locator: ".tonight-page" },
+    { name: "收藏", locator: ".collection-page" },
+    { name: "档案", locator: ".archive-page" },
+  ];
+  for (const surface of surfaces) {
+    const navItem = page.getByRole("button", { name: surface.name, exact: true });
+    await navItem.click();
+    await expect(page.locator(surface.locator)).toBeVisible();
+    await page.getByRole("button", { name: "DEMO", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: "演示控制台" });
+    await dialog.getByRole("button", { name: "关闭演示控制台" }).click();
+    await expect(dialog).toHaveCount(0);
+    await expect(navItem).toHaveAttribute("aria-current", "page");
+    await expect(page.locator(surface.locator)).toBeVisible();
+  }
+
+  await page.getByRole("button", { name: /夜班侦探 NIGHT SHIFT/ }).click();
+  const library = page.getByRole("region", { name: "案件剧本选择" });
+  await expect(library).toBeVisible();
+  await page.getByRole("button", { name: /DEMO MODE/ }).click();
+  const libraryDialog = page.getByRole("dialog", { name: "演示控制台" });
+  await libraryDialog.getByRole("button", { name: "关闭演示控制台" }).click();
+  await expect(libraryDialog).toHaveCount(0);
+  await expect(library).toBeVisible();
+});
+
+test.describe("automatic browser locale", () => {
+  test.use({ locale: "en-US" });
+
+  test("renders English on the first response and lets a cookie override it", async ({ page, context }) => {
+    const response = await page.goto("/", { waitUntil: "domcontentloaded" });
+    expect(await response?.text()).toContain('<html lang="en"');
+    await expect(page.getByRole("heading", { name: /When you fall asleep/ })).toBeVisible();
+    await expect(page.locator(".app-boot-screen")).toContainText("The night agency is turning on its lights");
+    expect((await context.cookies()).find((cookie) => cookie.name === "night-shift-locale")).toBeUndefined();
+
+    await page.getByRole("button", { name: /CASE 002/ }).click();
+    await expect(page.getByRole("heading", { name: /你睡着以后/ })).toBeVisible();
+    await page.getByRole("button", { name: /CASE 003/ }).click();
+    await expect(page.getByRole("heading", { name: /你睡着以后/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /开始第 003 宗案件/ })).toBeVisible();
+    await page.getByRole("button", { name: /CASE 001/ }).click();
+    await expect(page.getByRole("heading", { name: /When you fall asleep/ })).toBeVisible();
+
+    await page.getByRole("button", { name: "中文", exact: true }).click();
+    await expect(page.getByRole("heading", { name: /你睡着以后/ })).toBeVisible();
+    expect((await context.cookies()).find((cookie) => cookie.name === "night-shift-locale")?.value).toBe("zh-CN");
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("lang", "zh-CN");
+    await expect(page.getByRole("heading", { name: /你睡着以后/ })).toBeVisible();
+  });
+});
+
+test("migrates a legacy local language preference into the cookie", async ({ page, context }) => {
+  await page.addInitScript(() => window.localStorage.setItem("night-shift-locale", "en"));
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: /When you fall asleep/ })).toBeVisible();
+  expect((await context.cookies()).find((cookie) => cookie.name === "night-shift-locale")?.value).toBe("en");
+});
+
+test("starts an unopened case after returning from a campaign with progress", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /CASE 002/ }).click();
+  await page.getByRole("button", { name: /开始第 002 宗案件/ }).click();
+  await page.getByRole("button", { name: "继续" }).click();
+  await page.getByRole("button", { name: "继续" }).click();
+  await page.getByRole("button", { name: /进入事务所/ }).click();
+
+  await page.getByRole("button", { name: /夜班侦探 NIGHT SHIFT/ }).click();
+  await page.getByRole("button", { name: /CASE 001/ }).click();
+  await page.getByRole("button", { name: /开始第 001 宗案件/ }).click();
+  await expect(page.getByRole("heading", { name: "你们从未同时醒着。" })).toBeVisible();
+});
+
+test("plays the first case in English and preserves the language preference", async ({ page, context }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /ENGLISH/ }).click();
   await expect(page.getByRole("button", { name: /Begin Case 001/ })).toBeVisible();
@@ -71,6 +241,7 @@ test("plays the first case in English and preserves the language preference", as
   await expect(page.getByRole("heading", { name: "The Last Tram at 00:43" })).toBeVisible();
   await expectNoVisibleHan(page);
   await expect(page.evaluate(() => localStorage.getItem("night-shift-locale"))).resolves.toBe("en");
+  expect((await context.cookies()).find((cookie) => cookie.name === "night-shift-locale")?.value).toBe("en");
 });
 
 test("keeps the English first-night handoff usable at 390 × 844", async ({ page }) => {
@@ -94,7 +265,7 @@ test("keeps the English first-night handoff usable at 390 × 844", async ({ page
 async function reachFinalDecision(page: import("@playwright/test").Page) {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
-  await page.getByRole("button", { name: /跳到真结局条件/ }).click();
+  await runDemoShortcut(page, /跳到真结局条件/);
   await page.getByRole("button", { name: /去站台等一辆被否认的车/ }).click();
   await page.getByRole("button", { name: /今晚交给你了/ }).click();
   await page.getByRole("button", { name: /跳到清晨/ }).click();
@@ -105,7 +276,7 @@ test("starts a case and reaches the first morning report", async ({ page }) => {
   await openFirstNight(page);
   await expect(page.locator(".handoff-portrait img")).toHaveAttribute("src", /lin-du-handoff-portrait-v1/);
   await expect(page.locator(".handoff-docket")).toContainText("纸张的证词");
-  await expect(page.locator(".handoff-docket")).toContainText("侧照灯 · 灯港旧票据工坊");
+  await expect(page.locator(".handoff-docket")).toContainText("提灯 · 灯港旧票据工坊");
   await expectNoOverlap(page.locator(".scene-copy"), page.locator(".handoff-portrait"));
   await expectNoOverlap(page.locator(".handoff-docket"), page.locator(".handoff-portrait"));
   await expect(page.getByText(/可能惊动 · 错页登记处/)).toBeVisible();
@@ -172,7 +343,7 @@ test("rest intention requests an AI note only after explicit consent", async ({ 
   expect(requestBody).toMatchObject({
     intention,
     destination: "灯港旧票据工坊",
-    preparation: "侧照灯",
+    preparation: "提灯",
     detectiveName: "林渡",
   });
   expect(requestBody).not.toHaveProperty("sleepData");
@@ -250,6 +421,7 @@ test("anchors the desktop handoff and resets long-view scroll positions", async 
   await expect.poll(() => page.evaluate(() => getComputedStyle(document.activeElement!).outlineStyle)).toBe("solid");
 
   await page.getByRole("button", { name: "收藏", exact: true }).click();
+  await expect(page.locator(".collection-page")).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, 1200));
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1000);
   await page.getByRole("button", { name: "收藏", exact: true }).click();
@@ -263,7 +435,7 @@ test("anchors the desktop handoff and resets long-view scroll positions", async 
 test("keeps returned postcards in the journey album", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
-  await page.getByRole("button", { name: /03 没有退房的307/ }).click();
+  await runDemoShortcut(page, /03 没有退房的307/);
   await page.getByRole("button", { name: /收藏/ }).click();
 
   await expect(page.getByText("灯港拒收件")).toBeVisible();
@@ -284,7 +456,7 @@ test("keeps returned postcards in the journey album", async ({ page }) => {
   await expect(page.getByText("让错字继续保护地址")).toBeVisible();
   await expect(page.getByRole("heading", { name: "票根灯蕨" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "四十三日夜香" })).toBeVisible();
-  await page.getByRole("button", { name: "档案" }).click();
+  await page.getByRole("button", { name: "档案", exact: true }).click();
   await expect(page.getByText("雾灯城分区志")).toBeVisible();
   await expect(page.getByRole("heading", { name: "灯港区" })).toBeVisible();
   await expect(page.locator(".district-entry.unlocked")).toHaveCount(1);
@@ -295,10 +467,162 @@ test("keeps returned postcards in the journey album", async ({ page }) => {
   await expect(page.locator(".person-dossier.locked")).toHaveCount(3);
 });
 
+test("keeps the desktop collection continuous while putting core evidence first", async ({ page }) => {
+  await openMintableCollection(page);
+  const archiveIndex = page.getByRole("navigation", { name: "收藏档案分类" });
+  await expect(archiveIndex).toBeVisible();
+  await expectMinimumTapTargets(archiveIndex.locator("button"));
+  await expect(page.getByRole("button", { name: /核心物证/ })).toHaveAttribute("aria-pressed", "true");
+
+  const [evidence, journey, city, pocket] = await Promise.all([
+    page.locator("#collection-core-evidence").boundingBox(),
+    page.locator("#collection-returned-nights").boundingBox(),
+    page.locator("#collection-city-echoes").boundingBox(),
+    page.locator("#collection-pocket-drawer").boundingBox(),
+  ]);
+  expect(evidence).not.toBeNull();
+  expect(journey).not.toBeNull();
+  expect(city).not.toBeNull();
+  expect(pocket).not.toBeNull();
+  expect(evidence!.y).toBeLessThan(journey!.y);
+  expect(journey!.y).toBeLessThan(city!.y);
+  expect(city!.y).toBeLessThan(pocket!.y);
+  await expect(page.locator(".collection-section")).toHaveCount(9);
+  expect(await page.locator(".collection-section").evaluateAll(
+    (sections) => sections.every((section) => getComputedStyle(section).display !== "none"),
+  )).toBe(true);
+  await expectNoPageOverflow(page);
+});
+
+test("keeps the Injective keepsake desk honest and responsive when deployment is unconfigured", async ({ page }) => {
+  await page.route("**/api/injective/mint-authorization", async (route) => {
+    if (route.request().method() !== "GET") return route.continue();
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        configured: false,
+        chainId: 1439,
+        chainName: "Injective EVM Testnet",
+        rpcUrl: "https://k8s.testnet.json-rpc.injective.network/",
+        explorerUrl: "https://testnet.blockscout.injective.network",
+      }),
+    });
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openMintableCollection(page);
+  await expect(page.locator(".collectible-card.locked .collectible-mint-trigger")).toHaveCount(0);
+  const mintTrigger = page.getByRole("button", { name: "封进 Injective 链上档案" }).first();
+  await mintTrigger.click();
+
+  const dialog = page.getByRole("dialog", { name: "把这件夜班藏品封进链上档案" });
+  await expect(dialog).toBeVisible();
+  await expectDialogLifecycle(page, dialog);
+  await expect(dialog).toContainText("链上档案尚未开门");
+  await expect(dialog).toContainText("本地收藏和主线不受影响");
+  await expectNoPageOverflow(page);
+  await expectMinimumTapTargets(dialog.getByRole("button"));
+  const mobileGeometry = await dialog.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return {
+      width: rect.width,
+      scrollWidth: element.scrollWidth,
+      clientWidth: element.clientWidth,
+      maxHeight: Number.parseFloat(getComputedStyle(element).maxHeight),
+    };
+  });
+  expect(mobileGeometry.width).toBeGreaterThanOrEqual(380);
+  expect(mobileGeometry.width).toBeLessThanOrEqual(390);
+  expect(mobileGeometry.scrollWidth).toBe(mobileGeometry.clientWidth);
+
+  await page.setViewportSize({ width: 820, height: 1180 });
+  await expect.poll(() => dialog.evaluate((element) => getComputedStyle(element).gridTemplateColumns)).not.toBe("none");
+  await expectNoPageOverflow(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const desktopWidth = await dialog.evaluate((element) => element.getBoundingClientRect().width);
+  expect(desktopWidth).toBeLessThanOrEqual(960);
+  expect(desktopWidth).toBeGreaterThanOrEqual(900);
+
+  await dialog.getByRole("button", { name: "关闭链上归档" }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.body).overflow)).not.toBe("hidden");
+  await expect(mintTrigger).toBeFocused();
+});
+
+test("stores an Injective explorer receipt after the wallet finds an existing mint", async ({ page }) => {
+  const wallet = "0x2222222222222222222222222222222222222222";
+  const contract = "0x1111111111111111111111111111111111111111";
+  const explorerUrl = `https://testnet.blockscout.injective.network/token/${contract}/instance/7`;
+  await page.addInitScript((address) => {
+    const provider = {
+      request: async ({ method }: { method: string }) => {
+        if (method === "eth_requestAccounts" || method === "eth_accounts") return [address];
+        if (method === "eth_chainId") return "0x59f";
+        if (method === "wallet_switchEthereumChain") return null;
+        throw new Error(`Unexpected wallet method: ${method}`);
+      },
+    };
+    (window as Window & { ethereum?: typeof provider }).ethereum = provider;
+  }, wallet);
+  await page.route("**/api/injective/mint-authorization", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          configured: true,
+          chainId: 1439,
+          chainName: "Injective EVM Testnet",
+          rpcUrl: "https://k8s.testnet.json-rpc.injective.network/",
+          explorerUrl: "https://testnet.blockscout.injective.network",
+          contractAddress: contract,
+        }),
+      });
+      return;
+    }
+    const request = route.request().postDataJSON();
+    expect(request).toMatchObject({ recipient: wallet, campaignId: "case-001" });
+    expect(request.requestId).toEqual(expect.any(String));
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        status: "already-minted",
+        campaignId: request.campaignId,
+        collectibleId: request.collectibleId,
+        recipient: wallet,
+        tokenId: "7",
+        explorerUrl,
+        contractAddress: contract,
+        chainId: 1439,
+      }),
+    });
+  });
+
+  await openMintableCollection(page);
+  const trigger = page.getByRole("button", { name: "封进 Injective 链上档案" }).first();
+  await trigger.click();
+  const dialog = page.getByRole("dialog", { name: "把这件夜班藏品封进链上档案" });
+  await dialog.getByRole("button", { name: "连接钱包，准备归档" }).click();
+  await expect(dialog).toContainText("0x2222…2222");
+  await dialog.getByRole("button", { name: "领取签章并铸造" }).click();
+  await expect(dialog).toContainText("ARCHIVE RECEIPT · TOKEN #7");
+  await expect(dialog.getByRole("link", { name: /在 Injective 浏览器查看回执/ })).toHaveAttribute("href", explorerUrl);
+  const savedReceipts = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-injective-mints-v1") ?? "{}"));
+  expect(Object.values(savedReceipts)).toHaveLength(1);
+  expect(JSON.stringify(savedReceipts)).not.toContain("private");
+
+  await dialog.getByRole("button", { name: "收好回执" }).click();
+  await expect(page.getByRole("button", { name: "此浏览器已有链上回执" }).first()).toBeVisible();
+  await page.reload();
+  await page.getByRole("button", { name: "收藏", exact: true }).click();
+  await expect(page.getByRole("button", { name: "此浏览器已有链上回执" }).first()).toBeVisible();
+});
+
 test("returns a prior society answer in a later letter", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
-  await page.getByRole("button", { name: /03 没有退房的307/ }).click();
+  await runDemoShortcut(page, /03 没有退房的307/);
   await page.getByRole("button", { name: /替307号房完成退房/ }).click();
   await page.getByRole("button", { name: /今晚交给你了/ }).click();
   await page.getByRole("button", { name: /跳到清晨/ }).click();
@@ -364,7 +688,7 @@ test("restores and settles a real night after reload", async ({ page }) => {
 test("builds a core inference by connecting two evidence cards", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
-  await page.getByRole("button", { name: /解锁完整案件板/ }).click();
+  await runDemoShortcut(page, /解锁完整案件板/);
   await expect(page.getByRole("region", { name: "线索索引" })).toContainText("12 份档案 · 3 条未结线");
   await expect(page.locator(".board-node.checkable")).toHaveCount(6);
   await expect(page.locator(".clue-index-track i.checkable")).toHaveCount(6);
@@ -435,12 +759,14 @@ test("builds a core inference by connecting two evidence cards", async ({ page }
 test("shares one clue as a QR deep link", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
-  await page.getByRole("button", { name: /解锁完整案件板/ }).click();
+  await runDemoShortcut(page, /解锁完整案件板/);
   await page.getByRole("button", { name: /打开证物档案：四十三天/ }).click();
-  await page.getByRole("button", { name: /送给好友/ }).click();
+  const shareTrigger = page.getByRole("button", { name: /送给好友/ });
+  await shareTrigger.click();
 
   const dialog = page.getByRole("dialog", { name: /把「四十三天」/ });
   await expect(dialog).toBeVisible();
+  await expectDialogLifecycle(page, dialog);
   await expect(dialog.getByText(/不会附带你的夜班进度/)).toBeVisible();
   await expect(dialog.getByLabel("好友线索链接")).toHaveValue(`${new URL(page.url()).origin}/?case=case-001&clue=flower-cycle`);
   await expect(dialog.getByRole("img", { name: /分享线索「四十三天」的二维码/ })).toHaveAttribute("src", /^data:image\/png;base64,/);
@@ -448,6 +774,7 @@ test("shares one clue as a QR deep link", async ({ page }) => {
   await expect(dialog.getByRole("button", { name: "链接已复制" })).toBeVisible();
   await dialog.getByRole("button", { name: "关闭线索分享" }).click();
   await expect(dialog).toHaveCount(0);
+  await expect(shareTrigger).toBeFocused();
 });
 
 test("receives a friend clue from a validated query without advancing the case", async ({ page }) => {
@@ -508,9 +835,10 @@ test("rejects an unknown friend clue without starting a save", async ({ page }) 
 test("remembers a hand-arranged evidence desk after reload", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
-  await page.getByRole("button", { name: /解锁完整案件板/ }).click();
+  await runDemoShortcut(page, /解锁完整案件板/);
   await expect(page.locator(".demo-drawer")).toHaveCount(0);
   const handle = page.locator('.react-flow__node[data-id="ticket-date"] .board-node-drag-handle');
+  await handle.scrollIntoViewIfNeeded();
   const box = await handle.boundingBox();
   expect(box).not.toBeNull();
   await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
@@ -608,29 +936,105 @@ test("switches to the rain-radio campaign and completes its five-night story", a
   await expect(page.getByRole("button", { name: /继续当前案件/ })).toBeVisible();
 });
 
-test("restores a real Blackwater Creek expedition after reload and settles it once", async ({ page }) => {
+test("switches to the thirteenth-loaf campaign and completes its five-night story", async ({ page }) => {
+  const reportTitles = ["柜中多出的一只", "没有第十三名烘焙师", "火从炉外开始", "整座街区保管一块酵母", "把一份归还给无人"];
   await page.goto("/");
   await page.getByRole("button", { name: /CASE 003/ }).click();
   await page.getByRole("button", { name: /开始第 003 宗案件/ }).click();
+  await page.getByRole("button", { name: "继续" }).click();
+  await page.getByRole("button", { name: "继续" }).click();
+  await page.getByRole("button", { name: /进入事务所/ }).click();
+  await page.getByRole("button", { name: /守着街边保温柜/ }).click();
 
-  const bootlegger = page.locator("article", { hasText: "波士顿私酒贩小队" });
-  await bootlegger.getByRole("button", { name: /以此身份进入山谷/ }).click();
-  await page.locator(".sandbox-map").getByRole("button", { name: /08 卡莫迪农场/ }).click();
-  const negotiation = page.locator("article", { hasText: "同达米恩谈一笔更大的生意" });
-  await negotiation.getByRole("button", { name: "安排今晚调查" }).click();
-  await page.getByRole("button", { name: "真实夜班" }).click();
-  await page.getByRole("button", { name: /今晚交给调查队/ }).click();
+  for (let chapter = 1; chapter <= 5; chapter += 1) {
+    if (chapter > 1) {
+      await page.getByRole("button", { name: /^今晚$/ }).click();
+      await page.getByRole("button", { name: /全部收起，不拆/ }).click();
+      await page.locator(".choice-list .choice").first().click();
+    }
+    await page.getByRole("button", { name: /今晚交给你了/ }).click();
+    await page.getByRole("button", { name: /跳到清晨/ }).click();
+    await expect(page.locator(".report-hero").getByRole("heading", { name: reportTitles[chapter - 1] })).toBeVisible();
+    await expect(page.locator(".report-hero-art")).toHaveAttribute("src", /cases\/thirteenth-loaf\/headers\/morning-report-v1/);
+    await page.getByRole("button", { name: chapter === 5 ? /做出最终决定/ : /整理线索，准备下一夜/ }).click();
+  }
 
-  await expect(page.getByRole("heading", { name: "同达米恩谈一笔更大的生意" })).toBeVisible();
-  await page.reload();
-  await expect(page.getByRole("heading", { name: "同达米恩谈一笔更大的生意" })).toBeVisible();
-  await expect(page.getByRole("button", { name: /我回来了，拆开晨报/ })).toBeVisible();
-  await page.getByRole("button", { name: /我回来了，拆开晨报/ }).click();
-  await expect(page.getByText("昨夜调查完成")).toBeVisible();
-  await expect(page.getByText("每周驶向波士顿的货单")).toBeVisible();
-  await page.reload();
-  await expect(page.getByText("昨夜调查完成")).toBeVisible();
-  await expect(page.getByText("每周驶向波士顿的货单")).toHaveCount(1);
+  await expect(page.getByRole("heading", { name: /房契还给十二人以后/ })).toBeVisible();
+  await expect(page.locator(".ending-background")).toHaveAttribute("src", /cases\/thirteenth-loaf\/headers\/ending-tableau-v1/);
+  await page.getByRole("button", { name: /把火灾报告贴满全城/ }).click();
+  await expect(page.getByRole("heading", { name: "把火灾报告贴满全城" })).toBeVisible();
+  await expect(page.getByText(/第十三只面包仍用空白纸包着/)).toBeVisible();
+});
+
+test.describe("tablet portrait 820x1180", () => {
+  test.use({ viewport: { width: 820, height: 1180 } });
+
+  test("keeps the case board and inference desk in one touch-scroll flow", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: /DEMO MODE/ }).click();
+    await runDemoShortcut(page, /解锁完整案件板/);
+    await expect(page.locator(".demo-drawer")).toHaveCount(0);
+
+    await expect(page.locator(".board-workspace")).toHaveCSS("flex-direction", "column");
+    await expect(page.locator(".board-flow .react-flow__pane")).toHaveCSS("touch-action", "pan-y");
+    await expect(page.locator(".mobile-board-hint")).toBeVisible();
+    await expect(page.locator(".desktop-board-hint")).toBeHidden();
+    await expectNoPageOverflow(page);
+
+    const [shell, flow, relation] = await Promise.all([
+      page.locator(".board-shell").boundingBox(),
+      page.locator(".board-flow").boundingBox(),
+      page.locator(".relation-panel").boundingBox(),
+    ]);
+    expect(shell).not.toBeNull();
+    expect(flow).not.toBeNull();
+    expect(relation).not.toBeNull();
+    expect(shell!.width).toBeGreaterThan(780);
+    expect(flow!.width).toBeGreaterThan(750);
+    expect(relation!.width).toBeGreaterThan(760);
+    expect(relation!.y - (shell!.y + shell!.height)).toBeLessThanOrEqual(24);
+    expect(await page.locator(".board-node-drag-handle").evaluateAll(
+      (handles) => handles.every((handle) => getComputedStyle(handle).display === "none"),
+    )).toBe(true);
+
+    await page.locator(".relation-panel").scrollIntoViewIfNeeded();
+    await expect(page.getByRole("region", { name: "联合推理操作台" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /还需选择 2 件证物/ })).toBeVisible();
+    const cipherDisclosure = page.locator(".board-cipher-disclosure");
+    await expect(cipherDisclosure).not.toHaveAttribute("open", "");
+    await expect(cipherDisclosure.getByText("可选解密")).toBeVisible();
+    const [workspaceBox, cipherBox] = await Promise.all([
+      page.locator(".board-workspace").boundingBox(),
+      cipherDisclosure.boundingBox(),
+    ]);
+    expect(workspaceBox).not.toBeNull();
+    expect(cipherBox).not.toBeNull();
+    expect(cipherBox!.y).toBeGreaterThanOrEqual(workspaceBox!.y + workspaceBox!.height - 1);
+    await page.locator(".board-cipher-disclosure > summary").click();
+    await expect(page.locator(".cipher-desk")).toBeVisible();
+    await expectNoPageOverflow(page);
+  });
+
+  test("focuses one collection drawer at a time and keeps evidence first", async ({ page }) => {
+    await openMintableCollection(page);
+    const archiveIndex = page.getByRole("navigation", { name: "收藏档案分类" });
+    await expect(archiveIndex).toBeVisible();
+    await expectMinimumTapTargets(archiveIndex.locator("button"));
+    await expect(page.locator("#collection-core-evidence")).toBeVisible();
+    await expect(page.locator("#collection-returned-nights")).toBeHidden();
+    await expect(page.locator("#collection-city-echoes")).toBeHidden();
+    await expect(page.locator("#collection-pocket-drawer")).toBeHidden();
+
+    await page.getByRole("button", { name: /夜班归来/ }).click();
+    await expect(page.locator("#collection-returned-nights")).toBeVisible();
+    await expect(page.locator(".night-greenhouse")).toBeVisible();
+    await expect(page.locator("#collection-core-evidence")).toBeHidden();
+    await page.getByRole("button", { name: /城市回声/ }).click();
+    await expect(page.locator("#collection-city-echoes")).toBeVisible();
+    await expect(page.locator(".city-watch-ledger")).toBeVisible();
+    await expect(page.locator("#collection-returned-nights")).toBeHidden();
+    await expectNoPageOverflow(page);
+  });
 });
 
 test.describe("mobile 390x844", () => {
@@ -639,53 +1043,20 @@ test.describe("mobile 390x844", () => {
   test("switches campaign cards without overflow on the landing page", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator(".campaign-shelf")).toBeVisible();
+    await expect(page.locator(".featured-case")).toContainText("零点四十三分的末班车");
     await expectMinimumTapTargets(page.locator(".campaign-shelf button"));
     await page.getByRole("button", { name: /CASE 002/ }).click();
     await expect(page.getByRole("button", { name: /开始第 002 宗案件/ })).toBeVisible();
     await expectNoPageOverflow(page);
+    await page.getByRole("button", { name: /CASE 003/ }).click();
+    await expect(page.getByRole("button", { name: /开始第 003 宗案件/ })).toBeVisible();
+    await expect(page.getByRole("img", { name: /林渡站在夜班事务所门边/ })).toHaveAttribute(
+      "src",
+      /cases\/thirteenth-loaf\/headers\/shift-handoff-v1/,
+    );
+    await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /CASE 001/ }).click();
     await expect(page.getByRole("button", { name: /开始第 001 宗案件/ })).toBeVisible();
-  });
-
-  test("plays the Blackwater Creek bootlegger route through a stateful ending", async ({ page }) => {
-    await page.goto("/");
-    await page.getByRole("button", { name: /CASE 003/ }).click();
-    await page.getByRole("button", { name: /开始第 003 宗案件/ }).click();
-
-    const bootlegger = page.locator("article", { hasText: "波士顿私酒贩小队" });
-    await bootlegger.getByRole("button", { name: /以此身份进入山谷/ }).click();
-    await page.getByRole("button", { name: /打开睡眠硬件中心/ }).click();
-    await page.getByRole("button", { name: /静默枕/ }).click();
-    await page.getByRole("button", { name: /授权并连接 静默枕/ }).click();
-    await page.getByRole("button", { name: "关闭", exact: true }).click();
-    await page.locator(".sandbox-map").getByRole("button", { name: /08 卡莫迪农场/ }).click();
-
-    const negotiation = page.locator("article", { hasText: "同达米恩谈一笔更大的生意" });
-    await negotiation.getByRole("button", { name: "安排今晚调查" }).click();
-    await expect(page.getByRole("heading", { name: "把这一程交给夜班。" })).toBeVisible();
-    await expectNoPageOverflow(page);
-    await page.getByRole("button", { name: /今晚交给调查队/ }).click();
-    await expect(page.getByRole("heading", { name: "同达米恩谈一笔更大的生意" })).toBeVisible();
-    await expect(page.locator(".sleep-live-telemetry")).toContainText("静默枕正在记录");
-    await expectNoPageOverflow(page);
-    await page.getByRole("button", { name: /跳到清晨/ }).click();
-    await expect(page.getByText("昨夜调查完成")).toBeVisible();
-    await expect(page.getByText("每周驶向波士顿的货单")).toBeVisible();
-    await expect(page.locator(".sleep-morning-receipt")).toContainText("静默枕留下的一夜");
-    await expectNoPageOverflow(page);
-    await page.getByRole("button", { name: /归档晨报，准备下一夜/ }).click();
-    await page.getByRole("navigation", { name: "黑水溪卷宗导航" }).getByRole("button", { name: /收场/ }).click();
-    await expect(page.getByRole("heading", { name: "接管威士忌生意" })).toBeVisible();
-
-    await page.getByRole("button", { name: "以此收场" }).click();
-    await expect(page.getByRole("heading", { name: "接管威士忌生意" })).toBeVisible();
-    await expect(page.getByText(/原作者 Scott Dorward/)).toBeVisible();
-    await expectNoPageOverflow(page);
-
-    await page.getByRole("button", { name: "重看证物" }).click();
-    await expect(page.getByRole("heading", { name: "证物与展示材料" })).toBeVisible();
-    await page.getByRole("navigation", { name: "黑水溪卷宗导航" }).getByRole("button", { name: /收场/ }).click();
-    await expect(page.getByRole("heading", { name: "接管威士忌生意" })).toBeVisible();
   });
 
   test("keeps the first-night loop touchable without page overflow", async ({ page }) => {
@@ -704,6 +1075,15 @@ test.describe("mobile 390x844", () => {
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /跳到清晨/ }).click();
     await expect(page.getByText("昨夜调查完成")).toBeVisible();
+    const reportArchive = page.locator(".report-archive-details");
+    await expect(reportArchive).not.toHaveAttribute("open", "");
+    await expect(reportArchive.getByText("可选详读")).toBeVisible();
+    await expect(page.locator(".city-watch-report")).toBeHidden();
+    const compactReportHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+    expect(compactReportHeight).toBeLessThan(6000);
+    await page.getByRole("button", { name: /整理线索，准备下一夜/ }).scrollIntoViewIfNeeded();
+    await expect(page.getByRole("button", { name: /整理线索，准备下一夜/ })).toBeVisible();
+    await page.locator(".report-archive-details > summary").click();
     await expect(page.locator(".city-watch-report")).toBeVisible();
     await expect(page.locator(".wake-echo-report")).toContainText("纸纤维里的第二场雨");
     await expectNoPageOverflow(page);
@@ -715,6 +1095,8 @@ test.describe("mobile 390x844", () => {
     await openFirstNight(page);
     const intention = "x".repeat(160);
     await page.getByLabel("放下纸条").fill(intention);
+    await page.getByLabel("放下纸条").press("Shift+D");
+    await expect(page.locator(".demo-drawer")).toHaveCount(0);
     await expect(page.getByRole("button", { name: /请 AI 替林渡选择晨间短笺风格/ })).toHaveAttribute("aria-pressed", "false");
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: /今晚交给你了/ }).click();
@@ -730,7 +1112,11 @@ test.describe("mobile 390x844", () => {
     await expect(hardwareEntry).toContainText("睡眠设备");
     await expectMinimumTapTargets(hardwareEntry);
     await hardwareEntry.click();
-    await expect(page.getByRole("dialog", { name: /把一夜的微光/ })).toBeVisible();
+    const hardwareDialog = page.getByRole("dialog", { name: /把一夜的微光/ });
+    await expect(hardwareDialog).toBeVisible();
+    await expectDialogLifecycle(page, hardwareDialog);
+    await page.keyboard.press("Shift+D");
+    await expect(page.locator(".demo-drawer")).toHaveCount(0);
     await expect(page.locator(".sleep-device-grid img")).toHaveCount(4);
     await expectMinimumTapTargets(page.locator(".sleep-source-tabs button, .sleep-device-grid > button, .sleep-hardware-panel-header > button"));
     await expectNoPageOverflow(page);
@@ -739,22 +1125,41 @@ test.describe("mobile 390x844", () => {
     await expect(page.getByText("连接完成，可以回到游戏了")).toBeVisible();
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: "关闭", exact: true }).click();
+    await expect(hardwareDialog).toHaveCount(0);
     await expect(page.locator(".sleep-handoff-card")).toContainText("静默枕已待命");
+    await expect(hardwareEntry).toBeFocused();
   });
 
-  test("opens long collections and connects evidence on a phone", async ({ page }) => {
+  test("switches focused collection drawers and connects evidence on a phone", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("button", { name: /DEMO MODE/ }).click();
-    await page.getByRole("button", { name: /04 地图上被刮掉的线/ }).click();
+    await runDemoShortcut(page, /04 地图上被刮掉的线/);
     await page.getByRole("button", { name: "收藏", exact: true }).click();
+    await expect(page.locator(".collection-page")).toBeVisible();
+    const archiveIndex = page.getByRole("navigation", { name: "收藏档案分类" });
+    await expectMinimumTapTargets(archiveIndex.locator("button"));
+    await expect(page.locator("#collection-core-evidence")).toBeVisible();
+    await expect(page.locator(".night-greenhouse")).toBeHidden();
+    await expect(page.getByRole("button", { name: /核心物证/ })).toHaveAttribute("aria-pressed", "true");
+    expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThan(5200);
+    await page.getByRole("button", { name: /夜班归来/ }).click();
     await expect(page.getByText("雾灯温室")).toBeVisible();
+    await expect(page.locator("#collection-core-evidence")).toBeHidden();
+    await page.getByRole("button", { name: /城市回声/ }).click();
+    await expect(page.getByText("城市人情簿")).toBeVisible();
+    await expect(page.locator(".night-greenhouse")).toBeHidden();
+    await page.getByRole("button", { name: /口袋小物/ }).click();
+    await expect(page.getByText("口袋抽屉")).toBeVisible();
+    await expect(page.getByText("城市人情簿")).toBeHidden();
+    await page.getByRole("button", { name: /核心物证/ }).click();
+    await expect(page.locator("#collection-core-evidence")).toBeVisible();
     await expectNoPageOverflow(page);
     await page.getByRole("button", { name: "档案", exact: true }).click();
     await expect(page.getByText("雾灯城分区志")).toBeVisible();
     await expectNoPageOverflow(page);
 
     await page.getByRole("button", { name: /DEMO/ }).click();
-    await page.getByRole("button", { name: /解锁完整案件板/ }).click();
+    await runDemoShortcut(page, /解锁完整案件板/);
     await expect(page.locator(".demo-drawer")).toHaveCount(0);
     await expect(page.locator(".relation-panel")).toHaveCount(0);
     await expect(page.locator(".core-inference-dock")).toBeVisible();

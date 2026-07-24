@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Manrope, Newsreader } from "next/font/google";
 import { headers } from "next/headers";
+import { RequestLocaleProvider } from "@/src/i18n/request-locale-provider";
+import { getRequestLocale } from "@/src/i18n/server";
 import "./globals.css";
 
 const manrope = Manrope({ variable: "--font-manrope", subsets: ["latin"] });
@@ -23,6 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="zh-CN"><body className={`${manrope.variable} ${newsreader.variable}`}>{children}</body></html>;
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const requestLocale = await getRequestLocale();
+  return <html lang={requestLocale}><body className={`${manrope.variable} ${newsreader.variable}`}><RequestLocaleProvider initialLocale={requestLocale}>{children}</RequestLocaleProvider></body></html>;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { getCampaign } from "@/src/content/campaigns/registry";
 import type { CampaignManifest } from "@/src/content/campaigns/types";
 import {
@@ -9,10 +9,13 @@ import {
   isAppLocale,
   localizeCampaign,
   localizeValue,
+  localeCookieFromHeader,
   LOCALE_STORAGE_KEY,
+  serializeLocaleCookie,
   translateText,
   type AppLocale,
 } from "./core";
+import { useRequestLocale } from "./request-locale-provider";
 
 interface I18nContextValue {
   locale: AppLocale;
@@ -24,28 +27,15 @@ interface I18nContextValue {
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
-const localeChangeEvent = "night-shift-locale-change";
-
-function subscribeLocale(onStoreChange: () => void) {
-  window.addEventListener("storage", onStoreChange);
-  window.addEventListener(localeChangeEvent, onStoreChange);
-  return () => {
-    window.removeEventListener("storage", onStoreChange);
-    window.removeEventListener(localeChangeEvent, onStoreChange);
-  };
-}
-
-function getLocaleSnapshot(): AppLocale {
-  const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY);
-  return isAppLocale(stored) ? stored : DEFAULT_LOCALE;
-}
 
 export function I18nProvider({ campaignId, children }: { campaignId: string; children: ReactNode }) {
-  const preferredLocale = useSyncExternalStore(subscribeLocale, getLocaleSnapshot, () => DEFAULT_LOCALE);
+  const requestLocale = useRequestLocale();
+  const [preferredLocale, setPreferredLocale] = useState<AppLocale>(requestLocale);
   const locale = campaignSupportsLocale(campaignId, preferredLocale) ? preferredLocale : DEFAULT_LOCALE;
   const setLocale = useCallback((nextLocale: AppLocale) => {
     window.localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale);
-    window.dispatchEvent(new Event(localeChangeEvent));
+    document.cookie = serializeLocaleCookie(nextLocale);
+    setPreferredLocale(nextLocale);
   }, []);
   const t = useCallback((source: string) => translateText(source, locale), [locale]);
   const localize = useCallback(<T,>(value: T) => localizeValue(value, locale), [locale]);
@@ -54,6 +44,39 @@ export function I18nProvider({ campaignId, children }: { campaignId: string; chi
   useEffect(() => {
     document.documentElement.lang = locale;
   }, [locale]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const cookieLocale = localeCookieFromHeader(document.cookie);
+    const storedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY);
+    const legacyLocale = isAppLocale(storedLocale) ? storedLocale : undefined;
+
+    if (cookieLocale) {
+      if (legacyLocale !== cookieLocale) window.localStorage.setItem(LOCALE_STORAGE_KEY, cookieLocale);
+      return;
+    }
+    if (!legacyLocale) return;
+
+    document.cookie = serializeLocaleCookie(legacyLocale);
+    if (legacyLocale !== requestLocale) {
+      queueMicrotask(() => {
+        if (!cancelled) setPreferredLocale(legacyLocale);
+      });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [requestLocale]);
+
+  useEffect(() => {
+    const syncLocale = (event: StorageEvent) => {
+      if (event.key !== LOCALE_STORAGE_KEY || !isAppLocale(event.newValue)) return;
+      document.cookie = serializeLocaleCookie(event.newValue);
+      setPreferredLocale(event.newValue);
+    };
+    window.addEventListener("storage", syncLocale);
+    return () => window.removeEventListener("storage", syncLocale);
+  }, []);
 
   const value = useMemo<I18nContextValue>(() => ({
     locale,

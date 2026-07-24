@@ -1,0 +1,427 @@
+import { z } from "zod";
+import { LAST_TRAM_CAMPAIGN_ID } from "./campaigns/last-tram";
+import { RAIN_RADIO_CAMPAIGN_ID } from "./campaigns/rain-radio";
+import { THIRTEENTH_LOAF_CAMPAIGN_ID } from "./campaigns/thirteenth-loaf";
+
+const cipherDialSchema = z.object({
+  min: z.number(),
+  max: z.number(),
+  step: z.number().positive(),
+  initial: z.number(),
+  target: z.number(),
+  precision: z.number().int().min(0).max(3),
+  mode: z.enum(["minutes", "frequency"]),
+  ariaLabel: z.string().min(1),
+  decreaseLabel: z.string().min(1),
+  increaseLabel: z.string().min(1),
+  lockLabel: z.string().min(1),
+  unit: z.string(),
+}).superRefine((dial, ctx) => {
+  if (dial.max <= dial.min) ctx.addIssue({ code: "custom", path: ["max"], message: "Dial max must exceed min" });
+  if (dial.initial < dial.min || dial.initial > dial.max) ctx.addIssue({ code: "custom", path: ["initial"], message: "Dial initial value is out of range" });
+  if (dial.target < dial.min || dial.target > dial.max) ctx.addIssue({ code: "custom", path: ["target"], message: "Dial target value is out of range" });
+});
+
+export type CipherDial = z.infer<typeof cipherDialSchema>;
+
+const cipherChallengeSchema = z.object({
+  id: z.string().min(1),
+  campaignId: z.string().min(1),
+  order: z.number().int().positive(),
+  archiveLabel: z.string().min(1),
+  title: z.string().min(1),
+  subtitle: z.string().min(1),
+  requiredClueIds: z.array(z.string().min(1)).min(1),
+  cipherLabel: z.string().min(1),
+  cipherTokens: z.array(z.string().min(1)).min(1),
+  instruction: z.string().min(1),
+  prompt: z.string().min(1),
+  answerAliases: z.array(z.string().min(1)).min(1),
+  hints: z.tuple([z.string().min(1), z.string().min(1)]),
+  revealTitle: z.string().min(1),
+  revealText: z.string().min(1),
+  dial: cipherDialSchema.optional(),
+});
+
+export type CipherChallenge = z.infer<typeof cipherChallengeSchema>;
+
+const cipherRelaySchema = z.object({
+  id: z.string().min(1),
+  archiveLabel: z.string().min(1),
+  title: z.string().min(1),
+  description: z.string().min(1),
+  instruction: z.string().min(1),
+  fragments: z.array(z.object({ id: z.string().min(1), label: z.string().min(1), note: z.string().min(1) })).min(3),
+  solutionIds: z.array(z.string().min(1)).min(3),
+  hints: z.tuple([z.string().min(1), z.string().min(1)]),
+}).superRefine((relay, ctx) => {
+  const fragmentIds = relay.fragments.map((fragment) => fragment.id);
+  if (new Set(fragmentIds).size !== fragmentIds.length) ctx.addIssue({ code: "custom", path: ["fragments"], message: "Relay fragment ids must be unique" });
+  if (new Set(relay.solutionIds).size !== relay.solutionIds.length || relay.solutionIds.length !== fragmentIds.length) {
+    ctx.addIssue({ code: "custom", path: ["solutionIds"], message: "Relay solution must contain every fragment exactly once" });
+  }
+  if (relay.solutionIds.some((fragmentId) => !fragmentIds.includes(fragmentId))) {
+    ctx.addIssue({ code: "custom", path: ["solutionIds"], message: "Relay solution references an unknown fragment" });
+  }
+});
+
+export type CipherRelay = z.infer<typeof cipherRelaySchema>;
+
+const cipherDeskSchema = z.object({
+  campaignId: z.string().min(1),
+  archiveLabel: z.string().min(1),
+  title: z.string().min(1),
+  description: z.string().min(1),
+  completionLabel: z.string().min(1),
+  completionTitle: z.string().min(1),
+  completionText: z.string().min(1),
+  relay: cipherRelaySchema,
+  challenges: z.array(cipherChallengeSchema).min(1),
+}).superRefine((desk, ctx) => {
+  const ids = new Set(desk.challenges.map((challenge) => challenge.id));
+  const orders = new Set(desk.challenges.map((challenge) => challenge.order));
+  if (ids.size !== desk.challenges.length) ctx.addIssue({ code: "custom", path: ["challenges"], message: "Cipher challenge ids must be unique" });
+  if (orders.size !== desk.challenges.length) ctx.addIssue({ code: "custom", path: ["challenges"], message: "Cipher challenge orders must be unique" });
+  if (desk.challenges.some((challenge) => challenge.campaignId !== desk.campaignId)) {
+    ctx.addIssue({ code: "custom", path: ["challenges"], message: "Cipher challenges must belong to their desk campaign" });
+  }
+});
+
+export type CipherDeskDefinition = z.infer<typeof cipherDeskSchema>;
+
+const lastTramCiphers = [
+  {
+    id: "ticket-mirror",
+    campaignId: LAST_TRAM_CAMPAIGN_ID,
+    order: 1,
+    archiveLabel: "CIPHER 01 · REVERSED PUNCH",
+    title: "倒置的剪票孔",
+    subtitle: "旧票背面只剩两组被倒放的数字。",
+    requiredClueIds: ["ticket-date", "ticket-paper"],
+    cipherLabel: "票背残码",
+    cipherTokens: ["34", "00"],
+    instruction: "检票员把整张票倒转后才会打孔。不要把它读成线路编号，要把两组数字翻回一个时刻。",
+    prompt: "这张票指向几点几分？",
+    answerAliases: ["00:43", "0043", "零点四十三分"],
+    hints: ["先交换左右两组数字。", "答案使用 24 小时时刻；城市最常否认的那个时间已经在标题里出现过。"],
+    revealTitle: "零点四十三分",
+    revealText: "剪票孔不是车次，而是一枚约定的时刻。那张昨天打印的旧票，仍在等待一班只于 00:43 抵达的车。",
+    dial: {
+      min: 0,
+      max: 59,
+      step: 1,
+      initial: 34,
+      target: 43,
+      precision: 0,
+      mode: "minutes",
+      ariaLabel: "隐藏站钟分钟刻度",
+      decreaseLabel: "把站钟向前调一分钟",
+      increaseLabel: "把站钟向后调一分钟",
+      lockLabel: "核对站钟时刻",
+      unit: "",
+    },
+  },
+  {
+    id: "florist-numbers",
+    campaignId: LAST_TRAM_CAMPAIGN_ID,
+    order: 2,
+    archiveLabel: "CIPHER 02 · FLORIST LEDGER",
+    title: "花店的无名订单",
+    subtitle: "四个数字写在每隔四十三天出现一次的花单角落。",
+    requiredClueIds: ["flower-cycle", "postcard"],
+    cipherLabel: "订单签名",
+    cipherTokens: ["13", "09", "14", "01"],
+    instruction: "米娜的旧账本把 A 记作 01、B 记作 02，依次写到 Z。把四个数字换回字母。",
+    prompt: "是谁在替这份订单保管名字？",
+    answerAliases: ["MINA", "米娜"],
+    hints: ["13 对应字母 M。", "按 A=01 的顺序，09、14、01 分别对应 I、N、A。"],
+    revealTitle: "MINA",
+    revealText: "订单没有收件地址，却一直保留同一个保管人。米娜不是花的主人；她是在替一位仍活着的人维持联络。",
+  },
+  {
+    id: "platform-chronology",
+    campaignId: LAST_TRAM_CAMPAIGN_ID,
+    order: 3,
+    archiveLabel: "CIPHER 03 · FORGOTTEN TIMETABLE",
+    title: "被刮掉的站台名",
+    subtitle: "档案馆留下六枚不按时间排列的时钟印章。",
+    requiredClueIds: ["scratched-map", "museum-tag", "ledger-clasp"],
+    cipherLabel: "时钟印章",
+    cipherTokens: ["03:26 · D", "00:43 · H", "05:00 · N", "02:43 · D", "04:12 · E", "01:17 · I"],
+    instruction: "把印章按照夜晚从早到晚排列，再依次抄下每个时刻旁的字母。",
+    prompt: "档案馆刮掉的是哪一种站台？",
+    answerAliases: ["HIDDEN", "隐藏", "隐藏站台"],
+    hints: ["最早的印章是 00:43，最晚的是 05:00。", "排序后的字母依次是 H、I、D、D、E、N。"],
+    revealTitle: "HIDDEN PLATFORM · 隐藏站台",
+    revealText: "地图上的刮痕不是删除失败，而是一条保护路线。六枚时钟印章共同指向河下那座没有编号的隐藏站台。",
+  },
+].map((challenge) => cipherChallengeSchema.parse(challenge));
+
+const rainRadioCiphers = [
+  {
+    id: "rain-frequency-lock",
+    campaignId: RAIN_RADIO_CAMPAIGN_ID,
+    order: 1,
+    archiveLabel: "SIGNAL 01 · RAIN DIAL",
+    title: "雨滴调频锁",
+    subtitle: "停电控制台留下三组刻线，雨滴占据了本该属于小数点的位置。",
+    requiredClueIds: ["radio-warm-dial", "rain-frequency"],
+    cipherLabel: "旋钮刻线",
+    cipherTokens: ["19", "27", "雨滴", "13", "MHz"],
+    instruction: "每组数字只抄最后一位；把雨滴当作小数点，单位保留为兆赫。",
+    prompt: "电台在雨中锁定了哪个频率？",
+    answerAliases: ["97.3", "97.3MHz", "九十七点三"],
+    hints: ["19、27、13 的末位分别是 9、7、3。", "把雨滴放在 7 和 3 之间：97.3 MHz。"],
+    revealTitle: "97.3 MHz · 无人频率",
+    revealText: "旋钮并没有随机漂移。雨水每次都把控制台接回九十七点三兆赫——那是四十七户证词共同使用的入口。",
+    dial: {
+      min: 96.8,
+      max: 97.8,
+      step: 0.1,
+      initial: 96.9,
+      target: 97.3,
+      precision: 1,
+      mode: "frequency",
+      ariaLabel: "雨中电台调频刻度",
+      decreaseLabel: "频率降低零点一兆赫",
+      increaseLabel: "频率升高零点一兆赫",
+      lockLabel: "锁定当前频率",
+      unit: "MHz",
+    },
+  },
+  {
+    id: "silent-call-count",
+    campaignId: RAIN_RADIO_CAMPAIGN_ID,
+    order: 2,
+    archiveLabel: "SIGNAL 02 · SILENT LEDGER",
+    title: "沉默来电的户数",
+    subtitle: "计费簿记录了一百七十一次无声来电，其中三十次只是断线后的重拨。",
+    requiredClueIds: ["mute-reel", "caller-list", "tunnel-echo"],
+    cipherLabel: "接线员算式",
+    cipherTokens: ["171 次", "− 30 次重拨", "÷ 每户 3 次"],
+    instruction: "先扣掉断线重拨；剩余来电中，每一户都恰好留下三次呼吸波形。",
+    prompt: "有多少户居民共同维持这条沉默线路？",
+    answerAliases: ["47", "四十七", "四十七户"],
+    hints: ["真正属于住户的记录共有 171 − 30 = 141 次。", "141 ÷ 3 = 47。"],
+    revealTitle: "47 户仍在回答",
+    revealText: "沉默不是空白。计费簿、呼吸波形和防空管回声共同证明，地图上被删掉的四十七户居民仍在维护这条线路。",
+  },
+  {
+    id: "relay-morse-voice",
+    campaignId: RAIN_RADIO_CAMPAIGN_ID,
+    order: 3,
+    archiveLabel: "SIGNAL 03 · RELAY TAIL",
+    title: "雨中中继的尾音",
+    subtitle: "中继箱每次归零前都会敲出五组长短不一的雨声。",
+    requiredClueIds: ["demolition-map", "relay-seal", "numbered-key"],
+    cipherLabel: "摩尔斯尾音",
+    cipherTokens: ["...-", "---", "..", "-.-.", "."],
+    instruction: "把短雨点当作点、长排水声当作划，按国际摩尔斯字母表逐组翻译。",
+    prompt: "中继箱要求我们把什么还给居民？",
+    answerAliases: ["VOICE", "声音", "话语权"],
+    hints: ["第一组 ...- 是 V，最后一组 . 是 E。", "五组字母依次是 V、O、I、C、E。"],
+    revealTitle: "VOICE · 声音",
+    revealText: "中继箱保存的不是预言，而是一项请求：别替居民完成最后一次广播，把使用公共频率的声音还给他们。",
+  },
+].map((challenge) => cipherChallengeSchema.parse(challenge));
+
+const thirteenthLoafCiphers = [
+  {
+    id: "loaf-thirteen-count",
+    campaignId: THIRTEENTH_LOAF_CAMPAIGN_ID,
+    order: 1,
+    archiveLabel: "OVEN NOTE 01 · DAILY TALLY",
+    title: "没有主人的烘焙总数",
+    subtitle: "账房把十二枚持份环和一张空白访客牌放在同一行。",
+    requiredClueIds: ["extra-loaf", "twelve-tallies", "blank-guest-share"],
+    cipherLabel: "每日烘焙算式",
+    cipherTokens: ["12 枚持份环", "+", "1 张无字访客牌"],
+    instruction: "持份环代表有主份额；访客牌虽不对应成员，仍计入每日必须完成的烘焙量。",
+    prompt: "地下公共炉每天至少要烤出多少只面包？",
+    answerAliases: ["13", "十三", "十三只"],
+    hints: ["合作社只有十二名持份人，但访客份额也必须被烤出来。", "12 + 1 = 13。"],
+    revealTitle: "13 · 多出的不是成员",
+    revealText: "第十三只面包从来不属于第十三个人。它是一项每天重新履行、任何需要者都能使用的访客份额。",
+  },
+  {
+    id: "loaf-fire-direction",
+    campaignId: THIRTEENTH_LOAF_CAMPAIGN_ID,
+    order: 2,
+    archiveLabel: "OVEN NOTE 02 · HEAT DIRECTION",
+    title: "焦痕的逆向口供",
+    subtitle: "三件物证分别保存了热量抵达的先后顺序。",
+    requiredClueIds: ["conduit-scorch", "intact-oven", "corrected-inspection"],
+    cipherLabel: "热量顺序",
+    cipherTokens: ["主管熔断", "→", "外墙碳化", "→", "炉门受热"],
+    instruction: "从最先损坏的物件读到最后受热的位置。答案不是被指控的设备，而是热量真正开始的地方。",
+    prompt: "火灾从哪一套设施开始？",
+    answerAliases: ["热力主管", "市政热力主管", "主管", "HEAT MAIN", "CONDUIT"],
+    hints: ["面包炉内部没有由内向外的裂纹。", "最先熔化的是炉桥下的市政热力主管。"],
+    revealTitle: "MUNICIPAL HEAT MAIN · 市政热力主管",
+    revealText: "熔断器、焦痕与修正页给出同一个方向：火从公共管道烧进面包房，原报告把箭头倒转了。",
+  },
+  {
+    id: "loaf-common-code",
+    campaignId: THIRTEENTH_LOAF_CAMPAIGN_ID,
+    order: 3,
+    archiveLabel: "OVEN NOTE 03 · STARTER LABEL",
+    title: "酵母罐的六格暗号",
+    subtitle: "分散酵母清册只留下六个按字母顺序编号的格子。",
+    requiredClueIds: ["starter-census", "night-bake-ledger", "courier-route"],
+    cipherLabel: "窗台编号",
+    cipherTokens: ["03", "15", "13", "13", "15", "14"],
+    instruction: "把 A 记作 01、B 记作 02，依次换回六个字母。它描述的不是某位领袖，而是酵母和劳动的保管方式。",
+    prompt: "这套夜间网络把酵母当作什么来保管？",
+    answerAliases: ["COMMON", "公共", "共有", "共同"],
+    hints: ["03、15 分别对应 C、O。", "六个字母依次是 C、O、M、M、O、N。"],
+    revealTitle: "COMMON · 共同保管",
+    revealText: "酵母不由一个人拥有或控制。分散的窗台与无负责人夜账共同证明，合作社靠共享保管而不是隐秘领袖延续。",
+  },
+].map((challenge) => cipherChallengeSchema.parse(challenge));
+
+const cipherRegistry: Record<string, CipherDeskDefinition> = {
+  [LAST_TRAM_CAMPAIGN_ID]: cipherDeskSchema.parse({
+    campaignId: LAST_TRAM_CAMPAIGN_ID,
+    archiveLabel: "NIGHT CIPHER DESK · 夜班密文台",
+    title: "城市把不能公开说的话，折进了票孔、花单和时刻表。",
+    description: "证物归档后，密文会逐段显影。答错不会扣除任何东西，提示也不影响结果。",
+    completionLabel: "ALL THREE CIPHERS FILED",
+    completionTitle: "隐藏站台已经显影",
+    completionText: "票孔、花单和时钟印章终于指向同一条被否认的路线。城市没有因此交出结论，但它再也无法声称站台不存在。",
+    relay: {
+      id: "last-tram-final-relay",
+      archiveLabel: "FINAL RELAY · 最终接线",
+      title: "把三份答案写成一封交接电报",
+      description: "林渡只留了三个字段：WHEN、WHO、WHERE。按字段顺序把已经解开的碎片接入发报机。",
+      instruction: "依次选择 WHEN（何时）、WHO（谁在维持联络）、WHERE（去哪里）。点已放入的碎片可以撤回。",
+      fragments: [
+        { id: "tram-hidden", label: "HIDDEN PLATFORM", note: "WHERE · 被档案刮掉的地点" },
+        { id: "tram-time", label: "00:43", note: "WHEN · 倒置剪票孔的时刻" },
+        { id: "tram-mina", label: "MINA", note: "WHO · 无名花单的保管人" },
+      ],
+      solutionIds: ["tram-time", "tram-mina", "tram-hidden"],
+      hints: ["第一个字段是时刻，不是人名。", "完整顺序是 WHEN → WHO → WHERE。"],
+    },
+    challenges: lastTramCiphers,
+  }),
+  [RAIN_RADIO_CAMPAIGN_ID]: cipherDeskSchema.parse({
+    campaignId: RAIN_RADIO_CAMPAIGN_ID,
+    archiveLabel: "RAIN SIGNAL LAB · 雨中信号台",
+    title: "雨把四十七户的证词，藏进频率、计费簿和摩尔斯尾音。",
+    description: "每组信号都来自已经归档的证物。调错不会损坏频率，打开提示也不会让任何声音失去分量。",
+    completionLabel: "ALL THREE SIGNALS RESTORED",
+    completionTitle: "公共频率已经显影",
+    completionText: "九十七点三兆赫、四十七户来电和中继尾音已经互相作证：这不是无人广播，而是一座街区共同维护的声音出口。",
+    relay: {
+      id: "rain-radio-final-relay",
+      archiveLabel: "FINAL RELAY · 最终接线",
+      title: "把三段信号接回公共频率",
+      description: "中继箱要求按 SENDER、CHANNEL、MESSAGE 三个字段重新发报。每份解密答案只能使用一次。",
+      instruction: "依次选择 SENDER（谁在发报）、CHANNEL（使用什么频率）、MESSAGE（要求归还什么）。点已放入的碎片可以撤回。",
+      fragments: [
+        { id: "radio-voice", label: "VOICE", note: "MESSAGE · 摩尔斯尾音的请求" },
+        { id: "radio-frequency", label: "97.3 MHz", note: "CHANNEL · 雨水锁定的频率" },
+        { id: "radio-residents", label: "47 HOUSEHOLDS", note: "SENDER · 沉默线路的居民" },
+      ],
+      solutionIds: ["radio-residents", "radio-frequency", "radio-voice"],
+      hints: ["发报格式先写发送者，再写频道。", "完整顺序是 SENDER → CHANNEL → MESSAGE。"],
+    },
+    challenges: rainRadioCiphers,
+  }),
+  [THIRTEENTH_LOAF_CAMPAIGN_ID]: cipherDeskSchema.parse({
+    campaignId: THIRTEENTH_LOAF_CAMPAIGN_ID,
+    archiveLabel: "COMMUNAL OVEN NOTES · 公共炉旁注",
+    title: "城市把所有权、火灾方向与共同劳动，藏进每日烘焙的算式里。",
+    description: "三组旁注只重排已经归档的事实。答错不会消耗物证，打开提示也不会影响关系或结局资格。",
+    completionLabel: "ALL THREE OVEN NOTES FILED",
+    completionTitle: "第十三份已经显影",
+    completionText: "十三只面包、市政热力主管和共同保管已经互相作证：这里没有失踪成员或秘密店主，只有一项被持续履行的公共份额。",
+    relay: {
+      id: "thirteenth-loaf-final-relay",
+      archiveLabel: "FINAL CHARTER · 最终章程",
+      title: "把三份答案写回修复后的合作社章程",
+      description: "何砾留下三个字段：CAUSE、OWNERS、RIGHT。每份解密答案只能使用一次。",
+      instruction: "依次选择 CAUSE（谁承担火灾责任）、OWNERS（房契归还给谁）、RIGHT（哪项权利继续无主）。点已放入的碎片可以撤回。",
+      fragments: [
+        { id: "loaf-right", label: "GUEST SHARE", note: "RIGHT · 任何需要者都可使用的访客份额" },
+        { id: "loaf-cause", label: "MUNICIPAL HEAT MAIN", note: "CAUSE · 炉桥下超压的公共设施" },
+        { id: "loaf-owners", label: "12 MEMBERS", note: "OWNERS · 名册、围裙与持份环对应的人" },
+      ],
+      solutionIds: ["loaf-cause", "loaf-owners", "loaf-right"],
+      hints: ["先写造成火灾的设施，再写恢复所有权的人。", "完整顺序是 CAUSE → OWNERS → RIGHT。"],
+    },
+    challenges: thirteenthLoafCiphers,
+  }),
+};
+
+export function getCampaignCipherDesk(campaignId: string): CipherDeskDefinition | undefined {
+  return cipherRegistry[campaignId];
+}
+
+export function getCampaignCipherChallenges(campaignId: string): readonly CipherChallenge[] {
+  return getCampaignCipherDesk(campaignId)?.challenges ?? [];
+}
+
+export function getCampaignCipherChallenge(campaignId: string, challengeId: string): CipherChallenge | undefined {
+  return getCampaignCipherChallenges(campaignId).find((challenge) => challenge.id === challengeId);
+}
+
+export function getCampaignCipherRelay(campaignId: string, relayId: string): CipherRelay | undefined {
+  const relay = getCampaignCipherDesk(campaignId)?.relay;
+  return relay?.id === relayId ? relay : undefined;
+}
+
+export function getCampaignCipherProgressIds(campaignId: string): string[] {
+  const desk = getCampaignCipherDesk(campaignId);
+  return desk ? [...desk.challenges.map((challenge) => challenge.id), desk.relay.id] : [];
+}
+
+export function isCipherUnlocked(challenge: CipherChallenge, unlockedClueIds: readonly string[]): boolean {
+  return challenge.requiredClueIds.every((clueId) => unlockedClueIds.includes(clueId));
+}
+
+export function matchesCipherAnswer(challenge: CipherChallenge, answer: string): boolean {
+  const normalized = normalizeCipherAnswer(answer);
+  return Boolean(normalized) && challenge.answerAliases.some((alias) => normalizeCipherAnswer(alias) === normalized);
+}
+
+export function isCipherRelayUnlocked(campaignId: string, solvedCipherIds: readonly string[]): boolean {
+  const challenges = getCampaignCipherChallenges(campaignId);
+  return Boolean(challenges.length) && challenges.every((challenge) => solvedCipherIds.includes(challenge.id));
+}
+
+export function matchesCipherRelay(relay: CipherRelay, fragmentIds: readonly string[]): boolean {
+  return fragmentIds.length === relay.solutionIds.length && relay.solutionIds.every((fragmentId, index) => fragmentIds[index] === fragmentId);
+}
+
+export function alignCipherDialValue(dial: CipherDial, value: number): number {
+  const clamped = Math.min(dial.max, Math.max(dial.min, value));
+  const steps = Math.round((clamped - dial.min) / dial.step);
+  return Number(Math.min(dial.max, dial.min + steps * dial.step).toFixed(dial.precision));
+}
+
+export function stepCipherDialValue(dial: CipherDial, value: number, direction: -1 | 1): number {
+  return alignCipherDialValue(dial, value + direction * dial.step);
+}
+
+export function formatCipherDialValue(dial: CipherDial, value: number): string {
+  const aligned = alignCipherDialValue(dial, value);
+  if (dial.mode === "minutes") return `00:${String(Math.round(aligned)).padStart(2, "0")}`;
+  return `${aligned.toFixed(dial.precision)}${dial.unit ? ` ${dial.unit}` : ""}`;
+}
+
+export function cipherDialAnswer(dial: CipherDial, value: number): string {
+  return formatCipherDialValue(dial, value);
+}
+
+export function getCipherDialSignal(dial: CipherDial, value: number): "silent" | "faint" | "clear" | "locked" {
+  const distanceInSteps = Math.round(Math.abs(alignCipherDialValue(dial, value) - dial.target) / dial.step);
+  if (distanceInSteps === 0) return "locked";
+  if (distanceInSteps <= 1) return "clear";
+  if (distanceInSteps <= 3) return "faint";
+  return "silent";
+}
+
+export function normalizeCipherAnswer(value: string): string {
+  return value.normalize("NFKC").trim().toUpperCase().replace(/[\s:：·.。,_，\-—/\\]+/g, "");
+}

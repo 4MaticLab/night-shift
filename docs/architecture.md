@@ -13,14 +13,11 @@
 | 案件包契约 | `src/content/campaigns/types.ts` | `CampaignManifest`、引用完整性校验与案件内容查询 |
 | 案件注册表 | `src/content/campaigns/registry.ts` | 当前三案、默认案件和合法 `campaignId` 白名单 |
 | 首案内容包 | `src/content/campaigns/last-tram.ts` | 组合既有首案模块与视觉／结局规则 |
-| 本地化核心 | `src/i18n/core.ts`、`src/i18n/provider.tsx` | 语言偏好、案件能力回退、递归内容投影和界面翻译上下文 |
+| 本地化核心 | `src/i18n/core.ts`、`src/i18n/server.ts`、`src/i18n/request-locale-provider.tsx`、`src/i18n/provider.tsx` | Cookie／请求语言协商、案件能力回退、递归内容投影和界面翻译上下文 |
 | 首案英文目录 | `src/i18n/en-catalog.ts`、`src/i18n/en-overrides.ts` | 首案完整英文覆盖与关键文学文本人工润色 |
 | 第二案内容包 | `src/content/campaigns/rain-radio.ts` | 《只在雨中播出的电台》的五夜完整内容 |
-| 第三案内容包 | `src/content/campaigns/blackwater-creek.ts` | 《黑水溪》的沙盒 manifest 与线性兼容外壳 |
-| 第三案沙盒内容 | `src/content/campaigns/blackwater-creek-data.ts` | 双入口、九地点、行动、证物、手札、人物、污染与五结局 |
-| 沙盒契约与结算 | `src/lib/sandbox/` | 地点条件／效果类型、引用校验和确定性行动／结局结算 |
-| 沙盒存档 | `src/stores/sandbox-store.ts` | 按案件隔离的世界状态，以及交接、夜间会话与晨报状态机 |
-| 沙盒案件界面 | `src/components/game/sandbox-case.tsx` | 身份开场、地点图、夜班交接／等待／晨报、档案与收场 |
+| 第三案内容包 | `src/content/campaigns/thirteenth-loaf.ts` | 《黎明前出炉的第十三个面包》的五夜完整内容 |
+| 第三案视觉包 | `src/content/thirteenth-loaf-assets.ts` | 第三案 34 张专属横幅、夜印、明信片、植物、收藏、人物与城区资产 |
 | 首案核心内容 | `src/content/case.ts` | 首案五夜章节、12 条线索、8 件藏品与固定报告文本 |
 | 随身物内容 | `src/content/preparations.ts` | 三件准备物、五夜各自的确定性环境回响 |
 | 归来明信片 | `src/content/postcards.ts` | 五夜地点、城市传闻、背面短笺与三种随身物附言 |
@@ -37,6 +34,10 @@
 | 结局终函 | `src/content/endings.ts` | 三种结局的独立结果、林渡终函、档案标签与结案语 |
 | 证物关系 | `src/content/relations.ts` | 三条核心推论、对应证物对与成功解释 |
 | 好友线索链接 | `src/lib/game-engine/clue-sharing.ts` | 白名单线索查询、深链接生成与 query 清理 |
+| Injective 藏品契约 | `contracts/NightShiftKeepsake.sol`、`src/lib/injective/keepsake.ts` | ERC-721、EIP-712 voucher、规范元数据、网络与 ABI |
+| Injective 授权 API | `app/api/injective/mint-authorization/`、`src/lib/injective/server.ts` | 服务端签名、白名单、同源、大小、幂等与限流降级 |
+| Injective 藏品界面 | `src/components/game/injective-mint.tsx`、`src/lib/injective/client.ts` | 钱包切链、前端 redeem、交易确认与本地回执 |
+| 夜班密文内容 | `src/content/ciphers.ts` | 按案件注册的确定性关卡、开放条件、答案归一化、提示与回执 |
 | 内容契约 | `src/lib/game-engine/schema.ts` | Zod schema、引用与数量约束 |
 | 夜间结算 | `src/lib/game-engine/resolve-night.ts` | 根据章节、睡眠质量、随身物与调查方向选择确定性结果 |
 | 睡眠会话 | `src/lib/game-engine/sleep-session.ts` | 创建、恢复和结束 Demo／真实夜班，按时长生成质量与夜印进度 |
@@ -53,30 +54,35 @@
 | 夜间循环 | `src/components/game/night-cycle.tsx` | 睡前准备、夜班会话、晨报与空晨报状态 |
 | 调查与归档 | `src/components/game/investigation.tsx` | 案件板、收藏柜、档案与结局 |
 | 好友线索界面 | `src/components/game/clue-sharing.tsx` | 二维码、复制链接与接收反馈 |
+| 夜班密文台 | `src/components/game/cipher-desk.tsx` | 逐段开放、答案输入、无惩罚提示与已解密回执 |
 | 游戏框架 | `src/components/game/shell.tsx` | 顶栏、底部导航与 Demo 控制台 |
 | 共享游戏 UI | `src/components/game/shared.tsx` | 纸卡、印章、城市路线与睡眠文案 |
 | 视觉系统 | `app/globals.css` | 色板、纸张、地图、雨雾、响应式与动效 |
+
+收藏页本身不建立新的存档投影。`Collection` 只把既有 store 字段映射为四个显示组：核心物证、夜班归来、城市回声与口袋小物。CSS `order` 让核心物证在桌面连续长卷中位于首位；900 px 以下只显示当前 `activeCollectionCategory` 对应的现有 section。分类状态不持久化、不参与解锁或结局，切换案件后仍由各案件的隔离存档提供内容。
+
+四个模态入口共用 `src/lib/use-accessible-dialog.ts`：挂载时记录触发焦点、锁定 Body 滚动，并沿弹层到 `body` 的祖先链把旁支节点设为 `inert` 与 `aria-hidden`；Tab 在当前对话框的可见可聚焦元素中循环，Escape 关闭；卸载时精确恢复原属性、滚动和焦点。弹层根节点使用 `data-dialog-layer`，确保遮罩仍可关闭，同时背景不能被指针或键盘访问。
+
+打开 Demo 控制台不再调用 `begin()`。`DemoDrawer` 只在玩家确认具体操作后调用现有 `jumpToChapter`、`unlockBoard` 或 `reset`；“完整案件板”确认路径先显式 `begin()`，其余章节快照由游戏 store 自身标记开始。确认层只解释并约束 UI 写入时机，不改变这些 store action 的确定性结果与案件隔离。
 | 资产清单 | `src/content/assets.ts` | 四幕页头／结局画面、物证、夜印、明信片、植物、社团纹章、纪念物、人物与地区的 manifest 和解析函数 |
 
 ## 状态模型
 
-主要阶段为 `day → ready → night → morning → ending`。章节结算只通过当前案件 manifest 的确定性内容函数产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 15。`campaignId` 标识活动案件，活动进度仍保持扁平供组件读取；切换时先把它快照到 `campaignSaves[campaignId]`，再恢复目标案件或创建新档。章节、线索、关系、结局、案板坐标、夜间历史和放下纸条因此按案隔离。v13 及更早的单案件存档默认归入 `case-001`，原有数据无需清除；v15 对纸条记录逐章校验，旧档默认没有纸条，不伪造用户输入。
+`AppBootBoundary` 在应用首次进入时把真实产品内容标记为 `inert`，避免半水合页面被误点；它等待 `window.load`、`document.fonts.ready` 与当前案件首页主视觉的加载或失败结果。加载幕至少保留 700 ms 以避免冷暖缓存之间闪烁，最迟 7 秒主动放行，图片失败也会安全进入产品。退出后不会因切换案件重复播放整页加载幕。案件板、夜间循环、结局与硬件中心通过 `next/dynamic` 从首页入口拆分，在真正进入对应界面时使用轻量局部反馈。
 
-语言偏好单独保存为 `night-shift-locale`，不进入任一游戏 store、存档版本或结算函数。`I18nProvider` 根据当前案件把偏好解析为有效语言：`case-001` 支持 `zh-CN` 与 `en`，未翻译案件明确回退中文。英文模式只递归投影 manifest 的字符串值，稳定 ID、引用、数字、规则和存档键保持原样，因此切换语言或刷新不会复制、重置或迁移游戏进度。
+主要阶段为 `day → ready → night → morning → ending`。章节结算只通过当前案件 manifest 的确定性内容函数产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 16。`campaignId` 标识活动案件，活动进度仍保持扁平供组件读取；切换时先把它快照到 `campaignSaves[campaignId]`，再恢复目标案件或创建新档。章节、线索、关系、密文解答、结局、案板坐标、夜间历史和放下纸条因此按案隔离。v13 及更早的单案件存档默认归入 `case-001`，原有数据无需清除；v15 对纸条记录逐章校验，v16 只保留当前案件注册表中的合法密文 ID，旧档默认没有解密记录。
 
-案件 manifest 同时提供章节数、线索数、藏品数、真结局门槛、档案标题和逐夜视觉。`resolveNight`、关系匹配、结局资格、迁移过滤和页面投影都显式接收当前 manifest；通用模块不按 `case-001`／`case-002` 写分支。`defineCampaign` 要求章节从 1 连续排列、每个 choice 有路线、每夜拥有明信片／植物／四时辰回声／睡隙回声／夜印，并拒绝跨案件线索引用和不可达门槛。
+语言协商在服务端首帧前完成：合法的 `night-shift-locale` 偏好 Cookie 优先，其次按质量权重读取请求 `Accept-Language` 中第一个受支持的 `en-*` 或 `zh-*`，最后回退 `zh-CN`。根布局把同一结果写入 `<html lang>` 并通过 `RequestLocaleProvider` 交给加载幕与 `I18nProvider`，因此英文浏览器不会先看到中文首帧。自动检测本身不建立 Cookie；只有用户手动选择或迁移既有 `localStorage` 偏好时，才写入一年期、`SameSite=Lax` 的同名 Cookie。手动选择同时保留 `localStorage` 用于跨标签同步，优先级仍以 Cookie 为准；语言偏好不进入任一游戏 store、存档版本或结算函数。
 
-`CampaignManifest.format` 额外区分 `linear-night` 与 `sandbox-expedition`。第三案通过一个最小线性兼容外壳继续满足注册表的共享展示字段，实际玩法读取 `sandbox` 内容；`app/page.tsx` 只按格式选择通用沙盒界面，不按 `case-003` 写业务分支。`assertSandboxCampaign` 校验地点、行动、证物、手札、物品、NPC 和全部条件／效果引用，并要求污染阶段严格覆盖 0–7。
+`I18nProvider` 根据当前案件把偏好解析为有效展示语言：`case-001` 支持 `zh-CN` 与 `en`，未翻译案件明确回退中文；切回首案后继续使用原偏好。英文模式只递归投影 manifest 的字符串值，稳定 ID、引用、数字、规则和存档键保持原样，因此切换语言或刷新不会复制、重置或迁移游戏进度。
 
-沙盒进度单独持久化到 `night-shift-sandbox-v1` v2 的 `saves[campaignId]`，不修改线性存档 v14。其状态包含入口、已显影／访问地点、已完成行动、证物、手札、物品、污染、威胁、NPC 状态、行动日志、低刺激偏好与结局，并增加 `day → night → morning → day`、待执行行动、随队物品、活动 `SleepSession` 和最后晨报差异快照。v1 存档缺少延迟字段时安全归一化为白天；只有同时具有合法行动和会话的夜间存档才恢复为夜间，晨报也必须具备结果快照。行动结算没有随机数：出发时只冻结交接与开始时间，结束夜班时才调用一次 `resolveSandboxAction`；晨报阶段不能再次结算。前置条件决定是否可执行，效果通过去重与有界增量写入，终局结局会优先于普通收场。独立存档避免旧案迁移承受无关字段，也让重置第三案不会触及前两案。
+案件 manifest 同时提供章节数、线索数、藏品数、真结局门槛、档案标题和逐夜视觉。`resolveNight`、关系匹配、结局资格、迁移过滤和页面投影都显式接收当前 manifest；通用模块不按具体案件 ID 写业务分支。`defineCampaign` 要求章节从 1 连续排列、每个 choice 有路线、每夜拥有明信片／植物／四时辰回声／睡隙回声／夜印，并拒绝跨案件线索引用和不可达门槛。
 
 睡眠质量为 `interrupted`、`regular`、`restful`：三者都至少解锁一条主线线索；差异只体现在路线长度、收藏数量、回声事件和环境观察。`selectedPreparationId` 记录当前随身物，`preparationHistory` 按章节保存已经归来的准备；`selectedChoice` 记录当前方向，`choiceHistory` 按章节保存路线履历。方向决定四个路线节点、五段夜间事件、城市遭遇与归来来信，但同章节三个方向的线索和藏品结果保持一致。完成一夜后，章节编号会加入持久化的 `nightSealIds` 与 `completedReports`，旅程册据此解锁明信片与路线履历。
 
 `sleepMode` 区分 12 秒压缩演示和真实夜班。开始交接时创建包含 `startedAt` 与 `watchId` 的 `activeSleepSession`；Demo 始终保存 `midnight`，真实模式按浏览器本地小时冻结掌灯（19:00–22:59）、夜半（23:00–01:59）、末更（02:00–05:59）或白昼小憩（06:00–18:59）。真实模式不依赖后台定时器，而是在重开页面后由开始时间与当前时间重新计算进度；刷新不会因当前时刻改变已经冻结的城市时辰。真实夜班的 `recordWakeEcho` 只在活动会话尚无 `wakeEcho` 时写入一次章节回声和本地时间，不改变 phase；Demo 只为 `interrupted` 质量预置一条确定性回声。玩家最终结束会话时写入 `endedAt`、实际分钟数和按阈值派生的质量，并把会话保存为 `lastSleepSession` 供晨报读取。少于 5 小时为断续，5 小时至不足 7 小时为普通，7 小时及以上为安稳；任一结果都推进主线。
 
-沙盒案件复用同一组 `startSleepSession`、`finishSleepSession`、时辰和持续时间函数。Demo 仍为 12 秒且允许主动跳到清晨；真实模式保存开始时间，页面重开后直接恢复同一夜班。沙盒睡眠质量只选择夜间与晨报的叙事层级，不传入 `resolveSandboxAction`，所以短暂返回不会改变线索、人物、污染或结局。
-
-睡眠硬件使用第三份独立存档 `night-shift-sleep-hardware-v1`。线性和沙盒存档都只在 `SleepSession` 边界通知硬件域开始／结束采集，不保存任何硬件字段。只有经过本地授权的虚拟设备能创建活动采集；真实厂商桥接入口保持预演状态。虚拟模拟器从会话与设备 ID 确定性生成摘要，运行时变化不持久化，晨报最多保留最近 8 条摘要。设备撤销或切换会终止采集但不结束剧情会话，详见 [[docs/sleep-hardware-bridge]]。
+睡眠硬件使用第三份独立存档 `night-shift-sleep-hardware-v1`。游戏存档只在 `SleepSession` 边界通知硬件域开始／结束采集，不保存任何硬件字段。只有经过本地授权的虚拟设备能创建活动采集；真实厂商桥接入口保持预演状态。虚拟模拟器从会话与设备 ID 确定性生成摘要，运行时变化不持久化，晨报最多保留最近 8 条摘要。设备撤销或切换会终止采集但不结束剧情会话，详见 [[docs/sleep-hardware-bridge]]。
 
 植物阶段由同一持久化进度推导：`0–<25%` 种核、`25–<50%` 抽芽、`50–<85%` 展叶、`85–100%` 开花。页面关闭期间无需运行后台计时器，重开后会根据会话时间直接恢复对应阶段。完成夜班时写入 `growthHistory` 快照，包含章节、时长、质量、方向、随身物、城市时辰、可选睡隙回声 ID 与完成时间；断续睡眠也保存完整植株，只使用较紧凑的视觉层级。v5 迁移会为旧存档中已经完成的报告建立普通层级标本，v11 再为旧会话与温室记录补齐安全时辰；v12 校验可选回声记录，旧档没有回声时保留为空白而不伪造醒转。
 
@@ -90,7 +96,9 @@
 
 ## 内容边界
 
-生成式能力用于视觉资产和玩家明确授权的晨间短笺风格。部署必须同时配置模型密钥、访问码和持久化 Redis 配额；访问码只用于换取带独立会话 ID 的 24 小时 HMAC 签名 HttpOnly、SameSite Strict Cookie，不写入游戏存档。访问尝试、单会话额度、部署每日预算和纸条 `requestId` 幂等均由 Redis 跨实例执行，配额不可用时关闭 AI。模型只接收当前纸条、案件／章节标题、方向、地点、随身物和侦探名，并只能返回固定 `tone`／`image` 枚举；服务端以校验后的枚举组合安全短笺，不直接展示自由模型文本。未配置模型、权限失效、超时、上游错误和无效输出都返回有明确原因的本地确定性回信。伊芙琳是否活着、人物动机、线索存在性、核心因果与结局条件必须来自确定性内容，详见 [[docs/story-bible]]。
+链上藏品是确定性内容之外的可选公开回执层。服务端只为案件注册表中真实存在的收藏品生成元数据和 15 分钟 EIP-712 voucher，前端钱包在 Injective EVM Testnet 调用 ERC-721 合约；合约按钱包、案件和收藏拒绝重复领取。`night-shift-injective-mints-v1` 与游戏 store 完全分离，任何钱包、RPC、签名或交易失败都不得进入 `resolveNight`、存档迁移或结局资格。完整部署和隐私边界见 [[docs/injective-keepsake-mint]]。
+
+生成式能力用于编译期视觉资产和玩家明确授权的晨间短笺风格。第三案的 34 张专属图像已作为静态 WebP 随构建提交，运行时不会为案件生成画面或事实，提示词与映射见 [[docs/art-prompts/thirteenth-loaf-visual-archive]]。晨间短笺部署必须同时配置模型密钥、访问码和持久化 Redis 配额；访问码只用于换取带独立会话 ID 的 24 小时 HMAC 签名 HttpOnly、SameSite Strict Cookie，不写入游戏存档。访问尝试、单会话额度、部署每日预算和纸条 `requestId` 幂等均由 Redis 跨实例执行，配额不可用时关闭 AI。模型只接收当前纸条、案件／章节标题、方向、地点、随身物和侦探名，并只能返回固定 `tone`／`image` 枚举；服务端以校验后的枚举组合安全短笺，不直接展示自由模型文本。未配置模型、权限失效、超时、上游错误和无效输出都返回有明确原因的本地确定性回信。人物动机、线索存在性、核心因果与结局条件必须来自各案故事圣经。
 
 英文内容同样是随构建提交的确定性目录，不在运行时调用翻译服务或生成模型。内容测试要求首案英文投影不含汉字，并逐项比较章节、方向、线索、收藏、关系与结局的稳定 ID 及规则，防止翻译改变剧情图谱。
 
@@ -104,7 +112,11 @@ React Flow 使用本地受控节点承接拖动过程，只在桌面端从图钉
 
 案件板由明确尺寸的证物画布和右侧推理阅档栏组成。桌面端使用真实双栏：左侧画布只负责浏览与整理证物，右栏是参与网格排版的普通内容框，不悬浮或覆盖画布；右栏按“联合推理—当前证物档案—核心论断”排列，宽度受视口约束且只允许纵向滚动，不产生需要拖动的横向滚动条。A／B 两个已选线索槽与核对动作常驻右栏顶部，核心论断始终是右栏最后一段。画布按已解锁线索总数生成最多四列的居中网格，并自动适配到固定视口；画布不接管鼠标滚轮、背景拖拽、双击或捏合手势，页面滚动不被截断，缩放只由左侧控制键触发。721 px 以上始终保持左右双栏，只有手机级宽度才恢复文档流；390 px 手机端依次显示画布、联合推理、当前档案与核心论断。
 
+晨报以 900 px 为阅读层级断点。宽屏默认展开完整夜班档案；平板与手机默认把硬件回执、放下纸条、明信片、时辰、睡隙、植物、人物、机会、纪念物和社团来函收进原生 `details`，主文档流只保留夜印／日志、随身物、路线、新证物、矛盾和下一步。玩家可随时展开，折叠状态不写存档也不改变内容。案件板则始终先渲染证物画布与联合推理，再把密文台置于其后的独立 `details`；密文默认收起，以 DOM 顺序和原生展开语义同时表达“补充档案而非主线门槛”。
+
 好友线索使用 `?case=<案件 ID>&clue=<稳定线索 ID>` 的 local-first 深链接。分享端只从当前案件白名单生成链接和二维码；接收端在 hydration 后先验证案件，再验证该案线索，切换到对应存档后才经 `receiveSharedClue` 写入 `unlockedClueIds` 与 `receivedClueIds`，随后从地址栏移除两个 query。跨案件组合与未知 ID 不创建或污染存档，旧的仅含 `clue` 链接继续默认解释为 `case-001`。重复链接保持幂等，不传送其他进度，也不会确认关系或推进章节。赠送线索可参与普通阅档与联合推理，但真结局只计算非 `receivedClueIds` 的亲自取得线索；玩家后来完成对应夜班时，该 ID 会从好友来源表移除，转为亲自取得。
+
+密文关卡使用独立的 `solvedCipherIds` 保存已经核对的稳定 ID。每个案件注册一份 `CipherDeskDefinition`，同时提供标题、说明、三段关卡、最终接线与全关完成回执；单个关卡可选 `CipherDial`，声明范围、步长、初始值、目标、精度和显示模式。刻度盘值先按范围与步长对齐并按精度截断，再格式化为时刻或 MHz 文本，最终仍通过同一答案白名单进入 `solveCipher`，避免浮点漂移或绕过作者答案。文本答案经 NFKC、大小写和常见分隔符归一化后精确匹配，最终接线则要求碎片 ID 数量、唯一性与顺序完全一致，全部不使用模糊判断或生成模型。只有成功关卡和接线 ID 持久化；未提交刻度与临时排序只存在组件状态。迁移会按当前案件的三关与接线 ID 合集过滤未知和跨案件值。未注册密文的案件不显示空面板。
 
 真结局资格由 `canUnlockTrueEnding` 统一判断，界面锁定与存档动作共用同一规则；因此不能通过绕开按钮直接写入未满足条件的真结局。旧存档迁移由可独立测试的 `migrateGameState` 提供。
 
@@ -136,7 +148,7 @@ React Flow 使用本地受控节点承接拖动过程，只在桌面端从图钉
 - `investigation.tsx`：案件板、明信片旅程册、夜印收藏、物证档案与 manifest 驱动的结案卷宗。
 - `clue-sharing.tsx`：单条证物二维码、复制链接与接收结果提示；不拥有存档校验规则。
 - `shell.tsx`：跨视图导航与 Demo 控制台。
-- `sleep-hardware.tsx`：跨线性／沙盒的硬件中心、授权、信号与回执；不拥有剧情结算。
+- `sleep-hardware.tsx`：跨案件的硬件中心、授权、信号与回执；不拥有剧情结算。
 - `shared.tsx`：跨功能域复用的纸张、印章和路线视觉原语。
 
 会话模型位于 `src/lib/game-engine`，跨页恢复依赖持久化时间戳而非组件生命周期。`app/page.tsx` 只保留顶层状态与视图编排，后续案件板和等待循环可以在各自功能域内独立演进。
@@ -147,7 +159,6 @@ React Flow 使用本地受控节点承接拖动过程，只在桌面端从图钉
 
 - [[docs/product-overview]]
 - [[docs/campaign-authoring]]
-- [[docs/blackwater-creek-adaptation-bible]]
 - [[docs/decision-log]]
 - [[docs/quality-baseline]]
 - [[docs/sleep-hardware-bridge]]

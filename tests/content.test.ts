@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { nightShiftCase } from "@/src/content/case";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import { preparations } from "@/src/content/preparations";
@@ -24,13 +24,11 @@ import { endingEpilogues, getEndingEpilogue } from "@/src/content/endings";
 import { cityWatchEchoes, cityWatches, DEMO_CITY_WATCH_ID, getCityWatch, getCityWatchEcho, getCityWatchId } from "@/src/content/watches";
 import { getWakeEcho, getWakeEchoById, wakeEchoes } from "@/src/content/wake-echoes";
 import { createClueShareUrl, readSharedClueQuery, removeSharedClueQuery } from "@/src/lib/game-engine/clue-sharing";
-import { BLACKWATER_CREEK_CAMPAIGN_ID, campaignRegistry, DEFAULT_CAMPAIGN_ID, RAIN_RADIO_CAMPAIGN_ID } from "@/src/content/campaigns/registry";
+import { campaignRegistry, DEFAULT_CAMPAIGN_ID, RAIN_RADIO_CAMPAIGN_ID, THIRTEENTH_LOAF_CAMPAIGN_ID } from "@/src/content/campaigns/registry";
 import { lastTramCampaign } from "@/src/content/campaigns/last-tram";
 import { rainRadioCampaign } from "@/src/content/campaigns/rain-radio";
+import { thirteenthLoafCampaign } from "@/src/content/campaigns/thirteenth-loaf";
 import { getCampaignRouteDirection, matchCampaignEvidenceRelation } from "@/src/content/campaigns/types";
-import { blackwaterCreekCampaign } from "@/src/content/campaigns/blackwater-creek";
-import { availableSandboxEndings, resolveSandboxAction, startSandboxCampaign } from "@/src/lib/sandbox/engine";
-import { normalizeSandboxProgress, useSandboxStore } from "@/src/stores/sandbox-store";
 import { campaignSupportsLocale, localizeCampaign } from "@/src/i18n/core";
 
 describe("Night Shift case content", () => {
@@ -59,6 +57,7 @@ describe("Night Shift case content", () => {
     expect(collectStrings(english).filter((text) => /\p{Script=Han}/u.test(text))).toEqual([]);
     expect(campaignSupportsLocale(lastTramCampaign.id, "en")).toBe(true);
     expect(campaignSupportsLocale(rainRadioCampaign.id, "en")).toBe(false);
+    expect(campaignSupportsLocale(thirteenthLoafCampaign.id, "en")).toBe(false);
   });
 
   it("contains the complete five-night mystery", () => {
@@ -67,13 +66,13 @@ describe("Night Shift case content", () => {
     expect(nightShiftCase.collectibles).toHaveLength(8);
   });
 
-  it("registers two linear campaigns and one distinct sandbox campaign", () => {
-    expect(campaignRegistry.map((campaign) => campaign.id)).toEqual(["case-001", "case-002", "case-003"]);
+  it("registers three complete Night Shift campaigns", () => {
+    expect(campaignRegistry.map((campaign) => campaign.id)).toEqual(["case-001", "case-002", "case-004"]);
     expect(new Set(campaignRegistry.map((campaign) => campaign.case.title))).toHaveLength(3);
     expect(new Set(campaignRegistry.flatMap((campaign) => campaign.case.clues.map((clue) => clue.id))).size)
       .toBe(campaignRegistry.reduce((total, campaign) => total + campaign.case.clues.length, 0));
 
-    for (const campaign of campaignRegistry.filter((item) => !("format" in item) || item.format !== "sandbox-expedition")) {
+    for (const campaign of campaignRegistry) {
       expect(campaign.case.chapters).toHaveLength(5);
       expect(campaign.routes).toHaveLength(15);
       expect(campaign.endings).toHaveLength(3);
@@ -90,102 +89,11 @@ describe("Night Shift case content", () => {
         }
       }
     }
-    expect(blackwaterCreekCampaign.id).toBe(BLACKWATER_CREEK_CAMPAIGN_ID);
-    expect(blackwaterCreekCampaign.format).toBe("sandbox-expedition");
-    expect(blackwaterCreekCampaign.sandbox?.locations).toHaveLength(9);
     expect(rainRadioCampaign.case.title).toBe("只在雨中播出的电台");
+    expect(thirteenthLoafCampaign.case.title).toBe("黎明前出炉的第十三个面包");
+    expect(thirteenthLoafCampaign.presentation.archiveNumber).toBe("003");
     expect(lastTramCampaign.case.clues.some((clue) => rainRadioCampaign.case.clues.some((other) => other.id === clue.id))).toBe(false);
-  });
-
-  it("covers both Blackwater Creek origins, nine locations, six handouts, corruption, and major endings", () => {
-    const content = blackwaterCreekCampaign.sandbox!;
-    expect(content.origins.map((origin) => origin.id)).toEqual(["university", "bootlegger"]);
-    expect(content.locations.map((location) => location.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    expect(content.clues).toHaveLength(20);
-    expect(content.handouts).toHaveLength(6);
-    expect(content.corruptionStages.map((stage) => stage.stage)).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
-    expect(content.endings.map((ending) => ending.id)).toEqual(["farm-fall", "escape", "bargain", "contain", "destroy"]);
-
-    let university = startSandboxCampaign(content, "university");
-    for (const actionId of ["camp-blast-plan", "riverbed-trace", "riverbed-blast", "riverbed-muck", "cave-dynamite", "cave-destroy"]) {
-      const resolution = resolveSandboxAction(content, university, actionId);
-      expect(resolution.ok, actionId).toBe(true);
-      university = resolution.progress;
-    }
-    expect(availableSandboxEndings(content, university).map((ending) => ending.id)).toContain("destroy");
-
-    let bootlegger = startSandboxCampaign(content, "bootlegger");
-    const negotiation = resolveSandboxAction(content, bootlegger, "carmody-negotiate");
-    expect(negotiation.ok).toBe(true);
-    bootlegger = negotiation.progress;
-    expect(availableSandboxEndings(content, bootlegger).map((ending) => ending.id)).toContain("bargain");
-
-    const terminal = resolveSandboxAction(content, startSandboxCampaign(content, "bootlegger"), "farm-assault");
-    expect(terminal.ok).toBe(true);
-    expect(availableSandboxEndings(content, terminal.progress).map((ending) => ending.id)).toEqual(["farm-fall"]);
-  });
-
-  it("delays Blackwater Creek action effects until the morning report and settles only once", () => {
-    const content = blackwaterCreekCampaign.sandbox!;
-    const campaignId = blackwaterCreekCampaign.id;
-    const persistWarning = vi.spyOn(console, "warn").mockImplementation(() => {});
-    useSandboxStore.setState({ saves: {} });
-
-    expect(useSandboxStore.getState().start(campaignId, content, "bootlegger")).toBe(true);
-    const before = useSandboxStore.getState().saves[campaignId];
-    expect(before.phase).toBe("day");
-    expect(before.clueIds).not.toContain("distribution-ledger");
-
-    expect(useSandboxStore.getState().selectAction(campaignId, content, "carmody-negotiate")).toBe(true);
-    useSandboxStore.getState().setSleepMode(campaignId, content, "real");
-    expect(useSandboxStore.getState().startExpedition(
-      campaignId,
-      content,
-      new Date("2026-07-23T20:00:00.000Z"),
-    )).toBe(true);
-    const during = useSandboxStore.getState().saves[campaignId];
-    expect(during.phase).toBe("night");
-    expect(during.completedActionIds).not.toContain("carmody-negotiate");
-    expect(during.clueIds).not.toContain("distribution-ledger");
-
-    expect(useSandboxStore.getState().finishExpedition(
-      campaignId,
-      content,
-      new Date("2026-07-24T02:30:00.000Z"),
-    )).toBe(true);
-    const morning = useSandboxStore.getState().saves[campaignId];
-    expect(morning.phase).toBe("morning");
-    expect(morning.completedActionIds).toContain("carmody-negotiate");
-    expect(morning.clueIds).toContain("distribution-ledger");
-    expect(morning.latestReport?.session.durationMinutes).toBe(390);
-    expect(morning.latestReport?.session.quality).toBe("regular");
-
-    const logLength = morning.log.length;
-    expect(useSandboxStore.getState().finishExpedition(campaignId, content)).toBe(false);
-    expect(useSandboxStore.getState().saves[campaignId].log).toHaveLength(logLength);
-    expect(useSandboxStore.getState().archiveReport(campaignId, content)).toBe(true);
-    expect(useSandboxStore.getState().saves[campaignId]).toMatchObject({
-      phase: "day",
-      pendingActionId: undefined,
-      selectedItemId: undefined,
-    });
-    persistWarning.mockRestore();
-  });
-
-  it("normalizes legacy sandbox saves into a safe daytime v2 state", () => {
-    const legacy = startSandboxCampaign(blackwaterCreekCampaign.sandbox!, "university");
-    const normalized = normalizeSandboxProgress({
-      ...legacy,
-      phase: undefined,
-      sleepMode: undefined,
-      selectedQuality: undefined,
-    });
-
-    expect(normalized.phase).toBe("day");
-    expect(normalized.sleepMode).toBe("demo");
-    expect(normalized.selectedQuality).toBe("regular");
-    expect(normalized.originId).toBe("university");
-    expect(normalized.unlockedLocationIds).toEqual(legacy.unlockedLocationIds);
+    expect(campaignRegistry.flatMap((campaign) => campaign.case.clues).filter((clue) => clue.id === "commons-charter")).toHaveLength(1);
   });
 
   it("gives every clue a literary dossier without changing fixed facts", () => {
@@ -567,6 +475,11 @@ describe("Night Shift case content", () => {
       present: true,
       campaignId: RAIN_RADIO_CAMPAIGN_ID,
       clue: rainRadioCampaign.case.clues.find((clue) => clue.id === "radio-warm-dial"),
+    });
+    expect(readSharedClueQuery(`?case=${THIRTEENTH_LOAF_CAMPAIGN_ID}&clue=blank-guest-share`)).toEqual({
+      present: true,
+      campaignId: THIRTEENTH_LOAF_CAMPAIGN_ID,
+      clue: thirteenthLoafCampaign.case.clues.find((clue) => clue.id === "blank-guest-share"),
     });
     expect(readSharedClueQuery("?clue=unknown")).toEqual({ present: true, campaignId: DEFAULT_CAMPAIGN_ID, clue: undefined });
     expect(readSharedClueQuery("?case=case-404&clue=flower-cycle")).toEqual({ present: true });

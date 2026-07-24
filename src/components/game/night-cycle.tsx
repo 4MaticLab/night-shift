@@ -89,7 +89,7 @@ export function Tonight({ onLaunch, onHardware }: { onLaunch: (quality: SleepQua
   return (
     <div className="content-grid tonight-page">
       <section className={selectedDirection ? "desk-scene handoff-ready" : "desk-scene"}>
-        <div className="scene-copy"><p className="eyebrow"><Clock3 size={14} /> {t("今晚的任务 · 23:40 前交接")}</p><h2>{locale === "en" ? <>Lin Du is arranging<br />tonight&apos;s equipment.</> : <>林渡正在整理<br />今晚的装备。</>}</h2><p>{t("选择一个调查方向。无论你今晚睡得如何，故事都会继续。")}</p></div>
+        <div className="scene-copy"><p className="eyebrow"><Clock3 size={14} /> {t("今晚的任务 · 23:40 前交接")}</p><h2>{locale === "en" ? <>Lin Du is arranging<br />tonight&apos;s equipment.</> : <>林渡正在整理<br />今晚的装备。</>}</h2><p>{locale === "en" ? <>Choose an investigative direction.<br />However you sleep tonight, the story will continue.</> : <>选择一个调查方向。<br />无论你今晚睡得如何，故事都会继续。</>}</p></div>
         <motion.figure className="handoff-portrait" initial={{ opacity: 0, y: 12, rotate: 1.4 }} animate={{ opacity: 1, y: 0, rotate: selectedDirection ? .35 : 1.15 }} transition={{ duration: .7, ease: "easeOut" }}>
           <div className="handoff-portrait-image"><Image src={handoffPortrait.src} alt={handoffPortrait.alt} fill priority sizes="(max-width: 600px) 44vw, (max-width: 900px) 34vw, 24vw" /></div>
           <figcaption><small>LIN DU · NIGHT DETECTIVE</small><b>{campaign.presentation.detectiveName}</b><span>{selectedDirection ? t("已收到今晚的方向") : t("在等你写下方向")}</span></figcaption>
@@ -103,7 +103,7 @@ export function Tonight({ onLaunch, onHardware }: { onLaunch: (quality: SleepQua
         <h3>{current.question}</h3>
         <p className="city-aside">“{current.cityAside}”</p>
         <div className="choice-list">{current.choices.map((choice, i) => { const direction = getCampaignRouteDirection(campaign, chapter, choice.id); const society = localize(getCitySociety(direction.societyId)); return <button type="button" aria-pressed={selectedChoice === choice.id} key={choice.id} className={selectedChoice === choice.id ? "choice selected" : "choice"} onClick={() => selectChoice(choice.id)}><span>0{i + 1}</span><div><b>{choice.label}</b><small>{choice.note}</small><em>{t("可能惊动")} · {society.name}</em></div>{selectedChoice === choice.id ? <Check /> : <ChevronRight />}</button>; })}</div>
-        <div className="preparation-box"><div className="preparation-heading"><small>PACK ONE THING · {t("随身物")}</small><b>{t("准备，然后放手")}</b></div><div className="preparation-list">{preparations.map((source) => { const item = localize(source); const Icon = item.icon; return <button type="button" aria-pressed={preparationId === item.id} key={item.id} className={preparationId === item.id ? "preparation selected" : "preparation"} onClick={() => setPreparationId(item.id)}><span><Icon size={19} /></span><div><b>{item.title}</b><small>{item.promise}</small></div>{preparationId === item.id && <Check size={15} />}</button>; })}</div><p>{selectedPreparation?.description}</p></div>
+        <div className="preparation-box"><div className="preparation-heading"><small>PACK ONE THING · {t("随身物")}</small><b>{t("准备，然后放手")}</b></div><div className="preparation-list">{preparations.map((source) => { const item = localize(source); return <button type="button" aria-pressed={preparationId === item.id} key={item.id} className={preparationId === item.id ? "preparation selected" : "preparation"} onClick={() => setPreparationId(item.id)}><span><Image src={item.imageSrc} alt={item.imageAlt} width={80} height={80} unoptimized /></span><div><b>{item.title}</b><small>{item.promise}</small></div>{preparationId === item.id && <Check size={15} />}</button>; })}</div></div>
         <div className="quality-box">
           <div><small>NIGHT HANDOFF</small><b>{t("选择交接方式")}</b></div>
           <div className="mode-toggle" role="group" aria-label={t("夜班模式")}>
@@ -236,6 +236,14 @@ export function MorningReport({ onContinue, onHardware }: { onContinue: () => vo
   const reportClock = lastSleepSession?.mode === "real" && lastSleepSession.endedAt
     ? new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(lastSleepSession.endedAt))
     : "05:28";
+  const [reportArchiveOpen, setReportArchiveOpen] = useState(false);
+  useEffect(() => {
+    const wideReport = window.matchMedia("(min-width: 901px)");
+    const syncDisclosure = () => setReportArchiveOpen(wideReport.matches);
+    syncDisclosure();
+    wideReport.addEventListener("change", syncDisclosure);
+    return () => wideReport.removeEventListener("change", syncDisclosure);
+  }, [chapter]);
   useEffect(() => {
     if (!restRitual || !restRitual.aiRequested || restRitual.status !== "pending") return;
     const requestKey = restRitual.requestId;
@@ -290,6 +298,11 @@ export function MorningReport({ onContinue, onHardware }: { onContinue: () => vo
   return (
     <div className="report-wrap">
       <section className="report-hero"><Image className="report-hero-art" src={morningHeader.src} alt={morningHeader.alt} fill priority sizes="100vw" /><div><Seal>{t("调查报告")} · 0{chapter}</Seal><p>{t("昨夜调查完成")}</p><h2>{current.title}</h2><small>{t("记录人：")}{campaign.presentation.detectiveName} · {campaign.presentation.cityName} · {reportClock}</small></div></section>
+      <details className="report-archive-details" open={reportArchiveOpen} onToggle={(event) => setReportArchiveOpen(event.currentTarget.open)}>
+        <summary>
+          <span><small>FULL NIGHT ARCHIVE · {locale === "en" ? "OPTIONAL READING" : "可选详读"}</small><b>{locale === "en" ? "Open the full route, city echoes, and keepsakes" : "展开昨夜完整行程、城市回声与纪念物"}</b><p>{locale === "en" ? "The core report and next action remain below. Reading every side record is optional." : "核心发现与下一步仍在下方；不展开也不会漏掉线索或阻断主线。"}</p></span>
+          <ChevronRight />
+        </summary>
       <div className="sleep-receipt-wrap"><SleepHardwareMorningReceipt sessionId={lastSleepSession?.id} /><button type="button" onClick={onHardware}>{t("管理睡眠硬件")} <ChevronRight /></button></div>
       {restRitual && <PaperCard className={`rest-reflection-card source-${restRitual.source}`}><div className="rest-reflection-mark"><Sparkles /><span>{restReflectionLabel}</span></div><div><div className="paper-heading"><small>WHAT YOU LEFT FOR THE NIGHT · {t("放下纸条")}</small><b>{t("林渡把它夹回晨报里")}</b></div><blockquote>“{restRitual.intention}”</blockquote><p>{restRitual.reflection}</p><footer>{restReflectionDisclosure} {t("回信不改变案件事实、睡眠评价或任何奖励。")}</footer></div></PaperCard>}
       <section className="return-postcard" aria-label={locale === "en" ? `Postcard returned from Night ${chapter}` : `第${chapter}夜归来明信片`}>
@@ -303,6 +316,7 @@ export function MorningReport({ onContinue, onHardware }: { onContinue: () => vo
       {opportunityNotice && opportunityResponse && <PaperCard className="opportunity-echo"><div><small>DAYLIGHT ANSWER RETURNED · {t("午后答复的回声")}</small><h3>{opportunityNotice.title}</h3></div><blockquote>“{opportunityResponse.echo}”</blockquote><span>{t("这段回声不改变案件成果或结局资格。")}</span></PaperCard>}
       {souvenir && souvenirArt && <section className="souvenir-reveal" aria-label={`${t("口袋里多出来的东西")}：${souvenir.name}`}><div className="souvenir-reveal-art"><Image src={souvenirArt.src} alt={souvenirArt.alt} width={1024} height={1024} /></div><PaperCard><div className="paper-heading"><small>03 · FOUND IN A POCKET</small><b>{t("口袋里多出来的东西")}</b></div><span className="souvenir-archive-name">{souvenir.archiveName}</span><h3>{souvenir.name}</h3><p className="souvenir-rumor">“{souvenir.cityRumor}”</p><p>{souvenir.provenance}</p><blockquote>“{souvenir.fieldNote}”</blockquote><div className="souvenir-no-advantage"><b>{t("不是案件线索")}</b><span>{t("它不提供调查优势、额外奖励或结局资格，只证明这座城在你睡着时有自己的生活。")}</span></div></PaperCard></section>}
       {societyRecord && society && correspondencePrompt && <section className={`society-memory-letter society-${society.id}`} aria-label={`${society.name}${t("来函")}`}><SocietyCrest societyId={society.id} /><PaperCard><div className="paper-heading"><small>04 · THE CITY REMEMBERS</small><b>{society.name}{t("来函")}</b></div><span className="society-archive-name">{society.archiveName}</span><h3>{locale === "en" ? `To “${t(getSocietyTitle(societyRecord))}”` : `致「${getSocietyTitle(societyRecord)}」`}</h3><p className="society-rumor">“{society.publicRumor}”</p><blockquote>{t(getSocietyLetter(societyRecord))}</blockquote>{priorReply && <div className="correspondence-echo"><small>YOUR LAST ANSWER RETURNED · {t("上次答复的余波")}</small><p>{priorReply.echo}</p></div>}<div className="society-postscript"><small>{t("本夜被记住的原因")}</small><p>{result.direction.societyNotice}</p></div><div className="correspondence-question"><small>A QUESTION WITH NO CORRECT ANSWER · {t("城市问函")}</small><p>{correspondencePrompt.context}</p><h4>{correspondencePrompt.question}</h4><div className="correspondence-replies">{correspondencePrompt.replies.map((reply) => <button key={reply.id} className={selectedReply?.id === reply.id ? "selected" : ""} disabled={Boolean(selectedReply)} onClick={() => answerCorrespondence(chapter, reply.id)}><b>{reply.label}</b><span>{reply.note}</span>{selectedReply?.id === reply.id && <Check size={15} />}</button>)}</div>{selectedReply ? <div className="correspondence-filed"><b>{t("答复已寄出")}</b><span>{selectedReply.summary}</span></div> : <p className="correspondence-skip">{t("可以不回信，直接整理晨报；沉默不会失去线索、植物或任何后续章节。")}</p>}</div><footer>— {society.signoff}</footer></PaperCard></section>}
+      </details>
       <div className="report-grid">
         <PaperCard className="sleep-summary"><div className="paper-heading"><small>NIGHT IMPRESSION</small><b>{locale === "en" ? `Night seal ${chapter}` : `第 ${chapter} 枚夜印`}</b></div><div className="sleep-session-meta"><span>{lastSleepSession?.mode === "real" ? t("真实夜班") : t("演示夜班")}</span><b>{formatSleepDuration(lastSleepSession?.durationMinutes, locale)}</b></div><div className="earned-seal"><Image src={nightSeal.src} alt={nightSeal.alt} width={150} height={150} /></div><p>{t(quality === "interrupted" ? "城市的声音有些断续，旅程较短，但这枚夜印仍完整记录了重要发现。" : quality === "regular" ? "一条完整而安静的标准路线，已经压进纸纤维里。" : "雾散得很早，夜印因此多留下一圈稀薄的金线。")}</p></PaperCard>
         <PaperCard className="journal"><div className="paper-heading"><small>LIN DU / FIELD NOTES</small><b>{t("侦探日志")}</b></div><p>“{current.journal}”</p><span>— {campaign.presentation.detectiveName}, 05:28</span></PaperCard>

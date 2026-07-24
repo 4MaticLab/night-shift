@@ -1,6 +1,6 @@
 # Night Shift 文档索引
 
-这里是稳定知识的入口。未来实现计划与进度统一从 [[PLANS]] 进入。
+这里是稳定知识的入口。当前 checkout 的复杂任务计划从 [[PLANS]] 进入；已退役计划保存在 Git 历史中。
 
 ## 产品
 
@@ -8,13 +8,15 @@
 - [[docs/north-star]] — 文学性城市、异步等待与原创边界的北极星。
 - [[docs/story-bible]] — 首案真相、人物关系和不可被动态改写的事实。
 - [[docs/rain-radio-story-bible]] — 第二案的广播网络、四十七户居民与固定真相。
-- [[docs/blackwater-creek-adaptation-bible]] — 第三案双入口、九地点、污染规则、结局矩阵与非商业改编边界。
+- [[docs/thirteenth-loaf-story-bible]] — 第三案的十二人合作社、访客份额、火灾责任与固定真相。
+- [[docs/blackwater-creek-adaptation-bible]] — 已退役的《黑水溪》原型及其撤销原因；只作为历史索引。
 - [[docs/demo-script]] — 90 秒现场演示路径。
 - [[docs/hackathon-submission-kit]] — Hack the Rest 赛道陈述、评委问答、提交材料、真实边界与部署排障。
 - [[docs/quality-baseline]] — 当前版本的质量基线、验证命令和已知边界。
 - [[docs/viewport-checklist]] — 桌面与移动端关键页面的交互检查清单。
 - [[docs/sleep-hardware-bridge]] — 虚拟睡眠设备、真实桥接预演与游戏生命周期。
 - [[docs/privacy-and-guardrails]] — 健康数据最小化、授权、撤销和非医疗边界。
+- [[docs/injective-keepsake-mint]] — Injective EVM Testnet 藏品领取、合约、部署与真实边界。
 
 ## 工程
 
@@ -37,6 +39,7 @@
 - [[docs/art-prompts/foglight-districts]] — 灯港区、旧子午区与玻璃丘的城市版画提示词和源图映射。
 - [[docs/art-prompts/four-act-headers]] — 交接、夜行、归来与裁决四幕横幅的构图和源图映射。
 - [[docs/art-prompts/sleep-hardware-dossiers]] — 四类睡眠硬件档案画面与生成源图映射。
+- [[docs/art-prompts/thirteenth-loaf-visual-archive]] — 第三案 34 张专属美术的提示词组、画幅与运行时映射。
 
 ## 维护规则
 

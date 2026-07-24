@@ -55,7 +55,9 @@
 | `hardware.virtual-mattress` | 床下潮汐带 | Hardware dossier | `/public/art/hardware/virtual-mattress-v1.webp` | 完成 | 睡眠硬件中心 |
 | `hardware.virtual-pillow` | 静默枕 | Hardware dossier | `/public/art/hardware/virtual-pillow-v1.webp` | 完成 | 睡眠硬件中心 |
 
-品牌 Logo、核心插画、八件物证、五枚夜印、五张城市明信片、五张植物学标本、三枚社团纹章、九件口袋纪念物、林渡交接肖像、四张人物肖像、三张地区版画与四张睡眠硬件档案由内置图像生成能力生成；地图、纸张、图钉、路线、信号读数、四阶段揭示、交接标签和档案材质保持代码原生，以便响应式缩放与动效控制。品牌 Logo 的提示词与透明化记录见 [[docs/art-prompts/night-shift-logo]]；林渡的身份连续性与最终提示词见 [[docs/art-prompts/lin-du-handoff-portrait]]；明信片的生成约束与场景差异见 [[docs/art-prompts/city-postcards]]，植物提示词见 [[docs/art-prompts/night-greenhouse]]，纹章提示词见 [[docs/art-prompts/city-societies]]，纪念物提示词见 [[docs/art-prompts/pocket-souvenirs]]，人物提示词与源图映射见 [[docs/art-prompts/city-witness-portraits]]，地区提示词见 [[docs/art-prompts/foglight-districts]]，硬件提示词见 [[docs/art-prompts/sleep-hardware-dossiers]]。内容资产通过 `src/content/assets.ts` manifest 解析；全局品牌 Logo 与 CSS 场景由站点外壳直接引用。
+第三案另有一套完全专属的 34 张 WebP 视觉包，统一位于 `/public/art/cases/thirteenth-loaf/`：四幕横幅 4 张、夜印 5 张、明信片 5 张、植物标本 5 张、收藏品 8 张、人物肖像 4 张、城区版画 3 张。具体 ID、文件、替代文本与类别由 `src/content/thirteenth-loaf-assets.ts` 登记，全部被第三案 manifest 或通用档案页消费。
+
+品牌 Logo、核心插画、八件首案物证、五枚首案夜印、五张首案城市明信片、五张首案植物学标本、三枚社团纹章、九件口袋纪念物、林渡交接肖像、四张首案人物肖像、三张首案地区版画、四张睡眠硬件档案与第三案 34 张专属视觉由内置图像生成能力生成；地图、纸张、图钉、路线、信号读数、四阶段揭示、交接标签和档案材质保持代码原生，以便响应式缩放与动效控制。品牌 Logo 的提示词与透明化记录见 [[docs/art-prompts/night-shift-logo]]；林渡的身份连续性与最终提示词见 [[docs/art-prompts/lin-du-handoff-portrait]]；明信片的生成约束与场景差异见 [[docs/art-prompts/city-postcards]]，植物提示词见 [[docs/art-prompts/night-greenhouse]]，纹章提示词见 [[docs/art-prompts/city-societies]]，纪念物提示词见 [[docs/art-prompts/pocket-souvenirs]]，人物提示词与源图映射见 [[docs/art-prompts/city-witness-portraits]]，地区提示词见 [[docs/art-prompts/foglight-districts]]，硬件提示词见 [[docs/art-prompts/sleep-hardware-dossiers]]，第三案提示词与映射见 [[docs/art-prompts/thirteenth-loaf-visual-archive]]。内容资产通过 `src/content/assets.ts` manifest 解析；全局品牌 Logo 与 CSS 场景由站点外壳直接引用。
 
 ## 相关文档
 
@@ -72,3 +74,4 @@
 - [[docs/art-prompts/four-act-headers]]
 - [[docs/art-prompts/lin-du-handoff-portrait]]
 - [[docs/art-prompts/sleep-hardware-dossiers]]
+- [[docs/art-prompts/thirteenth-loaf-visual-archive]]
