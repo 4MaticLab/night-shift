@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-lost-property-case]] | `codex/lost-property-case` | `in_progress` | `manual` | 0/8 | 固定故事圣经、五夜因果与推论图 |
+| [[plans/codex-lost-property-case]] | `codex/lost-property-case` | `in_progress` | `manual` | 1/8 | 编写视觉档案规范与完整资产映射 |
 
 ## 使用规则
 
