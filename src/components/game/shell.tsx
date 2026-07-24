@@ -7,6 +7,7 @@ import { Archive, ChevronRight, Coffee, Gift, Moon, RotateCcw, Search, Sparkles,
 import { useGameStore } from "@/src/stores/game-store";
 import { useI18n } from "@/src/i18n/provider";
 import type { GameView } from "./types";
+import { Dock, DockIcon } from "@/src/components/ui/dock";
 import { SleepHardwareStatus } from "./sleep-hardware-status";
 import { useAccessibleDialog } from "@/src/lib/use-accessible-dialog";
 import { getReadyEvidenceSyntheses } from "@/src/lib/game-engine/evidence-synthesis";
@@ -35,7 +36,19 @@ export function BottomNav({ view }: { view: GameView }) {
   const items: [GameView, ReactNode, string][] = [
     ["report", <Coffee key="c" />, t("今晨")], ["board", <Search key="s" />, t("案件板")], ["tonight", <Moon key="m" />, t("今晚")], ["collection", <Gift key="g" />, t("收藏")], ["archive", <Archive key="a" />, t("档案")],
   ];
-  return <nav className="bottom-nav" aria-label={t("主要导航")}>{items.map(([id, icon, label]) => <Link href={getGameViewPath(id)} aria-current={view === id ? "page" : undefined} className={view === id ? "active" : ""} key={id} onClick={(event) => { if (view !== id) return; event.preventDefault(); window.scrollTo({ top: 0, left: 0 }); }}>{icon}<span>{label}</span>{id === "board" && readyCount > 0 && <i className="nav-ready-badge" aria-label={locale === "en" ? `${readyCount} inferences ready` : `${readyCount} 条推论可以整理`}>{readyCount}</i>}</Link>)}</nav>;
+  return (
+    <Dock className="bottom-nav" role="navigation" aria-label={t("主要导航")} iconSize={46} iconMagnification={68} iconDistance={120} direction="bottom">
+      {items.map(([id, icon, label]) => (
+        <DockIcon key={id}>
+          <Link href={getGameViewPath(id)} aria-current={view === id ? "page" : undefined} className={view === id ? "active" : ""} onClick={(event) => { if (view !== id) return; event.preventDefault(); window.scrollTo({ top: 0, left: 0 }); }}>
+            <span className="dock-icon-box">{icon}</span>
+            <span className="dock-icon-label">{label}</span>
+            {id === "board" && readyCount > 0 && <i className="nav-ready-badge" aria-label={locale === "en" ? `${readyCount} inferences ready` : `${readyCount} 条推论可以整理`}>{readyCount}</i>}
+          </Link>
+        </DockIcon>
+      ))}
+    </Dock>
+  );
 }
 
 export function DemoDrawer({ onClose, setView }: { onClose: () => void; setView: (view: GameView) => void }) {

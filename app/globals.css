@@ -1279,56 +1279,71 @@ blockquote {
   bottom: max(10px, env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
-  width: min(620px, calc(100% - 28px));
-  height: 64px;
-  background: rgba(12, 18, 30, .96);
+  width: max-content;
+  max-width: calc(100% - 16px);
+  height: auto;
+  margin-top: 0;
+  background: rgba(12, 18, 30, .92);
   border: 1px solid rgba(197, 154, 90, .24);
-  border-radius: 5px;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  padding: 5px 8px;
+  border-radius: 18px;
   box-shadow: 0 -12px 40px #0006;
   backdrop-filter: blur(15px);
 }
 
 .bottom-nav a {
-  min-width: 0;
-  min-height: 48px;
+  position: relative;
+  width: 100%;
+  min-height: 44px;
   color: #7f8a99;
-  border: 1px solid transparent;
-  border-radius: 3px;
   background: none;
   display: flex;
   flex-direction: column;
   gap: 3px;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   font-size: 9px;
   cursor: pointer;
-  position: relative;
   text-decoration: none;
 }
 
+.bottom-nav .dock-icon-box {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  transition: background-color .18s ease, border-color .18s ease;
+}
+
 .bottom-nav a svg {
-  width: 18px;
+  width: 55%;
+  height: auto;
 }
 
 .bottom-nav a.active {
   color: var(--amber);
-  border-color: #c59a5a1f;
+}
+
+.bottom-nav a.active .dock-icon-box {
   background: #c59a5a0d;
+  border-color: #c59a5a1f;
 }
 
 .bottom-nav a.active::before {
   content: "";
   position: absolute;
-  top: -6px;
+  top: -9px;
   width: 30px;
   border-top: 2px solid var(--amber);
 }
 
 .bottom-nav a:not(.active):hover {
   color: var(--paper);
+}
+
+.bottom-nav a:not(.active):hover .dock-icon-box {
   background: #ffffff08;
 }
 
@@ -3262,14 +3277,10 @@ blockquote {
   }
 }
 
-.bottom-nav a {
-  position: relative;
-}
-
 .nav-ready-badge {
   position: absolute;
-  top: 5px;
-  right: 8px;
+  top: -3px;
+  right: -5px;
   min-width: 17px;
   height: 17px;
   padding: 0 4px;
@@ -10065,11 +10076,7 @@ blockquote {
     padding-inline: 15px;
   }
 
-  .bottom-nav {
-    width: calc(100% - 16px);
-  }
-
-  .bottom-nav a span {
+  .bottom-nav a .dock-icon-label {
     font-size: 8px;
   }
 
