@@ -16,6 +16,7 @@
 - [[docs/quality-baseline]] — 当前版本的质量基线、验证命令和已知边界。
 - [[docs/viewport-checklist]] — 桌面与移动端关键页面的交互检查清单。
 - [[docs/sleep-hardware-bridge]] — 虚拟睡眠设备、真实桥接预演与游戏生命周期。
+- [[docs/home-assistant-ambient-bridge]] — 本机 Home Assistant 空间外设桥、受限实体、配对、cue 与比赛接线。
 - [[docs/privacy-and-guardrails]] — 健康数据最小化、授权、撤销和非医疗边界。
 - [[docs/injective-keepsake-mint]] — Injective EVM Testnet 藏品领取、合约、部署与真实边界。
 

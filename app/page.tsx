@@ -14,6 +14,7 @@ import { getCampaign } from "@/src/content/campaigns/registry";
 import { getAsset } from "@/src/content/assets";
 import { I18nProvider, useI18n } from "@/src/i18n/provider";
 import { AppBootBoundary, GameSectionLoading } from "@/src/components/game/loading-screen";
+import { AmbientHardwareCoordinator } from "@/src/components/game/ambient-hardware-coordinator";
 
 const subscribeToHydration = () => () => undefined;
 const dynamicLoading = () => <GameSectionLoading />;
@@ -124,14 +125,14 @@ function GamePage() {
   }, [hydrated, libraryOpen]);
 
   if (libraryOpen || (!game.started && !intro)) {
-    return <>{clueNotice}<Hero interactive={hydrated} onStart={() => { setUserToggledLibrary(false); if (game.started) setIntro(false); else setIntro(true); }} onDemo={() => setDemo(true)} /><AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={(nextView) => { setUserToggledLibrary(false); changeView(nextView); }} />}</AnimatePresence></>;
+    return <><AmbientHardwareCoordinator />{clueNotice}<Hero interactive={hydrated} onStart={() => { setUserToggledLibrary(false); if (game.started) setIntro(false); else setIntro(true); }} onDemo={() => setDemo(true)} /><AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={(nextView) => { setUserToggledLibrary(false); changeView(nextView); }} />}</AnimatePresence></>;
   }
-  if (intro && !game.started) return <>{clueNotice}<CasePrologue onBack={() => { setIntro(false); setUserToggledLibrary(true); }} onDone={() => { game.begin(); setIntro(false); }} /></>;
-  if (game.phase === "night") return <>{clueNotice}<NightRun onFinish={game.finishNight} onHardware={() => setHardwareOpen(true)} />{hardwarePanel}</>;
-  if (game.phase === "ending") return <>{clueNotice}<Ending onOpenLibrary={() => setUserToggledLibrary(true)} /></>;
+  if (intro && !game.started) return <><AmbientHardwareCoordinator />{clueNotice}<CasePrologue onBack={() => { setIntro(false); setUserToggledLibrary(true); }} onDone={() => { game.begin(); setIntro(false); }} /></>;
+  if (game.phase === "night") return <><AmbientHardwareCoordinator />{clueNotice}<NightRun onFinish={game.finishNight} onHardware={() => setHardwareOpen(true)} />{hardwarePanel}</>;
+  if (game.phase === "ending") return <><AmbientHardwareCoordinator />{clueNotice}<Ending onOpenLibrary={() => setUserToggledLibrary(true)} /></>;
 
   return (
-    <><div className="app-shell">
+    <><AmbientHardwareCoordinator /><div className="app-shell">
       <TopBar chapter={game.chapter} onDemo={() => setDemo(true)} onHome={() => { setUserToggledLibrary(true); setIntro(false); }} onHardware={() => setHardwareOpen(true)} />
       <main className="app-content">
         {activeView === "tonight" && <Tonight onLaunch={game.startNight} onHardware={() => setHardwareOpen(true)} />}

@@ -447,6 +447,128 @@ test("sleep hardware authorizes a virtual ring and returns a local morning recei
   expect(JSON.stringify(hardwareState)).not.toContain("samples");
 });
 
+test("Home Assistant pairs a safe room device and never blocks the night shift", async ({ page }) => {
+  let paired = false;
+  const bridgeCalls: Array<{ path: string; body?: Record<string, unknown> }> = [];
+  await page.route("http://localhost:43117/v1/**", async (route) => {
+    const request = route.request();
+    const url = new URL(request.url());
+    const path = url.pathname;
+    const body = request.postDataJSON() as Record<string, unknown> | null;
+    if (path === "/v1/status") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          bridge: "night-shift-home-assistant",
+          version: "0.1.0",
+          paired,
+          homeAssistant: paired ? "online" : "connecting",
+          instanceName: paired ? "Home Assistant 2026.7.0" : undefined,
+          entityCount: paired ? 3 : 0,
+        }),
+      });
+      return;
+    }
+    if (path === "/v1/pair") {
+      paired = body?.code === "654321";
+      bridgeCalls.push({ path, body: body ?? undefined });
+      await route.fulfill({
+        status: paired ? 200 : 401,
+        contentType: "application/json",
+        headers: paired
+          ? { "Set-Cookie": "night_shift_ha_session=test; HttpOnly; SameSite=Strict; Path=/" }
+          : {},
+        body: JSON.stringify(paired ? { paired: true } : { error: "bad code" }),
+      });
+      return;
+    }
+    if (path === "/v1/entities") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          entities: [
+            {
+              id: "light.desk_lamp",
+              name: "Desk Lamp",
+              domain: "light",
+              state: "off",
+              available: true,
+              controllable: true,
+              capabilities: ["turn-on", "turn-off", "brightness", "color"],
+              attributes: {},
+            },
+            {
+              id: "sensor.room_temperature",
+              name: "Room Temperature",
+              domain: "sensor",
+              state: "21.5",
+              available: true,
+              controllable: false,
+              capabilities: ["read"],
+              attributes: { unit: "°C" },
+            },
+          ],
+        }),
+      });
+      return;
+    }
+    if (path === "/v1/bindings" && request.method() === "GET") {
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ bindings: {} }) });
+      return;
+    }
+    if (path === "/v1/bindings") {
+      bridgeCalls.push({ path, body: body ?? undefined });
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+      return;
+    }
+    if (path === "/v1/test") {
+      bridgeCalls.push({ path, body: body ?? undefined });
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ tested: "light.desk_lamp" }) });
+      return;
+    }
+    if (path === "/v1/cues") {
+      bridgeCalls.push({ path, body: body ?? undefined });
+      await route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "HA disconnected" }) });
+      return;
+    }
+    if (path === "/v1/events") {
+      await route.abort("blockedbyclient");
+      return;
+    }
+    await route.fulfill({ status: 200, contentType: "application/json", body: "{}" });
+  });
+
+  await openFirstNight(page);
+  await page.getByRole("button", { name: /打开睡眠硬件中心/ }).first().click();
+  await page.getByRole("tab", { name: /房间外设/ }).click();
+  await expect(page.getByText("本地桥已经找到")).toBeVisible();
+  await page.getByRole("textbox", { name: "六位配对码" }).fill("654321");
+  await page.getByRole("button", { name: "配对本地桥" }).click();
+  await expect(page.getByText("房间外设已经接入")).toBeVisible();
+  await expect(page.getByText("Room Temperature")).toBeVisible();
+
+  const departure = page.locator(".ambient-cue-list article").filter({ hasText: "夜班出发" });
+  await departure.getByRole("combobox").selectOption("light.desk_lamp");
+  await departure.getByRole("button", { name: "试运行" }).click();
+  await page.getByRole("button", { name: "开启夜班联动" }).click();
+  await expect(page.getByRole("button", { name: "夜班联动已开启" })).toHaveAttribute("aria-pressed", "true");
+
+  const persisted = await page.evaluate(() => localStorage.getItem("night-shift-ambient-hardware-v1"));
+  expect(persisted).toContain("light.desk_lamp");
+  expect(persisted).not.toContain("Desk Lamp");
+  expect(persisted).not.toContain("secret");
+
+  await page.getByRole("button", { name: "关闭", exact: true }).click();
+  await page.getByRole("button", { name: /今晚交给你了/ }).click();
+  await expect(page.locator(".night-run")).toBeVisible();
+  await expect.poll(() => bridgeCalls.some((call) => call.path === "/v1/cues"
+    && call.body?.cue === "night.started")).toBe(true);
+  expect(bridgeCalls.some((call) => call.path === "/v1/test"
+    && call.body?.entityId === "light.desk_lamp")).toBe(true);
+});
+
 test("sleep hardware keeps the active device while browsing drafts and resets panel scroll", async ({ page }) => {
   await openFirstNight(page);
   await page.getByRole("button", { name: /打开睡眠硬件中心/ }).first().click();
