@@ -6,7 +6,6 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/feat-night-diorama]] | `feat/night-diorama` | in_progress | auto | 0/5 | 实现夜行立体纸剧场组件与样式 |
 
 ## 使用规则
 
