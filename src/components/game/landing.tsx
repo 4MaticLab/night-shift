@@ -59,7 +59,7 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
       </section>
       <section className="campaign-shelf" aria-label={t("案件剧本选择")}>
         <header>
-          <div><small>CASE LIBRARY · 02 FILES</small><h2>{t("今晚从哪一宗开始？")}</h2></div>
+          <div><small>CASE LIBRARY · {String(campaignRegistry.length).padStart(2, "0")} FILES</small><h2>{t("今晚从哪一宗开始？")}</h2></div>
           <span>{t("本地独立存档")}</span>
         </header>
         <motion.article className="featured-case" key={campaign.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} aria-live="polite">

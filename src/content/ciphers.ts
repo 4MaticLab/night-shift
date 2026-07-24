@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { LAST_TRAM_CAMPAIGN_ID } from "./campaigns/last-tram";
 import { RAIN_RADIO_CAMPAIGN_ID } from "./campaigns/rain-radio";
+import { THIRTEENTH_LOAF_CAMPAIGN_ID } from "./campaigns/thirteenth-loaf";
 
 const cipherDialSchema = z.object({
   min: z.number(),
@@ -224,6 +225,60 @@ const rainRadioCiphers = [
   },
 ].map((challenge) => cipherChallengeSchema.parse(challenge));
 
+const thirteenthLoafCiphers = [
+  {
+    id: "loaf-thirteen-count",
+    campaignId: THIRTEENTH_LOAF_CAMPAIGN_ID,
+    order: 1,
+    archiveLabel: "OVEN NOTE 01 · DAILY TALLY",
+    title: "没有主人的烘焙总数",
+    subtitle: "账房把十二枚持份环和一张空白访客牌放在同一行。",
+    requiredClueIds: ["extra-loaf", "twelve-tallies", "blank-guest-share"],
+    cipherLabel: "每日烘焙算式",
+    cipherTokens: ["12 枚持份环", "+", "1 张无字访客牌"],
+    instruction: "持份环代表有主份额；访客牌虽不对应成员，仍计入每日必须完成的烘焙量。",
+    prompt: "地下公共炉每天至少要烤出多少只面包？",
+    answerAliases: ["13", "十三", "十三只"],
+    hints: ["合作社只有十二名持份人，但访客份额也必须被烤出来。", "12 + 1 = 13。"],
+    revealTitle: "13 · 多出的不是成员",
+    revealText: "第十三只面包从来不属于第十三个人。它是一项每天重新履行、任何需要者都能使用的访客份额。",
+  },
+  {
+    id: "loaf-fire-direction",
+    campaignId: THIRTEENTH_LOAF_CAMPAIGN_ID,
+    order: 2,
+    archiveLabel: "OVEN NOTE 02 · HEAT DIRECTION",
+    title: "焦痕的逆向口供",
+    subtitle: "三件物证分别保存了热量抵达的先后顺序。",
+    requiredClueIds: ["conduit-scorch", "intact-oven", "corrected-inspection"],
+    cipherLabel: "热量顺序",
+    cipherTokens: ["主管熔断", "→", "外墙碳化", "→", "炉门受热"],
+    instruction: "从最先损坏的物件读到最后受热的位置。答案不是被指控的设备，而是热量真正开始的地方。",
+    prompt: "火灾从哪一套设施开始？",
+    answerAliases: ["热力主管", "市政热力主管", "主管", "HEAT MAIN", "CONDUIT"],
+    hints: ["面包炉内部没有由内向外的裂纹。", "最先熔化的是炉桥下的市政热力主管。"],
+    revealTitle: "MUNICIPAL HEAT MAIN · 市政热力主管",
+    revealText: "熔断器、焦痕与修正页给出同一个方向：火从公共管道烧进面包房，原报告把箭头倒转了。",
+  },
+  {
+    id: "loaf-common-code",
+    campaignId: THIRTEENTH_LOAF_CAMPAIGN_ID,
+    order: 3,
+    archiveLabel: "OVEN NOTE 03 · STARTER LABEL",
+    title: "酵母罐的六格暗号",
+    subtitle: "分散酵母清册只留下六个按字母顺序编号的格子。",
+    requiredClueIds: ["starter-census", "night-bake-ledger", "courier-route"],
+    cipherLabel: "窗台编号",
+    cipherTokens: ["03", "15", "13", "13", "15", "14"],
+    instruction: "把 A 记作 01、B 记作 02，依次换回六个字母。它描述的不是某位领袖，而是酵母和劳动的保管方式。",
+    prompt: "这套夜间网络把酵母当作什么来保管？",
+    answerAliases: ["COMMON", "公共", "共有", "共同"],
+    hints: ["03、15 分别对应 C、O。", "六个字母依次是 C、O、M、M、O、N。"],
+    revealTitle: "COMMON · 共同保管",
+    revealText: "酵母不由一个人拥有或控制。分散的窗台与无负责人夜账共同证明，合作社靠共享保管而不是隐秘领袖延续。",
+  },
+].map((challenge) => cipherChallengeSchema.parse(challenge));
+
 const cipherRegistry: Record<string, CipherDeskDefinition> = {
   [LAST_TRAM_CAMPAIGN_ID]: cipherDeskSchema.parse({
     campaignId: LAST_TRAM_CAMPAIGN_ID,
@@ -272,6 +327,30 @@ const cipherRegistry: Record<string, CipherDeskDefinition> = {
       hints: ["发报格式先写发送者，再写频道。", "完整顺序是 SENDER → CHANNEL → MESSAGE。"],
     },
     challenges: rainRadioCiphers,
+  }),
+  [THIRTEENTH_LOAF_CAMPAIGN_ID]: cipherDeskSchema.parse({
+    campaignId: THIRTEENTH_LOAF_CAMPAIGN_ID,
+    archiveLabel: "COMMUNAL OVEN NOTES · 公共炉旁注",
+    title: "城市把所有权、火灾方向与共同劳动，藏进每日烘焙的算式里。",
+    description: "三组旁注只重排已经归档的事实。答错不会消耗物证，打开提示也不会影响关系或结局资格。",
+    completionLabel: "ALL THREE OVEN NOTES FILED",
+    completionTitle: "第十三份已经显影",
+    completionText: "十三只面包、市政热力主管和共同保管已经互相作证：这里没有失踪成员或秘密店主，只有一项被持续履行的公共份额。",
+    relay: {
+      id: "thirteenth-loaf-final-relay",
+      archiveLabel: "FINAL CHARTER · 最终章程",
+      title: "把三份答案写回修复后的合作社章程",
+      description: "何砾留下三个字段：CAUSE、OWNERS、RIGHT。每份解密答案只能使用一次。",
+      instruction: "依次选择 CAUSE（谁承担火灾责任）、OWNERS（房契归还给谁）、RIGHT（哪项权利继续无主）。点已放入的碎片可以撤回。",
+      fragments: [
+        { id: "loaf-right", label: "GUEST SHARE", note: "RIGHT · 任何需要者都可使用的访客份额" },
+        { id: "loaf-cause", label: "MUNICIPAL HEAT MAIN", note: "CAUSE · 炉桥下超压的公共设施" },
+        { id: "loaf-owners", label: "12 MEMBERS", note: "OWNERS · 名册、围裙与持份环对应的人" },
+      ],
+      solutionIds: ["loaf-cause", "loaf-owners", "loaf-right"],
+      hints: ["先写造成火灾的设施，再写恢复所有权的人。", "完整顺序是 CAUSE → OWNERS → RIGHT。"],
+    },
+    challenges: thirteenthLoafCiphers,
   }),
 };
 

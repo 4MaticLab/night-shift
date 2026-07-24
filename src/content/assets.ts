@@ -1,3 +1,5 @@
+import { thirteenthLoafAssets } from "./thirteenth-loaf-assets";
+
 export interface GameAsset {
   id: string;
   src: string;
@@ -311,6 +313,7 @@ export const assets = {
   hardwareVirtualPillow: {
     id: "hardware.virtual-pillow", src: "/art/hardware/virtual-pillow-v1.webp", alt: "带呼吸波纹缝线与传感扣的深蓝智能枕", category: "hardware-illustration", status: "complete",
   },
+  ...thirteenthLoafAssets,
 } as const satisfies Record<string, GameAsset>;
 
 export const assetManifest = Object.values(assets);

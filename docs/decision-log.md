@@ -152,3 +152,12 @@
 - 决定：使用 Injective EVM Testnet ERC-721。服务端只为编译期案件注册表中的收藏品签发绑定接收钱包、案件、收藏、元数据哈希和 15 分钟期限的 EIP-712 voucher；前端钱包调用合约 `redeem`，合约承担签名校验和最终去重。浏览器仅保存公开回执，整个域与游戏存档、睡眠数据和结局资格隔离。
 - 代价：需要部署 Solidity 合约、准备测试网 INJ 并保管服务端签名密钥；进程内 API 限流不等同生产级跨实例防滥用。换来的收益是密钥不下发、钱包仍亲自 mint、未配置时完整 local-first 降级。
 - 相关：[[docs/injective-keepsake-mint]]、[[docs/architecture]]、[[docs/privacy-and-guardrails]]。
+
+## ADR-018：第三案保留退役 ID 缺口并使用专属视觉包
+
+- 日期：2026-07-24
+- 状态：已采用
+- 背景：案件书架需要第三个完整 Night Shift 五夜案例来证明内容扩展能力；已退役 Blackwater Creek 曾使用 `case-003`，旧浏览器可能仍保存该 ID。第二案又复用了首案部分画面，不能充分证明剧本与视觉都能作为独立内容包接入。
+- 决定：《黎明前出炉的第十三个面包》在书架显示 CASE 003，技术 ID 使用 `case-004`，让旧 `case-003` 继续按非法案件安全回落。案件使用 34 张专属静态 WebP，覆盖四幕、夜印、明信片、植物、收藏、人物和城区；通用运行时仍只读取 manifest，不按新 ID 增加业务分支。
+- 代价：展示编号与技术 ID 不再连续一致，维护者必须从 `presentation.archiveNumber` 理解书架编号；专属视觉显著增加仓库体积和内容制作成本。换来的收益是旧存档不被误解释，并形成可复用的完整案件交付基线。
+- 相关：[[docs/thirteenth-loaf-story-bible]]、[[docs/art-prompts/thirteenth-loaf-visual-archive]]、[[docs/campaign-authoring]]。

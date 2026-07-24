@@ -302,7 +302,11 @@ export function Ending({ onOpenLibrary }: { onOpenLibrary: () => void }) {
     const postcard = campaign.postcards.find((item) => item.chapter === chapterNumber);
     const botanical = campaign.botanicals.find((item) => item.chapter === chapterNumber);
     if (!chapter || !postcard || !botanical) return [];
-    const direction = getCampaignRouteDirection(campaign, chapterNumber, choiceHistory[chapterNumber] ?? "");
+    const recordedChoiceId = choiceHistory[chapterNumber];
+    const validChoiceId = chapter.choices.some((choice) => choice.id === recordedChoiceId)
+      ? recordedChoiceId
+      : "";
+    const direction = getCampaignRouteDirection(campaign, chapterNumber, validChoiceId);
     const preparation = localize(getPreparation(preparationHistory[chapterNumber] ?? "side-lamp"));
     const growth = growthHistory[chapterNumber];
     const souvenirRecord = souvenirHistory[chapterNumber];
