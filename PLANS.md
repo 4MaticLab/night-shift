@@ -6,7 +6,6 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-injective-vercel-enable]] | `codex/injective-testnet-deploy` | `completed` | `manual` | 5/5 | 退役计划并更新 PR |
 
 ## 使用规则
 
