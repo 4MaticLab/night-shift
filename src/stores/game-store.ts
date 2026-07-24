@@ -420,7 +420,7 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   },
 }), {
   name: "night-shift-save-v1",
-  version: 16,
+  version: 17,
   migrate: migrateGameState,
 }));
 

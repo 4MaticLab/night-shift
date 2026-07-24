@@ -372,6 +372,26 @@ describe("Night Shift game store", () => {
     expect(migrated.boardPositions).toEqual({ "radio-warm-dial": { x: 200, y: 140 } });
   });
 
+  it("repairs a pre-third-case save that carries a choice from another case", () => {
+    const migrated = storeModule.migrateGameState({
+      campaignId: THIRTEENTH_LOAF_CAMPAIGN_ID,
+      started: true,
+      chapter: 5,
+      phase: "ending",
+      completedReports: [1, 2, 3, 4, 5],
+      choiceHistory: { 1: "source", 2: "roster", 3: "conduit", 4: "jars", 5: "announce" },
+      endingId: "public",
+    });
+
+    expect(migrated.choiceHistory).toEqual({
+      2: "roster",
+      3: "conduit",
+      4: "jars",
+      5: "announce",
+    });
+    expect(migrated.growthHistory[1]?.choiceId).toBe("cabinet");
+  });
+
   it("persists valid evidence positions and can restore the default desk", () => {
     const state = storeModule.useGameStore.getState();
     expect(state.setBoardPosition("ticket-date", { x: 120, y: 90 })).toBe(false);
