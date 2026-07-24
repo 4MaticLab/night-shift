@@ -5120,7 +5120,7 @@ blockquote {
   margin-top: 13px;
   margin-bottom: 0;
   color: #8f98a4;
-  font: 11px/1.7 var(--font-manrope);
+  font: 11px/1.7 var(--font-baskerville), var(--font-noto-serif-sc), "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
 }
 
 .collection-evidence-cabinet .collection-grid {
