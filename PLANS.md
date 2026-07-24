@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-当前 checkout 没有尚未退役的临时计划；已退役计划不再列入活动索引。
+| [[plans/codex-ci-quality-gate]] | `codex/ci-quality-gate` | `in_progress` | `manual` | 0/6 | 新增主 CI 与 Windows smoke workflow |
 
 ## 使用规则
 
