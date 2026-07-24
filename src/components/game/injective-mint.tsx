@@ -25,6 +25,7 @@ import {
 } from "@/src/lib/injective/keepsake";
 import { saveMintReceipt } from "@/src/lib/injective/client";
 import { useI18n } from "@/src/i18n/provider";
+import { useAccessibleDialog } from "@/src/lib/use-accessible-dialog";
 
 type MintStep = "checking" | "unconfigured" | "ready" | "connecting" | "authorizing" | "confirming" | "success" | "error";
 
@@ -66,28 +67,14 @@ export function InjectiveMintDialog({
   onMinted: (receipt: MintKeepsakeReceipt) => void;
 }) {
   const { locale, t } = useI18n();
-  const closeRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
   const [step, setStep] = useState<MintStep>("checking");
   const [status, setStatus] = useState<MintStatus | null>(null);
   const [wallet, setWallet] = useState<Address | null>(null);
   const [receipt, setReceipt] = useState<MintKeepsakeReceipt | null>(null);
   const [problem, setProblem] = useState("");
 
-  useEffect(() => {
-    const priorFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const priorOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = priorOverflow;
-      priorFocus?.focus();
-    };
-  }, [onClose]);
+  useAccessibleDialog(dialogRef, onClose);
 
   useEffect(() => {
     let active = true;
@@ -263,6 +250,7 @@ export function InjectiveMintDialog({
 
   return <motion.div
     className="injective-mint-backdrop"
+    data-dialog-layer
     role="presentation"
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -272,15 +260,17 @@ export function InjectiveMintDialog({
     }}
   >
     <motion.section
+      ref={dialogRef}
       className="injective-mint-dialog"
       role="dialog"
       aria-modal="true"
       aria-labelledby="injective-mint-title"
+      tabIndex={-1}
       initial={{ y: 22, opacity: 0, scale: .985 }}
       animate={{ y: 0, opacity: 1, scale: 1 }}
       exit={{ y: 16, opacity: 0, scale: .985 }}
     >
-      <button ref={closeRef} className="injective-mint-close" type="button" onClick={onClose} aria-label={t("关闭链上归档")}><X /></button>
+      <button className="injective-mint-close" type="button" data-dialog-initial-focus onClick={onClose} aria-label={t("关闭链上归档")}><X /></button>
       <div className="injective-mint-plate">
         <span className="injective-chain-mark">INJ · 1439</span>
         <Image src={asset.src} alt={asset.alt} fill sizes="(max-width: 600px) 100vw, 430px" />
