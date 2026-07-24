@@ -59,6 +59,9 @@ export function defineCampaign<const T extends CampaignManifest>(manifest: T): T
   const chapterNumbers = new Set(manifest.case.chapters.map((chapter) => chapter.number));
   const clueIds = new Set(manifest.case.clues.map((clue) => clue.id));
   const collectibleIds = new Set(manifest.case.collectibles.map((item) => item.id));
+  if (manifest.case.chapters.length !== 5) {
+    throw new Error(`Campaign ${manifest.id} must use the shared five-night lifecycle`);
+  }
   if (chapterNumbers.size !== manifest.case.chapters.length) throw new Error(`Campaign ${manifest.id} has duplicate chapter numbers`);
   if (manifest.case.chapters.some((chapter, index) => chapter.number !== index + 1)) {
     throw new Error(`Campaign ${manifest.id} chapters must be ordered consecutively from 1`);

@@ -4,14 +4,14 @@
 
 ## 快速索引
 
-- 产品与世界观：[[docs/product-overview]]、[[docs/story-bible]]、[[docs/rain-radio-story-bible]]、[[docs/thirteenth-loaf-story-bible]]
+- 产品与世界观：[[docs/product-overview]]、[[docs/story-bible]]、[[docs/rain-radio-story-bible]]、[[docs/thirteenth-loaf-story-bible]]、[[docs/chihaya-noa-story-bible]]
 - 案件包创作：[[docs/campaign-authoring]]
 - 北极星与参考原则：[[docs/north-star]]
 - 工程与状态模型：[[docs/architecture]]
 - 剧本翻译：[[docs/translation-guide]]
 - 睡眠硬件与隐私：[[docs/sleep-hardware-bridge]]、[[docs/privacy-and-guardrails]]
 - 链上藏品：[[docs/injective-keepsake-mint]]
-- 视觉与素材：[[docs/art-direction]]、[[docs/asset-list]]、[[docs/art-prompts/global-style]]、[[docs/art-prompts/lin-du-handoff-portrait]]、[[docs/art-prompts/city-witness-portraits]]、[[docs/art-prompts/foglight-districts]]、[[docs/art-prompts/four-act-headers]]、[[docs/art-prompts/thirteenth-loaf-visual-archive]]
+- 视觉与素材：[[docs/art-direction]]、[[docs/asset-list]]、[[docs/art-prompts/global-style]]、[[docs/art-prompts/lin-du-handoff-portrait]]、[[docs/art-prompts/city-witness-portraits]]、[[docs/art-prompts/foglight-districts]]、[[docs/art-prompts/four-act-headers]]、[[docs/art-prompts/thirteenth-loaf-visual-archive]]、[[docs/art-prompts/chihaya-noa-visual-archive]]
 - 演示与验收：[[docs/demo-script]]、[[docs/quality-baseline]]
 - 文档维护规范：[[docs/documentation-guide]]
 - 当前 checkout 的活跃计划：[[PLANS]]
