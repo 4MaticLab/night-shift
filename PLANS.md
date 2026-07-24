@@ -6,7 +6,6 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-campaign-entry-prologue]] | `codex/campaign-entry-prologue` | `completed` | `manual` | 6/6 | 验收通过，等待退役并创建 PR |
 
 ## 使用规则
 
