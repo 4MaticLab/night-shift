@@ -72,7 +72,9 @@ Demo、睡眠硬件、好友线索、Injective、证物信笺和推论信笺共�
 
 `AppBootBoundary` 在应用首次进入时把真实产品内容标记为 `inert`，避免半水合页面被误点；它等待 `window.load`、`document.fonts.ready` 与当前案件首页主视觉的加载或失败结果。加载幕至少保留 700 ms 以避免冷暖缓存之间闪烁，最迟 7 秒主动放行，图片失败也会安全进入产品。退出后不会因切换案件重复播放整页加载幕。案件板、夜间循环、结局与硬件中心通过 `next/dynamic` 从首页入口拆分，在真正进入对应界面时使用轻量局部反馈。
 
-主要阶段为 `day → ready → night → morning → ending`。章节结算只通过当前案件 manifest 的确定性内容函数产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 16。`campaignId` 标识活动案件，活动进度仍保持扁平供组件读取；切换时先把它快照到 `campaignSaves[campaignId]`，再恢复目标案件或创建新档。章节、线索、关系、密文解答、结局、案板坐标、夜间历史和放下纸条因此按案隔离。v13 及更早的单案件存档默认归入 `case-001`，原有数据无需清除；v15 对纸条记录逐章校验，v16 只保留当前案件注册表中的合法密文 ID，旧档默认没有解密记录。
+主要阶段为 `day → ready → night → morning → ending`。章节结算只通过当前案件 manifest 的确定性内容函数产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 17。`campaignId` 标识活动案件，活动进度仍保持扁平供组件读取；切换时先把它快照到 `campaignSaves[campaignId]`，再恢复目标案件或创建新档。章节、线索、关系、密文解答、结局、案板坐标、夜间历史和放下纸条因此按案隔离。v13 及更早的单案件存档默认归入 `case-001`，原有数据无需清除；v15 对纸条记录逐章校验，v16 只保留当前案件注册表中的合法密文 ID，旧档默认没有解密记录；v17 扩展当前案件注册表与迁移边界。本次晨报重放不增加任何持久化字段。
+
+「今晨」不再把 `phase === morning` 当作晨报存在性的唯一来源。页面从 `completedReports` 选择最新合法章节，并把该章节显式传给 `MorningReport`；组件再从 `choiceHistory`、`preparationHistory`、`growthHistory`、`societyHistory`、`correspondenceHistory`、`souvenirHistory`、`opportunityHistory` 与 `restRitualHistory` 读取同一夜快照。方向、准备物、质量、时长、时辰和睡隙优先取同一份 `growthHistory`；只有 `endedAt`、质量与时辰均匹配时才允许全局 `lastSleepSession` 补充实际会话和硬件回执，避免跨章混读。去案件板只切换视图并保持 `morning`，明确结束当日才调用 `continueDay()`；进入 `day／ready` 后仍可严格只读地重放最新晨报，未寄出的问函也不能在日期结束后补答。该模型不增加存档字段或版本，也不会再次调用任何结算写入。
 
 语言协商在服务端首帧前完成：合法的 `night-shift-locale` 偏好 Cookie 优先，其次按质量权重读取请求 `Accept-Language` 中第一个受支持的 `en-*` 或 `zh-*`，最后回退 `zh-CN`。根布局把同一结果写入 `<html lang>` 并通过 `RequestLocaleProvider` 交给加载幕与 `I18nProvider`，因此英文浏览器不会先看到中文首帧。自动检测本身不建立 Cookie；只有用户手动选择或迁移既有 `localStorage` 偏好时，才写入一年期、`SameSite=Lax` 的同名 Cookie。手动选择同时保留 `localStorage` 用于跨标签同步，优先级仍以 Cookie 为准；语言偏好不进入任一游戏 store、存档版本或结算函数。
 
