@@ -14,7 +14,6 @@
   --moss: #72836b;
   --fog: #aeb7c2;
   --primary: #c59a5a;
-  --topbar-height: 74px;
   --nav-clearance: 96px;
 }
 
@@ -283,7 +282,7 @@ body.app-is-booting {
 }
 
 .game-section-loading {
-  min-height: min(620px, calc(100svh - var(--topbar-height) - var(--nav-clearance)));
+  min-height: min(620px, calc(100svh - var(--nav-clearance)));
   display: grid;
   place-content: center;
   gap: 9px;
@@ -1295,7 +1294,7 @@ blockquote {
 .app-content {
   min-height: calc(100vh - var(--nav-clearance));
   min-height: calc(100svh - var(--nav-clearance));
-  padding-top: calc(var(--topbar-height) + env(safe-area-inset-top));
+  padding-top: calc(40px + env(safe-area-inset-top));
 }
 
 @media (max-width: 760px) {
@@ -1307,6 +1306,10 @@ blockquote {
 
   .app-content {
     padding-top: calc(116px + env(safe-area-inset-top));
+  }
+
+  .content-grid {
+    height: calc(100svh - var(--nav-clearance) - 116px);
   }
 }
 
@@ -1372,7 +1375,7 @@ blockquote {
 .content-grid {
   display: grid;
   grid-template-columns: 1.1fr .9fr;
-  height: calc(100svh - var(--topbar-height) - var(--nav-clearance));
+  height: calc(100svh - var(--nav-clearance) - 40px);
   min-height: 590px;
   overflow: hidden;
 }
@@ -9571,7 +9574,7 @@ blockquote {
   }
 
   .tonight-page .desk-scene {
-    height: min(720px, calc(100svh - var(--topbar-height)));
+    height: min(720px, calc(100svh - 116px));
     min-height: 620px;
     background-position: 20% center;
   }
