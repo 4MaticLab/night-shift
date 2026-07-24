@@ -25,6 +25,7 @@ import { CipherDesk } from "./cipher-desk";
 import { InjectiveMintDialog } from "./injective-mint";
 import { readMintReceipts } from "@/src/lib/injective/client";
 import { ClueDossierDialog, SynthesisRevealDialog } from "./evidence-letters";
+import { TarotDraw } from "./tarot-draw";
 
 type ArchiveFilter = "all" | "clues" | "inferences" | "unused";
 
@@ -242,7 +243,7 @@ export function Collection() {
   const { campaign, localize, locale, t } = useI18n();
   const [mintingCollectible, setMintingCollectible] = useState<Collectible | null>(null);
   const [mintedCollectibleIds, setMintedCollectibleIds] = useState<string[]>([]);
-  const [activeCollectionCategory, setActiveCollectionCategory] = useState<"evidence" | "journey" | "city" | "pocket">("evidence");
+  const [activeCollectionCategory, setActiveCollectionCategory] = useState<"evidence" | "journey" | "city" | "tarot" | "pocket">("evidence");
   const nightCount = campaign.case.chapters.length;
   const finalChapter = campaign.case.chapters.at(-1)!.number;
   const opportunityDays = campaign.case.chapters.filter((entry) => entry.number >= 2).map((entry) => entry.number);
@@ -281,6 +282,13 @@ export function Collection() {
       count: locale === "en" ? "4 shelves" : "4 组档案",
     },
     {
+      id: "tarot" as const,
+      targetId: "collection-night-omens",
+      icon: <Sparkles />,
+      label: locale === "en" ? "Night omens" : "夜兆牌桌",
+      count: locale === "en" ? "1 daily" : "每日 1 张",
+    },
+    {
       id: "pocket" as const,
       targetId: "collection-pocket-drawer",
       icon: <KeyRound />,
@@ -296,7 +304,7 @@ export function Collection() {
   return <div className="collection-page">
     <div className="page-title"><div><p className="eyebrow">NIGHT CABINET · {t("夜间陈列柜")}</p><h2>{locale === "en" ? <>Time did not vanish.<br />Nor did the city forget.</> : <>时间没有消失。<br />城市也没有忘记。</>}</h2></div><p>{locale === "en" ? `Every wait leaves a night seal, grows a plant, returns a postcard, and lets one of the underground societies remember how you worked. These are not scores, but ${nightCount} stretches of time that can be told again.` : `每次等待都会形成一枚夜印、长成一株植物、寄回一张明信片，也让某个地下社团记住你的做事方式。这里保存的不是分数，是 ${nightCount} 段可以重新讲述的时间。`}</p></div>
     <nav className="collection-index" aria-label={locale === "en" ? "Collection archive groups" : "收藏档案分类"}>
-      <div className="collection-index-heading"><small>ARCHIVE INDEX · 04 DRAWERS</small><b>{locale === "en" ? "Choose what you came back to find." : "先看你这次回来想找什么。"}</b></div>
+      <div className="collection-index-heading"><small>ARCHIVE INDEX · 05 DRAWERS</small><b>{locale === "en" ? "Choose what you came back to find." : "先看你这次回来想找什么。"}</b></div>
       <div className="collection-index-tabs">
         {collectionCategories.map((category) => <button type="button" aria-pressed={activeCollectionCategory === category.id} className={activeCollectionCategory === category.id ? "active" : ""} onClick={() => selectCollectionCategory(category.id, category.targetId)} key={category.id}>{category.icon}<span><b>{category.label}</b><small>{category.count}</small></span></button>)}
       </div>
@@ -307,6 +315,7 @@ export function Collection() {
       <div className="society-ledger-grid">{citySocieties.map((source) => { const society = localize(source); const records = societyRecords.filter((record) => record.societyId === society.id); const latest = records.at(-1); return <article className={latest ? `society-ledger-card touched standing-${latest.standing}` : "society-ledger-card"} key={society.id}><SocietyCrest societyId={society.id} compact /><div className="society-ledger-copy"><small>{society.archiveName}</small><h3>{society.name}</h3><p className="society-concern">{t("关心")} · {society.concern}</p><blockquote>“{society.publicRumor}”</blockquote><div className="society-current-address"><small>{t("城里目前怎样称呼你")}</small><b>{latest ? t(getSocietyTitle(latest)) : t("尚未被正式称呼")}</b></div><p className="society-rule">{t("内部规矩")} · {society.privateRule}</p></div><div className="society-trace">{records.length ? records.map((record) => { const direction = getCampaignRouteDirection(campaign, record.chapter, record.choiceId); const replyRecord = correspondenceHistory[record.chapter]; return <div key={record.chapter}><span>{locale === "en" ? `Night 0${record.chapter}` : `夜 0${record.chapter}`}</span><b>{direction.dispatchTitle}</b><small>{replyRecord ? t("已回信") : t("未回信")}</small></div>; }) : <p>{t("尚无一条已归来的路线惊动他们。")}</p>}</div></article>; })}</div>
       {societyRecords.length > 0 && <div className="correspondence-ledger"><div className="correspondence-ledger-heading"><small>RETURNED ANSWERS · {correspondenceRecords.length}/{societyRecords.length}</small><h4>{t("问函与答复履历")}</h4><p>{t("没有寄出的答复也会保留为空白，不影响任何案件成果。")}</p></div><div className="correspondence-ledger-grid">{societyRecords.map((memory) => { const society = localize(citySocieties.find((item) => item.id === memory.societyId)!); const prompt = localize(getCorrespondencePrompt(memory)); const record = correspondenceHistory[memory.chapter]; const reply = record ? localize(getCorrespondenceReply(record)) : null; return <article className={reply ? "correspondence-ledger-entry answered" : "correspondence-ledger-entry"} key={memory.chapter}><small>{locale === "en" ? `Night 0${memory.chapter}` : `夜 0${memory.chapter}`} · {society.name}</small><h5>{prompt.question}</h5>{reply ? <><div><small>{t("你的答复")}</small><b>{reply.label}</b><p>{reply.summary}</p></div><blockquote><small>{t("留下的余波")}</small>{reply.echo}</blockquote></> : <div className="unanswered"><small>{t("未寄出的信封")}</small><b>{t("这一夜没有答复")}</b><p>{t("故事照常继续，城市没有替你的沉默扣除任何东西。")}</p></div>}</article>; })}</div></div>}
     </section>
+    <TarotDraw active={activeCollectionCategory === "tarot"} />
     <section id="collection-pocket-drawer" className={`pocket-drawer ${collectionSectionClass("pocket")}`}>
       <div className="shelf-heading"><small>UNASKED-FOR SOUVENIRS · {Object.keys(souvenirHistory).length}/{nightCount} NIGHTS</small><h3>{t("口袋抽屉")}</h3></div>
       <p className="pocket-drawer-intro">{locale === "en" ? `Directions and packed items lead ${campaign.presentation.detectiveName} through different corners of the city, but there is no exchange table and refreshing cannot reroll a find. Each object from these ${nightCount} nights is merely a piece of incidental testimony, never an advantage.` : `方向与随身物会让${campaign.presentation.detectiveName}经过不同的城市角落，但没有兑换表，也不能靠刷新重抽。${nightCount} 夜里出现的每件小物都只是一段旁证，不会替案件增加优势。`}</p>

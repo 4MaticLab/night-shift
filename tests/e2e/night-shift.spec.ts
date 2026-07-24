@@ -734,6 +734,34 @@ test("keeps returned postcards in the journey album", async ({ page }) => {
   await expect(page.getByText(/DRAWER CLOSED|DISTRICT UNVISITED|PERSON SEALED/)).toHaveCount(0);
 });
 
+test("draws one local daily night omen without changing game progress", async ({ page }) => {
+  await openFirstNight(page);
+  await page.getByRole("link", { name: "收藏", exact: true }).click();
+  await expect(page.locator(".collection-page")).toBeVisible();
+  const gameStateBefore = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state);
+  await page.getByRole("button", { name: /夜兆牌桌/ }).click();
+
+  const table = page.locator("#collection-night-omens");
+  await expect(table).toBeVisible();
+  await expect(table).toContainText("每天从九张原创夜兆牌中翻开一张");
+  const draw = table.getByRole("button", { name: "抽取今日夜兆" });
+  await expect(draw).toBeEnabled();
+  await draw.click();
+  await expect(table.getByText(/今日解读 · (正位|逆位)/)).toBeVisible();
+  await expect(table.getByText("夜兆不改变线索、结局、收藏、睡眠评价或城市关系。")).toBeVisible();
+  await expect(table.getByRole("button", { name: "今日夜兆已归档" })).toBeDisabled();
+
+  const tarotState = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-tarot-v1")!).state);
+  expect(tarotState.localSeed).toBeGreaterThan(0);
+  expect(Object.keys(tarotState.records)).toHaveLength(1);
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-save-v1")!).state)).toEqual(gameStateBefore);
+
+  const revealedTitle = await table.locator(".night-omen-reading h4").textContent();
+  await page.reload();
+  await expect(page.locator("#collection-night-omens .night-omen-reading h4")).toHaveText(revealedTitle!);
+  await expect(page.locator("#collection-night-omens").getByRole("button", { name: "今日夜兆已归档" })).toBeDisabled();
+});
+
 test("keeps the desktop collection continuous while putting core evidence first", async ({ page }) => {
   await openMintableCollection(page);
   const archiveIndex = page.getByRole("navigation", { name: "收藏档案分类" });
@@ -741,20 +769,23 @@ test("keeps the desktop collection continuous while putting core evidence first"
   await expectMinimumTapTargets(archiveIndex.locator("button"));
   await expect(page.getByRole("button", { name: /核心物证/ })).toHaveAttribute("aria-pressed", "true");
 
-  const [evidence, journey, city, pocket] = await Promise.all([
+  const [evidence, journey, city, tarot, pocket] = await Promise.all([
     page.locator("#collection-core-evidence").boundingBox(),
     page.locator("#collection-returned-nights").boundingBox(),
     page.locator("#collection-city-echoes").boundingBox(),
+    page.locator("#collection-night-omens").boundingBox(),
     page.locator("#collection-pocket-drawer").boundingBox(),
   ]);
   expect(evidence).not.toBeNull();
   expect(journey).not.toBeNull();
   expect(city).not.toBeNull();
+  expect(tarot).not.toBeNull();
   expect(pocket).not.toBeNull();
   expect(evidence!.y).toBeLessThan(journey!.y);
   expect(journey!.y).toBeLessThan(city!.y);
-  expect(city!.y).toBeLessThan(pocket!.y);
-  await expect(page.locator(".collection-section")).toHaveCount(9);
+  expect(city!.y).toBeLessThan(tarot!.y);
+  expect(tarot!.y).toBeLessThan(pocket!.y);
+  await expect(page.locator(".collection-section")).toHaveCount(10);
   expect(await page.locator(".collection-section").evaluateAll(
     (sections) => sections.every((section) => getComputedStyle(section).display !== "none"),
   )).toBe(true);
