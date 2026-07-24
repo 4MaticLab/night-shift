@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope, Newsreader } from "next/font/google";
 import { headers } from "next/headers";
+import { ClickSpark } from "@/src/components/click-spark";
 import { RequestLocaleProvider } from "@/src/i18n/request-locale-provider";
 import { getRequestLocale } from "@/src/i18n/server";
 import "./globals.css";
@@ -27,5 +28,5 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const requestLocale = await getRequestLocale();
-  return <html lang={requestLocale}><body className={`${manrope.variable} ${newsreader.variable}`}><RequestLocaleProvider initialLocale={requestLocale}>{children}</RequestLocaleProvider></body></html>;
+  return <html lang={requestLocale}><body className={`${manrope.variable} ${newsreader.variable}`}><RequestLocaleProvider initialLocale={requestLocale}>{children}<ClickSpark /></RequestLocaleProvider></body></html>;
 }

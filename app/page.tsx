@@ -46,6 +46,8 @@ function GamePage() {
   const [hardwareOpen, setHardwareOpen] = useState(false);
   const processedClueQuery = useRef(false);
   const activeView: GameView = game.phase === "morning" && view === "tonight" ? "report" : view;
+  const latestReportChapter = game.completedReports.length ? Math.max(...game.completedReports) : null;
+  const reviewingCurrentMorning = game.phase === "morning" && latestReportChapter === game.chapter;
   const receiveSharedClue = game.receiveSharedClue;
   const switchCampaign = game.switchCampaign;
 
@@ -132,7 +134,16 @@ function GamePage() {
       <TopBar chapter={game.chapter} onDemo={() => setDemo(true)} onHome={() => { setUserToggledLibrary(true); setIntro(false); }} onHardware={() => setHardwareOpen(true)} />
       <main className="app-content">
         {activeView === "tonight" && <Tonight onLaunch={game.startNight} onHardware={() => setHardwareOpen(true)} />}
-        {activeView === "report" && (game.phase === "morning" ? <MorningReport onContinue={() => { game.continueDay(); changeView(game.chapter >= getCampaign(game.campaignId).case.chapters.at(-1)!.number ? "tonight" : "board"); }} onHardware={() => setHardwareOpen(true)} /> : <EmptyReport setView={changeView} />)}
+        {activeView === "report" && (latestReportChapter !== null
+          ? <MorningReport
+              reportChapter={latestReportChapter}
+              reviewingCurrentMorning={reviewingCurrentMorning}
+              onReviewEvidence={() => changeView("board")}
+              onFinishDay={() => { game.continueDay(); changeView("tonight"); }}
+              onPrepareTonight={() => changeView("tonight")}
+              onHardware={() => setHardwareOpen(true)}
+            />
+          : <EmptyReport setView={changeView} />)}
         {activeView === "board" && <CaseBoard />}
         {activeView === "collection" && <Collection />}
         {activeView === "archive" && <ArchivePage />}
