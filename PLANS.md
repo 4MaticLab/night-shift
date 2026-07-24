@@ -6,6 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
+| [[plans/codex-wagmi-wallet-connection]] | `codex/wagmi-wallet-connection` | `in_progress` | `auto` | 0/5 | 配置 wagmi provider 与 injected connector |
 
 ## 使用规则
 
