@@ -6,7 +6,6 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-wagmi-wallet-connection]] | `codex/wagmi-wallet-connection` | `completed` | `auto` | 5/5 | 退役计划并创建 PR |
 
 ## 使用规则
 
