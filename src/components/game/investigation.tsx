@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, FileCheck2, FileText, Flower2, KeyRound, Link2, QrCode, RotateCcw, Search, Sparkles, X } from "lucide-react";
@@ -25,13 +25,63 @@ import { useI18n } from "@/src/i18n/provider";
 import { CipherDesk } from "./cipher-desk";
 import { InjectiveMintDialog } from "./injective-mint";
 import { readMintReceipts } from "@/src/lib/injective/client";
+import { deriveEvidenceBoardHints } from "@/src/lib/game-engine/evidence-board";
+import { ClueDossierDialog, RelationRevealDialog } from "./evidence-letters";
 
-type EvidenceNode = Node<{ clue: Clue; selected: boolean; selectionIndex: number | null; focused: boolean; received: boolean; onSelect: (clueId: string) => void }, "evidence">;
+type EvidenceNode = Node<{
+  clue: Clue;
+  selected: boolean;
+  selectionIndex: number | null;
+  focused: boolean;
+  received: boolean;
+  checkable: boolean;
+  compatible: boolean;
+  onSelect: (clueId: string) => void;
+  onOpenDossier: (clueId: string) => void;
+}, "evidence">;
 
 function EvidenceNodeCard({ data }: NodeProps<EvidenceNode>) {
   const { t } = useI18n();
-  const { clue, selected, selectionIndex, focused, received, onSelect } = data;
-  return <div className="board-node-wrap"><Handle className="board-connection-handle" type="target" position={Position.Left} isConnectable={false} /><span className="board-node-drag-handle" title={t("拖动图钉整理证物")}><span className="pin" /></span><div role="button" tabIndex={0} aria-pressed={selected} onClick={() => onSelect(clue.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onSelect(clue.id); } }} className={`board-node ${clue.type} ${selected ? "selected" : ""} ${focused ? "focused" : ""} ${received ? "received" : ""}`}>{selectionIndex !== null && <span className="evidence-slot-mark" aria-hidden="true">{t("证物")} {selectionIndex === 0 ? "A" : "B"}</span>}{received && <span className="friend-clue-mark">{t("好友送达")}</span>}<small>{clue.type.toUpperCase()} · 0{clue.chapter}</small><b>{clue.title}</b><p>{clue.summary}</p></div><Handle className="board-connection-handle" type="source" position={Position.Right} isConnectable={false} /></div>;
+  const { clue, selected, selectionIndex, focused, received, checkable, compatible, onSelect, onOpenDossier } = data;
+  return <div className="board-node-wrap">
+    <Handle className="board-connection-handle" type="target" position={Position.Left} isConnectable={false} />
+    <span className="board-node-drag-handle" title={t("拖动图钉整理证物")}><span className="pin" /></span>
+    <div
+      role="button"
+      tabIndex={0}
+      aria-pressed={selected}
+      aria-label={`${clue.type.toUpperCase()} · 0${clue.chapter} ${clue.title}`}
+      onClick={() => onSelect(clue.id)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onSelect(clue.id);
+        }
+      }}
+      className={`board-node ${clue.type} ${checkable ? "checkable" : ""} ${compatible ? "compatible" : ""} ${selected ? "selected" : ""} ${focused ? "focused" : ""} ${received ? "received" : ""}`}
+    >
+      {selectionIndex !== null && <><span className="evidence-slot-mark" aria-hidden="true">{selectionIndex === 0 ? "A" : "B"}</span><span className="sr-only">{t("已选证物")} {selectionIndex === 0 ? "A" : "B"}</span></>}
+      {received && <span className="friend-clue-mark">{t("好友送达")}</span>}
+      <small>{clue.type.toUpperCase()} · 0{clue.chapter}</small>
+      <b>{clue.title}</b>
+      <p>{clue.summary}</p>
+      {!selected && checkable && <><span className="sr-only">{compatible ? t("当前关系候选") : t("存在未结关系")}</span><span className={`evidence-relation-cue ${compatible ? "compatible" : ""}`} aria-hidden="true"><i /><i /><i /></span></>}
+    </div>
+    <button
+      type="button"
+      className="board-node-dossier"
+      aria-label={`${t("打开证物档案")}：${clue.title}`}
+      title={t("打开证物档案")}
+      onPointerDown={(event) => event.stopPropagation()}
+      onClick={(event) => {
+        event.stopPropagation();
+        onOpenDossier(clue.id);
+      }}
+    >
+      <BookOpen aria-hidden="true" />
+    </button>
+    <Handle className="board-connection-handle" type="source" position={Position.Right} isConnectable={false} />
+  </div>;
 }
 
 const evidenceNodeTypes = { evidence: EvidenceNodeCard };
@@ -48,7 +98,17 @@ export function CaseBoard() {
   const [feedback, setFeedback] = useState<{ kind: "success" | "error"; text: string } | null>(null);
   const [isCompactBoard, setIsCompactBoard] = useState(false);
   const [sharedClue, setSharedClue] = useState<Clue | null>(null);
-  const available = campaign.case.clues.filter((clue) => unlockedClueIds.includes(clue.id));
+  const [dossierClueId, setDossierClueId] = useState<string | null>(null);
+  const [revealedRelationId, setRevealedRelationId] = useState<string | null>(null);
+  const available = useMemo(() => campaign.case.clues.filter((clue) => unlockedClueIds.includes(clue.id)), [campaign.case.clues, unlockedClueIds]);
+  const boardHints = useMemo(() => deriveEvidenceBoardHints({
+    relations: campaign.relations,
+    unlockedClueIds,
+    confirmedRelationIds: confirmedRelations,
+    selectedClueIds,
+  }), [campaign.relations, confirmedRelations, selectedClueIds, unlockedClueIds]);
+  const checkableClueIds = useMemo(() => new Set(boardHints.checkableClueIds), [boardHints.checkableClueIds]);
+  const compatibleClueIds = useMemo(() => new Set(boardHints.compatibleClueIds), [boardHints.compatibleClueIds]);
 
   const selectEvidence = useCallback((clueId: string) => {
     setFocusedClueId(clueId);
@@ -65,6 +125,11 @@ export function CaseBoard() {
     setSelectedClueIds([...selectedClueIds, clueId]);
   }, [selectedClueIds, t]);
 
+  const openDossier = useCallback((clueId: string) => {
+    setFocusedClueId(clueId);
+    setDossierClueId(clueId);
+  }, []);
+
   useEffect(() => {
     const mediaQuery = window.matchMedia(
       "(max-width: 600px), (max-width: 1024px) and (orientation: portrait)",
@@ -79,7 +144,17 @@ export function CaseBoard() {
     id: clue.id,
     type: "evidence",
     position: boardPositions[clue.id] ?? defaultBoardPosition(index),
-    data: { clue, selected: false, selectionIndex: null, focused: false, received: receivedClueIds.includes(clue.id), onSelect: selectEvidence },
+    data: {
+      clue,
+      selected: false,
+      selectionIndex: null,
+      focused: false,
+      received: receivedClueIds.includes(clue.id),
+      checkable: checkableClueIds.has(clue.id),
+      compatible: false,
+      onSelect: selectEvidence,
+      onOpenDossier: openDossier,
+    },
     dragHandle: ".board-node-drag-handle",
     style: { background: "transparent", border: 0, padding: 0, width: 190 },
   })));
@@ -87,9 +162,22 @@ export function CaseBoard() {
   useEffect(() => {
     setNodes((current) => current.map((node) => {
       const selectionIndex = selectedClueIds.indexOf(node.id);
-      return { ...node, data: { ...node.data, selected: selectionIndex !== -1, selectionIndex: selectionIndex === -1 ? null : selectionIndex, focused: focusedClueId === node.id, received: receivedClueIds.includes(node.id), onSelect: selectEvidence } };
+      return {
+        ...node,
+        data: {
+          ...node.data,
+          selected: selectionIndex !== -1,
+          selectionIndex: selectionIndex === -1 ? null : selectionIndex,
+          focused: focusedClueId === node.id,
+          received: receivedClueIds.includes(node.id),
+          checkable: checkableClueIds.has(node.id),
+          compatible: compatibleClueIds.has(node.id),
+          onSelect: selectEvidence,
+          onOpenDossier: openDossier,
+        },
+      };
     }));
-  }, [focusedClueId, receivedClueIds, selectEvidence, selectedClueIds, setNodes]);
+  }, [checkableClueIds, compatibleClueIds, focusedClueId, openDossier, receivedClueIds, selectEvidence, selectedClueIds, setNodes]);
   const edges: Edge[] = campaign.relations.flatMap((relation, index) => {
     if (!confirmedRelations.includes(relation.id) || !relation.clueIds.every((clueId) => unlockedClueIds.includes(clueId))) return [];
     return [{ id: relation.id, source: relation.clueIds[0], target: relation.clueIds[1], animated: true, label: `${t("推论")} 0${index + 1}`, style: { stroke: index === 1 ? "#a86158" : "#698d89", strokeWidth: 3 }, labelStyle: { fill: "#e7dcc5", fontSize: 9 } }];
@@ -108,6 +196,7 @@ export function CaseBoard() {
     }
     setFeedback({ kind: "success", text: relation.explanation });
     setSelectedClueIds([]);
+    setRevealedRelationId(relation.id);
   };
 
   const restoreBoardLayout = () => {
@@ -118,6 +207,9 @@ export function CaseBoard() {
   const selectedClues = selectedClueIds.map((id) => campaign.case.clues.find((clue) => clue.id === id)).filter((clue): clue is Clue => clue !== undefined);
   const focusedClue = available.find((clue) => clue.id === focusedClueId);
   const focusedRelations = focusedClue ? campaign.relations.filter((relation) => confirmedRelations.includes(relation.id) && relation.clueIds.includes(focusedClue.id)) : [];
+  const dossierClue = available.find((clue) => clue.id === dossierClueId) ?? null;
+  const dossierRelations = dossierClue ? campaign.relations.filter((relation) => confirmedRelations.includes(relation.id) && relation.clueIds.includes(dossierClue.id)) : [];
+  const revealedRelation = revealedRelationId ? campaign.relations.find((relation) => relation.id === revealedRelationId) ?? null : null;
   const inferenceStep = selectedClueIds.length;
   const inferencePrompt = inferenceStep === 0
     ? t("先点一张你认为重要的证物。")
@@ -129,6 +221,20 @@ export function CaseBoard() {
     <div className="page-title"><div><p className="eyebrow">CASE BOARD · {t("证物关系图")}</p><h2>{locale === "en" ? <>Connect the lies<br />the city has told.</> : <>把城市说过的谎，<br />一根根连起来。</>}</h2></div><p>{t("点两张证物，再核对它们是否能共同作证。无需拖线；桌面端拖动图钉只用于整理案板。")}</p></div>
     <div className="board-workspace">
       <div className="board-shell">
+        <header className="clue-index" role="region" aria-label={t("线索索引")}>
+          <div className="clue-index-copy">
+            <small>CLUE INDEX · {t("线索索引")}</small>
+            <b>{available.length} {t("份档案")} · {boardHints.openRelationIds.length} {t("条未结线")}</b>
+            <span>{selectedClueIds.length === 1 ? t("铜绿亮起的证物能与 A 互相作证；仍需放入 B 后手动核对。") : t("细线标记尚有未结关系的证物；先选择一件放入 A。")}</span>
+          </div>
+          <div className="clue-index-status" aria-hidden="true">
+            {available.map((clue) => {
+              const selectionIndex = selectedClueIds.indexOf(clue.id);
+              const state = selectionIndex !== -1 ? "selected" : compatibleClueIds.has(clue.id) ? "compatible" : checkableClueIds.has(clue.id) ? "checkable" : "";
+              return <i className={state} key={clue.id} />;
+            })}
+          </div>
+        </header>
         <div className="board-flow">{nodes.length ? <ReactFlow nodes={nodes} edges={edges} nodeTypes={evidenceNodeTypes} onNodesChange={onNodesChange} onNodeDragStop={(_, node) => setBoardPosition(node.id, node.position)} fitView minZoom={0.5} maxZoom={1.6} nodesDraggable={!isCompactBoard} panOnDrag={!isCompactBoard} zoomOnPinch={!isCompactBoard} zoomOnScroll={!isCompactBoard} zoomOnDoubleClick={!isCompactBoard} preventScrolling={!isCompactBoard} proOptions={{ hideAttribution: true }}><Background color="#988d73" gap={28} size={1} variant={BackgroundVariant.Dots} />{!isCompactBoard && <Controls showInteractive={false} />}</ReactFlow> : <div className="board-empty"><Search /><h3>{t("案件板还很安静")}</h3><p>{t("完成第一夜调查，林渡带回的证物会出现在这里。")}</p></div>}</div>
       </div>
       <aside className="relation-panel" aria-label={t("证物档案与关系")}>
@@ -151,8 +257,8 @@ export function CaseBoard() {
           {feedback && <p className={`relation-feedback ${feedback.kind}`} role="status">{feedback.text}</p>}
         </section>
         <div className="board-panel-heading"><small>OPEN DOSSIER · {focusedClue ? `NIGHT 0${focusedClue.chapter}` : "NO FILE"}</small><button type="button" onClick={restoreBoardLayout}><RotateCcw /> {t("恢复摆放")}</button></div>
-        {focusedClue ? <article className="clue-dossier" aria-live="polite"><span>{focusedClue.type}{receivedClueIds.includes(focusedClue.id) ? ` · ${t("好友送达")}` : ""}</span><h3>{focusedClue.title}</h3><button className="clue-share-trigger" type="button" onClick={() => setSharedClue(focusedClue)}><QrCode /> {t("送给好友")}</button><p>{focusedClue.detail}</p><blockquote><small>{t("城市异议")}</small>“{focusedClue.cityObjection}”</blockquote><div><small>{campaign.presentation.detectiveName} · {t("页边批注")}</small>{focusedClue.marginNote}</div>{focusedRelations.length > 0 && <footer><small>{t("这份证物已经参与作证")}</small>{focusedRelations.map((relation) => <b key={relation.id}><Link2 /> {relation.statement}</b>)}</footer>}</article> : <div className="clue-dossier empty"><FileText /><p>{t("点击案板上的证物即可阅档；选中的两件会留在右侧推理栏中。")}</p></div>}
-        <div className="relation-ledger"><small>{t("核心推论")} · {confirmedRelations.length}/{campaign.relations.length}</small>{campaign.relations.map((relation, index) => { const confirmed = confirmedRelations.includes(relation.id); return <div className={confirmed ? "relation-entry done" : "relation-entry"} key={relation.id}><span>{confirmed ? <Check /> : `0${index + 1}`}</span><div><small>{confirmed ? "CONFIRMED" : "UNRESOLVED"}</small><b>{confirmed ? relation.statement : t("未确认推论")}</b></div></div>; })}</div>
+        {focusedClue ? <article className="clue-dossier" aria-live="polite"><span>{focusedClue.type}{receivedClueIds.includes(focusedClue.id) ? ` · ${t("好友送达")}` : ""}</span><h3>{focusedClue.title}</h3><div className="clue-dossier-actions"><button className="clue-dossier-open" type="button" onClick={() => openDossier(focusedClue.id)}><BookOpen /> {t("以信笺阅档")}</button><button className="clue-share-trigger" type="button" onClick={() => setSharedClue(focusedClue)}><QrCode /> {t("送给好友")}</button></div><p>{focusedClue.detail}</p><blockquote><small>{t("城市异议")}</small>“{focusedClue.cityObjection}”</blockquote><div><small>{campaign.presentation.detectiveName} · {t("页边批注")}</small>{focusedClue.marginNote}</div>{focusedRelations.length > 0 && <footer><small>{t("这份证物已经参与作证")}</small>{focusedRelations.map((relation) => <b key={relation.id}><Link2 /> {relation.statement}</b>)}</footer>}</article> : <div className="clue-dossier empty"><FileText /><p>{t("点击案板上的证物即可阅档；选中的两件会留在右侧推理栏中。")}</p></div>}
+        <div className="relation-ledger"><small>{t("核心推论")} · {confirmedRelations.length}/{campaign.relations.length}</small>{campaign.relations.map((relation, index) => { const confirmed = confirmedRelations.includes(relation.id); return <button type="button" disabled={!confirmed} aria-label={confirmed ? `${t("查看核心推论")}：${relation.statement}` : t("未确认推论")} onClick={() => setRevealedRelationId(relation.id)} className={confirmed ? "relation-entry done" : "relation-entry"} key={relation.id}><span>{confirmed ? <Check /> : `0${index + 1}`}</span><div><small>{confirmed ? "CONFIRMED" : "UNRESOLVED"}</small><b>{confirmed ? relation.statement : t("未确认推论")}</b></div></button>; })}</div>
       </aside>
     </div>
     <details className="board-cipher-disclosure">
@@ -162,6 +268,18 @@ export function CaseBoard() {
       </summary>
       <CipherDesk />
     </details>
+    <AnimatePresence>{dossierClue && <ClueDossierDialog
+      clue={dossierClue}
+      received={receivedClueIds.includes(dossierClue.id)}
+      relations={dossierRelations}
+      detectiveName={campaign.presentation.detectiveName}
+      onClose={() => setDossierClueId(null)}
+      onShare={() => {
+        setDossierClueId(null);
+        setSharedClue(dossierClue);
+      }}
+    />}</AnimatePresence>
+    <AnimatePresence>{revealedRelation && <RelationRevealDialog relation={revealedRelation} onClose={() => setRevealedRelationId(null)} />}</AnimatePresence>
     <AnimatePresence>{sharedClue && <ClueShareDialog clue={sharedClue} onClose={() => setSharedClue(null)} />}</AnimatePresence>
   </div>;
 }
