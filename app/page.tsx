@@ -41,7 +41,7 @@ function GamePage() {
   const [intro, setIntro] = useState(false);
   const [view, setView] = useState<GameView>(game.phase === "morning" ? "report" : "tonight");
   const [demo, setDemo] = useState(false);
-  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(true);
   const [clueGiftNotice, setClueGiftNotice] = useState<ClueGiftNoticeData | null>(null);
   const [hardwareOpen, setHardwareOpen] = useState(false);
   const processedClueQuery = useRef(false);
