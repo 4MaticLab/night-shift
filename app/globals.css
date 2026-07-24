@@ -36,6 +36,16 @@ body {
   font-family: var(--font-manrope), sans-serif;
 }
 
+.click-spark-canvas {
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  user-select: none;
+}
+
 body.app-is-booting {
   overflow: hidden;
 }
@@ -9624,6 +9634,10 @@ blockquote {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
+  .click-spark-canvas {
+    display: none;
+  }
 
   *,
   *::before,
