@@ -47,7 +47,7 @@ export const posterSeries: PosterDefinition[] = [
     secondaryAlt: "被撕去终点的旧电车票",
     steps: ["扫码打开案件", "选择调查方向", "把夜晚交给林渡"],
     cta: "扫描启封第一宗案件",
-    accent: "#c59a5a",
+    accent: "#698d89",
     qrContent: "day-01-case-file",
   },
   {
@@ -143,7 +143,7 @@ export const posterSeries: PosterDefinition[] = [
     secondaryAlt: "秘密站台、电车与账册组成的第五夜印",
     steps: ["扫描进入事务所", "完成五夜交接", "选择真相的去处"],
     cta: "扫描，搭上零点四十三分末班车",
-    accent: "#d1ae70",
+    accent: "#7f9ea8",
     qrContent: "day-05-last-call",
   },
 ];

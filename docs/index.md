@@ -14,6 +14,7 @@
 - [[docs/demo-script]] — 90 秒现场演示路径。
 - [[docs/hackathon-submission-kit]] — Hack the Rest 赛道陈述、评委问答、提交材料、真实边界与部署排障。
 - [[docs/poster-series-guide]] — 五日案件碎片海报的结构、日更节奏、网页预览、印刷规格与 200 份投放方案。
+- [[docs/poster-entry-trigger-guide]] — 海报网页入口、二维码去向、路由判定、打印触发与不触发边界。
 - [[docs/quality-baseline]] — 当前版本的质量基线、验证命令和已知边界。
 - [[docs/viewport-checklist]] — 桌面与移动端关键页面的交互检查清单。
 - [[docs/sleep-hardware-bridge]] — 虚拟睡眠设备、真实桥接预演与游戏生命周期。

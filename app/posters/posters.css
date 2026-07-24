@@ -17,14 +17,14 @@
 }
 
 .poster-site-intro small {
-  color: #c59a5a;
+  color: #89aab2;
   font: 9px monospace;
   letter-spacing: .16em;
 }
 
 .poster-site-intro h1 {
   margin: 7px 0 8px;
-  color: #eee2ca;
+  color: #e7edf3;
   font: 600 clamp(36px, 5vw, 68px)/1 var(--font-playfair), var(--font-noto-serif-sc), serif;
 }
 
@@ -39,7 +39,7 @@
 .poster-site-intro aside {
   min-width: 210px;
   padding: 14px 16px;
-  border: 1px solid #62553f;
+  border: 1px solid #42566b;
   color: #aeb5bd;
   background: #111a29;
 }
@@ -50,7 +50,7 @@
 }
 
 .poster-site-intro aside b {
-  color: #d6c7a9;
+  color: #dce5ed;
   font-family: var(--font-playfair), var(--font-noto-serif-sc), serif;
 }
 
@@ -70,7 +70,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  border: 1px solid #5a4d3c;
+  border: 1px solid #41566d;
   color: #aab2bc;
   background: #0b121ee8;
   box-shadow: 0 12px 40px #0009;
@@ -96,9 +96,9 @@
 .poster-toolbar a:hover,
 .poster-toolbar button:hover,
 .poster-toolbar a.active {
-  border-color: #9b7849;
-  color: #eadfc8;
-  background: #29251f;
+  border-color: #698d89;
+  color: #e6edf3;
+  background: #172638;
 }
 
 .poster-toolbar svg {
@@ -129,12 +129,12 @@
 }
 
 .poster-preview-caption a {
-  color: #c7a16a;
+  color: #8fb2bb;
   text-decoration: none;
 }
 
 .poster-sheet {
-  --poster-accent: #c59a5a;
+  --poster-accent: #698d89;
   --poster-image-position: center;
   container-type: inline-size;
   isolation: isolate;
@@ -144,11 +144,11 @@
   overflow: hidden;
   display: grid;
   grid-template-rows: 8.5% 45.5% 27% 19%;
-  color: #162033;
+  color: #d4dce5;
   background:
-    linear-gradient(#7a63400a 1px, transparent 1px) 0 0 / 100% 9px,
-    linear-gradient(135deg, #f0e7d4, #d8c7a7);
-  border: 1px solid #a88b61;
+    linear-gradient(#7991a10b 1px, transparent 1px) 0 0 / 100% 9px,
+    linear-gradient(135deg, #111c2d, #0b1321);
+  border: 1px solid #435a72;
   box-shadow: 0 34px 90px #000b;
   print-color-adjust: exact;
   -webkit-print-color-adjust: exact;
@@ -164,7 +164,7 @@
 
 .poster-sheet::before {
   inset: 2.2cqw;
-  border: 1px solid #725b372b;
+  border: 1px solid #71869e36;
 }
 
 .poster-sheet::after {
@@ -193,7 +193,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 2cqw;
-  color: #d8d0bf;
+  color: #d2dae4;
   background: #0d1524;
   border-bottom: .2cqw solid var(--poster-accent);
 }
@@ -217,7 +217,7 @@
 }
 
 .poster-brand-lockup b {
-  color: #f0e4cb;
+  color: #edf2f6;
   font: 600 2.3cqw/1.05 var(--font-playfair), var(--font-noto-serif-sc), serif;
   letter-spacing: .06em;
 }
@@ -272,7 +272,7 @@
   z-index: 3;
   left: 3.5cqw;
   bottom: 2.7cqw;
-  color: #e8d1a4;
+  color: #a9bdc8;
   font: 700 12cqw/.8 var(--font-playfair), serif;
   opacity: .24;
 }
@@ -305,7 +305,7 @@
 
 .poster-title-block h1 {
   margin: 0;
-  color: #f1e5ce;
+  color: #f0f4f7;
   font: 600 4.5cqw/.98 var(--font-playfair), var(--font-noto-serif-sc), serif;
   letter-spacing: -.03em;
 }
@@ -333,8 +333,8 @@
   grid-template-columns: 20% minmax(0, 1fr) 24%;
   gap: 2.4cqw;
   align-items: stretch;
-  border-block: 1px solid #826b4938;
-  background: #e7dcc5;
+  border-block: 1px solid #536b843d;
+  background: linear-gradient(135deg, #172438, #101b2c);
 }
 
 .poster-inset {
@@ -342,9 +342,9 @@
   position: relative;
   margin: 0;
   overflow: hidden;
-  border: .7cqw solid #cdbb99;
+  border: .7cqw solid #52677d;
   background: #1b2638;
-  box-shadow: 0 1.3cqw 2.5cqw #533b222f;
+  box-shadow: 0 1.3cqw 2.5cqw #02071266;
   transform: rotate(-.5deg);
 }
 
@@ -357,7 +357,7 @@
   width: 5cqw;
   height: 2.2cqw;
   transform: translateX(-50%) rotate(1.5deg);
-  background: #9b815e99;
+  background: #61778d99;
 }
 
 .poster-inset img {
@@ -371,7 +371,7 @@
 
 .poster-fragment p {
   margin: 1.1cqw 0;
-  color: #33372f;
+  color: #dfe6ec;
   font: 600 1.75cqw/1.55 var(--font-playfair), var(--font-noto-serif-sc), serif;
 }
 
@@ -379,23 +379,23 @@
   margin: 1.4cqw 0 0;
   padding: 1.1cqw 1.3cqw;
   border-left: .25cqw solid var(--poster-accent);
-  color: #5e5c54;
-  background: #ccb9953d;
+  color: #aebdca;
+  background: #203149a8;
   font: 1.18cqw/1.55 var(--font-baskerville), var(--font-noto-serif-sc), serif;
 }
 
 .poster-subject {
   min-width: 0;
   padding: 1.7cqw;
-  border: 1px solid #7e6a4e66;
-  color: #4f514b;
-  background: #d3c2a2;
+  border: 1px solid #5f748a80;
+  color: #aebbc8;
+  background: #1c2a3d;
 }
 
 .poster-subject b {
   display: block;
   margin: 1.1cqw 0 .7cqw;
-  color: #292e2b;
+  color: #e4eaf0;
   font: 600 2cqw/1.2 var(--font-playfair), var(--font-noto-serif-sc), serif;
 }
 
@@ -460,7 +460,7 @@
   width: 12cqw;
   height: 12cqw;
   padding: .7cqw;
-  background: #f4ecd9;
+  background: #f4f7f9;
 }
 
 .poster-qr span {
@@ -473,7 +473,7 @@
 }
 
 .poster-qr b {
-  color: #f0e2c5;
+  color: #e8eef3;
   font: 600 1.35cqw/1.35 var(--font-playfair), var(--font-noto-serif-sc), serif;
 }
 

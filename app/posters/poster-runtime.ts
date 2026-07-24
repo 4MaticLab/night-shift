@@ -19,6 +19,6 @@ export async function createPosterQr(origin: string, poster: PosterDefinition) {
     errorCorrectionLevel: "H",
     margin: 1,
     width: 440,
-    color: { dark: "#0e1628", light: "#f4ecd9" },
+    color: { dark: "#0e1628", light: "#f4f7f9" },
   });
 }
