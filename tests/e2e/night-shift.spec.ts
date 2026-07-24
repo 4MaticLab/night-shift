@@ -694,7 +694,9 @@ test("keeps returned postcards in the journey album", async ({ page }) => {
   await expect(page.getByText("寄往无人之处")).toBeVisible();
   await expect(page.getByText(/第二版回答 · 灯港花店后室/)).toBeVisible();
   await expect(page.getByText("雾灯城寄回的 5 个夜晚")).toBeVisible();
+  await expect(page.locator(".journey-postcard.locked .journey-postcard-image img.uncollected-art")).toHaveCount(3);
   await expect(page.getByText("雾灯温室")).toBeVisible();
+  await expect(page.locator(".greenhouse-specimen.locked .greenhouse-locked img.uncollected-art")).toHaveCount(3);
   await expect(page.getByText("城市人情簿")).toBeVisible();
   await expect(page.getByText("城市值更簿")).toBeVisible();
   await expect(page.locator(".watch-ledger-entry:not(.locked)")).toHaveCount(2);
@@ -702,6 +704,14 @@ test("keeps returned postcards in the journey album", async ({ page }) => {
   await expect(page.getByText("口袋抽屉")).toBeVisible();
   await expect(page.locator(".pocket-object.unlocked")).toHaveCount(2);
   await expect(page.locator(".pocket-object.locked")).toHaveCount(7);
+  await expect(page.locator(".pocket-object.locked .pocket-object-art img.uncollected-art")).toHaveCount(7);
+  await expect(page.getByText("DRAWER CLOSED")).toHaveCount(0);
+  await expect(page.locator(".journey-postcard.locked .journey-postcard-image svg, .greenhouse-specimen.locked .greenhouse-locked svg, .pocket-object.locked .pocket-object-art svg")).toHaveCount(0);
+  await page.locator(".pocket-object.locked").last().scrollIntoViewIfNeeded();
+  await expect.poll(() => page.locator(".collection-page img.uncollected-art").evaluateAll((images) => images.every((image) => {
+    const source = image as HTMLImageElement;
+    return source.complete && source.naturalWidth > 0;
+  }))).toBe(true);
   await expect(page.getByRole("heading", { name: "错页登记处" })).toBeVisible();
   await expect(page.locator(".society-current-address b", { hasText: "可借阅的旁注" })).toBeVisible();
   await expect(page.getByText("问函与答复履历")).toBeVisible();
@@ -713,10 +723,15 @@ test("keeps returned postcards in the journey album", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "灯港区" })).toBeVisible();
   await expect(page.locator(".district-entry.unlocked")).toHaveCount(1);
   await expect(page.locator(".district-entry.locked")).toHaveCount(2);
+  await expect(page.locator(".district-entry.locked .district-art img.uncollected-art")).toHaveCount(2);
   await expect(page.getByText("相关人物")).toBeVisible();
   await expect(page.getByRole("heading", { name: "米娜·索莱尔" })).toBeVisible();
   await expect(page.locator(".person-dossier.encountered")).toHaveCount(1);
   await expect(page.locator(".person-dossier.locked")).toHaveCount(3);
+  await expect(page.locator(".person-dossier.locked .person-portrait img.uncollected-art")).toHaveCount(3);
+  await expect(page.locator(".folder:not(.complete) .folder-locked-art")).toHaveCount(3);
+  await expect(page.locator(".district-entry.locked .district-art svg, .person-dossier.locked .person-portrait svg, .folder:not(.complete) > div svg")).toHaveCount(0);
+  await expect(page.getByText(/DRAWER CLOSED|DISTRICT UNVISITED|PERSON SEALED/)).toHaveCount(0);
 });
 
 test("keeps the desktop collection continuous while putting core evidence first", async ({ page }) => {

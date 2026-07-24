@@ -411,12 +411,13 @@ blockquote {
   opacity: .2;
   pointer-events: none;
   background: repeating-linear-gradient(105deg, transparent 0 33px, rgba(215, 224, 226, .22) 34px, transparent 35px 67px);
-  animation: rain 1.8s linear infinite;
+  animation: rain 5.4s linear infinite;
 }
 
+/* one 67px stripe period along the 105deg gradient normal, so the loop point is seamless */
 @keyframes rain {
   to {
-    transform: translate(-50px, 100px);
+    transform: translate(-64.72px, -17.34px);
   }
 }
 
@@ -6783,6 +6784,11 @@ blockquote {
   object-fit: cover;
 }
 
+.uncollected-art {
+  filter: grayscale(1) brightness(.24) contrast(.82) !important;
+  opacity: .34 !important;
+}
+
 .journey-postcard-copy {
   padding: 22px;
   display: flex;
@@ -6834,23 +6840,8 @@ blockquote {
   color: #606c7e;
 }
 
-.postcard-locked {
-  height: 100%;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 10px;
-  color: #536077;
-}
-
-.postcard-locked svg {
-  width: 29px;
-  height: 29px;
-}
-
-.postcard-locked span {
-  font: 8px monospace;
-  letter-spacing: .15em;
+.journey-postcard.locked .journey-postcard-image {
+  box-shadow: inset 0 0 50px #050811aa;
 }
 
 .journey-route-history {
@@ -6976,21 +6967,14 @@ blockquote {
 
 .greenhouse-locked {
   aspect-ratio: 2 / 3;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 8px;
+  overflow: hidden;
   background: #10191c;
 }
 
-.greenhouse-locked svg {
-  width: 24px;
-  color: #53625c;
-}
-
-.greenhouse-locked span {
-  font: 7px monospace;
-  letter-spacing: .12em;
+.greenhouse-locked img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .city-favor-ledger {
@@ -7369,6 +7353,14 @@ blockquote {
 
 .folder>div svg {
   width: 14px;
+}
+
+.folder-locked-art {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  filter: grayscale(1) brightness(.25);
+  opacity: .42;
 }
 
 .empty-report {
@@ -8229,24 +8221,6 @@ blockquote {
   object-fit: cover;
 }
 
-.pocket-object-art>div {
-  height: 100%;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 10px;
-  color: #586476;
-}
-
-.pocket-object-art svg {
-  width: 27px;
-}
-
-.pocket-object-art span {
-  font: 7px monospace;
-  letter-spacing: .13em;
-}
-
 .pocket-object-copy {
   padding: 17px;
 }
@@ -8818,24 +8792,6 @@ blockquote {
   object-fit: cover;
 }
 
-.person-portrait>div {
-  height: 100%;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 10px;
-  color: #536075;
-}
-
-.person-portrait svg {
-  width: 28px;
-}
-
-.person-portrait span {
-  font: 7px monospace;
-  letter-spacing: .12em;
-}
-
 .person-dossier-copy {
   padding: 19px;
 }
@@ -8960,24 +8916,6 @@ blockquote {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.district-art>div {
-  height: 100%;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 8px;
-  color: #526077;
-}
-
-.district-art svg {
-  width: 26px;
-}
-
-.district-art span {
-  font: 7px monospace;
-  letter-spacing: .12em;
 }
 
 .district-copy {
