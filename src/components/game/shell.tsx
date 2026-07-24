@@ -8,6 +8,7 @@ import { useI18n } from "@/src/i18n/provider";
 import type { GameView } from "./types";
 import { SleepHardwareStatus } from "./sleep-hardware-status";
 import { useAccessibleDialog } from "@/src/lib/use-accessible-dialog";
+import { getReadyEvidenceSyntheses } from "@/src/lib/game-engine/evidence-synthesis";
 
 export function TopBar({ chapter, onDemo, onHome, onHardware }: { chapter: number; onDemo: () => void; onHome: () => void; onHardware: () => void }) {
   useGameStore((state) => state.campaignId);
@@ -22,11 +23,17 @@ export function TopBar({ chapter, onDemo, onHome, onHardware }: { chapter: numbe
 }
 
 export function BottomNav({ view, setView }: { view: GameView; setView: (view: GameView) => void }) {
-  const { t } = useI18n();
+  const { unlockedClueIds, synthesizedEvidenceIds } = useGameStore();
+  const { campaign, locale, t } = useI18n();
+  const readyCount = getReadyEvidenceSyntheses({
+    syntheses: campaign.syntheses,
+    unlockedClueIds,
+    synthesizedEvidenceIds,
+  }).length;
   const items: [GameView, ReactNode, string][] = [
     ["report", <Coffee key="c" />, t("今晨")], ["board", <Search key="s" />, t("案件板")], ["tonight", <Moon key="m" />, t("今晚")], ["collection", <Gift key="g" />, t("收藏")], ["archive", <Archive key="a" />, t("档案")],
   ];
-  return <nav className="bottom-nav" aria-label={t("主要导航")}>{items.map(([id, icon, label]) => <button type="button" aria-current={view === id ? "page" : undefined} className={view === id ? "active" : ""} key={id} onClick={() => setView(id)}>{icon}<span>{label}</span></button>)}</nav>;
+  return <nav className="bottom-nav" aria-label={t("主要导航")}>{items.map(([id, icon, label]) => <button type="button" aria-current={view === id ? "page" : undefined} className={view === id ? "active" : ""} key={id} onClick={() => setView(id)}>{icon}<span>{label}</span>{id === "board" && readyCount > 0 && <i className="nav-ready-badge" aria-label={locale === "en" ? `${readyCount} inferences ready` : `${readyCount} 条推论可以整理`}>{readyCount}</i>}</button>)}</nav>;
 }
 
 export function DemoDrawer({ onClose, setView }: { onClose: () => void; setView: (view: GameView) => void }) {
@@ -64,12 +71,12 @@ export function DemoDrawer({ onClose, setView }: { onClose: () => void; setView:
       })}><b>0{chapter.number}</b><span>{chapter.title}</span></button>)}</div></div>
       <div className="demo-section"><small>{t("现场演示")}</small><button type="button" disabled={Boolean(pendingAction)} className="drawer-action" onClick={() => setPendingAction({
         title: locale === "en" ? "Stage the complete caseboard?" : "载入完整案件板演示？",
-        note: locale === "en" ? "This fills the current case with a staged evidence snapshot so every inference can be demonstrated." : "这会用固定证物快照改写当前案件，便于现场演示全部联合推理。",
+        note: locale === "en" ? "This fills the current case with a staged evidence snapshot so every inference can be demonstrated." : "这会用固定证物快照改写当前案件，便于现场演示全部推论合成。",
         confirmLabel: locale === "en" ? "Stage the caseboard" : "确认载入案件板",
         run: () => { begin(); unlockBoard(); setView("board"); onClose(); },
       })}><Search /> {t("解锁完整案件板")} <ChevronRight /></button><button type="button" disabled={Boolean(pendingAction)} className="drawer-action" onClick={() => setPendingAction({
         title: locale === "en" ? "Stage the true-ending conditions?" : "载入真结局条件演示？",
-        note: locale === "en" ? "This replaces the current case with a final-night snapshot containing the evidence and relations needed for the ending demo." : "这会把当前案件替换为最终夜快照，并写入演示结局所需的证物与推论。",
+        note: locale === "en" ? "This replaces the current case with a final-night snapshot containing the evidence and inferences needed for the ending demo." : "这会把当前案件替换为最终夜快照，并写入演示结局所需的证物与推论。",
         confirmLabel: locale === "en" ? "Stage the ending demo" : "确认载入结局演示",
         run: () => { jumpToChapter(finalChapter); unlockBoard(true); setView("tonight"); onClose(); },
       })}><Sparkles /> {t("跳到真结局条件")} <ChevronRight /></button></div>

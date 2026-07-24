@@ -3,7 +3,7 @@ import {
   cityDistrictSchema,
   cityWatchEchoSchema,
   endingEpilogueSchema,
-  evidenceRelationSchema,
+  evidenceSynthesisSchema,
   journeyPostcardSchema,
   nightBotanicalSchema,
   routeDirectionSchema,
@@ -171,26 +171,26 @@ const rainRadioRoutes: RouteDirection[] = rainRadioCase.chapters.flatMap((chapte
   })),
 );
 
-const rainRadioRelations = [
+const rainRadioSyntheses = [
   {
     id: "radio-future-proof",
-    clueIds: ["tomorrow-bulletin", "tomorrow-proof"],
-    statement: "广播稿来自尚未公开的市政印版",
+    inputIds: ["tomorrow-bulletin", "tomorrow-proof"],
+    title: "广播稿来自尚未公开的市政印版",
     explanation: "明日简报与空白校样上的铅字压痕完全一致，证明有人在公告发布前把内容送进电台。",
   },
   {
     id: "radio-resident-network",
-    clueIds: ["caller-list", "tunnel-echo"],
-    statement: "居民通过旧防空网络向电台提交证词",
+    inputIds: ["caller-list", "tunnel-echo"],
+    title: "居民通过旧防空网络向电台提交证词",
     explanation: "沉默来电簿的门牌与防空管回声逐户对应，所谓无人信号其实由整片街区共同维持。",
   },
   {
     id: "radio-erasure-order",
-    clueIds: ["demolition-map", "numbered-key"],
-    statement: "街区先被从档案删除，随后才被现实拆除",
+    inputIds: ["demolition-map", "numbered-key"],
+    title: "街区先被从档案删除，随后才被现实拆除",
     explanation: "地图删名时间早于拆迁令，而四十七把钥匙仍保存原门框木屑，证明“无人居住”是事后制造的说法。",
   },
-].map((item) => evidenceRelationSchema.parse(item));
+].map((item) => evidenceSynthesisSchema.parse(item));
 
 const rainRadioEndings: EndingEpilogue[] = [
   {
@@ -321,7 +321,7 @@ export const rainRadioCampaign = defineCampaign({
   version: 1,
   case: rainRadioCase,
   routes: rainRadioRoutes,
-  relations: rainRadioRelations,
+  syntheses: rainRadioSyntheses,
   endings: rainRadioEndings,
   postcards: rainRadioPostcards,
   botanicals: rainRadioBotanicals,
@@ -333,7 +333,7 @@ export const rainRadioCampaign = defineCampaign({
     trueEndingId: "return",
     requiredClueCount: rainRadioCase.clues.length,
     requiredCollectibleCount: 7,
-    requiredRelationCount: rainRadioRelations.length,
+    requiredSynthesisCount: rainRadioSyntheses.length,
   },
   presentation: {
     archiveNumber: "002",

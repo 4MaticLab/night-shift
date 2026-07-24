@@ -4,7 +4,7 @@ import {
   cityDistrictSchema,
   cityWatchEchoSchema,
   endingEpilogueSchema,
-  evidenceRelationSchema,
+  evidenceSynthesisSchema,
   journeyPostcardSchema,
   nightBotanicalSchema,
   routeDirectionSchema,
@@ -185,26 +185,26 @@ const thirteenthLoafRoutes: RouteDirection[] = thirteenthLoafCase.chapters.flatM
   })),
 );
 
-const thirteenthLoafRelations = [
+const thirteenthLoafSyntheses = [
   {
     id: "loaf-no-thirteenth-owner",
-    clueIds: ["twelve-name-roster", "blank-guest-share"],
-    statement: "第十三只面包不是失踪成员的份额",
+    inputIds: ["twelve-name-roster", "blank-guest-share"],
+    title: "第十三只面包不是失踪成员的份额",
     explanation: "完整十二人名册与刻意保持空白的访客份额互相证明：合作社从未有第十三名持份人，多出来的一只面包是公共早餐。",
   },
   {
     id: "loaf-fire-from-main",
-    clueIds: ["conduit-scorch", "corrected-inspection"],
-    statement: "火灾由市政热力主管超压引起",
+    inputIds: ["conduit-scorch", "corrected-inspection"],
+    title: "火灾由市政热力主管超压引起",
     explanation: "向内展开的管道焦痕与费澄未提交的修正页方向一致，原报告把公共设施责任转嫁给了合作社。",
   },
   {
     id: "loaf-cooperative-survived",
-    clueIds: ["starter-census", "night-bake-ledger"],
-    statement: "合作社以分布式轮值继续存在",
+    inputIds: ["starter-census", "night-bake-ledger"],
+    title: "合作社以分布式轮值继续存在",
     explanation: "分散酵母清册与无负责人夜账说明，成员和邻居把菌种与劳动拆开保管，使任何一次没收都无法终止互助。",
   },
-].map((item) => evidenceRelationSchema.parse(item));
+].map((item) => evidenceSynthesisSchema.parse(item));
 
 const thirteenthLoafEndings: EndingEpilogue[] = [
   {
@@ -395,7 +395,7 @@ export const thirteenthLoafCampaign = defineCampaign({
   version: 1,
   case: thirteenthLoafCase,
   routes: thirteenthLoafRoutes,
-  relations: thirteenthLoafRelations,
+  syntheses: thirteenthLoafSyntheses,
   endings: thirteenthLoafEndings,
   postcards: thirteenthLoafPostcards,
   botanicals: thirteenthLoafBotanicals,
@@ -407,7 +407,7 @@ export const thirteenthLoafCampaign = defineCampaign({
     trueEndingId: "return",
     requiredClueCount: thirteenthLoafCase.clues.length,
     requiredCollectibleCount: 7,
-    requiredRelationCount: thirteenthLoafRelations.length,
+    requiredSynthesisCount: thirteenthLoafSyntheses.length,
   },
   presentation: {
     archiveNumber: "003",

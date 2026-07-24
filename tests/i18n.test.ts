@@ -59,7 +59,7 @@ describe("rain-radio English projection", () => {
     expect(localized.case.clues.map((c) => c.id)).toEqual(rainRadioCampaign.case.clues.map((c) => c.id));
     expect(localized.case.collectibles.map((c) => c.id)).toEqual(rainRadioCampaign.case.collectibles.map((c) => c.id));
     expect(localized.routes.map((r) => r.id)).toEqual(rainRadioCampaign.routes.map((r) => r.id));
-    expect(localized.relations.map((r) => r.id)).toEqual(rainRadioCampaign.relations.map((r) => r.id));
+    expect(localized.syntheses.map((item) => item.id)).toEqual(rainRadioCampaign.syntheses.map((item) => item.id));
     expect(localized.endings.map((e) => e.id)).toEqual(rainRadioCampaign.endings.map((e) => e.id));
     expect(localized.postcards.map((p) => p.id)).toEqual(rainRadioCampaign.postcards.map((p) => p.id));
     expect(localized.botanicals.map((b) => b.id)).toEqual(rainRadioCampaign.botanicals.map((b) => b.id));

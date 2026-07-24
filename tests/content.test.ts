@@ -11,7 +11,7 @@ import {
   recordWakeEcho,
   startSleepSession,
 } from "@/src/lib/game-engine/sleep-session";
-import { evidenceRelations, matchEvidenceRelation } from "@/src/content/relations";
+import { evidenceSyntheses } from "@/src/content/relations";
 import { getDefaultChoiceId, getRouteDirection, routeDirections } from "@/src/content/routes";
 import { getNightBotanical, growthStageFromProgress, nightBotanicals } from "@/src/content/botany";
 import { citySocieties, createSocietyMemory, getCitySociety, getSocietyLetter, getSocietyTitle } from "@/src/content/societies";
@@ -29,7 +29,7 @@ import { chihayaNoaCampaign } from "@/src/content/campaigns/chihaya-noa";
 import { lastTramCampaign } from "@/src/content/campaigns/last-tram";
 import { rainRadioCampaign } from "@/src/content/campaigns/rain-radio";
 import { thirteenthLoafCampaign } from "@/src/content/campaigns/thirteenth-loaf";
-import { getCampaignRouteDirection, matchCampaignEvidenceRelation } from "@/src/content/campaigns/types";
+import { getCampaignEvidenceSynthesis, getCampaignRouteDirection } from "@/src/content/campaigns/types";
 import { campaignSupportsLocale, localizeCampaign } from "@/src/i18n/core";
 
 describe("Night Shift case content", () => {
@@ -47,7 +47,7 @@ describe("Night Shift case content", () => {
       clues: campaign.case.clues.map((clue) => clue.id),
       collectibles: campaign.case.collectibles.map((item) => item.id),
       routes: campaign.routes.map((route) => [route.id, route.choiceId, route.societyId]),
-      relations: campaign.relations.map((relation) => [relation.id, ...relation.clueIds]),
+      syntheses: campaign.syntheses.map((synthesis) => [synthesis.id, ...synthesis.inputIds]),
       endings: campaign.endings.map((ending) => ending.id),
     });
 
@@ -463,19 +463,17 @@ describe("Night Shift case content", () => {
     expect(nightSealProgress(session, new Date("2026-07-23T08:00:00.000Z"))).toBe(100);
   });
 
-  it("defines three evidence relations using real case clues", () => {
+  it("defines three evidence syntheses using real case clues", () => {
     const clueIds = new Set(nightShiftCase.clues.map((clue) => clue.id));
-    expect(evidenceRelations).toHaveLength(3);
-    for (const relation of evidenceRelations) {
-      expect(relation.clueIds.every((clueId) => clueIds.has(clueId))).toBe(true);
+    expect(evidenceSyntheses).toHaveLength(3);
+    for (const synthesis of evidenceSyntheses) {
+      expect(synthesis.inputIds.every((clueId) => clueIds.has(clueId))).toBe(true);
     }
   });
 
-  it("matches evidence pairs in either order and rejects false links", () => {
-    expect(matchEvidenceRelation("flower-cycle", "postcard")?.id).toBe("mina-evelyn");
-    expect(matchEvidenceRelation("postcard", "flower-cycle")?.id).toBe("mina-evelyn");
-    expect(matchEvidenceRelation("ticket-date", "postcard")).toBeUndefined();
-    expect(matchEvidenceRelation("postcard", "postcard")).toBeUndefined();
+  it("looks up deterministic synthesis recipes by stable output id", () => {
+    expect(getCampaignEvidenceSynthesis(lastTramCampaign, "mina-evelyn")?.inputIds).toEqual(["flower-cycle", "postcard"]);
+    expect(getCampaignEvidenceSynthesis(lastTramCampaign, "missing-synthesis")).toBeUndefined();
   });
 
   it("builds and validates a single-clue share link", () => {
@@ -499,9 +497,9 @@ describe("Night Shift case content", () => {
     expect(removeSharedClueQuery("https://night-shift-zeta.vercel.app/?case=case-001&clue=flower-cycle&from=qr#desk")).toBe("/?from=qr#desk");
   });
 
-  it("matches evidence only inside the selected campaign", () => {
-    const relation = rainRadioCampaign.relations[0];
-    expect(matchCampaignEvidenceRelation(rainRadioCampaign, relation.clueIds[0], relation.clueIds[1])).toEqual(relation);
-    expect(matchCampaignEvidenceRelation(rainRadioCampaign, "flower-cycle", "postcard")).toBeUndefined();
+  it("looks up evidence only inside the selected campaign", () => {
+    const synthesis = rainRadioCampaign.syntheses[0];
+    expect(getCampaignEvidenceSynthesis(rainRadioCampaign, synthesis.id)).toEqual(synthesis);
+    expect(getCampaignEvidenceSynthesis(rainRadioCampaign, "mina-evelyn")).toBeUndefined();
   });
 });

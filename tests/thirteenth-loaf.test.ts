@@ -20,7 +20,7 @@ describe("The Thirteenth Loaf Before Dawn", () => {
     expect(thirteenthLoafCampaign.case.clues).toHaveLength(12);
     expect(thirteenthLoafCampaign.case.collectibles).toHaveLength(8);
     expect(thirteenthLoafCampaign.routes).toHaveLength(15);
-    expect(thirteenthLoafCampaign.relations).toHaveLength(3);
+    expect(thirteenthLoafCampaign.syntheses).toHaveLength(3);
     expect(thirteenthLoafCampaign.endings).toHaveLength(3);
     expect(thirteenthLoafCampaign.characters).toHaveLength(4);
     expect(thirteenthLoafCampaign.districts).toHaveLength(3);
@@ -28,7 +28,7 @@ describe("The Thirteenth Loaf Before Dawn", () => {
       trueEndingId: "return",
       requiredClueCount: 12,
       requiredCollectibleCount: 7,
-      requiredRelationCount: 3,
+      requiredSynthesisCount: 3,
     });
     expect(thirteenthLoafCampaign.case.clues.find((clue) => clue.id === "twelve-name-roster")?.detail).toMatch(/没有被刮去的第十三行/);
     expect(thirteenthLoafCampaign.case.clues.find((clue) => clue.id === "conduit-scorch")?.marginNote).toMatch(/公共管道进店/);

@@ -4,19 +4,20 @@ import type {
   CityDistrict,
   CityWatchEcho,
   EndingEpilogue,
-  EvidenceRelation,
+  EvidenceSynthesis,
   JourneyPostcard,
   NightBotanical,
   RouteDirection,
   WakeEcho,
 } from "@/src/lib/game-engine/schema";
 import type { EndingId } from "@/src/lib/game-engine/ending";
+import { validateEvidenceSynthesisGraph } from "@/src/lib/game-engine/evidence-synthesis";
 
 export interface CampaignRules {
   trueEndingId: EndingId;
   requiredClueCount: number;
   requiredCollectibleCount: number;
-  requiredRelationCount: number;
+  requiredSynthesisCount: number;
 }
 
 export type CampaignPrologueStage = "incident" | "evidence" | "handoff";
@@ -57,7 +58,7 @@ export interface CampaignManifest {
   version: number;
   case: CaseContent;
   routes: RouteDirection[];
-  relations: EvidenceRelation[];
+  syntheses: EvidenceSynthesis[];
   endings: EndingEpilogue[];
   postcards: JourneyPostcard[];
   botanicals: NightBotanical[];
@@ -122,11 +123,8 @@ export function defineCampaign<const T extends CampaignManifest>(manifest: T): T
     }
   }
 
-  for (const relation of manifest.relations) {
-    if (relation.clueIds.some((clueId) => !clueIds.has(clueId))) {
-      throw new Error(`Campaign ${manifest.id} relation ${relation.id} references an unknown clue`);
-    }
-  }
+  const synthesisError = validateEvidenceSynthesisGraph(manifest.case.clues, manifest.syntheses);
+  if (synthesisError) throw new Error(`Campaign ${manifest.id} ${synthesisError}`);
   for (const character of manifest.characters) {
     if (character.revealClueIds.some((clueId) => !clueIds.has(clueId))) {
       throw new Error(`Campaign ${manifest.id} character ${character.id} references an unknown clue`);
@@ -137,7 +135,7 @@ export function defineCampaign<const T extends CampaignManifest>(manifest: T): T
   }
   if (manifest.rules.requiredClueCount > manifest.case.clues.length
     || manifest.rules.requiredCollectibleCount > manifest.case.collectibles.length
-    || manifest.rules.requiredRelationCount > manifest.relations.length) {
+    || manifest.rules.requiredSynthesisCount > manifest.syntheses.length) {
     throw new Error(`Campaign ${manifest.id} has unreachable ending requirements`);
   }
   return manifest;
@@ -192,8 +190,6 @@ export function getCampaignWakeEchoById(campaign: CampaignManifest, echoId: stri
   return item;
 }
 
-export function matchCampaignEvidenceRelation(campaign: CampaignManifest, firstClueId: string, secondClueId: string): EvidenceRelation | undefined {
-  const selected = new Set([firstClueId, secondClueId]);
-  if (selected.size !== 2) return undefined;
-  return campaign.relations.find((relation) => relation.clueIds.every((clueId) => selected.has(clueId)));
+export function getCampaignEvidenceSynthesis(campaign: CampaignManifest, synthesisId: string): EvidenceSynthesis | undefined {
+  return campaign.syntheses.find((synthesis) => synthesis.id === synthesisId);
 }

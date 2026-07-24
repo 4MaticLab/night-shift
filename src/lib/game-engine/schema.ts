@@ -71,19 +71,13 @@ export const clueSchema = z.object({
 });
 export type Clue = z.infer<typeof clueSchema>;
 
-export const boardPositionSchema = z.object({
-  x: z.number().finite(),
-  y: z.number().finite(),
-});
-export type BoardPosition = z.infer<typeof boardPositionSchema>;
-
-export const evidenceRelationSchema = z.object({
+export const evidenceSynthesisSchema = z.object({
   id: z.string(),
-  clueIds: z.tuple([z.string(), z.string()]),
-  statement: z.string(),
+  inputIds: z.array(z.string()).min(2),
+  title: z.string(),
   explanation: z.string(),
 });
-export type EvidenceRelation = z.infer<typeof evidenceRelationSchema>;
+export type EvidenceSynthesis = z.infer<typeof evidenceSynthesisSchema>;
 
 export const endingEpilogueSchema = z.object({
   id: z.enum(["public", "protect", "return"]),
