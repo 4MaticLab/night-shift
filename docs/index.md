@@ -50,6 +50,7 @@
 - [[docs/art-prompts/sleep-hardware-dossiers]] — 四类睡眠硬件档案画面与生成源图映射。
 - [[docs/art-prompts/thirteenth-loaf-visual-archive]] — 第三案 34 张专属美术的提示词组、画幅与运行时映射。
 - [[docs/art-prompts/chihaya-noa-visual-archive]] — 第四案 34 张专属美术、人物连续性与文化表达边界。
+- [[docs/art-prompts/fog-without-wolves-visual-archive]] — 第五案 34 张专属美术、双主角身份连续性与钟后负空间规则。
 
 ## 维护规则
 

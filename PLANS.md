@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-lost-property-case]] | `codex/lost-property-case` | `in_progress` | `manual` | 1/8 | 编写视觉档案规范与完整资产映射 |
+| [[plans/codex-lost-property-case]] | `codex/lost-property-case` | `in_progress` | `manual` | 2/8 | 生成并登记 34 张专属运行时资产 |
 
 ## 使用规则
 
