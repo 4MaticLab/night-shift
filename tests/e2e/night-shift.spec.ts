@@ -142,8 +142,15 @@ test("keeps one global background track controllable and remembers when it is of
 
   await page.goto("/");
   const audio = page.locator(".background-music-control audio");
+  const musicControl = page.locator(".background-music-control");
   await expect(audio).toHaveCount(1);
   await expect(audio).toHaveAttribute("src", "/audio/c-minor-nocturne.mp3");
+  await expect(musicControl.locator(".background-music-tooltip, .background-music-icon i")).toHaveCount(0);
+  await expect(musicControl.locator("button")).not.toHaveAttribute("title");
+  expect(await musicControl.locator("button").evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { borderWidth: style.borderWidth, backgroundColor: style.backgroundColor };
+  })).toEqual({ borderWidth: "0px", backgroundColor: "rgba(0, 0, 0, 0)" });
   expect(await audio.evaluate((element) => ({ loop: (element as HTMLAudioElement).loop, volume: (element as HTMLAudioElement).volume }))).toEqual({ loop: true, volume: .22 });
   await expect.poll(() => page.evaluate(() => (window as Window & { __bgmPlayCalls?: number }).__bgmPlayCalls)).toBeGreaterThan(0);
 
