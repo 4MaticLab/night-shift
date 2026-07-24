@@ -6,6 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
+| [[plans/codex-injective-vercel-enable]] | `codex/injective-testnet-deploy` | `in_progress` | `manual` | 0/5 | 绑定 Vercel 项目并核对 production 环境 |
 
 ## 使用规则
 
