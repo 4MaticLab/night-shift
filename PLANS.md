@@ -6,7 +6,6 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-injective-testnet-deploy]] | `codex/injective-testnet-deploy` | `completed` | `manual` | 6/6 | 记录完成证据后退役计划 |
 
 ## 使用规则
 
