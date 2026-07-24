@@ -617,19 +617,54 @@ test("keeps the Injective keepsake desk honest and responsive when deployment is
 
 test("stores an Injective explorer receipt after the wallet finds an existing mint", async ({ page }) => {
   const wallet = "0x2222222222222222222222222222222222222222";
+  const otherWallet = "0x3333333333333333333333333333333333333333";
   const contract = "0x1111111111111111111111111111111111111111";
   const explorerUrl = `https://testnet.blockscout.injective.network/token/${contract}/instance/7`;
-  await page.addInitScript((address) => {
-    const provider = {
-      request: async ({ method }: { method: string }) => {
-        if (method === "eth_requestAccounts" || method === "eth_accounts") return [address];
-        if (method === "eth_chainId") return "0x59f";
-        if (method === "wallet_switchEthereumChain") return null;
-        throw new Error(`Unexpected wallet method: ${method}`);
-      },
+  await page.addInitScript(({ selectedAddress, alternateAddress }) => {
+    const provider = (address: string) => {
+      let connected = false;
+      return {
+        on: () => undefined,
+        removeListener: () => undefined,
+        request: async ({ method }: { method: string }) => {
+          if (method === "eth_requestAccounts") {
+            connected = true;
+            return [address];
+          }
+          if (method === "eth_accounts") return connected ? [address] : [];
+          if (method === "eth_chainId") return "0x59f";
+          if (method === "wallet_switchEthereumChain") return null;
+          throw new Error(`Unexpected wallet method: ${method}`);
+        },
+      };
     };
-    (window as Window & { ethereum?: typeof provider }).ethereum = provider;
-  }, wallet);
+    const wallets = [
+      {
+        info: {
+          uuid: "00000000-0000-4000-8000-000000000001",
+          name: "Foglight Wallet",
+          icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>",
+          rdns: "city.foglight.wallet",
+        },
+        provider: provider(alternateAddress),
+      },
+      {
+        info: {
+          uuid: "00000000-0000-4000-8000-000000000002",
+          name: "Night Archive Wallet",
+          icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>",
+          rdns: "city.night-archive.wallet",
+        },
+        provider: provider(selectedAddress),
+      },
+    ];
+    (window as Window & { ethereum?: (typeof wallets)[number]["provider"] }).ethereum = wallets[0].provider;
+    window.addEventListener("eip6963:requestProvider", () => {
+      for (const detail of wallets) {
+        window.dispatchEvent(new CustomEvent("eip6963:announceProvider", { detail }));
+      }
+    });
+  }, { selectedAddress: wallet, alternateAddress: otherWallet });
   await page.route("**/api/injective/mint-authorization", async (route) => {
     if (route.request().method() === "GET") {
       await route.fulfill({
@@ -669,7 +704,8 @@ test("stores an Injective explorer receipt after the wallet finds an existing mi
   const trigger = page.getByRole("button", { name: "封进 Injective 链上档案" }).first();
   await trigger.click();
   const dialog = page.getByRole("dialog", { name: "把这件夜班藏品封进链上档案" });
-  await dialog.getByRole("button", { name: "连接钱包，准备归档" }).click();
+  await expect(dialog.getByRole("button", { name: /默认浏览器钱包/ })).toBeVisible();
+  await dialog.getByRole("button", { name: /Night Archive Wallet/ }).click();
   await expect(dialog).toContainText("0x2222…2222");
   await dialog.getByRole("button", { name: "领取签章并铸造" }).click();
   await expect(dialog).toContainText("ARCHIVE RECEIPT · TOKEN #7");
@@ -683,6 +719,31 @@ test("stores an Injective explorer receipt after the wallet finds an existing mi
   await page.reload();
   await page.getByRole("button", { name: "收藏", exact: true }).click();
   await expect(page.getByRole("button", { name: "此浏览器已有链上回执" }).first()).toBeVisible();
+});
+
+test("explains the injected-only boundary when no browser wallet is available", async ({ page }) => {
+  await page.route("**/api/injective/mint-authorization", async (route) => {
+    if (route.request().method() !== "GET") return route.continue();
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        configured: true,
+        chainId: 1439,
+        chainName: "Injective EVM Testnet",
+        rpcUrl: "https://k8s.testnet.json-rpc.injective.network/",
+        explorerUrl: "https://testnet.blockscout.injective.network",
+        contractAddress: "0x1111111111111111111111111111111111111111",
+      }),
+    });
+  });
+
+  await openMintableCollection(page);
+  await page.getByRole("button", { name: "封进 Injective 链上档案" }).first().click();
+  const dialog = page.getByRole("dialog", { name: "把这件夜班藏品封进链上档案" });
+  await expect(dialog).toContainText("没有检测到浏览器钱包");
+  await expect(dialog).toContainText("当前版本不启用 WalletConnect");
+  await expect(dialog.getByRole("button", { name: "领取签章并铸造" })).toHaveCount(0);
 });
 
 test("returns a prior society answer in a later letter", async ({ page }) => {
