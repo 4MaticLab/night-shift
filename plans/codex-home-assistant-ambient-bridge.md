@@ -1,6 +1,6 @@
 # Home Assistant 空间外设桥
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P1
 - 创建：2026-07-24
 - 更新：2026-07-24
@@ -36,7 +36,7 @@ Night Shift 已有可撤销的虚拟睡眠硬件层，但浏览器和云端运�
 - [x] 扩展硬件中心并接入游戏阶段协调器，保持核心状态机非阻塞。
 - [x] 覆盖桥协议、实体归一化、安全拒绝、store 和关键 UI 流程。
 - [x] 更新稳定文档、决策记录、运行脚本与比赛接线说明。
-- [ ] 完成代码、文档、构建与必要浏览器验证。
+- [x] 完成代码、文档、构建与必要浏览器验证。
 
 ## 验收标准
 
@@ -50,14 +50,16 @@ Night Shift 已有可撤销的虚拟睡眠硬件层，但浏览器和云端运�
 
 ## 验证
 
-- `npm test`
-- `npm run lint`
-- `npm run build`
-- `npm run docs:check`
-- `npm run bridge:test`
-- `npm run test:e2e -- --grep "Home Assistant"`
-- 使用模拟 Home Assistant WebSocket 服务验证认证、初始状态、状态事件、命令、重连与拒绝路径。
-- 使用本地浏览器验证无桥降级、配对、试亮、cue 绑定和游戏阶段不等待桥响应。
+- `npm test`：通过，11 个文件、108 项测试。
+- `npm run lint`：通过，全仓无 ESLint 错误。
+- `npm run build`：通过，Next 16 生产构建、TypeScript 与页面生成完成；首次 Google Fonts 网络请求失败，网络恢复后重跑通过。
+- `npm run build:sites`：通过，Vinext 五阶段构建完成。
+- `npm run docs:check`：通过，87 个 Markdown 文件的双链全部有效。
+- `npm run bridge:test`：通过，2 个文件、8 项桥／store 测试。
+- `PLAYWRIGHT_PORT=3107 npm run test:e2e -- --grep "Home Assistant"`：通过，1 项 Chrome 关键流程测试。
+- 模拟 Home Assistant WebSocket 服务已验证认证、初始状态、状态事件、命令、错误凭据、origin、配对、危险实体拒绝、畸形请求与令牌不泄漏。
+- 本地浏览器已验证无桥降级、英文 UI、390 px 硬件抽屉无横向溢出和控制台无错误；自动化已验证配对、试亮、cue 绑定、持久化最小化与桥失败不阻塞夜班。
+- `git diff --check`：通过。
 
 ## 决定记录
 
@@ -66,6 +68,7 @@ Night Shift 已有可撤销的虚拟睡眠硬件层，但浏览器和云端运�
 - 2026-07-24：前端只发送语义 cue；Home Assistant token、service allowlist 和命令翻译保留在 loopback 本地桥。
 - 2026-07-24：比赛接线限定同机 localhost 前端；公网部署不宣称能直接访问观众电脑的本地桥。
 - 2026-07-24：移动端硬件抽屉在 390 px 下完成无横向溢出检查，浏览器控制台无错误。
+- 2026-07-24：全部验收与验证完成，计划进入 `completed`，待以独立提交记录后退役。
 
 ## 相关文档
 

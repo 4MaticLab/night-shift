@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-home-assistant-ambient-bridge]] | `codex/home-assistant-ambient-bridge` | `in_progress` | `manual` | 85% | 运行全量验证并收尾交付 |
+| [[plans/codex-home-assistant-ambient-bridge]] | `codex/home-assistant-ambient-bridge` | `completed` | `manual` | 100% | 记录验证证据后退役计划 |
 
 ## 使用规则
 
