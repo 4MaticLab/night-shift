@@ -6,7 +6,6 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-unified-campaign-intake|剧本一统一生命周期与视觉接入]] | `codex/unified-campaign-intake` | `completed` | `manual` | 五夜内容、返照镜台、34 张资产与三档浏览器验收完成 | 提交最终证据后退役临时计划并创建 PR |
 
 ## 使用规则
 
