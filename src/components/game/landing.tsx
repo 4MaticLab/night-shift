@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight, Moon, Zap } from "lucide-react";
+import { ArrowRight, Moon } from "lucide-react";
 import { getAsset } from "@/src/content/assets";
 import { campaignRegistry } from "@/src/content/campaigns/registry";
 import { useGameStore } from "@/src/stores/game-store";
@@ -12,7 +12,7 @@ import { LanguagesIcon } from "@/src/components/ui/languages-icon";
 import { OptionWheel } from "./option-wheel";
 import { useI18n } from "@/src/i18n/provider";
 
-export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; onDemo: () => void; interactive: boolean }) {
+export function Hero({ onStart, interactive }: { onStart: () => void; interactive: boolean }) {
   const { campaignId, started, switchCampaign } = useGameStore();
   const { campaign, locale, preferredLocale, setLocale, t } = useI18n();
   const heroAsset = getAsset(campaign.presentation.heroAssetId);
@@ -42,8 +42,7 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
       <nav className="landing-nav">
         <div className="brand-mark"><span aria-hidden="true" /><div><b>{t("夜班侦探")}</b><small>NIGHT SHIFT</small></div></div>
         <div className="landing-nav-actions">
-          <button className="ghost-button language-button" disabled={!interactive} aria-label={preferredLocale === "en" ? "切换到中文" : "Switch to English"} title={preferredLocale === "en" ? "切换到中文" : "Switch to English"} onClick={() => setLocale(preferredLocale === "en" ? "zh-CN" : "en")}><LanguagesIcon size={22} /></button>
-          <button className="ghost-button" disabled={!interactive} onClick={onDemo}><Zap size={15} /> DEMO MODE</button>
+          <button className="ghost-button language-button" disabled={!interactive} aria-label={preferredLocale === "en" ? "切换到中文" : "Switch to English"} title={preferredLocale === "en" ? "切换到中文" : "Switch to English"} onClick={() => setLocale(preferredLocale === "en" ? "zh-CN" : "en")}><LanguagesIcon size={28} /></button>
         </div>
       </nav>
       <section className="hero-copy">

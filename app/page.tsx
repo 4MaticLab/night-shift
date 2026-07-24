@@ -121,7 +121,7 @@ function GamePage() {
   }, [hydrated, libraryOpen]);
 
   if (libraryOpen || (!game.started && !intro)) {
-    return <><AmbientHardwareCoordinator />{clueNotice}<Hero interactive={hydrated} onStart={() => { setUserToggledLibrary(false); if (game.started) setIntro(false); else setIntro(true); }} onDemo={() => setDemo(true)} /><AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={(nextView) => { setUserToggledLibrary(false); changeView(nextView); }} />}</AnimatePresence></>;
+    return <><AmbientHardwareCoordinator />{clueNotice}<Hero interactive={hydrated} onStart={() => { setUserToggledLibrary(false); if (game.started) setIntro(false); else setIntro(true); }} /><AnimatePresence>{demo && <DemoDrawer onClose={() => setDemo(false)} setView={(nextView) => { setUserToggledLibrary(false); changeView(nextView); }} />}</AnimatePresence></>;
   }
   if (intro && !game.started) return <><AmbientHardwareCoordinator />{clueNotice}<CasePrologue onBack={() => { setIntro(false); setUserToggledLibrary(true); }} onDone={() => { game.begin(); setIntro(false); }} /></>;
   if (game.phase === "night") return <><AmbientHardwareCoordinator />{clueNotice}<NightRun onFinish={game.finishNight} onHardware={() => setHardwareOpen(true)} />{hardwarePanel}</>;
