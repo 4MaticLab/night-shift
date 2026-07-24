@@ -193,6 +193,6 @@
 - 日期：2026-07-24
 - 状态：已采用
 - 背景：比赛版本需要接入通用房间硬件，但普通网页无法可靠发现 HomeKit、Matter 或局域网设备，也不应保管 Home Assistant 长期令牌。现有睡眠硬件域又承载健康数据最小化语义，不能把灯光和插座伪装成睡眠来源。
-- 决定：用只监听 `127.0.0.1` 的 Node 本地桥连接 Home Assistant WebSocket API；浏览器经六位码显式配对，只读取归一化白名单实体，并发送 `night.started`、`wake.echo`、`morning.arrived` 三种幂等语义 cue。桥只翻译场景、灯、开关和风扇的固定动作，传感器只读，危险域与任意 service 拒绝。空间外设使用独立 store，只持久化启用和实体 ID 绑定，任何错误都不阻塞游戏状态机。
-- 代价：比赛机必须同时运行本地前端与桥；公网部署不能自动控制观众电脑的 localhost，桥重启也会丢失配对和临时恢复快照。换来的收益是 Home Assistant token 不落前端、局域网能力边界明确，并可复用 Home Assistant 已有的 HomeKit、Matter、Zigbee 与厂商集成。
+- 决定：用 Bun 编译的跨平台 Connector 在 `127.0.0.1` 提供设置页与受限桥，连接 Home Assistant WebSocket API。Vercel 页面只在 Chrome Local Network Access 权限后访问固定 loopback 地址，经六位码换取 12 小时 bearer；它只读取归一化白名单实体，并发送 `night.started`、`wake.echo`、`morning.arrived` 三种幂等语义 cue。桥只翻译场景、灯、开关和风扇的固定动作，传感器只读，危险域与任意 service 拒绝。空间外设使用独立 store，只持久化启用和实体 ID 绑定，任何错误都不阻塞游戏状态机。
+- 代价：比赛机必须下载并保持未签名的 Connector 运行，非 Chrome 浏览器不承诺公网到 loopback 的路径，桥重启也会丢失 token、配对和临时恢复快照。换来的收益是正式 Vercel 页面可在用户授权后接入本机 Home Assistant，长期 token 不落前端，局域网发现边界明确，并可复用 Home Assistant 已有的 HomeKit、Matter、Zigbee 与厂商集成。
 - 相关：[[docs/home-assistant-ambient-bridge]]、[[docs/sleep-hardware-bridge]]、[[docs/privacy-and-guardrails]]、[[docs/architecture]]。

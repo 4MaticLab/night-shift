@@ -450,7 +450,7 @@ test("sleep hardware authorizes a virtual ring and returns a local morning recei
 test("Home Assistant pairs a safe room device and never blocks the night shift", async ({ page }) => {
   let paired = false;
   const bridgeCalls: Array<{ path: string; body?: Record<string, unknown> }> = [];
-  await page.route("http://localhost:43117/v1/**", async (route) => {
+  await page.route("http://127.0.0.1:43117/v1/**", async (route) => {
     const request = route.request();
     const url = new URL(request.url());
     const path = url.pathname;
@@ -476,12 +476,14 @@ test("Home Assistant pairs a safe room device and never blocks the night shift",
       await route.fulfill({
         status: paired ? 200 : 401,
         contentType: "application/json",
-        headers: paired
-          ? { "Set-Cookie": "night_shift_ha_session=test; HttpOnly; SameSite=Strict; Path=/" }
-          : {},
-        body: JSON.stringify(paired ? { paired: true } : { error: "bad code" }),
+        body: JSON.stringify(paired
+          ? { paired: true, sessionToken: "browser-session-token", expiresAt: Date.now() + 43_200_000 }
+          : { error: "bad code" }),
       });
       return;
+    }
+    if (paired && path !== "/v1/status") {
+      expect(request.headers().authorization).toBe("Bearer browser-session-token");
     }
     if (path === "/v1/entities") {
       await route.fulfill({
@@ -567,6 +569,27 @@ test("Home Assistant pairs a safe room device and never blocks the night shift",
     && call.body?.cue === "night.started")).toBe(true);
   expect(bridgeCalls.some((call) => call.path === "/v1/test"
     && call.body?.entityId === "light.desk_lamp")).toBe(true);
+});
+
+test("Connector absence offers a Chrome permission retry and platform download", async ({ page }) => {
+  await page.route("http://127.0.0.1:43117/v1/**", (route) => route.abort("connectionfailed"));
+
+  await openFirstNight(page);
+  await page.getByRole("button", { name: /打开睡眠硬件中心/ }).first().click();
+  await page.getByRole("tab", { name: /房间外设/ }).click();
+
+  await expect(page.getByText("本地桥未运行")).toBeVisible();
+  await expect(page.getByText(/Chrome 142\+/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "下载 Connector" })).toHaveAttribute(
+    "href",
+    /github\.com\/4MaticLab\/night-shift\/releases/,
+  );
+  await expect(page.getByRole("link", { name: "打开本机设置页" })).toHaveAttribute(
+    "href",
+    "http://127.0.0.1:43118",
+  );
+  await page.getByRole("button", { name: "重新寻找本地桥" }).click();
+  await expect(page.getByText("本地桥未运行")).toBeVisible();
 });
 
 test("sleep hardware keeps the active device while browsing drafts and resets panel scroll", async ({ page }) => {

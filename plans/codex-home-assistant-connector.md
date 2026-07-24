@@ -33,10 +33,10 @@ Night Shift 已有经过验证的 Home Assistant loopback 桥，但当前比赛�
 
 ## 任务
 
-- [ ] 将 PR #77 桥核心移植到最新主线并重新验证基线。
-- [ ] 把桥配对改为短期 bearer session，并为 Chrome LNA／Vercel origin 建立安全请求边界。
-- [ ] 实现 Connector 生命周期、Home Assistant 配置／发现、本地设置页与无终端启动体验。
-- [ ] 实现 macOS／Windows／Linux Bun 编译和 macOS `.app` 包装。
+- [x] 将 PR #77 桥核心移植到最新主线并重新验证基线。
+- [x] 把桥配对改为短期 bearer session，并为 Chrome LNA／Vercel origin 建立安全请求边界。
+- [x] 实现 Connector 生命周期、Home Assistant 配置／发现、本地设置页与无终端启动体验。
+- [x] 实现 macOS／Windows／Linux Bun 编译和 macOS `.app` 包装。
 - [ ] 扩展 Night Shift 硬件中心的 Connector 下载、权限、发现、配对与失败降级体验。
 - [ ] 新增协议、store、浏览器、Connector 设置页、编译后二进制与 CI artifact 测试。
 - [ ] 更新稳定文档并完成全量代码、构建、文档与人工浏览器验证。
@@ -72,6 +72,8 @@ Night Shift 已有经过验证的 Home Assistant loopback 桥，但当前比赛�
 - 2026-07-24：选择 Bun standalone executable，而非 Electron／Tauri；设置 UI 由本地 loopback 页面承担，减小新技术面与包体。
 - 2026-07-24：普通 Chrome 页面只发现固定 localhost Connector；mDNS 与 Home Assistant token 保留在 Connector，网页不扫描任意局域网。
 - 2026-07-24：未签名／未公证是 Developer Preview 的真实边界，公开 Release 留待代码合入后的独立发布动作。
+- 2026-07-24：跨站 `SameSite=Strict` Cookie 无法支撑 Vercel → localhost；网页改用仅存于 `sessionStorage` 的 12 小时随机 bearer，会话随 Connector 重启失效。
+- 2026-07-24：Connector 设置页固定监听 `127.0.0.1:43118`，桥固定监听 `127.0.0.1:43117`；设置页验证 Home Assistant 后才让网页配对。
 
 ## 相关文档
 

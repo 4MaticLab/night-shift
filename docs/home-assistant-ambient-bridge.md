@@ -7,34 +7,41 @@ Home Assistant 是 Night Shift 的可选空间环境层：它把 HomeKit、Matte
 普通网页无法可靠承担 mDNS、HomeKit HAP、Matter 或局域网令牌保管。本方案因此分成三层：
 
 ```text
-Night Shift 浏览器 → 127.0.0.1 本地桥 → Home Assistant WebSocket API → 已接入的房间设备
-       语义 cue          配对／白名单          认证／状态订阅／service
+Vercel 上的 Night Shift → 127.0.0.1 Connector → Home Assistant WebSocket API → 房间设备
+ Chrome LNA + bearer       配对／白名单／mDNS        认证／状态订阅／service
 ```
 
-网页只知道受支持的实体投影、用户选择的绑定和桥在线状态。`HA_TOKEN` 始终只存在于本地桥进程。
+网页只尝试已知的 `127.0.0.1:43117`，不会枚举局域网。Chrome 142+ 会在 HTTPS 网站第一次请求 loopback 时显示 Local Network Access 权限；用户允许后，HTTP loopback 请求才继续。mDNS 发现和 `HA_TOKEN` 都留在 Connector。
 
 ## 快速接线
 
-1. 在 Home Assistant 中创建一枚长期访问令牌。比赛机建议使用专用本地账号，并只把准备展示的设备暴露给该账号。
-2. 启动 Night Shift 前端：
+### 下载应用路径
 
-   ```bash
-   npm run dev
-   ```
-
-3. 另开一个终端启动本地桥：
-
-   ```bash
-   HA_URL=http://homeassistant.local:8123 \
-   HA_TOKEN=replace-with-local-token \
-   npm run bridge:start
-   ```
-
-   若局域网可发现 `_home-assistant._tcp.local.`，可以省略 `HA_URL`；显式 URL 对比赛现场更稳定。
-4. 终端会显示六位配对码。打开游戏的“硬件中心 → 房间外设”，输入配对码。
+1. 从 GitHub Actions 的 `Connector Artifacts` 下载对应平台产物。macOS 解压后双击 `Night Shift Connector.app`；Windows 双击 `.exe`；Linux 给文件执行权限后启动。Developer Preview 未签名、未公证，系统可能要求用户显式确认。
+2. Connector 自动打开 `http://127.0.0.1:43118` 设置页。点击自动发现，或填写 Home Assistant URL；粘贴长期访问令牌并验证。比赛机建议使用专用本地账号，并只向该账号暴露演示设备。
+3. 设置页显示安全实体数量和六位配对码。保持 Connector 运行，点击“打开 Night Shift”进入 `https://night-shift-zeta.vercel.app`。
+4. 在 Chrome 的“硬件中心 → 房间外设”点击连接；若出现“本地网络访问”提示，选择允许，再输入六位码。
 5. 为“夜班出发”“睡隙回声”“晨报抵达”分别选择实体，先执行一次试运行，确认后再开启游戏自动响应。
 
-默认桥地址为 `http://localhost:43117`，只监听 `127.0.0.1`，默认只接受 `http://localhost:3000` 和 `http://127.0.0.1:3000`。比赛版本应在同一台电脑上运行前端、本地桥与浏览器。公网 Sites／Vercel 页面直接连接观众电脑的 localhost 不属于当前支持范围。
+Connector 设置页只监听 `127.0.0.1:43118`，桥只监听 `127.0.0.1:43117`。Home Assistant token 默认只存在于本次 Connector 进程内；关闭应用后必须重新连接和配对。
+
+### 仓库开发路径
+
+开发者可直接运行同一入口：
+
+```bash
+npm run connector:start
+```
+
+旧的纯 CLI 桥仍可用于协议调试：
+
+```bash
+HA_URL=http://homeassistant.local:8123 \
+HA_TOKEN=replace-with-local-token \
+npm run bridge:start
+```
+
+Connector 默认允许本地开发 origin 和固定 Vercel 生产 origin。设置页中的 Night Shift URL 会把用户明确填写的 preview origin 加入本次进程的精确白名单。
 
 ## 环境变量
 
@@ -45,7 +52,9 @@ Night Shift 浏览器 → 127.0.0.1 本地桥 → Home Assistant WebSocket API �
 | `NIGHT_SHIFT_BRIDGE_PORT` | 否 | 本地桥端口，默认 `43117` |
 | `NIGHT_SHIFT_PAIR_CODE` | 否 | 固定六位演示配对码；缺省时每次启动随机生成 |
 | `NIGHT_SHIFT_ALLOWED_ORIGINS` | 否 | 逗号分隔的前端 origin 白名单 |
-| `NEXT_PUBLIC_HOME_ASSISTANT_BRIDGE_URL` | 否 | 前端使用的桥 URL；默认按当前 hostname 选择 localhost |
+| `NIGHT_SHIFT_APP_URL` | 否 | Connector 打开的 Night Shift URL；默认固定 Vercel 生产地址 |
+| `NEXT_PUBLIC_HOME_ASSISTANT_BRIDGE_URL` | 否 | 前端使用的桥 URL；默认 `http://127.0.0.1:43117` |
+| `NEXT_PUBLIC_CONNECTOR_DOWNLOAD_URL` | 否 | 前端下载按钮；发布前可指向 Actions／Release 页面 |
 
 不要把 `HA_TOKEN` 写进 `.env` 的 `NEXT_PUBLIC_*` 变量、浏览器存储、演示录屏或错误截图。若必须保存本机环境文件，应保持它不受 Git 跟踪。
 
@@ -74,23 +83,26 @@ Night Shift 浏览器 → 127.0.0.1 本地桥 → Home Assistant WebSocket API �
 ## 本地状态与恢复
 
 - 浏览器存档 `night-shift-ambient-hardware-v1` 只保留启用开关和三个实体 ID 绑定。
-- 配对会话使用 12 小时、HttpOnly、SameSite Strict Cookie；服务端只保存随机会话值的 SHA-256 摘要。
+- 配对返回 12 小时随机 bearer；网页只把它放进当前标签页的 `sessionStorage`，Connector 只保存 SHA-256 摘要。它不是 Home Assistant token，不能调用白名单外 API。
 - 实体状态与事件流只保存在运行内存；完整 Home Assistant 状态不会进入游戏存档。
 - 第一次试运行或 cue 前，本地桥为灯、开关和风扇抓取一份最小前态；“恢复原状态”尽力还原。场景无法通用恢复，会明确列为跳过。
 - 本地桥重启后配对、状态快照和内存绑定都会失效；浏览器重新配对后会把已保存绑定同步回桥。
 
 ## 协议与验证
 
-本地 API 版本前缀为 `/v1`。`GET /status` 可用于发现是否运行；配对后可访问 `/entities`、`/bindings`、`/events`，并通过 `/test`、`/cues`、`/restore` 执行受限动作。请求体上限为 32 KiB，非白名单 origin 会在路由前被拒绝。
+本地 API 版本前缀为 `/v1`。`GET /v1/status` 可用于检查 Connector；`POST /v1/pair` 用六位码换取 bearer；配对后可访问 `/v1/entities`、`/v1/bindings`，并通过 `/v1/test`、`/v1/cues`、`/v1/restore` 执行受限动作。请求体上限为 32 KiB，非白名单 origin 会在路由前被拒绝。浏览器 fetch 明确设置 `targetAddressSpace: "loopback"`；不支持该路径的浏览器需要原生 App、扩展或云中继，本项目只承诺 Chrome。
 
 常用验证：
 
 ```bash
 npm run bridge:test
-PLAYWRIGHT_PORT=3107 npm run test:e2e -- --grep "Home Assistant"
+npm run connector:test
+npm run connector:build
+npm run connector:smoke
+PLAYWRIGHT_PORT=3107 npm run test:e2e -- --grep "Home Assistant|Connector"
 ```
 
-协议测试使用模拟 Home Assistant WebSocket 服务覆盖认证、初始状态、`state_changed`、命令、错误凭据、origin、配对、危险实体拒绝和令牌不泄漏。浏览器测试覆盖无桥降级、配对、绑定、试运行、启用、cue 失败与核心夜班继续运行。
+`npm run connector:build:all` 生成 macOS arm64、macOS x64、Windows x64 与 Linux x64 四个目录；PR 的 `Connector Artifacts` workflow 执行相同构建并上传临时 artifact，不创建公开 Release。协议测试使用模拟 Home Assistant WebSocket 服务覆盖认证、状态、命令、错误凭据、origin、配对、危险实体拒绝和令牌不泄漏；浏览器测试覆盖无 Connector 降级、下载指引、配对、绑定、试运行、启用、cue 失败与核心夜班继续运行。
 
 ## 相关文档
 

@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Check,
   CircleOff,
+  Download,
+  ExternalLink,
   Lightbulb,
   Power,
   RefreshCw,
@@ -17,6 +19,9 @@ import { useAmbientHardwareStore } from "@/src/stores/ambient-hardware-store";
 import { useI18n } from "@/src/i18n/provider";
 
 const cueIds = ["night.started", "wake.echo", "morning.arrived"] as const satisfies AmbientCue[];
+const connectorDownloadUrl = process.env.NEXT_PUBLIC_CONNECTOR_DOWNLOAD_URL
+  || "https://github.com/4MaticLab/night-shift/releases";
+const connectorSettingsUrl = "http://127.0.0.1:43118";
 
 export function AmbientHardwareWorkbench() {
   const {
@@ -77,9 +82,17 @@ export function AmbientHardwareWorkbench() {
         <article className="ambient-setup-card">
           <Router />
           <div>
-            <b>{t("先在这台电脑启动桥接进程")}</b>
-            <p>{t("桥只监听本机地址；Home Assistant 令牌不会进入网页或存档。")}</p>
-            <code>HA_URL=http://homeassistant.local:8123 HA_TOKEN=•••• npm run bridge:start</code>
+            <b>{t("安装并打开 Night Shift Connector")}</b>
+            <p>{t("Chrome 会在连接本机 Connector 时询问“本地网络访问”；允许后，本页才能看到它。Home Assistant 令牌不会进入网页或存档。")}</p>
+            <div className="ambient-setup-actions">
+              <a href={connectorDownloadUrl} target="_blank" rel="noreferrer">
+                <Download /> {t("下载 Connector")}
+              </a>
+              <a href={connectorSettingsUrl} target="_blank" rel="noreferrer">
+                <ExternalLink /> {t("打开本机设置页")}
+              </a>
+            </div>
+            <small>{t("Developer Preview · Chrome 142+ · macOS / Windows / Linux")}</small>
           </div>
         </article>
         {lastError && <p className="ambient-error">{lastError}</p>}
@@ -100,7 +113,7 @@ export function AmbientHardwareWorkbench() {
         <article className="ambient-pair-card">
           <ShieldCheck />
           <div>
-            <b>{t("输入桥终端显示的六位配对码")}</b>
+            <b>{t("输入 Connector 设置页显示的六位配对码")}</b>
             <p>{t("配对只授权当前浏览器控制你随后明确选择的安全实体。")}</p>
             <form onSubmit={(event) => {
               event.preventDefault();

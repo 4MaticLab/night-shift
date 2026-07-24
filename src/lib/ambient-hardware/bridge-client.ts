@@ -2,37 +2,56 @@
 
 import {
   ambientBindingsSchema,
-  ambientBridgeEventSchema,
   ambientBridgeStatusSchema,
   ambientEntitySchema,
   type AmbientBindings,
-  type AmbientBridgeEvent,
   type AmbientBridgeStatus,
   type AmbientCueRequest,
   type AmbientEntity,
 } from "./types";
 
+const BRIDGE_SESSION_KEY = "night-shift-home-assistant-session";
+
 function bridgeUrl(): string {
   const configured = process.env.NEXT_PUBLIC_HOME_ASSISTANT_BRIDGE_URL?.replace(/\/$/, "");
   if (configured) return configured;
-  if (typeof window !== "undefined" && window.location.hostname === "127.0.0.1") {
-    return "http://127.0.0.1:43117";
-  }
-  return "http://localhost:43117";
+  return "http://127.0.0.1:43117";
+}
+
+type LocalNetworkRequestInit = RequestInit & {
+  targetAddressSpace?: "loopback";
+};
+
+function readSessionToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return window.sessionStorage.getItem(BRIDGE_SESSION_KEY);
+}
+
+function writeSessionToken(token: string): void {
+  window.sessionStorage.setItem(BRIDGE_SESSION_KEY, token);
 }
 
 async function bridgeFetch(path: string, init?: RequestInit): Promise<unknown> {
-  const response = await fetch(`${bridgeUrl()}${path}`, {
+  const token = readSessionToken();
+  const request: LocalNetworkRequestInit = {
     ...init,
-    credentials: "include",
+    mode: "cors",
+    targetAddressSpace: "loopback",
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...init?.headers,
     },
     signal: init?.signal ?? AbortSignal.timeout(3_000),
-  });
+  };
+  const response = await fetch(`${bridgeUrl()}${path}`, request);
   const body = await response.json().catch(() => ({})) as { error?: string };
-  if (!response.ok) throw new Error(body.error || `Local bridge returned ${response.status}.`);
+  if (!response.ok) {
+    if (response.status === 401 && path !== "/v1/pair" && typeof window !== "undefined") {
+      window.sessionStorage.removeItem(BRIDGE_SESSION_KEY);
+    }
+    throw new Error(body.error || `Local bridge returned ${response.status}.`);
+  }
   return body;
 }
 
@@ -41,10 +60,14 @@ export async function readAmbientBridgeStatus(): Promise<AmbientBridgeStatus> {
 }
 
 export async function pairAmbientBridge(code: string): Promise<void> {
-  await bridgeFetch("/v1/pair", {
+  const body = await bridgeFetch("/v1/pair", {
     method: "POST",
     body: JSON.stringify({ code }),
-  });
+  }) as { sessionToken?: unknown };
+  if (typeof body.sessionToken !== "string" || !body.sessionToken) {
+    throw new Error("本地 Connector 未返回有效会话。");
+  }
+  writeSessionToken(body.sessionToken);
 }
 
 export async function readAmbientEntities(): Promise<AmbientEntity[]> {
@@ -87,18 +110,8 @@ export async function restoreAmbientScene(): Promise<{ restored: string[]; skipp
   }) as { restored: string[]; skipped: string[] };
 }
 
-export function connectAmbientBridgeEvents(
-  onEvent: (event: AmbientBridgeEvent) => void,
-  onError: () => void,
-): () => void {
-  const stream = new EventSource(`${bridgeUrl()}/v1/events`, { withCredentials: true });
-  stream.onmessage = (message) => {
-    try {
-      onEvent(ambientBridgeEventSchema.parse(JSON.parse(message.data) as unknown));
-    } catch {
-      // Ignore malformed local bridge events; the next status refresh remains authoritative.
-    }
-  };
-  stream.onerror = onError;
-  return () => stream.close();
+export function clearAmbientBridgeSession(): void {
+  if (typeof window !== "undefined") {
+    window.sessionStorage.removeItem(BRIDGE_SESSION_KEY);
+  }
 }

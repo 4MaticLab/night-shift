@@ -11,11 +11,12 @@
 ## Home Assistant 空间外设
 
 - 空间外设与睡眠／健康域分离。Home Assistant 的灯、场景、开关、风扇和环境传感器状态不进入 `night-shift-save-v1`、睡眠摘要、剧情结算或结局资格。
-- `HA_TOKEN` 只由监听 `127.0.0.1` 的本地桥读取，不进入前端包、浏览器存档、日志或桥 API 响应。浏览器以显式六位码换取 12 小时 HttpOnly、SameSite Strict 配对 Cookie。
+- `HA_TOKEN` 只由监听 `127.0.0.1` 的 Connector 读取并默认保留在进程内存，不进入前端包、浏览器存档、日志或桥 API 响应。浏览器以显式六位码换取 12 小时随机 bearer；bearer 只存在于当前标签页 `sessionStorage`，服务端只保存摘要。
 - 浏览器只在 `night-shift-ambient-hardware-v1` 保存启用状态和用户选择的实体 ID 绑定；完整实体清单、原始 `state_changed` 事件和设备状态仅存在于运行内存。
 - 可控制域严格限制为 `scene`、`light`、`switch` 与 `fan`，传感器只读；门锁、车库门、安防、摄像头、警报、脚本、自动化和任意 service 调用拒绝。
 - 玩家必须先配对、选择实体、试运行并主动开启自动响应。每次动作前验证实体仍在白名单且可用；“恢复原状态”只尽力恢复本次桥进程抓取的灯、开关和风扇前态。
 - 外设 cue 只表达夜班阶段，不读取或推断健康状态。桥未运行、令牌失效、Home Assistant 断线或设备命令失败时，游戏继续推进且不降低内容。
+- Vercel 网页只请求固定 loopback 地址，由 Chrome Local Network Access 权限门控；mDNS 与任意局域网发现只在用户启动的 Connector 内发生。origin 采用精确白名单，设置 API 只接受自身 loopback origin。
 
 ## 放下纸条与 AI 回信
 

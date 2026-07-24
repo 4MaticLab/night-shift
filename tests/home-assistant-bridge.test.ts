@@ -261,13 +261,16 @@ describe("loopback bridge HTTP boundary", () => {
       body: JSON.stringify({ code: "654321" }),
     });
     expect(pair.status).toBe(200);
-    const cookie = pair.headers.get("set-cookie")?.split(";")[0];
-    expect(cookie).toMatch(/^night_shift_ha_session=/);
+    expect(pair.headers.get("set-cookie")).toBeNull();
+    const pairBody = await pair.json() as { sessionToken: string; expiresAt: number };
+    expect(pairBody.sessionToken).toMatch(/^[A-Za-z0-9_-]{40,}$/);
+    expect(pairBody.expiresAt).toBeGreaterThan(Date.now() + 11 * 60 * 60_000);
+    const authorization = `Bearer ${pairBody.sessionToken}`;
 
     const status = await fetch(`${baseUrl}/v1/status`, {
       headers: {
         Origin: "http://localhost:3000",
-        Cookie: cookie!,
+        Authorization: authorization,
       },
     });
     const statusBody = JSON.stringify(await status.json());
@@ -278,7 +281,7 @@ describe("loopback bridge HTTP boundary", () => {
       method: "POST",
       headers: {
         Origin: "http://localhost:3000",
-        Cookie: cookie!,
+        Authorization: authorization,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ bindings: { "night.started": "sensor.bedroom_temperature" } }),
@@ -289,7 +292,7 @@ describe("loopback bridge HTTP boundary", () => {
       method: "POST",
       headers: {
         Origin: "http://localhost:3000",
-        Cookie: cookie!,
+        Authorization: authorization,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ bindings: { "night.started": "light.desk_lamp" } }),
@@ -299,7 +302,7 @@ describe("loopback bridge HTTP boundary", () => {
     const discovery = await fetch(`${baseUrl}/v1/discovery?timeout=100`, {
       headers: {
         Origin: "http://localhost:3000",
-        Cookie: cookie!,
+        Authorization: authorization,
       },
     });
     expect(await discovery.json()).toEqual({

@@ -11843,6 +11843,11 @@ blockquote {
 .ambient-connection-card p,
 .ambient-consent p { margin: 5px 0 0; color: #8e9aaa; font-size: 9px; line-height: 1.6; }
 .ambient-setup-card code { display: block; width: 100%; max-width: 100%; margin-top: 12px; padding: 10px; overflow-x: auto; border: 1px dashed #5a6472; color: #c8b690; background: #070d15; font-size: 8px; white-space: nowrap; }
+.ambient-setup-card > div > small { display: block; margin-top: 9px; color: #717d8b; font: 7px monospace; letter-spacing: .08em; }
+.ambient-setup-actions { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+.ambient-setup-actions a { min-height: 40px; padding: 9px 12px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid #756241; color: #dfc68f; background: #ad7f321c; font-size: 9px; text-decoration: none; }
+.ambient-setup-actions a:last-child { border-color: #526171; color: #aeb9c7; background: transparent; }
+.ambient-setup-actions svg { width: 15px; height: 15px; }
 .ambient-primary,
 .ambient-pair-card button,
 .ambient-connection-card button,
@@ -12065,6 +12070,7 @@ blockquote {
   .ambient-pair-card form { flex-direction: column; }
   .ambient-pair-card input,
   .ambient-pair-card form button { width: 100%; }
+  .ambient-setup-actions a { width: 100%; }
   .ambient-connection-card { align-items: flex-start; flex-wrap: wrap; }
   .ambient-connection-card button { width: 100%; }
   .ambient-cue-list article { grid-template-columns: 30px minmax(0, 1fr); }

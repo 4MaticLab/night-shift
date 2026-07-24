@@ -3,7 +3,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
-  connectAmbientBridgeEvents,
   pairAmbientBridge,
   readAmbientBindings,
   readAmbientBridgeStatus,
@@ -60,17 +59,9 @@ const initialState = {
   lastError: null as string | null,
 };
 
-let closeEventStream: (() => void) | null = null;
-
 function connectionFromStatus(status: AmbientBridgeStatus): AmbientConnectionState {
   if (!status.paired) return "unpaired";
   return status.homeAssistant === "disabled" ? "offline" : status.homeAssistant;
-}
-
-function startEventStream(apply: (event: AmbientBridgeEvent) => void, onError: () => void): void {
-  closeEventStream?.();
-  if (typeof EventSource === "undefined") return;
-  closeEventStream = connectAmbientBridgeEvents(apply, onError);
 }
 
 export const useAmbientHardwareStore = create<AmbientHardwareStore>()(persist((set, get) => ({
@@ -92,9 +83,6 @@ export const useAmbientHardwareStore = create<AmbientHardwareStore>()(persist((s
       } else {
         set({ bindings: remoteBindings });
       }
-      // EventSource reconnects automatically. A transient stream error must not
-      // override the bridge's explicit Home Assistant status.
-      startEventStream(get().applyBridgeEvent, () => undefined);
       return status.homeAssistant === "online";
     } catch (error) {
       set({
@@ -191,8 +179,6 @@ export const useAmbientHardwareStore = create<AmbientHardwareStore>()(persist((s
   },
   clearError: () => set({ lastError: null }),
   reset: () => {
-    closeEventStream?.();
-    closeEventStream = null;
     set(initialState);
   },
 }), {

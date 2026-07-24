@@ -48,6 +48,7 @@
 | 睡眠硬件存档 | `src/stores/sleep-hardware-store.ts` | 可撤销授权、活动采集和最近 8 条本地摘要 |
 | 睡眠硬件界面 | `src/components/game/sleep-hardware.tsx` | 硬件中心、交接状态、夜间遥测和晨报回执 |
 | 空间外设契约 | `src/lib/ambient-hardware/` | Home Assistant 白名单实体、语义 cue、桥协议和浏览器客户端 |
+| 空间外设 Connector | `apps/connector/` | loopback 设置页、Home Assistant 配置／发现、桥生命周期与无终端入口 |
 | 空间外设桥 | `tools/home-assistant-bridge/` | loopback HTTP、显式配对、mDNS、Home Assistant WebSocket、状态订阅和受限 service 翻译 |
 | 空间外设存档／协调 | `src/stores/ambient-hardware-store.ts`、`src/components/game/ambient-hardware-coordinator.tsx` | 只持久化启用与绑定，在阶段边界非阻塞发送幂等 cue |
 | 放下纸条契约 | `src/lib/rest-ritual.ts` | 纸条／回信校验、确定性本地回信与最小模型请求契约 |
@@ -96,7 +97,7 @@ Demo、睡眠硬件、好友线索、Injective、证物信笺和推论信笺共�
 
 睡眠硬件使用第三份独立存档 `night-shift-sleep-hardware-v1`。游戏存档只在 `SleepSession` 边界通知硬件域开始／结束采集，不保存任何硬件字段。只有经过本地授权的虚拟设备能创建活动采集；真实厂商桥接入口保持预演状态。虚拟模拟器从会话与设备 ID 确定性生成摘要，运行时变化不持久化，晨报最多保留最近 8 条摘要。设备撤销或切换会终止采集但不结束剧情会话，详见 [[docs/sleep-hardware-bridge]]。
 
-Home Assistant 使用第四份独立存档 `night-shift-ambient-hardware-v1`，只保存启用状态与三项实体 ID 绑定。`AmbientHardwareCoordinator` 观察既有 `phase`、`activeSleepSession` 与 `lastSleepSession`，生成包含案件、章节、会话和 cue 的稳定请求 ID；它不写 game store，也不等待桥响应。本地桥仅监听 `127.0.0.1`，持有 `HA_TOKEN`、配对会话、实体投影、动作白名单与临时恢复快照；浏览器没有发现局域网设备或调用任意 Home Assistant service 的能力。桥离线只改变外设 store 的连接状态，详见 [[docs/home-assistant-ambient-bridge]]。
+Home Assistant 使用第四份独立存档 `night-shift-ambient-hardware-v1`，只保存启用状态与三项实体 ID 绑定。`AmbientHardwareCoordinator` 观察既有 `phase`、`activeSleepSession` 与 `lastSleepSession`，生成包含案件、章节、会话和 cue 的稳定请求 ID；它不写 game store，也不等待桥响应。Connector 设置页位于 `127.0.0.1:43118`，桥位于 `127.0.0.1:43117`；前者持有进程内 `HA_TOKEN` 并管理后者，后者持有短期配对摘要、实体投影、动作白名单与临时恢复快照。Vercel 浏览器通过 Chrome Local Network Access 和 `targetAddressSpace: loopback` 访问固定桥地址，但没有 mDNS、任意局域网枚举或任意 Home Assistant service 能力。桥离线只改变外设 store 的连接状态，详见 [[docs/home-assistant-ambient-bridge]]。
 
 植物阶段由同一持久化进度推导：`0–<25%` 种核、`25–<50%` 抽芽、`50–<85%` 展叶、`85–100%` 开花。页面关闭期间无需运行后台计时器，重开后会根据会话时间直接恢复对应阶段。完成夜班时写入 `growthHistory` 快照，包含章节、时长、质量、方向、随身物、城市时辰、可选睡隙回声 ID 与完成时间；断续睡眠也保存完整植株，只使用较紧凑的视觉层级。v5 迁移会为旧存档中已经完成的报告建立普通层级标本，v11 再为旧会话与温室记录补齐安全时辰；v12 校验可选回声记录，旧档没有回声时保留为空白而不伪造醒转。
 

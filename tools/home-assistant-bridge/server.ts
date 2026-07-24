@@ -12,8 +12,8 @@ import { AmbientController } from "./ambient-controller";
 import { discoverHomeAssistantInstances } from "./discovery";
 import type { HomeAssistantClient } from "./home-assistant-client";
 
-const SESSION_COOKIE = "night_shift_ha_session";
 const MAX_BODY_BYTES = 32_768;
+const SESSION_DURATION_MS = 12 * 60 * 60_000;
 
 interface BridgeServerOptions {
   client?: HomeAssistantClient;
@@ -71,7 +71,6 @@ export function createBridgeServer(options: BridgeServerOptions): BridgeServer {
     }
     if (allowedOrigin) {
       response.setHeader("Access-Control-Allow-Origin", allowedOrigin);
-      response.setHeader("Access-Control-Allow-Credentials", "true");
       response.setHeader("Vary", "Origin");
     }
     response.setHeader("Cache-Control", "no-store");
@@ -79,7 +78,7 @@ export function createBridgeServer(options: BridgeServerOptions): BridgeServer {
 
     if (request.method === "OPTIONS") {
       response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-      response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+      response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
       response.writeHead(204).end();
       return;
     }
@@ -103,12 +102,9 @@ export function createBridgeServer(options: BridgeServerOptions): BridgeServer {
         return json(response, 401, { error: "Pairing code is invalid." });
       }
       const token = randomBytes(32).toString("base64url");
-      sessions.set(hashToken(token), { expiresAt: Date.now() + 12 * 60 * 60_000 });
-      response.setHeader(
-        "Set-Cookie",
-        `${SESSION_COOKIE}=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=43200`,
-      );
-      return json(response, 200, { paired: true });
+      const expiresAt = Date.now() + SESSION_DURATION_MS;
+      sessions.set(hashToken(token), { expiresAt });
+      return json(response, 200, { paired: true, sessionToken: token, expiresAt });
     }
 
     if (!readSession(request, sessions)) {
@@ -244,14 +240,8 @@ function hashToken(token: string): string {
 }
 
 function readSession(request: IncomingMessage, sessions: Map<string, Session>): Session | null {
-  const cookies = Object.fromEntries(
-    (request.headers.cookie ?? "").split(";").map((part) => {
-      const separator = part.indexOf("=");
-      if (separator < 0) return ["", ""];
-      return [part.slice(0, separator).trim(), part.slice(separator + 1).trim()];
-    }),
-  );
-  const token = cookies[SESSION_COOKIE];
+  const authorization = request.headers.authorization;
+  const token = authorization?.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
   if (!token) return null;
   const key = hashToken(token);
   const session = sessions.get(key);

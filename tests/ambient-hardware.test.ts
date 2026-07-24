@@ -1,7 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const bridgeMocks = vi.hoisted(() => ({
-  connectAmbientBridgeEvents: vi.fn(() => vi.fn()),
   pairAmbientBridge: vi.fn(),
   readAmbientBindings: vi.fn(),
   readAmbientBridgeStatus: vi.fn(),
@@ -26,6 +25,15 @@ const memoryStorage: Storage = {
   removeItem: (key) => { values.delete(key); },
   setItem: (key, value) => { values.set(key, value); },
 };
+const sessionValues = new Map<string, string>();
+const memorySessionStorage: Storage = {
+  get length() { return sessionValues.size; },
+  clear: () => sessionValues.clear(),
+  getItem: (key) => sessionValues.get(key) ?? null,
+  key: (index) => Array.from(sessionValues.keys())[index] ?? null,
+  removeItem: (key) => { sessionValues.delete(key); },
+  setItem: (key, value) => { sessionValues.set(key, value); },
+};
 
 const onlineStatus = {
   bridge: "night-shift-home-assistant" as const,
@@ -49,12 +57,17 @@ const deskLamp = {
 
 beforeAll(async () => {
   vi.stubGlobal("localStorage", memoryStorage);
-  vi.stubGlobal("window", { localStorage: memoryStorage });
+  vi.stubGlobal("sessionStorage", memorySessionStorage);
+  vi.stubGlobal("window", {
+    localStorage: memoryStorage,
+    sessionStorage: memorySessionStorage,
+  });
   ambientModule = await import("@/src/stores/ambient-hardware-store");
 });
 
 beforeEach(() => {
   memoryStorage.clear();
+  memorySessionStorage.clear();
   vi.clearAllMocks();
   ambientModule.useAmbientHardwareStore.getState().reset();
   bridgeMocks.readAmbientBridgeStatus.mockResolvedValue(onlineStatus);
