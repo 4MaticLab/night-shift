@@ -23,6 +23,7 @@
 - [[docs/home-assistant-ambient-bridge]] — 本机 Home Assistant 空间外设桥、受限实体、配对、cue 与比赛接线。
 - [[docs/privacy-and-guardrails]] — 健康数据最小化、授权、撤销和非医疗边界。
 - [[docs/injective-keepsake-mint]] — Injective EVM Testnet 藏品领取、合约、部署与真实边界。
+- [[docs/tarot-night-omens]] — 收藏页每日塔罗画风夜兆的入口、确定性抽取、本地存档与非奖励护栏。
 
 ## 工程
 
