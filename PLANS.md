@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-home-assistant-ambient-bridge]] | `codex/home-assistant-ambient-bridge` | `in_progress` | `manual` | 0% | 建立本地桥与受限 Home Assistant 协议 |
+| [[plans/codex-home-assistant-ambient-bridge]] | `codex/home-assistant-ambient-bridge` | `in_progress` | `manual` | 85% | 运行全量验证并收尾交付 |
 
 ## 使用规则
 

@@ -177,3 +177,12 @@
 - 决定：当前 `morning` 保持到玩家明确结束当日；去案件板只切换视图。`day／ready` 阶段的「今晨」从最新 `completedReports` 章节及既有方向、随身物、成长、社团、纪念物和会话快照重放同一份报纸，不新增报告副本或存档字段。
 - 代价：只提供最新一份晨报重放，不保存滚动位置，也不建立历史报告选择器；换来的收益是线索归档、晨报重读和下一夜准备各自拥有明确动作，刷新后仍保持一致。
 - 相关：[[docs/product-overview]]、[[docs/architecture]]、Issue #19。
+
+## ADR-020：Home Assistant 通过 loopback 桥成为独立空间外设域
+
+- 日期：2026-07-24
+- 状态：已采用
+- 背景：比赛版本需要接入通用房间硬件，但普通网页无法可靠发现 HomeKit、Matter 或局域网设备，也不应保管 Home Assistant 长期令牌。现有睡眠硬件域又承载健康数据最小化语义，不能把灯光和插座伪装成睡眠来源。
+- 决定：用只监听 `127.0.0.1` 的 Node 本地桥连接 Home Assistant WebSocket API；浏览器经六位码显式配对，只读取归一化白名单实体，并发送 `night.started`、`wake.echo`、`morning.arrived` 三种幂等语义 cue。桥只翻译场景、灯、开关和风扇的固定动作，传感器只读，危险域与任意 service 拒绝。空间外设使用独立 store，只持久化启用和实体 ID 绑定，任何错误都不阻塞游戏状态机。
+- 代价：比赛机必须同时运行本地前端与桥；公网部署不能自动控制观众电脑的 localhost，桥重启也会丢失配对和临时恢复快照。换来的收益是 Home Assistant token 不落前端、局域网能力边界明确，并可复用 Home Assistant 已有的 HomeKit、Matter、Zigbee 与厂商集成。
+- 相关：[[docs/home-assistant-ambient-bridge]]、[[docs/sleep-hardware-bridge]]、[[docs/privacy-and-guardrails]]、[[docs/architecture]]。
