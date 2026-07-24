@@ -15,6 +15,7 @@
   --fog: #aeb7c2;
   --primary: #c59a5a;
   --nav-clearance: 96px;
+  --chrome-clearance: calc(80px + env(safe-area-inset-top));
 }
 
 * {
@@ -1294,22 +1295,17 @@ blockquote {
 .app-content {
   min-height: calc(100vh - var(--nav-clearance));
   min-height: calc(100svh - var(--nav-clearance));
-  padding-top: calc(40px + env(safe-area-inset-top));
 }
 
 @media (max-width: 760px) {
+  :root {
+    --chrome-clearance: calc(118px + env(safe-area-inset-top));
+  }
+
   .game-chrome .case-heading {
     top: calc(100% + 8px);
     transform: translateX(-50%);
     max-width: calc(100vw - 40px);
-  }
-
-  .app-content {
-    padding-top: calc(116px + env(safe-area-inset-top));
-  }
-
-  .content-grid {
-    height: calc(100svh - var(--nav-clearance) - 116px);
   }
 }
 
@@ -1375,7 +1371,7 @@ blockquote {
 .content-grid {
   display: grid;
   grid-template-columns: 1.1fr .9fr;
-  height: calc(100svh - var(--nav-clearance) - 40px);
+  height: calc(100svh - var(--nav-clearance));
   min-height: 590px;
   overflow: hidden;
 }
@@ -1420,7 +1416,7 @@ blockquote {
   position: absolute;
   z-index: 5;
   left: 7%;
-  top: 8%;
+  top: max(8%, var(--chrome-clearance));
   max-width: min(320px, 42%);
 }
 
@@ -1558,6 +1554,12 @@ blockquote {
   grid-template-rows: minmax(0, 1fr) auto;
   border-left: 1px solid #2b3548;
   overflow: hidden;
+}
+
+@media (min-width: 601px) {
+  .plan-panel {
+    padding-top: var(--chrome-clearance);
+  }
 }
 
 .plan-panel-scroll {
@@ -3330,6 +3332,7 @@ blockquote {
   justify-content: space-between;
   gap: 50px;
   padding: 55px 7vw 36px;
+  padding-top: var(--chrome-clearance);
   border-bottom: 1px solid #2d384a;
   background: radial-gradient(circle at 80% 0, #25334a, transparent 45%);
 }
@@ -9557,6 +9560,7 @@ blockquote {
 
   .plan-panel {
     padding: 30px 26px;
+    padding-top: var(--chrome-clearance);
   }
 
   .plan-panel h3 {
@@ -9574,14 +9578,14 @@ blockquote {
   }
 
   .tonight-page .desk-scene {
-    height: min(720px, calc(100svh - 116px));
+    height: min(720px, 100svh);
     min-height: 620px;
     background-position: 20% center;
   }
 
   .tonight-page .scene-copy {
     left: 5%;
-    top: 8%;
+    top: max(8%, var(--chrome-clearance));
     max-width: 45%;
   }
 
@@ -9914,7 +9918,7 @@ blockquote {
 
   .scene-copy {
     left: 20px;
-    top: 7%;
+    top: max(7%, var(--chrome-clearance));
     max-width: 52%;
   }
 
@@ -10062,6 +10066,7 @@ blockquote {
 
   .page-title {
     padding: 42px 22px 30px;
+    padding-top: var(--chrome-clearance);
   }
 
   .page-title h2 {
