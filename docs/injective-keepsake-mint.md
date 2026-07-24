@@ -19,6 +19,12 @@
 
 服务端 API 对相同 `requestId + wallet + campaign + collectible` 保留 15 分钟进程内幂等结果，每个来源地址每小时最多创建 8 份新授权。该限制是黑客松部署的滥用护栏，不是生产级跨实例配额；合约才是最终的重复铸造防线。
 
+## 钱包连接边界
+
+前端使用 wagmi 3 管理 EVM 钱包发现、连接恢复、账户状态、切链和所选 connector 的 wallet client，并继续复用 viem 的合约类型和公共 RPC 客户端。现有藏品对话框直接呈现 injected connector；支持传统 `window.ethereum` 和 EIP-6963 多钱包发现，多个 provider 指向同一钱包时只显示一次。连接或铸造前，wagmi 将钱包切换到已配置的 Injective EVM Testnet。
+
+当前比赛版本刻意不配置 WalletConnect，不需要 Reown project ID，也不包含 WalletConnect connector 或 provider 依赖。因此桌面浏览器扩展和钱包内置浏览器可连接；普通手机浏览器、Codex 内嵌浏览器和其他没有注入 EIP-1193 provider 的环境只显示安装提示，不提供二维码或 deep link。以后启用 WalletConnect 只扩展 connector 配置，不改变 voucher 或合约协议。
+
 ## 合约与元数据
 
 - 合约：`contracts/NightShiftKeepsake.sol`

@@ -6572,6 +6572,54 @@ blockquote {
   padding-top: 20px;
 }
 
+.injective-wallet-options {
+  display: grid;
+  gap: 8px;
+}
+
+.injective-wallet-options>button {
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #7e6745;
+  background: #172333;
+  color: #d8c7a7;
+  text-align: left;
+  cursor: pointer;
+}
+
+.injective-wallet-options>button:hover {
+  border-color: #c59a55;
+  background: #223047;
+}
+
+.injective-wallet-options>button>svg {
+  width: 19px;
+  flex: 0 0 auto;
+  color: #d3a75c;
+}
+
+.injective-wallet-options>button span,
+.injective-wallet-options>button b,
+.injective-wallet-options>button small {
+  display: block;
+}
+
+.injective-wallet-options>button b {
+  font: 700 11px/1.35 monospace;
+}
+
+.injective-wallet-options>button small {
+  margin-top: 2px;
+  color: #7f8c9c;
+  font: 8px/1.35 monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
 .injective-mint-copy>footer>button {
   width: 100%;
   min-height: 50px;
