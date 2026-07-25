@@ -17,9 +17,9 @@
 | 本地化核心 | `src/i18n/core.ts`、`src/i18n/server.ts`、`src/i18n/request-locale-provider.tsx`、`src/i18n/provider.tsx` | Cookie／请求语言协商、案件能力回退、递归内容投影和界面翻译上下文 |
 | 首案英文目录 | `src/i18n/en-catalog.ts`、`src/i18n/en-overrides.ts` | 首案完整英文覆盖与关键文学文本人工润色 |
 | 第二案内容包 | `src/content/campaigns/rain-radio.ts` | 《只在雨中播出的电台》的五夜完整内容 |
-| 第三案内容包 | `src/content/campaigns/thirteenth-loaf.ts` | 《黎明前出炉的第十三个面包》的五夜完整内容 |
+| 第三案内容包 | `src/content/campaigns/thirteenth-loaf.ts` | 《面包奇谈》的五夜完整内容 |
 | 第三案视觉包 | `src/content/thirteenth-loaf-assets.ts` | 第三案 34 张专属横幅、夜印、明信片、植物、收藏、人物与城区资产 |
-| 第四案内容包 | `src/content/campaigns/chihaya-noa.ts` | 《千早诺亚的第十三次旅行》的五夜完整内容 |
+| 第四案内容包 | `src/content/campaigns/chihaya-noa.ts` | 《千早诺亚的现身》的五夜完整内容 |
 | 第四案视觉包 | `src/content/chihaya-noa-assets.ts` | 第四案 34 张专属横幅、夜印、明信片、植物、收藏、人物与城区资产 |
 | 第五案内容包 | `src/content/campaigns/fog-without-wolves.ts` | 《雾中无狼》的五夜完整内容与五条分层推论 |
 | 第五案视觉包 | `src/content/fog-without-wolves-assets.ts` | 第五案 34 张专属横幅、夜印、明信片、植物、收藏、人物与城区资产 |

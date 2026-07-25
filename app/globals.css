@@ -597,8 +597,9 @@ blockquote {
 .hero-copy h1 {
   margin: 24px 0 22px;
   color: var(--warm-paper);
-  font-size: clamp(54px, 5.5vw, 86px);
-  line-height: 1.01;
+  /* Slightly smaller responsive scale for campaign-rotating headlines. */
+  font-size: clamp(40px, 4.1vw, 64px);
+  line-height: 1.06;
   letter-spacing: -.04em;
   text-wrap: balance;
 }
@@ -606,6 +607,11 @@ blockquote {
 .hero-copy h1 em {
   color: var(--amber);
   font-weight: 400;
+}
+
+/* Opacity-only swap wrapper: do not restyle type size/color/weight. */
+.hero-copy-text {
+  display: block;
 }
 
 .hero-lede {
@@ -11683,8 +11689,8 @@ blockquote {
 
   .hero-copy h1 {
     margin-block: 20px 18px;
-    font-size: clamp(47px, 13.6vw, 58px);
-    line-height: 1.02;
+    font-size: clamp(34px, 10vw, 42px);
+    line-height: 1.08;
   }
 
   .hero-lede {

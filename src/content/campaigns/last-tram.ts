@@ -34,6 +34,8 @@ export const lastTramCampaign = defineCampaign({
   presentation: {
     archiveNumber: "001",
     teaser: "一辆不存在的电车，每晚仍在穿过这座城市。",
+    headlineMain: "城市否认的轨道上，",
+    headlineAccent: "他仍在数站台脚步声。",
     description: "追查被城市否认的四十三号线，把失踪者的选择权送回原处。",
     cityName: "雾灯城",
     detectiveName: "林渡",
