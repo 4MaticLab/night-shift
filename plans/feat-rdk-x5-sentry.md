@@ -36,12 +36,12 @@ SDK 调研结论（2026-07 官方文档与社区示例）：RDK X5 跑 RDK OS（
 
 ## 任务
 
-- [ ] 板端 `apps/rdk-sentry`：HTTP 服务 + I2C 驱动 + 帧差体动分析 + mock 模式
-- [ ] 桌宠契约扩展与 `rdk-bridge.ts` 纯逻辑
-- [ ] `main.ts` 数据源切换、IPC 与配置持久化
-- [ ] dashboard 连接 UI 与数据源徽标
-- [ ] `tests/rdk-bridge.test.ts` 全绿并入根 vitest
-- [ ] `docs/rdk-x5-sleep-sentry.md` 完成并入索引
+- [x] 板端 `apps/rdk-sentry`：HTTP 服务 + I2C 驱动 + 帧差体动分析 + mock 模式
+- [x] 桌宠契约扩展与 `rdk-bridge.ts` 纯逻辑
+- [x] `main.ts` 数据源切换、IPC 与配置持久化
+- [x] dashboard 连接 UI 与数据源徽标
+- [x] `tests/rdk-bridge.test.ts` 全绿并入根 vitest
+- [x] `docs/rdk-x5-sleep-sentry.md` 完成并入索引
 
 ## 验收标准
 
@@ -65,4 +65,4 @@ SDK 调研结论（2026-07 官方文档与社区示例）：RDK X5 跑 RDK OS（
 ## 相关文档
 
 - [[docs/sleep-hardware-bridge]]、[[docs/privacy-and-guardrails]]（护栏基线）
-- `docs/rdk-x5-sleep-sentry.md`（本计划产出，落地后改为双链）
+- [[docs/rdk-x5-sleep-sentry]]（本计划产出）

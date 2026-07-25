@@ -122,6 +122,34 @@ h3 { font-size: 13px; margin: 10px 0 6px; color: rgba(240, 212, 138, 0.85); }
 /* 摄像头行 */
 .camera-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
+/* 床头哨站连接行 */
+.sentry-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+
+.sentry-row input {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(120, 140, 190, 0.35);
+  background: rgba(11, 16, 32, 0.7);
+  color: #e8e3d5;
+  outline: none;
+}
+
+.sentry-row input:focus { border-color: rgba(212, 175, 55, 0.6); }
+
+#sentry-host { flex: 1; min-width: 160px; }
+#sentry-port { width: 72px; }
+
+code {
+  font-family: "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  color: rgba(207, 224, 255, 0.85);
+  background: rgba(120, 140, 190, 0.12);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
 button {
   font-family: inherit;
   font-size: 13px;
