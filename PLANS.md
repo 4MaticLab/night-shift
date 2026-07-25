@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/feat-desk-pet]] | `feat/desk-pet` | in_progress | auto | 0/5 | 提交实现与验证证据 |
+| [[plans/feat-desk-pet]] | `feat/desk-pet` | in_progress | auto | 5/5 | 写入最终验证证据并完成 |
 
 ## 使用规则
 
