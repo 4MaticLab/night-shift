@@ -2305,11 +2305,17 @@ blockquote {
   position: absolute;
   top: 24px;
   left: 3.2vw;
-  right: 3.2vw;
+  /* Keep the skip/wake button clear of the global BGM control (50px + its right inset). */
+  right: max(3.2vw, calc(max(4vw, 42px, env(safe-area-inset-right)) + 62px));
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   z-index: 10;
+}
+
+.night-header .brand-mark {
+  min-width: 0;
 }
 
 .night-header button {
@@ -11675,6 +11681,16 @@ blockquote {
   .landing-nav-actions,
   .topbar-actions {
     margin-right: 52px;
+  }
+
+  .night-header {
+    /* Mobile BGM control is 44px with a tighter right inset. */
+    right: max(3.2vw, calc(max(20px, env(safe-area-inset-right)) + 56px));
+  }
+
+  .night-header button {
+    flex: 0 0 auto;
+    white-space: nowrap;
   }
 
   .landing-nav .ghost-button {
