@@ -6,6 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
+| [[plans/feat-rdk-x5-sentry]] | `feat/rdk-x5-sentry` | in_progress | auto | 0/6 | 板端 apps/rdk-sentry 代理 |
 
 ## 使用规则
 
