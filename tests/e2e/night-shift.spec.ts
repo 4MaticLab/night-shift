@@ -321,16 +321,16 @@ test.describe("automatic browser locale", () => {
 
     await selectCampaign(page, "The Station That Broadcasts in Rain");
     await expect(page.getByRole("heading", { name: /On nights when rain falls/ })).toBeVisible();
-    await selectCampaign(page, "面包奇谈");
-    await expect(page.getByRole("heading", { name: /停业十七年的烤炉/ })).toBeVisible();
-    await expect(page.getByRole("button", { name: /开始第 003 宗案件/ })).toBeVisible();
-    await selectCampaign(page, "千早诺亚的现身");
-    await expect(page.getByRole("heading", { name: /同一个名字过境十二次/ })).toBeVisible();
-    await expect(page.getByRole("button", { name: /开始第 004 宗案件/ })).toBeVisible();
+    await selectCampaign(page, "The Thirteenth Loaf Before Dawn");
+    await expect(page.getByRole("heading", { name: /Seventeen years after the ovens/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Begin Case 003/ })).toBeVisible();
+    await selectCampaign(page, "Chihaya Noa's Thirteenth Journey");
+    await expect(page.getByRole("heading", { name: /same name has crossed the border/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Begin Case 004/ })).toBeVisible();
     await selectCampaign(page, "The Last Tram at 00:43");
     await expect(page.getByRole("heading", { name: /On tracks the city denies/ })).toBeVisible();
 
-    await page.getByRole("button", { name: "中文", exact: true }).click();
+    await page.getByRole("button", { name: /切换到中文|中文/ }).click();
     await expect(page.getByRole("heading", { name: /城市否认的轨道上/ })).toBeVisible();
     expect((await context.cookies()).find((cookie) => cookie.name === "night-shift-locale")?.value).toBe("zh-CN");
     await page.reload();
