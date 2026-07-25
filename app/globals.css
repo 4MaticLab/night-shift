@@ -15509,12 +15509,15 @@ blockquote {
   position: relative;
   padding: clamp(22px, 3.5vw, 58px) clamp(16px, 4vw, 66px) clamp(30px, 4vw, 54px);
   color: #2b2620;
-  /* Morning sheet: whiter cream-yellow paper, less brown tea-stain. */
+  /* Keep the existing paper-fiber texture; only wash the tone toward white-yellow. */
   background-color: #fbf7e8;
   background-image:
-    radial-gradient(140% 100% at 50% 0%, #fffef8 0, #faf4e0 48%, #f3e9c8 100%),
-    linear-gradient(180deg, #ffffff66 0%, transparent 42%, #f0e4b81a 100%);
-  background-blend-mode: normal, soft-light;
+    linear-gradient(180deg, #fffdf8e6 0%, #faf3e0cc 48%, #f3e9c8b8 100%),
+    url("/art/ui/foglight-morning-paper-texture-v3.webp");
+  background-size: auto, 100% auto;
+  background-repeat: no-repeat, repeat-y;
+  background-position: center, top center;
+  background-blend-mode: soft-light, multiply;
   box-shadow:
     0 1px 0 #ffffff88 inset,
     0 -40px 80px #d4c49212 inset,
@@ -15533,15 +15536,9 @@ blockquote {
   box-shadow: 0 18px 50px #00000059;
 }
 
-/* faint print grain over the whole sheet — keep light so it does not muddy the page */
+/* no extra CSS grain — fiber texture already provides the paper grain */
 .newspaper .broadsheet::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    repeating-linear-gradient(0deg, transparent 0 3px, #b59a5a05 4px),
-    repeating-linear-gradient(90deg, transparent 0 7px, #b59a5a03 8px);
+  display: none;
 }
 
 .newspaper .broadsheet > * {
@@ -15771,7 +15768,7 @@ blockquote {
 .newspaper .character-encounter > div:first-child {
   min-height: 330px;
   border: 1px solid #2b262066;
-  outline: 5px solid #efe6d2;
+  outline: 5px solid #f5efdc;
   outline-offset: -6px;
   box-shadow: none;
   transform: none;
