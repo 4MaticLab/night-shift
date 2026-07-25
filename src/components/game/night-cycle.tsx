@@ -19,6 +19,7 @@ import { elapsedSessionMinutes, formatSleepDuration, nightSealProgress } from "@
 import { useGameStore } from "@/src/stores/game-store";
 import { getReadyEvidenceSyntheses } from "@/src/lib/game-engine/evidence-synthesis";
 import { BotanicalSpecimen, CityRoute, PaperCard, qualityCopy, Seal, SocietyCrest } from "./shared";
+import { EvidenceLoupe } from "./evidence-loupe";
 import { NightDiorama } from "./night-diorama";
 import type { GameView } from "./types";
 import { SleepHardwareHandoff, SleepHardwareMorningReceipt, SleepHardwareNightTelemetry } from "./sleep-hardware";
@@ -379,7 +380,7 @@ export function MorningReport({ reportChapter, reviewingCurrentMorning, onReview
       </header>
       <section className="paper-lead">
         <div className="lead-copy"><Seal>{t("调查报告")} · 0{chapter}</Seal><h2>{current.title}</h2><small>{t("记录人：")}{campaign.presentation.detectiveName} · {campaign.presentation.cityName} · {reportClock}</small></div>
-        <figure className="lead-figure"><Image className="report-hero-art" src={morningHeader.src} alt={morningHeader.alt} fill preload sizes="(max-width: 900px) 100vw, 60vw" /><figcaption>{morningHeader.alt}</figcaption></figure>
+        <EvidenceLoupe className="lead-figure" src={morningHeader.src} alt={morningHeader.alt} caption={morningHeader.alt} />
       </section>
       {!reviewingCurrentMorning && <aside className="report-replay-note"><FileText /><span><small>LATEST MORNING REPORT · {t("最新晨报重读")}</small><b>{t("这份报纸保持为上一次归来时的内容。")}</b><p>{t("你可以继续整理案件板，也可以回到今晚的交接；重读不会改写任何归档。")}</p></span></aside>}
       <details className="report-archive-details" open={reportArchiveOpen} onToggle={(event) => setReportArchiveOpen(event.currentTarget.open)}>
