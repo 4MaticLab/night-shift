@@ -6,6 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
+| [[plans/feat-cipher-case-notebook]] | `feat/cipher-case-notebook` | `in_progress` | `auto` | 0% | 实现案件隔离的本地密文笔记 |
 
 ## 使用规则
 
