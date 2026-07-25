@@ -1,6 +1,6 @@
 # 图片页面编辑式美感排版
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P2
 - 创建：2026-07-25
 - 更新：2026-07-25
@@ -28,10 +28,10 @@
 
 ## 任务
 
-- [ ] 藏品 `.collection-grid` 编辑式非对称排版（桌面）。
-- [ ] 海报 `.poster-print-stack` 屏幕错落陈列 + 打印回落。
-- [ ] 移动端/窄屏稳定回落。
-- [ ] 验证：`npm test`、`npm run lint`、`npm run build`、人工预览两页。
+- [x] 藏品 `.collection-grid` 编辑式非对称排版（桌面）。
+- [x] 海报 `.poster-print-stack` 屏幕错落陈列 + 打印回落。
+- [x] 移动端/窄屏稳定回落。
+- [x] 验证：`npm test`、`npm run lint`、`npm run build`、人工预览两页。
 
 ## 验收标准
 
@@ -50,6 +50,7 @@
 ## 决定记录
 
 - 2026-07-25：创建计划，`auto` 模式自审通过进入 `in_progress`。
+- 2026-07-25：完成实现。藏品网格改为每 7 张一个 2x2 特写 + 轻旋转错落；海报预览三段错落陈列，打印/手机回落干净堆叠。验证：`eslint .` 通过、`vitest run` 20 文件 138 用例全过、`next build` 成功、`/posters` 预览人工确认倾斜生效。
 
 ## 相关文档
 
