@@ -1217,6 +1217,54 @@ test("reads, searches, and synthesizes evidence without pair guessing", async ({
   await expectNoPageOverflow(page);
 });
 
+test("keeps cipher notes local, campaign-scoped, and separate from game progress", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: /开始第 001 宗案件/ })).toBeEnabled();
+  await page.keyboard.press("Shift+D");
+  await runDemoShortcut(page, /解锁完整案件板/);
+  await page.locator(".board-cipher-disclosure > summary").click();
+
+  const gameBefore = await page.evaluate(() => localStorage.getItem("night-shift-save-v1"));
+  const notebook = page.locator(".cipher-notebook");
+  const textarea = notebook.getByRole("textbox", { name: "密文草稿" });
+  await textarea.fill("13=M\n先按时刻排序，再抄字母");
+  await expect(notebook).toContainText("已保存到本机");
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem("night-shift-cipher-notes-v1")!).state.notes);
+  expect(stored["case-001"]).toContain("13=M");
+  expect(await page.evaluate(() => localStorage.getItem("night-shift-save-v1"))).toBe(gameBefore);
+
+  await page.reload();
+  await page.locator(".board-cipher-disclosure > summary").click();
+  await expect(page.locator(".cipher-notebook").getByRole("textbox", { name: "密文草稿" })).toHaveValue("13=M\n先按时刻排序，再抄字母");
+  const clear = page.locator(".cipher-notebook").getByRole("button", { name: "清空" });
+  await clear.click();
+  await expect(page.locator(".cipher-notebook").getByRole("button", { name: "确认清空" })).toBeVisible();
+  await expect(page.locator(".cipher-notebook").getByRole("textbox", { name: "密文草稿" })).not.toHaveValue("");
+  await page.locator(".cipher-notebook").getByRole("button", { name: "确认清空" }).click();
+  await expect(page.locator(".cipher-notebook").getByRole("textbox", { name: "密文草稿" })).toHaveValue("");
+});
+
+test("reveals cipher hints one at a time without persisting help usage", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: /开始第 001 宗案件/ })).toBeEnabled();
+  await page.keyboard.press("Shift+D");
+  await runDemoShortcut(page, /解锁完整案件板/);
+  await page.locator(".board-cipher-disclosure > summary").click();
+
+  const firstCipher = page.locator(".cipher-level.unlocked").first();
+  const hints = firstCipher.locator(".cipher-progressive-hints");
+  await expect(hints.locator("li")).toHaveCount(0);
+  await hints.getByRole("button", { name: "展开第一条提示" }).click();
+  await expect(hints.locator("li")).toHaveCount(1);
+  await hints.getByRole("button", { name: "再看一条提示" }).click();
+  await expect(hints.locator("li")).toHaveCount(2);
+  await expect(hints).toContainText("不会扣除任何东西，也不会写入存档");
+
+  await page.reload();
+  await page.locator(".board-cipher-disclosure > summary").click();
+  await expect(page.locator(".cipher-level.unlocked").first().locator(".cipher-progressive-hints li")).toHaveCount(0);
+});
+
 test("shares one clue as a QR deep link", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
