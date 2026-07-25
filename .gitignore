@@ -47,6 +47,10 @@ next-env.d.ts
 /outputs/
 /work/
 
+# desk pet (Electron subapp)
+/apps/desk-pet/node_modules/
+/apps/desk-pet/dist/
+
 # OpenNext
 .open-next
 

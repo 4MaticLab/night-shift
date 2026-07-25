@@ -38,6 +38,7 @@
     "examples",
     "worker",
     "contract-tests",
+    "apps/desk-pet",
     "vite.config.ts"
   ]
 }

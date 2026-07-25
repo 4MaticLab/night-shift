@@ -1,0 +1,166 @@
+/* 桌宠窗口：透明背景，林渡 + 蓝盒子床垫 */
+
+* { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+
+html, body { background: transparent; overflow: hidden; }
+
+body {
+  font-family: "Songti SC", "Noto Serif SC", Georgia, serif;
+  width: 300px;
+  height: 380px;
+  color: #e8e3d5;
+}
+
+#stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#drag-handle {
+  -webkit-app-region: drag;
+  cursor: grab;
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: rgba(11, 16, 32, 0.82);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  color: rgba(232, 227, 213, 0.75);
+  margin-top: 4px;
+}
+
+#hud {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 11px;
+}
+
+#hud span {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(11, 16, 32, 0.82);
+  border: 1px solid rgba(120, 140, 190, 0.35);
+  white-space: nowrap;
+}
+
+#points-chip { color: #f0d48a; border-color: rgba(212, 175, 55, 0.45); }
+
+#bubble {
+  position: absolute;
+  top: 58px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 250px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(17, 24, 44, 0.94);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  font-size: 12px;
+  line-height: 1.6;
+  z-index: 5;
+  transition: opacity 0.3s ease;
+}
+
+#bubble.hidden { opacity: 0; pointer-events: none; }
+
+#pet-zone {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  cursor: pointer;
+}
+
+#lin-du {
+  position: absolute;
+  left: 50%;
+  bottom: 46px;
+  width: 150px;
+  border-radius: 14px;
+  border: 2px solid rgba(212, 175, 55, 0.45);
+  box-shadow: 0 10px 28px rgba(4, 8, 18, 0.6);
+  transform-origin: center bottom;
+  transform: translateX(-50%);
+  transition: transform 1.4s ease, bottom 1.4s ease, filter 1.4s ease, width 1.4s ease;
+  animation: idle-bob 4.2s ease-in-out infinite;
+}
+
+@keyframes idle-bob {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-6px); }
+}
+
+#mattress {
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 210px;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 1s ease;
+  filter: drop-shadow(0 8px 18px rgba(4, 8, 18, 0.55));
+}
+
+#zzz {
+  position: absolute;
+  left: 68%;
+  bottom: 190px;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  color: #9fb4e8;
+  font-family: Georgia, serif;
+  font-style: italic;
+  pointer-events: none;
+}
+
+#zzz span {
+  display: inline-block;
+  animation: zzz-rise 2.6s ease-in-out infinite;
+}
+
+#zzz span:nth-child(1) { font-size: 22px; animation-delay: 0s; }
+#zzz span:nth-child(2) { font-size: 16px; animation-delay: 0.5s; }
+#zzz span:nth-child(3) { font-size: 12px; animation-delay: 1s; }
+
+@keyframes zzz-rise {
+  0% { transform: translateY(0); opacity: 0; }
+  30% { opacity: 0.95; }
+  100% { transform: translateY(-26px); opacity: 0; }
+}
+
+/* 睡觉：床垫亮出来，林渡「躺」上去 */
+#stage.sleeping #mattress { opacity: 1; }
+#stage.sleeping #zzz { opacity: 1; }
+#stage.sleeping #lin-du {
+  animation: none;
+  width: 120px;
+  bottom: 34px;
+  transform: translateX(-50%) rotate(-86deg) translateY(8px);
+  filter: brightness(0.55) saturate(0.7);
+}
+
+#actions {
+  display: flex;
+  gap: 6px;
+  padding-bottom: 8px;
+}
+
+#actions button {
+  -webkit-app-region: no-drag;
+  font-family: inherit;
+  font-size: 11px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  background: rgba(11, 16, 32, 0.86);
+  color: #e8e3d5;
+  cursor: pointer;
+}
+
+#actions button:hover { background: rgba(27, 36, 64, 0.95); }
+
+#quit { border-color: rgba(150, 90, 90, 0.5); }
