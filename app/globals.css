@@ -608,17 +608,9 @@ blockquote {
   font-weight: 400;
 }
 
-.hero-copy-swap {
-  position: relative;
-  min-height: clamp(210px, 28vh, 290px);
-}
-
-.hero-copy-swap-inner {
-  width: 100%;
-}
-
-.hero-copy-swap .hero-lede {
-  margin: 0 0 4px;
+/* Opacity-only swap wrapper: do not restyle type size/color/weight. */
+.hero-copy-text {
+  display: block;
 }
 
 .hero-lede {
@@ -11605,10 +11597,6 @@ blockquote {
   .hero-copy {
     width: auto;
     margin: 15vh 22px 520px;
-  }
-
-  .hero-copy-swap {
-    min-height: clamp(160px, 24vh, 230px);
   }
 
   .hero-copy h1 {

@@ -43,23 +43,21 @@ export function Hero({ onStart, interactive }: { onStart: () => void; interactiv
       </nav>
       <section className="hero-copy">
         <p className="eyebrow"><Moon size={14} /> {t("一款与你轮班生活的异步侦探游戏")}<span className="shift-rule"><span className="shift-rule-face shift-rule-day"><b aria-hidden="true">●</b>{t("你负责白天推理")}</span><span className="shift-rule-face shift-rule-night"><b aria-hidden="true">☾</b>{t("林渡负责夜晚调查")}</span></span></p>
-        <div className="hero-copy-swap">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={campaign.id}
-              className="hero-copy-swap-inner"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={heroCopyTransition}
-            >
-              <h1>
-                {campaign.presentation.headlineMain}<br /><em>{campaign.presentation.headlineAccent}</em>
-              </h1>
-              <p className="hero-lede">{campaign.presentation.teaser}</p>
-            </motion.div>
-          </AnimatePresence>
-        </div>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={campaign.id}
+            className="hero-copy-text"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={heroCopyTransition}
+          >
+            <h1>
+              {campaign.presentation.headlineMain}<br /><em>{campaign.presentation.headlineAccent}</em>
+            </h1>
+            <p className="hero-lede">{campaign.presentation.teaser}</p>
+          </motion.div>
+        </AnimatePresence>
         <div className="hero-actions">
           <ShinyButton
             className="primary-button"
