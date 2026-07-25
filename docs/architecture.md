@@ -17,9 +17,9 @@
 | 本地化核心 | `src/i18n/core.ts`、`src/i18n/server.ts`、`src/i18n/request-locale-provider.tsx`、`src/i18n/provider.tsx` | Cookie／请求语言协商、案件能力回退、递归内容投影和界面翻译上下文 |
 | 首案英文目录 | `src/i18n/en-catalog.ts`、`src/i18n/en-overrides.ts` | 首案完整英文覆盖与关键文学文本人工润色 |
 | 第二案内容包 | `src/content/campaigns/rain-radio.ts` | 《只在雨中播出的电台》的五夜完整内容 |
-| 第三案内容包 | `src/content/campaigns/thirteenth-loaf.ts` | 《黎明前出炉的第十三个面包》的五夜完整内容 |
+| 第三案内容包 | `src/content/campaigns/thirteenth-loaf.ts` | 《面包奇谈》的五夜完整内容 |
 | 第三案视觉包 | `src/content/thirteenth-loaf-assets.ts` | 第三案 34 张专属横幅、夜印、明信片、植物、收藏、人物与城区资产 |
-| 第四案内容包 | `src/content/campaigns/chihaya-noa.ts` | 《千早诺亚的第十三次旅行》的五夜完整内容 |
+| 第四案内容包 | `src/content/campaigns/chihaya-noa.ts` | 《千早诺亚的现身》的五夜完整内容 |
 | 第四案视觉包 | `src/content/chihaya-noa-assets.ts` | 第四案 34 张专属横幅、夜印、明信片、植物、收藏、人物与城区资产 |
 | 第五案内容包 | `src/content/campaigns/fog-without-wolves.ts` | 《雾中无狼》的五夜完整内容与五条分层推论 |
 | 第五案视觉包 | `src/content/fog-without-wolves-assets.ts` | 第五案 34 张专属横幅、夜印、明信片、植物、收藏、人物与城区资产 |
@@ -144,6 +144,8 @@ Home Assistant 使用第四份独立存档 `night-shift-ambient-hardware-v1`，�
 晨报以 900 px 为阅读层级断点。宽屏默认展开完整夜班档案；平板与手机默认把硬件回执、放下纸条、明信片、时辰、睡隙、植物、人物、机会、纪念物和社团来函收进原生 `details`，主文档流只保留夜印／日志、随身物、路线、新证物、矛盾和下一步。玩家可随时展开，折叠状态不写存档也不改变内容。案件板把档案库与推理合成台置于主文档流，再把密文台放在其后的独立 `details`；密文默认收起，以 DOM 顺序和原生展开语义表达“补充档案而非主线门槛”。
 
 好友线索使用 `/game/board?case=<案件 ID>&clue=<稳定线索 ID>` 的 local-first 深链接。分享端只从当前案件白名单生成链接和二维码；共享 route layout 在普通阶段守卫之前验证案件和该案线索，切换到对应存档后才经 `receiveSharedClue` 写入 `unlockedClueIds` 与 `receivedClueIds`，随后 replace 到无 query 的案件板。旧的根路径 `/?case=...&clue=...` 与仅含 `clue` 的链接继续兼容，后者默认解释为 `case-001`。跨案件组合与未知 ID 不创建或污染存档；重复链接保持幂等，不传送其他进度，也不会合成推论或推进章节。赠送线索可参与普通阅档与推论合成，但真结局只计算非 `receivedClueIds` 的亲自取得线索；玩家后来完成对应夜班时，该 ID 会从好友来源表移除，转为亲自取得。
+
+纪念品交换页 `/keepsake` 用同一套 local-first 思路把非评分的纪念品做成可扫码礼物。`keepsake-sharing` 只把稳定的 souvenir ID 编进 `/keepsake?keepsake=<id>` 链接与二维码；服务端为九件纪念品各生成分享链接与 QR。收取端把结果写入独立 localStorage 键 `night-shift-keepsakes-v1`（`keepsake-store`），与主游戏存档完全隔离，因此不触碰任何存档迁移、线索、推论或结局资格。未知 ID 不写入也不报错；重复收取幂等；收到的纪念品带“已收藏”标记，并同样可再生成二维码与可打印海报继续分享。
 
 密文关卡使用独立的 `solvedCipherIds` 保存已经核对的稳定 ID。每个案件注册一份 `CipherDeskDefinition`，同时提供标题、说明、三段关卡、最终接线与全关完成回执；单个关卡可选 `CipherDial`，声明范围、步长、初始值、目标、精度和显示模式。显示模式支持时刻、MHz 和案件通用计数，并可由内容提供仪表及信号标签；刻度盘值先按范围与步长对齐并按精度截断，最终仍通过同一答案白名单进入 `solveCipher`，避免浮点漂移或绕过作者答案。文本答案经 NFKC、大小写和常见分隔符归一化后精确匹配，最终接线则要求碎片 ID 数量、唯一性与顺序完全一致，全部不使用模糊判断或生成模型。十五个核心关卡通过 challenge ID 映射到桌边参考册，提供完整 A1Z26／摩尔斯表或通用时序、算式、频率与因果方法；映射不进入密文 schema，参考文本不得包含答案别名或揭示标题。两条作者提示通过 `ProgressiveCipherHints` 分两次主动展开，层级仅存在当前组件会话，刷新或切换案件即清除，也不记录求助次数。密文台另挂载独立 `night-shift-cipher-notes-v1` 草稿存档，按 `campaignId` 保存最多 1200 字纯文本；组件不解析草稿、不传入答案校验，也不写 game store。只有成功关卡和接线 ID 持久化；未提交刻度、临时排序、参考册展开状态与提示层级只存在组件状态。迁移会按当前案件的三关与接线 ID 合集过滤未知和跨案件值，笔记存档则独立清理非法案件键与非字符串内容。未注册密文的案件不显示空面板。
 

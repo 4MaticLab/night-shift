@@ -580,32 +580,6 @@ blockquote {
   width: min(620px, 46vw);
   margin-left: 8vw;
   margin-top: 1vh;
-  padding: 28px 34px 30px 31px;
-  isolation: isolate;
-}
-
-.hero-copy::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: -20px -28px -24px -24px;
-  background:
-    linear-gradient(90deg, #c59a5a09 0 1px, transparent 1px) 15px 0 / 100% 100% no-repeat,
-    repeating-linear-gradient(0deg, transparent 0 30px, #d9c8a909 31px),
-    radial-gradient(ellipse at 24% 40%, #172238a8, transparent 72%);
-  opacity: .9;
-  pointer-events: none;
-}
-
-.hero-copy::after {
-  content: "NIGHT INTAKE · 00:43";
-  position: absolute;
-  right: 2px;
-  bottom: 1px;
-  color: #7d6a4d;
-  font: 6px/1 monospace;
-  letter-spacing: .22em;
-  transform: rotate(-1deg);
 }
 
 .eyebrow {
@@ -621,57 +595,23 @@ blockquote {
 }
 
 .hero-copy h1 {
-  margin: 22px 0 26px;
+  margin: 24px 0 22px;
   color: var(--warm-paper);
-  font-size: clamp(54px, 5.25vw, 82px);
-  line-height: .98;
-  letter-spacing: -.045em;
+  /* Slightly smaller responsive scale for campaign-rotating headlines. */
+  font-size: clamp(40px, 4.1vw, 64px);
+  line-height: 1.06;
+  letter-spacing: -.04em;
   text-wrap: balance;
-  filter: drop-shadow(0 3px 16px #0008);
 }
 
-.hero-title-hand {
-  display: block;
-}
-
-.hero-copy h1 .hero-title-hand {
-  position: relative;
-  width: max-content;
-  max-width: 100%;
-  margin: 10px 0 0 9px;
+.hero-copy h1 em {
   color: var(--amber);
-  font-family: var(--font-handwriting), var(--font-noto-serif-sc), cursive;
-  font-size: 1.03em;
-  font-style: normal;
   font-weight: 400;
-  letter-spacing: .005em;
-  line-height: .92;
-  white-space: nowrap;
-  transform: rotate(-1.1deg);
-  transform-origin: left center;
-  text-shadow:
-    .5px 0 #c59a5a,
-    0 1px #7d5b2e,
-    0 0 18px #c59a5a1f;
 }
 
-.hero-copy h1 .hero-title-hand-lead {
-  margin: 0 0 0 2px;
-  transform: rotate(-.6deg);
-}
-
-.hero-title-hand:not(.hero-title-hand-lead)::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  left: 3%;
-  right: -2%;
-  bottom: -13px;
-  height: 12px;
-  border-top: 2px solid #c59a5a8c;
-  border-radius: 50%;
-  transform: rotate(.8deg) skewX(-16deg);
-  mask-image: linear-gradient(90deg, transparent, #000 5%, #000 93%, transparent);
+/* Opacity-only swap wrapper: do not restyle type size/color/weight. */
+.hero-copy-text {
+  display: block;
 }
 
 .hero-lede {
@@ -681,54 +621,11 @@ blockquote {
   line-height: 1.85;
 }
 
-.hero-lede-note {
-  position: relative;
-  margin: 0 0 0 5px;
-  padding: 12px 16px 12px 6px;
-  color: #c9c5ba;
-  font-family: var(--font-noto-serif-sc), serif;
-  letter-spacing: .025em;
-  transform: rotate(.12deg);
-}
-
 .hero-actions {
   display: flex;
   align-items: center;
   gap: 26px;
   margin-top: 30px;
-}
-
-.hero-actions .primary-button {
-  position: relative;
-  border-radius: 2px 7px 3px 5px;
-  font-family: var(--font-noto-serif-sc), serif;
-  font-weight: 600;
-  letter-spacing: .035em;
-  transform: rotate(-.3deg);
-}
-
-.hero-actions .primary-button::before,
-.hero-actions .primary-button::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  width: 9px;
-  height: 18px;
-  border-radius: 50%;
-  background: #0c1422;
-  transform: translateY(-50%);
-}
-
-.hero-actions .primary-button::before { left: -5px; }
-.hero-actions .primary-button::after { right: -5px; }
-
-.hero-kicker-copy {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-noto-serif-sc), serif;
-  font-size: 10px;
-  letter-spacing: .13em;
 }
 
 .primary-button,
@@ -2303,26 +2200,37 @@ blockquote {
 
 .night-header {
   position: absolute;
-  top: 24px;
+  /* Match the global BGM control top + height so skip sits on the same horizontal line. */
+  top: max(28px, env(safe-area-inset-top));
   left: 3.2vw;
-  right: 3.2vw;
+  /* Keep the skip/wake button clear of the global BGM control (50px + its right inset). */
+  right: max(3.2vw, calc(max(4vw, 42px, env(safe-area-inset-right)) + 62px));
+  min-height: 50px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   z-index: 10;
 }
 
+.night-header .brand-mark {
+  min-width: 0;
+}
+
 .night-header button {
+  box-sizing: border-box;
+  min-height: 50px;
   color: #d9c18d;
   background: #10182799;
   border: 1px solid #c59a5a55;
-  padding: 8px 15px;
+  padding: 0 16px;
   display: flex;
   align-items: center;
   gap: 7px;
   cursor: pointer;
   font-size: 11px;
   letter-spacing: .06em;
+  line-height: 1.2;
   backdrop-filter: blur(6px);
   transition: background .25s, border-color .25s, color .25s;
 }
@@ -7217,7 +7125,7 @@ blockquote {
 .collection-index {
   position: sticky;
   z-index: 24;
-  top: 24px;
+  top: 0;
   order: 1;
   width: min(1180px, calc(100% - 48px));
   min-height: 82px;
@@ -7327,7 +7235,7 @@ blockquote {
 
 .collection-section {
   /* Keep section titles clear of the sticky index + a stable activation gap. */
-  scroll-margin-top: 128px;
+  scroll-margin-top: 120px;
 }
 
 .collection-evidence-cabinet {
@@ -7397,10 +7305,12 @@ blockquote {
 .collection-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
+  grid-auto-flow: row dense;
+  gap: 26px 20px;
   max-width: 1180px;
-  margin: 45px auto;
+  margin: 48px auto;
   padding: 0 24px;
+  align-items: start;
 }
 
 .collectible-card {
@@ -7411,10 +7321,47 @@ blockquote {
   padding: 20px;
   box-shadow: 0 12px 40px #0004;
   border: 1px solid #c4b89f;
+  transition: transform .42s cubic-bezier(.2, .7, .2, 1), box-shadow .42s ease;
+  will-change: transform;
 }
 
 .collectible-card:nth-child(2n) {
   background: #e6dac2;
+}
+
+/* Editorial magazine rhythm — break the rigid 4-up grid with a featured
+   plate every seven fragments and a faint pinned-clipping tilt/stagger. */
+.collection-grid > .collectible-card:nth-child(7n + 1) {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.collection-grid > .collectible-card:nth-child(7n + 1) .item-art {
+  height: auto;
+  min-height: 300px;
+}
+
+.collection-grid > .collectible-card:nth-child(3n + 1) {
+  transform: rotate(-.6deg) translateY(9px);
+}
+
+.collection-grid > .collectible-card:nth-child(3n + 2) {
+  transform: rotate(.55deg) translateY(-6px);
+}
+
+.collection-grid > .collectible-card:nth-child(3n + 3) {
+  transform: rotate(.75deg) translateY(15px);
+}
+
+.collection-grid > .collectible-card:nth-child(7n + 1) {
+  transform: rotate(-.35deg);
+}
+
+.collectible-card:hover,
+.collectible-card:focus-within {
+  transform: rotate(0deg) translateY(-8px) scale(1.014);
+  box-shadow: 0 26px 66px #0007;
+  z-index: 3;
 }
 
 .collectible-card.locked {
@@ -11440,13 +11387,27 @@ blockquote {
     grid-template-columns: minmax(0, .8fr) minmax(440px, 1.2fr);
   }
 
+  .tonight-page .desk-scene {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow: visible;
+  }
+
   .tonight-page .scene-copy {
-    left: 6%;
-    max-width: 84%;
+    position: static;
+    left: auto;
+    top: auto;
+    max-width: none;
+    padding: var(--chrome-clearance) 7% 0;
   }
 
   .tonight-page .handoff-stack {
-    padding: 160px 5% 5%;
+    position: static;
+    inset: auto;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 18px 7% 30px;
     gap: 16px;
   }
 
@@ -11459,11 +11420,11 @@ blockquote {
   }
 
   .tonight-page .handoff-portrait {
-    width: min(90%, 240px);
+    width: min(100%, 300px);
   }
 
   .tonight-page .handoff-docket {
-    width: min(90%, 240px);
+    width: min(100%, 300px);
   }
 
   .plan-panel {
@@ -11486,19 +11447,28 @@ blockquote {
   }
 
   .tonight-page .desk-scene {
-    height: min(720px, 100svh);
-    min-height: 620px;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
     background-position: 20% center;
   }
 
   .tonight-page .scene-copy {
-    left: 5%;
-    top: max(8%, var(--chrome-clearance));
-    max-width: 45%;
+    position: static;
+    left: auto;
+    top: auto;
+    max-width: none;
+    padding: max(var(--chrome-clearance), 32px) 6% 0;
   }
 
   .tonight-page .handoff-stack {
-    padding: max(var(--chrome-clearance), 140px) 5% 40px;
+    position: static;
+    inset: auto;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 20px 6% 40px;
     gap: 18px;
   }
 
@@ -11511,11 +11481,11 @@ blockquote {
   }
 
   .tonight-page .handoff-portrait {
-    width: min(70%, 320px);
+    width: min(100%, 340px);
   }
 
   .tonight-page .handoff-docket {
-    width: min(70%, 320px);
+    width: min(100%, 340px);
   }
 
   .tonight-page .plan-panel {
@@ -11677,6 +11647,20 @@ blockquote {
     margin-right: 52px;
   }
 
+  .night-header {
+    /* Match mobile BGM control top/height and clear its tighter right inset. */
+    top: max(18px, env(safe-area-inset-top));
+    right: max(3.2vw, calc(max(20px, env(safe-area-inset-right)) + 56px));
+    min-height: 44px;
+  }
+
+  .night-header button {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 0 12px;
+    white-space: nowrap;
+  }
+
   .landing-nav .ghost-button {
     font-size: 0;
     width: 44px;
@@ -11699,60 +11683,20 @@ blockquote {
   }
 
   .hero-copy {
-    width: calc(100% - 28px);
-    margin: 15vh 14px 520px;
-    padding: 22px 10px 25px 16px;
-  }
-
-  .hero-copy::before {
-    inset: -14px -8px -17px -8px;
-  }
-
-  .hero-copy::after {
-    right: 4px;
-    font-size: 5px;
+    width: auto;
+    margin: 15vh 22px 520px;
   }
 
   .hero-copy h1 {
     margin-block: 20px 18px;
-    font-size: clamp(40px, 11.6vw, 48px);
-    line-height: 1.02;
-  }
-
-  .hero-copy h1 .hero-title-hand {
-    margin-top: 9px;
-    margin-left: 3px;
-    font-size: .94em;
-    line-height: .97;
-  }
-
-  .hero-kicker {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 9px;
-  }
-
-  .hero-kicker-copy {
-    font-size: 8px;
-  }
-
-  .hero-kicker .shift-rule {
-    margin-left: 0;
-  }
-
-  .hero-title-hand::after {
-    bottom: -9px;
+    font-size: clamp(34px, 10vw, 42px);
+    line-height: 1.08;
   }
 
   .hero-lede {
     max-width: 350px;
     font-size: 14px;
     line-height: 1.75;
-  }
-
-  .hero-lede-note {
-    margin-left: 1px;
-    padding: 11px 8px 11px 4px;
   }
 
   .hero-actions {
@@ -12078,6 +12022,17 @@ blockquote {
     min-height: 355px;
   }
 
+  /* Flatten the editorial tilt/featured spans on phones for a clean single column. */
+  .collection-grid > .collectible-card,
+  .collection-grid > .collectible-card:nth-child(3n + 1),
+  .collection-grid > .collectible-card:nth-child(3n + 2),
+  .collection-grid > .collectible-card:nth-child(3n + 3),
+  .collection-grid > .collectible-card:nth-child(7n + 1) {
+    grid-column: auto;
+    grid-row: auto;
+    transform: none;
+  }
+
   .archive-folders,
   .ending-cards {
     grid-template-columns: 1fr;
@@ -12099,7 +12054,7 @@ blockquote {
 
 @media (max-width: 900px) {
   .collection-index {
-    top: 20px;
+    top: 0;
     width: calc(100% - 28px);
     min-height: 72px;
     margin-top: -12px;
@@ -12147,7 +12102,7 @@ blockquote {
 
 @media (max-width: 600px) {
   .collection-index {
-    top: 16px;
+    top: 0;
     width: calc(100% - 16px);
     min-height: 74px;
     margin-bottom: 18px;
@@ -12181,7 +12136,7 @@ blockquote {
   }
 
   .collection-section {
-    scroll-margin-top: 103px;
+    scroll-margin-top: 100px;
   }
 
   .collection-evidence-cabinet {
@@ -14587,12 +14542,12 @@ blockquote {
 }
 
 .evidence-archive-layout {
-  width: min(1180px, calc(100% - 48px));
+  width: min(1280px, calc(100% - 48px));
   margin: 0 auto 36px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(330px, 370px);
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .evidence-library {
@@ -14903,9 +14858,6 @@ blockquote {
 
 .ready-synthesis-list {
   padding: 15px;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
 }
 
 .ready-synthesis-card {
@@ -14916,7 +14868,7 @@ blockquote {
 }
 
 .ready-synthesis-card + .ready-synthesis-card {
-  margin-top: 0;
+  margin-top: 12px;
 }
 
 .synthesis-inputs {
@@ -15084,10 +15036,6 @@ blockquote {
   .evidence-archive-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
-  .ready-synthesis-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 900px) {
@@ -15097,6 +15045,10 @@ blockquote {
   }
 
   .synthesis-desk {
+    position: relative;
+    top: auto;
+    max-height: none;
+    overflow: visible;
     grid-row: auto;
   }
 }
@@ -15706,6 +15658,73 @@ blockquote {
   font-size: 9px;
   letter-spacing: .08em;
   text-align: right;
+}
+
+/* ---------- investigative loupe ---------- */
+
+.evidence-loupe {
+  position: relative;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.evidence-loupe-lens {
+  position: absolute;
+  z-index: 6;
+  border-radius: 50%;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  border: 2px solid #efe6d2;
+  box-shadow:
+    0 0 0 1px #2b262066,
+    0 10px 30px #0009,
+    inset 0 0 18px #0007;
+  opacity: 0;
+  transform: scale(.85);
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.evidence-loupe[data-active="true"] .evidence-loupe-lens {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.evidence-loupe-hint {
+  position: absolute;
+  z-index: 5;
+  left: 10px;
+  top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #0b1120b3;
+  color: #e7dcc2;
+  font-size: 9px;
+  letter-spacing: .06em;
+  backdrop-filter: blur(3px);
+  pointer-events: none;
+  opacity: .82;
+  transition: opacity .2s ease;
+}
+
+.evidence-loupe[data-active="true"] .evidence-loupe-hint {
+  opacity: 0;
+}
+
+@media (hover: none) {
+  .evidence-loupe {
+    cursor: default;
+  }
+}
+
+@media print {
+
+  .evidence-loupe-lens,
+  .evidence-loupe-hint {
+    display: none !important;
+  }
 }
 
 /* ---------- shared: flatten floating cards into printed articles ---------- */

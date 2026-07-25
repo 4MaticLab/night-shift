@@ -1,0 +1,113 @@
+// English translation for the print poster series and the /posters UI.
+// British English; matches the game's Foglight City terminology.
+export const postersEnglish: Record<string, string> = {
+  // Poster 1 · case unsealed
+  "第一日公开 · 案件启封": "Day One reveal · Case unsealed",
+  "一张不存在的车票，在昨夜重新售出": "A ticket that does not exist was sold again last night",
+  "零点四十三分，\n末班车仍在等人。": "At 00:43,\nthe last tram is still waiting.",
+  "你负责白天推理。你睡着以后，夜班侦探林渡才开始工作。": "You handle the daytime deduction. Only after you fall asleep does the night detective Lin Du begin his work.",
+  "今日案件碎片": "Today's case fragment",
+  "纸张已经老化七年，票面日期却是昨天。市政厅说从来没有 43 号线；雨水不同意。": "The paper has aged seven years, yet the date on its face is yesterday. City Hall says there was never a Line 43; the rain disagrees.",
+  "“雾灯城擅长保存旧事，尤其是它已经盖章否认过的那些。”": "'Foglight City is good at keeping old matters — especially the ones it has stamped and denied.'",
+  "今晚从这里开始": "Tonight begins here",
+  "不存在的车票": "The ticket that does not exist",
+  "一宗五夜完成的异步侦探案件": "An asynchronous detective case solved over five nights",
+  "林渡站在夜班事务所窗前，桌上摊着地图": "Lin Du stands at the Night Shift Agency window, a map spread on the desk",
+  "被撕去终点的旧电车票": "An old tram ticket with its destination torn away",
+  "扫码打开案件": "Scan to open the case",
+  "选择调查方向": "Choose an investigation direction",
+  "把夜晚交给林渡": "Leave the night to Lin Du",
+  "扫描启封第一宗案件": "Scan to unseal the first case",
+
+  // Poster 2 · character file
+  "第二日公开 · 角色档案": "Day Two reveal · Character file",
+  "他与你从未同时醒着": "He and you are never awake at the same time",
+  "林渡\n夜班侦探": "Lin Du\nNight Shift Detective",
+  "白天，他把事务所留给你。夜里，他带上你选的物件，去走城市不肯承认的路。": "By day he leaves the agency to you. By night he takes the object you chose and walks the roads the city will not admit.",
+  "角色设计": "Character design",
+  "深蓝外套、灰蓝围巾、磨旧肩包、黄铜手电与一本空白笔记。克制、可靠，也习惯替证据多等一分钟。": "A deep-blue coat, a grey-blue scarf, a worn shoulder bag, a brass torch and a blank notebook. Restrained, reliable, and used to waiting one more minute for the evidence.",
+  "“你决定该问什么。我负责在你睡着以后，找到它愿意回答的地方。”": "'You decide what to ask. I find, after you sleep, the place where it is willing to answer.'",
+  "今夜交接单": "Tonight's handover slip",
+  "方向 + 随身物": "Direction + carried object",
+  "选择改变夜行侧影，不会让主线失败": "Choices change the night's profile without failing the main line",
+  "林渡坐在交接桌前，手边是笔记本与黄铜手电": "Lin Du sits at the handover desk, a notebook and brass torch at hand",
+  "档案纸上的黄铜提灯": "A brass lantern on archive paper",
+  "写下一个方向": "Write down a direction",
+  "替他装一件东西": "Pack one thing for him",
+  "醒来拆晨报": "Wake and open the morning report",
+  "扫描，把今晚交给林渡": "Scan and leave tonight to Lin Du",
+
+  // Poster 3 · city figure
+  "第三日公开 · 城市人物": "Day Three reveal · City figure",
+  "一束花，每四十三天准时抵达": "A bunch of flowers, arriving on time every forty-three days",
+  "米娜没有说谎。\n她只是替谁留着一扇门？": "Mina did not lie.\nWho is she keeping a door open for?",
+  "灯港的花店十点关门。悲伤若提前预约，可以晚一些。": "The Lantern Wharf flower shop closes at ten. Grief, if booked in advance, may come a little later.",
+  "今日人物碎片": "Today's figure fragment",
+  "米娜否认见过伊芙琳，却保存着不该属于陌生人的明信片。订单没有地址，花仍知道该去哪里。": "Mina denies ever meeting Evelyn, yet keeps a postcard that should not belong to a stranger. The order has no address, yet the flowers still know where to go.",
+  "“花会记得谁照料过它。人有时得假装不记得。”": "'Flowers remember who tended them. People sometimes have to pretend they forget.'",
+  "米娜·索莱尔": "Mina Solair",
+  "灯港夜间花店老板 / PERSON 02": "Lantern Wharf night florist / PERSON 02",
+  "花店老板米娜的编辑蚀刻肖像": "An editorial etched portrait of the florist Mina",
+  "花店后巷中等待寄出的信封": "Envelopes waiting to be posted in the flower shop's back alley",
+  "白天读线索": "Read the clues by day",
+  "夜里等待回信": "Wait for a reply by night",
+  "把矛盾带回案件板": "Bring the contradiction back to the caseboard",
+  "扫描，领取第三日碎片": "Scan to collect the Day Three fragment",
+
+  // Poster 4 · city archive
+  "第四日公开 · 城市档案": "Day Four reveal · City archive",
+  "地图可以刮掉墨，城市刮不掉坡度": "A map can scrape off ink; a city cannot scrape off its gradient",
+  "有人删除了 43 号线。\n又把原图藏在最容易找到的柜子里。": "Someone deleted Line 43,\nthen hid the original in the easiest cabinet to find.",
+  "销毁证据，还是替证据争取时间？今晚，去拜访一间不存在的地下室。": "Destroy the evidence, or buy it time? Tonight, visit a basement that does not exist.",
+  "今日地点碎片": "Today's place fragment",
+  "档案馆声称没有地下室。地下室对此保留了三层楼的意见。玻璃丘的温室下面，仍有一条铜绿轨道。": "The archive claims it has no basement. The basement keeps three floors' worth of opinion on that. Beneath the greenhouses of Glass Hill, a verdigris track still runs.",
+  "“困难的不是销毁一张地图，而是决定哪一天让它重新被找到。”": "'The hard part is not destroying a map, but deciding on which day to let it be found again.'",
+  "城市设计": "City design",
+  "玻璃丘 / 市立档案馆": "Glass Hill / Municipal Archive",
+  "道路是档案；坡度是证词": "Roads are records; gradients are testimony",
+  "玻璃丘坡地温室、档案建筑和信号台": "Glass Hill's hillside greenhouses, archive building and signal tower",
+  "档案管理员奥林的编辑蚀刻肖像": "An editorial etched portrait of the archivist Orin",
+  "展开可检索档案": "Open the searchable archive",
+  "整理已到齐的证词": "Sort the testimony gathered so far",
+  "把推论归档": "File the inference away",
+  "扫描，进入被删除的路线": "Scan to enter the deleted line",
+
+  // Poster 5 · the last service
+  "第五日公开 · 最后一班": "Day Five reveal · The last service",
+  "所有钟表都把谎说完以后": "After every clock has finished telling its lie",
+  "信号灯亮了。\n这一次，决定由你留下。": "The signal lamp is lit.\nThis time, the decision is yours to leave.",
+  "五夜调查会把线索、城市回声与一份迟到七年的委托送回事务所。": "Five nights of investigation bring the clues, the city's echoes and a commission seven years late back to the agency.",
+  "最后一张碎片": "The last fragment",
+  "隐藏站台没有乘客，只有一册等待归还的档案。真相应该被公开、被保护，还是被交还？": "The hidden platform has no passengers, only a file waiting to be returned. Should the truth be made public, protected, or handed back?",
+  "“别替仍活着的人写完结局。”": "'Do not finish the ending for those who are still alive.'",
+  "玩家引导": "Player guide",
+  "完成五夜，做出决定": "Complete five nights, make the decision",
+  "睡眠长短只改变丰富度，不会让案件失败": "How long you sleep changes only the richness, never fails the case",
+  "隐藏站台的长椅上放着账册与封蜡信": "A ledger and a wax-sealed letter on the bench of the hidden platform",
+  "秘密站台、电车与账册组成的第五夜印": "The fifth-night seal of secret platform, tram and ledger",
+  "扫描进入事务所": "Scan to enter the agency",
+  "完成五夜交接": "Complete five nights of handover",
+  "选择真相的去处": "Choose where the truth goes",
+  "扫描，搭上零点四十三分末班车": "Scan and board the 00:43 last tram",
+
+  // Poster sheet UI
+  "夜班侦探": "Night Shift Detective",
+  "HOW TO ENTER · 玩家引导": "HOW TO ENTER · PLAYER GUIDE",
+
+  // Poster toolbar UI
+  "海报预览工具": "Poster preview tools",
+  "海报总览": "All posters",
+  "打印 / 导出 PDF": "Print / Export PDF",
+  "打开游戏": "Open the game",
+
+  // Posters index page
+  "五夜案件碎片海报": "Five-Night Case Fragment Posters",
+  "每天公开一个悬念层：案件启封、夜班侦探、城市人物、被删除的路线与最后决定。点击日期可单独预览；打印本页将生成恰好五张 A3 竖版页面。": "Each day reveals one layer of suspense: case unsealed, the night detective, city figures, the deleted line and the final decision. Click a day for a single preview; printing this page produces exactly five A3 portrait sheets.",
+  "200 份现场分发": "200 copies for on-site distribution",
+  "建议每款 40 份 · A3 母版 / A4 等比缩印": "Suggested 40 of each · A3 master / A4 proportional reduction",
+  "打开独立预览 →": "Open standalone preview →",
+  "打印建议：Chrome / Edge → A3 → 边距“无”→ 缩放 100% → 开启“背景图形”。缩印 A4 时选择“适合可打印区域”，不要单独裁切二维码。": "Printing tip: Chrome / Edge → A3 → margins 'None' → scale 100% → enable 'Background graphics'. When reducing to A4, choose 'Fit to printable area' and do not crop the QR code separately.",
+
+  // Poster day page
+  "这是一张独立 A3 打印页。打印时请选择边距“无”、缩放 100% 并开启背景图形；页面导航不会进入成品。": "This is a standalone A3 print page. When printing, choose margins 'None', scale 100% and enable background graphics; the page navigation will not appear in the final print.",
+};

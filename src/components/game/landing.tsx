@@ -2,28 +2,65 @@
 
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Moon } from "lucide-react";
 import { getAsset } from "@/src/content/assets";
-import { campaignRegistry } from "@/src/content/campaigns/registry";
+import { campaignRegistry, getCampaign } from "@/src/content/campaigns/registry";
+import type { CampaignManifest } from "@/src/content/campaigns/types";
 import { useGameStore } from "@/src/stores/game-store";
-import { campaignSupportsLocale, localizeCampaign } from "@/src/i18n/core";
+import { localizeValue, translateText, type AppLocale } from "@/src/i18n/core";
 import { ShinyButton } from "@/src/components/ui/shiny-button";
 import { LanguagesIcon } from "@/src/components/ui/languages-icon";
 import { OptionWheel } from "./option-wheel";
 import { useI18n } from "@/src/i18n/provider";
 
+const heroCopyTransition = { duration: 0.38, ease: "easeOut" as const };
+
+/** Compact English labels for the landing wheel — full titles are too long in the arc. */
+const WHEEL_EN_LABELS: Record<string, string> = {
+  "case-001": "Last Tram 00:43",
+  "case-002": "Rain Station",
+  "case-004": "Thirteenth Loaf",
+  "case-005": "Chihaya Noa",
+  "case-006": "No Wolves",
+};
+
+/** Prefer a mapped English string, then the campaign's stable englishTitle. */
+function displayCaseTitle(source: CampaignManifest, preferredLocale: AppLocale): string {
+  if (preferredLocale !== "en") return source.case.title;
+  const translated = translateText(source.case.title, "en");
+  if (translated !== source.case.title) return translated;
+  return source.case.englishTitle;
+}
+
+function wheelCaseTitle(source: CampaignManifest, preferredLocale: AppLocale): string {
+  if (preferredLocale === "en") {
+    return WHEEL_EN_LABELS[source.id] ?? displayCaseTitle(source, preferredLocale);
+  }
+  return source.case.title;
+}
+
 export function Hero({ onStart, interactive }: { onStart: () => void; interactive: boolean }) {
   const { campaignId, started, switchCampaign } = useGameStore();
-  const { campaign, locale, preferredLocale, setLocale, t } = useI18n();
+  const { campaign, preferredLocale, setLocale } = useI18n();
   const heroAsset = getAsset(campaign.presentation.heroAssetId);
+  // Landing chrome and rotating copy follow the user's preferred locale so that
+  // switching to a Chinese-only case does not yank the whole page back to zh-CN.
+  const tUi = (source: string) => translateText(source, preferredLocale);
+  const rawCampaign = getCampaign(campaignId);
+  const heroPresentation = preferredLocale === "en"
+    ? localizeValue(rawCampaign.presentation, "en")
+    : rawCampaign.presentation;
+  const displayTitle = preferredLocale === "en"
+    ? (WHEEL_EN_LABELS[rawCampaign.id] ?? displayCaseTitle(rawCampaign, preferredLocale))
+    : rawCampaign.case.title;
   const wheelEntries: { label: string; id?: (typeof campaignRegistry)[number]["id"] }[] = [
-    { label: t("选择剧本") },
-    ...campaignRegistry.map((source) => ({ label: localizeCampaign(source, campaignSupportsLocale(source.id, preferredLocale) ? preferredLocale : "zh-CN").case.title, id: source.id })),
+    { label: tUi("选择剧本") },
+    ...campaignRegistry.map((source) => ({ label: wheelCaseTitle(source, preferredLocale), id: source.id })),
   ];
   const selectedCampaignIndex = Math.max(1, wheelEntries.findIndex((entry) => entry.id === campaignId));
   const primaryLabel = started
-    ? locale === "en" ? `Continue ${campaign.case.title}` : `继续《${campaign.case.title}》`
-    : locale === "en" ? `Begin ${campaign.case.title}` : `开始《${campaign.case.title}》`;
+    ? preferredLocale === "en" ? `Continue ${displayTitle}` : `继续《${displayTitle}》`
+    : preferredLocale === "en" ? `Begin ${displayTitle}` : `开始《${displayTitle}》`;
 
   return (
     <main className="hero-shell">
@@ -40,18 +77,32 @@ export function Hero({ onStart, interactive }: { onStart: () => void; interactiv
         </div>
       </nav>
       <section className="hero-copy">
-        <h1>{locale === "en" ? <><span className="hero-title-hand hero-title-hand-lead">When you fall asleep,</span><em className="hero-title-hand">his work begins.</em></> : <><span className="hero-title-hand hero-title-hand-lead">你睡着以后，</span><em className="hero-title-hand">他才开始工作。</em></>}</h1>
-        <p className="hero-lede hero-lede-note">{locale === "en" ? "Analyze clues by day, hand the night to the detective." : "白天分析线索，晚上把调查交给侦探"}</p>
+        <p className="eyebrow"><Moon size={14} /> {tUi("一款与你轮班生活的异步侦探游戏")}<span className="shift-rule"><span className="shift-rule-face shift-rule-day"><b aria-hidden="true">●</b>{tUi("你负责白天推理")}</span><span className="shift-rule-face shift-rule-night"><b aria-hidden="true">☾</b>{tUi("林渡负责夜晚调查")}</span></span></p>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={campaign.id}
+            className="hero-copy-text"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={heroCopyTransition}
+          >
+            <h1>
+              {heroPresentation.headlineMain}<br /><em>{heroPresentation.headlineAccent}</em>
+            </h1>
+            <p className="hero-lede">{heroPresentation.teaser}</p>
+          </motion.div>
+        </AnimatePresence>
         <div className="hero-actions">
           <ShinyButton
             className="primary-button"
-            aria-label={started ? t("继续当前案件") : locale === "en" ? `Begin Case ${campaign.presentation.archiveNumber}` : `开始第 ${campaign.presentation.archiveNumber} 宗案件`}
+            aria-label={started ? tUi("继续当前案件") : preferredLocale === "en" ? `Begin Case ${heroPresentation.archiveNumber}` : `开始第 ${heroPresentation.archiveNumber} 宗案件`}
             disabled={!interactive}
             onClick={onStart}
           >{primaryLabel} <ArrowRight size={18} /></ShinyButton>
         </div>
       </section>
-      <section className={interactive ? "campaign-wheel" : "campaign-wheel inert"} aria-label={t("案件剧本选择")}>
+      <section className={interactive ? "campaign-wheel" : "campaign-wheel inert"} aria-label={tUi("案件剧本选择")}>
         <OptionWheel
           items={wheelEntries.map((entry) => entry.label)}
           defaultSelected={selectedCampaignIndex}
@@ -71,7 +122,9 @@ export function Hero({ onStart, interactive }: { onStart: () => void; interactiv
           soundVolume={1}
           onChange={(index) => { const id = wheelEntries[index]?.id; if (id) switchCampaign(id); }}
         />
-        {preferredLocale === "en" && <p className="locale-availability">English edition available for Case 001. Other cases remain in Chinese.</p>}
+        {preferredLocale === "en" && (
+          <p className="locale-availability">English edition available for Cases 001–002. Other cases keep Chinese in-game text; landing titles and teasers are translated for browsing.</p>
+        )}
       </section>
       <div className="landing-footnote" aria-hidden="true"><span>LOCAL-FIRST</span><i /><span>NO ACCOUNT</span><i /><span>SAVE ON THIS DEVICE</span></div>
     </main>

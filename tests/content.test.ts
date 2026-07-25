@@ -61,9 +61,9 @@ describe("Night Shift case content", () => {
     expect(collectStrings(english).filter((text) => /\p{Script=Han}/u.test(text))).toEqual([]);
     expect(campaignSupportsLocale(lastTramCampaign.id, "en")).toBe(true);
     expect(campaignSupportsLocale(rainRadioCampaign.id, "en")).toBe(true);
-    expect(campaignSupportsLocale(thirteenthLoafCampaign.id, "en")).toBe(false);
-    expect(campaignSupportsLocale(chihayaNoaCampaign.id, "en")).toBe(false);
-    expect(campaignSupportsLocale(fogWithoutWolvesCampaign.id, "en")).toBe(false);
+    expect(campaignSupportsLocale(thirteenthLoafCampaign.id, "en")).toBe(true);
+    expect(campaignSupportsLocale(chihayaNoaCampaign.id, "en")).toBe(true);
+    expect(campaignSupportsLocale(fogWithoutWolvesCampaign.id, "en")).toBe(true);
   });
 
   it("contains the complete five-night mystery", () => {
@@ -110,9 +110,9 @@ describe("Night Shift case content", () => {
       "header.night-expedition",
     ]);
     expect(new Set(rainRadioCampaign.presentation.prologue.scenes.map((scene) => getAsset(scene.assetId).src))).toHaveLength(3);
-    expect(thirteenthLoafCampaign.case.title).toBe("黎明前出炉的第十三个面包");
+    expect(thirteenthLoafCampaign.case.title).toBe("面包奇谈");
     expect(thirteenthLoafCampaign.presentation.archiveNumber).toBe("003");
-    expect(chihayaNoaCampaign.case.title).toBe("千早诺亚的第十三次旅行");
+    expect(chihayaNoaCampaign.case.title).toBe("千早诺亚的现身");
     expect(chihayaNoaCampaign.presentation.archiveNumber).toBe("004");
     expect(fogWithoutWolvesCampaign.case.title).toBe("雾中无狼");
     expect(fogWithoutWolvesCampaign.presentation.archiveNumber).toBe("005");

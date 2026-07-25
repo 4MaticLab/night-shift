@@ -114,8 +114,36 @@
 
 .poster-print-stack {
   display: grid;
-  gap: 44px;
+  gap: 40px;
   justify-items: center;
+}
+
+/* Editorial spread: lay the five sheets on the desk off-axis with a faint
+   tilt instead of a rigid centered column. Print + phones flatten this. */
+.poster-print-stack > section {
+  transition: transform .45s cubic-bezier(.2, .7, .2, 1);
+}
+
+.poster-print-stack > section:nth-child(3n + 1) {
+  justify-self: center;
+  transform: rotate(-.85deg);
+}
+
+.poster-print-stack > section:nth-child(3n + 2) {
+  justify-self: start;
+  margin-left: clamp(0px, 6vw, 92px);
+  transform: rotate(1deg);
+}
+
+.poster-print-stack > section:nth-child(3n + 3) {
+  justify-self: end;
+  margin-right: clamp(0px, 6vw, 92px);
+  transform: rotate(-.6deg);
+}
+
+.poster-print-stack > section:hover {
+  transform: rotate(0deg) scale(1.012);
+  z-index: 2;
 }
 
 .poster-preview-caption {
@@ -572,6 +600,15 @@
   .poster-print-hint {
     width: min(100%, 820px);
   }
+
+  .poster-print-stack > section,
+  .poster-print-stack > section:nth-child(3n + 1),
+  .poster-print-stack > section:nth-child(3n + 2),
+  .poster-print-stack > section:nth-child(3n + 3) {
+    justify-self: center;
+    margin-inline: 0;
+    transform: none;
+  }
 }
 
 @page {
@@ -604,6 +641,15 @@
 
   .poster-print-stack {
     display: block;
+  }
+
+  .poster-print-stack > section,
+  .poster-print-stack > section:nth-child(3n + 1),
+  .poster-print-stack > section:nth-child(3n + 2),
+  .poster-print-stack > section:nth-child(3n + 3) {
+    justify-self: auto;
+    margin: 0 !important;
+    transform: none !important;
   }
 
   .poster-sheet {
