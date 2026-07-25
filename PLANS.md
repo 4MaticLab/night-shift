@@ -6,7 +6,6 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/feat-editorial-image-layout]] | `feat/editorial-image-layout` | `in_progress` | `auto` | 0% | 藏品编辑式网格 |
 
 ## 使用规则
 
