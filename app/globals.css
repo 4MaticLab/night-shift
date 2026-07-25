@@ -7217,7 +7217,7 @@ blockquote {
 .collection-index {
   position: sticky;
   z-index: 24;
-  top: 24px;
+  top: 0;
   order: 1;
   width: min(1180px, calc(100% - 48px));
   min-height: 82px;
@@ -7327,7 +7327,7 @@ blockquote {
 
 .collection-section {
   /* Keep section titles clear of the sticky index + a stable activation gap. */
-  scroll-margin-top: 128px;
+  scroll-margin-top: 120px;
 }
 
 .collection-evidence-cabinet {
@@ -12099,7 +12099,7 @@ blockquote {
 
 @media (max-width: 900px) {
   .collection-index {
-    top: 20px;
+    top: 0;
     width: calc(100% - 28px);
     min-height: 72px;
     margin-top: -12px;
@@ -12147,7 +12147,7 @@ blockquote {
 
 @media (max-width: 600px) {
   .collection-index {
-    top: 16px;
+    top: 0;
     width: calc(100% - 16px);
     min-height: 74px;
     margin-bottom: 18px;
@@ -12181,7 +12181,7 @@ blockquote {
   }
 
   .collection-section {
-    scroll-margin-top: 103px;
+    scroll-margin-top: 100px;
   }
 
   .collection-evidence-cabinet {
