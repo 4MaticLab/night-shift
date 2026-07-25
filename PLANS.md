@@ -6,7 +6,6 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-mobile-app-packaging]] | `codex/mobile-app-packaging` | `completed` | `manual` | 100% | 记录最终证据并退役计划 |
 
 ## 使用规则
 
