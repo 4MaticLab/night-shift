@@ -1,6 +1,6 @@
 # feat/rdk-x5-sentry：RDK X5 床头哨站与桌宠通讯端
 
-- 状态：in_progress
+- 状态：completed
 - 模式：auto
 - 分支：`feat/rdk-x5-sentry`
 - 负责人：agent（桌宠系统延续）
@@ -55,6 +55,14 @@ SDK 调研结论（2026-07 官方文档与社区示例）：RDK X5 跑 RDK OS（
 
 - 根 vitest（含新 `rdk-bridge.test.ts`）、eslint、desk-pet `tsc`、docs:check。
 - 本机双进程联调：`--mock` 哨站 + `npm run pet:start`，人工验证连接、切换、回退与报告。
+
+## 最终验证证据（2026-07-25，实现提交 4ecf0a8）
+
+- `npm test`：25 个文件 / 178 用例全绿（含新增 `tests/rdk-bridge.test.ts` 13 用例与既有 `tests/desk-pet.test.ts` 12 用例未回归）。
+- `npm run lint`：0 error（仅主线遗留的 1 个无关 warning）；`apps/desk-pet` `tsc` 构建通过；`python3 -m compileall apps/rdk-sentry` 通过。
+- `npm run docs:check`：101 个 Markdown 文件双链全部可解析。
+- mock 联调（macOS）：`python3 apps/rdk-sentry/sentry.py --mock` 三端点返回合法 JSON；编译后的 `rdk-bridge` 解析链路端到端验证：health 协议号匹配、snapshot 解为 `source: rdk-x5`（degraded 为空）、motion 映射为实测 `VoidClipReport`，`scoreSleepQuality` 输出带「床头哨站实测」叙述且 `source: rdk-x5`。
+- 隐私护栏：`camera.py` 中帧仅内存处理，无任何图像落盘 / 出网路径；文档写明随时断开不惩罚。
 
 ## 决定记录
 
