@@ -1,10 +1,22 @@
-# 夜班侦探 Night Shift
+# ShiftX · 夜班侦探 Night Shift
 
 > 你睡着以后，他才开始工作。
 
-Night Shift 是一款「异步等待」侦探叙事游戏：白天你在事务所读晨报、整理证物、决定调查方向；夜里侦探林渡替你出门。真实夜班按设备本地时间冻结掌灯、夜半、末更或白昼小憩，改变城市侧影而不评价作息。默认 local-first——没有环境变量、数据库、登录、API Key 或任何硬件，也能完成完整五夜主循环。
+ShiftX 是旨在为「睡眠」带来更多趣味的解决方案。在 Night Shift（夜班侦探）游戏中，玩家扮演维多利亚时期伦敦侦探林渡的助手：玩家入睡时，林渡将在伦敦对案件展开一系列探索；清醒时，玩家需要为林渡整理证据、分析推理，并定下今晚侦探的探索方向。同时，ShiftX 提供了一套完整开源的睡眠优化套件 **Mini Lindo**，包含桌宠、智能监控硬件和智能家居网关等，旨在为睡眠提供系统性的、优雅的、有乐趣的优化方案。
 
-产品定位与核心循环见 [[docs/product-overview]]，设计北极星见 [[docs/north-star]]。
+游戏默认 local-first——没有环境变量、数据库、登录、API Key 或任何硬件，也能完成完整五夜主循环；真实夜班按设备本地时间冻结掌灯、夜半、末更或白昼小憩，改变城市侧影而不评价作息。产品定位与核心循环见 [[docs/product-overview]]，设计北极星见 [[docs/north-star]]。
+
+## 美学制胜！
+
+ShiftX 的构建核心是美学驱动：采用维多利亚风格与 COC（克苏鲁的呼唤）结合的风格，传达出一种潮湿、怪诞、厚重的感受。与此同时，ShiftX 大胆引入了大量工业设备的立体模型，构建在庞大工业朋克之下的「怪诞都市雾都伦敦」设计，提高在现代浏览器和 PICO 等空间设备中的游玩体验。玩家可以欣赏游戏中一系列优雅而怪诞的收藏品，并将其铭刻于 Injective 区块链上。视觉规则与生成提示词见 [[docs/art-direction]]。
+
+## 从软件到硬件，睡眠是系统工程
+
+在「伦敦」之外的物理生活中，侦探林渡同样关心助手（玩家）的状态。**Mini Lindo** 是一款高度集成的睡眠优化开源套件，可以运行在地瓜 RDK X5、Tuya T5 等任意开发板上，抽象了一套与睡眠相关的传感器系统和相关的处理算法，以及更进一步的基于 Home Assistant 构建的操作接口。只需将 Lindo（林渡）放在床头，即可持续关注助手的睡眠质量，并根据传感器或指环（如 zllo）的体态、温度、湿度等参数，自动调节床垫、空调、加湿器等硬件设备。
+
+ShiftX 认为，睡眠是一项可以优化的系统工程，而不只是闭眼就结束的盲盒。
+
+套件当前的落地形态：RDK X5 床头哨站（[[docs/rdk-x5-sleep-sentry]]，传感器接线与驱动见 [[docs/mini-lindo-sensor-guide]]）+ Electron 桌宠通讯端 + Home Assistant 空间桥（[[docs/home-assistant-ambient-bridge]]）。摄像头画面不出板、只回传聚合统计，所有设备信号只丰富叙事、不诊断、不惩罚、不锁内容，随时可撤销（[[docs/privacy-and-guardrails]]）。
 
 ## 案件书架
 
@@ -36,9 +48,9 @@ npm run dev
 | 路径 | 内容 |
 | --- | --- |
 | `app/` + `src/` | Next.js 主游戏（内容、状态、i18n、案件包） |
-| `apps/desk-pet/` | Electron 桌宠：林渡值更、睡眠报告，兼任 Mini Lindo 通讯端 |
-| `apps/rdk-sentry/` | Mini Lindo 板端代理：RDK X5 床头哨站（Python，零第三方依赖） |
-| `apps/connector/` + `tools/home-assistant-bridge/` | 本机 Home Assistant 空间外设桥与桌面连接器 |
+| `apps/desk-pet/` | Electron 桌宠：林渡值更、睡眠报告，Mini Lindo 套件的通讯端 |
+| `apps/rdk-sentry/` | Mini Lindo 套件的 RDK X5 床头哨站（Python，零第三方依赖） |
+| `apps/connector/` + `tools/home-assistant-bridge/` | Mini Lindo 套件的智能家居网关：Home Assistant 空间外设桥与桌面连接器 |
 | `contracts/` + `ignition/` | Injective EVM Testnet 藏品合约（Hardhat） |
 | `docs/` | 稳定知识，入口 [[docs/index]] |
 | `plans/` | 施工期临时计划，入口 [[PLANS]] |
@@ -50,7 +62,7 @@ npm run dev
 - **AI 晨间短笺** — “放下纸条”默认使用确定性本地回信。启用玩家逐夜授权的 AI 个性化短笺需服务端同时配置 `OPENAI_API_KEY`、`REST_REFLECTION_ACCESS_CODE`、`UPSTASH_REDIS_REST_URL`、`UPSTASH_REDIS_REST_TOKEN`，缺一保持本地回信；`REST_REFLECTION_DAILY_BUDGET` 调整每日预算（默认 200），可选 `OPENAI_BASE_URL` / `OPENAI_MODEL` 接 OpenAI-compatible 服务。模型只从固定枚举选择语气意象，短笺由服务端安全模板组成，不进入线索或结局计算。
 - **Injective 测试网藏品** — 已解锁收藏品可选择性领取为 ERC-721；未配置时界面诚实展示“链上档案尚未开门”。`npm run contract:compile && npm run contract:test`，部署与环境变量见 [[docs/injective-keepsake-mint]]。
 - **睡眠硬件** — 网页内虚拟睡眠设备与 Xiaomi Watch S4 真实接入 PoC，见 [[docs/sleep-hardware-user-guide]] 与 [[docs/xiaomi-watch-hardware-test]]。
-- **桌宠与 Mini Lindo（小林渡）** — `npm run pet:install && npm run pet:start` 启动桌宠；床头哨站在 RDK X5 上跑 `python3 apps/rdk-sentry/sentry.py`（任意机器加 `--mock` 联调），摄像头画面不出板、只回传聚合统计，见 [[docs/rdk-x5-sleep-sentry]]。
+- **Mini Lindo 睡眠套件** — `npm run pet:install && npm run pet:start` 启动桌宠；床头哨站在 RDK X5 上跑 `python3 apps/rdk-sentry/sentry.py`（任意机器加 `--mock` 联调），见 [[docs/rdk-x5-sleep-sentry]] 与 [[docs/mini-lindo-sensor-guide]]。
 - **Home Assistant 空间桥** — `npm run bridge:start` 或桌面连接器 `npm run connector:start`，用受限实体做夜班环境 cue，见 [[docs/home-assistant-ambient-bridge]]。
 - **海报序列** — `/posters` 提供五日案件碎片海报的网页预览与打印入口，见 [[docs/poster-series-guide]]。
 - **移动端打包** — Capacitor 打 Android APK / iOS App，`npm run mobile:build:android` 等命令见 [[docs/mobile-app-packaging]]。
@@ -68,6 +80,20 @@ npm run docs:check    # 文档双链检查
 
 可选鲁棒性套件：`npm run test:robustness`（渲染快照 + 合约编译测试 + Playwright E2E，也可用 `test:e2e` / `test:render` / `contract:*` 单跑）。质量基线与已知边界见 [[docs/quality-baseline]]。
 
+## Graph-Prompt-For-Agent-Loop（长程图提示词开发）
+
+ShiftX 的工程目录本身就是一个高度优化过的图提示词工程。我们提出了一套富有成效的图提示词，以驱动任意 Coding Agent（如 Kiro / Qoder / Step 等）在较长的时间内持续完成开发任务：
+
+```
+Plans 幂等提出 → 开发推进 → 美学与原则检验 → 文档沉淀 → Plans 幂等注销 → 新的 Plans 幂等提出
+```
+
+- **Plans 的幂等性**：4 名队友协同开发时，每个队友的 Agent 所获取的 Plans 在创建和关闭时均幂等，不会互相污染，并可进行前后溯源（规范见 [[plans/README]]，活跃索引见 [[PLANS]]）。
+- **美学与原则检验**：AI 需要使用 Playwright 或自带浏览器对所有涉及到的改动部分进行全部校对和比对，如果检测到美学或原则不符的部分，则打回重改。
+- **文档沉淀**：作为重大开发流程必须完成的收尾事项，便于多人开发的 Coding Agent 之间的重大信息同步（见 [[docs/documentation-guide]]）。
+
+ShiftX 的初版开发由 Agent 持续运行 12 小时自动完成，并在后续的 2 天开发中连续并发处理了 100 个提出者各异的 PR，最终达到了极高的完成度。完整代理手册从 [[AGENTS]] 开始。
+
 ## 部署
 
 默认 Vercel（Next.js 直出）；Cloudflare Workers 走 `npm run deploy`（OpenNext）或 `npm run deploy:sites`（vinext + wrangler）。赛道陈述与部署排障见 [[docs/hackathon-submission-kit]]。
@@ -76,4 +102,4 @@ npm run docs:check    # 文档双链检查
 
 - 开发代理与协作规范从 [[AGENTS]] 开始：`main` 受保护，一切变更走主题分支 + PR，复杂任务先建临时计划。
 - 稳定知识入口 [[docs/index]]；剧本翻译规范见 [[docs/translation-guide]]；工程结构见 [[docs/architecture]]。
-- 视觉遵循 Cozy Storybook Noir（[[docs/art-direction]]），主视觉与生成提示词见 `docs/art-prompts/`。
+- 视觉规则见 [[docs/art-direction]]，主视觉与生成提示词见 `docs/art-prompts/`。
