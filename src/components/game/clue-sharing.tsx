@@ -9,6 +9,7 @@ import { createClueShareUrl } from "@/src/lib/game-engine/clue-sharing";
 import { useGameStore } from "@/src/stores/game-store";
 import { useI18n } from "@/src/i18n/provider";
 import { useAccessibleDialog } from "@/src/lib/use-accessible-dialog";
+import { GAME_VIEW_PATHS } from "@/src/lib/game-routes";
 
 export interface ClueGiftNoticeData {
   kind: "success" | "info" | "error";
@@ -22,7 +23,7 @@ export function ClueShareDialog({ clue, onClose }: { clue: Clue; onClose: () => 
   const dialogRef = useRef<HTMLElement>(null);
   const [qrDataUrl, setQrDataUrl] = useState("");
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
-  const shareUrl = typeof window === "undefined" ? "" : createClueShareUrl(`${window.location.origin}${window.location.pathname}`, campaignId, clue.id);
+  const shareUrl = typeof window === "undefined" ? "" : createClueShareUrl(`${window.location.origin}${GAME_VIEW_PATHS.board}`, campaignId, clue.id);
 
   useEffect(() => {
     let cancelled = false;

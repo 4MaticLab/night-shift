@@ -28,6 +28,7 @@ import { getWakeEcho, getWakeEchoById, wakeEchoes } from "@/src/content/wake-ech
 import { createClueShareUrl, readSharedClueQuery, removeSharedClueQuery } from "@/src/lib/game-engine/clue-sharing";
 import { campaignRegistry, DEFAULT_CAMPAIGN_ID, RAIN_RADIO_CAMPAIGN_ID, THIRTEENTH_LOAF_CAMPAIGN_ID } from "@/src/content/campaigns/registry";
 import { chihayaNoaCampaign } from "@/src/content/campaigns/chihaya-noa";
+import { fogWithoutWolvesCampaign } from "@/src/content/campaigns/fog-without-wolves";
 import { lastTramCampaign } from "@/src/content/campaigns/last-tram";
 import { rainRadioCampaign } from "@/src/content/campaigns/rain-radio";
 import { thirteenthLoafCampaign } from "@/src/content/campaigns/thirteenth-loaf";
@@ -62,6 +63,7 @@ describe("Night Shift case content", () => {
     expect(campaignSupportsLocale(rainRadioCampaign.id, "en")).toBe(true);
     expect(campaignSupportsLocale(thirteenthLoafCampaign.id, "en")).toBe(false);
     expect(campaignSupportsLocale(chihayaNoaCampaign.id, "en")).toBe(false);
+    expect(campaignSupportsLocale(fogWithoutWolvesCampaign.id, "en")).toBe(false);
   });
 
   it("contains the complete five-night mystery", () => {
@@ -70,9 +72,9 @@ describe("Night Shift case content", () => {
     expect(nightShiftCase.collectibles).toHaveLength(8);
   });
 
-  it("registers four complete Night Shift campaigns", () => {
-    expect(campaignRegistry.map((campaign) => campaign.id)).toEqual(["case-001", "case-002", "case-004", "case-005"]);
-    expect(new Set(campaignRegistry.map((campaign) => campaign.case.title))).toHaveLength(4);
+  it("registers five complete Night Shift campaigns", () => {
+    expect(campaignRegistry.map((campaign) => campaign.id)).toEqual(["case-001", "case-002", "case-004", "case-005", "case-006"]);
+    expect(new Set(campaignRegistry.map((campaign) => campaign.case.title))).toHaveLength(5);
     expect(new Set(campaignRegistry.flatMap((campaign) => campaign.case.clues.map((clue) => clue.id))).size)
       .toBe(campaignRegistry.reduce((total, campaign) => total + campaign.case.clues.length, 0));
 
@@ -102,10 +104,18 @@ describe("Night Shift case content", () => {
       }
     }
     expect(rainRadioCampaign.case.title).toBe("只在雨中播出的电台");
+    expect(rainRadioCampaign.presentation.prologue.scenes.map((scene) => scene.assetId)).toEqual([
+      "header.night-shift.hero",
+      "district.lantern-wharf",
+      "header.night-expedition",
+    ]);
+    expect(new Set(rainRadioCampaign.presentation.prologue.scenes.map((scene) => getAsset(scene.assetId).src))).toHaveLength(3);
     expect(thirteenthLoafCampaign.case.title).toBe("黎明前出炉的第十三个面包");
     expect(thirteenthLoafCampaign.presentation.archiveNumber).toBe("003");
     expect(chihayaNoaCampaign.case.title).toBe("千早诺亚的第十三次旅行");
     expect(chihayaNoaCampaign.presentation.archiveNumber).toBe("004");
+    expect(fogWithoutWolvesCampaign.case.title).toBe("雾中无狼");
+    expect(fogWithoutWolvesCampaign.presentation.archiveNumber).toBe("005");
     expect(lastTramCampaign.case.clues.some((clue) => rainRadioCampaign.case.clues.some((other) => other.id === clue.id))).toBe(false);
     expect(campaignRegistry.flatMap((campaign) => campaign.case.clues).filter((clue) => clue.id === "commons-charter")).toHaveLength(1);
   });

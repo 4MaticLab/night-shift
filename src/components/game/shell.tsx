@@ -1,28 +1,45 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import Link from "next/link";
 import { motion } from "motion/react";
-import { Archive, ChevronRight, Coffee, Gift, Moon, RotateCcw, Search, Sparkles, X, Zap } from "lucide-react";
+import { ChevronRight, RotateCcw, Search, Sparkles, X } from "lucide-react";
 import { useGameStore } from "@/src/stores/game-store";
 import { useI18n } from "@/src/i18n/provider";
 import type { GameView } from "./types";
+import { Dock, DockIcon } from "@/src/components/ui/dock";
+import { CoffeeIcon } from "@/src/components/ui/coffee";
+import { SearchIcon } from "@/src/components/ui/search";
+import { MoonIcon } from "@/src/components/ui/moon";
+import { ReceiptEuroIcon } from "@/src/components/ui/receipt-euro";
+import { ArchiveIcon } from "@/src/components/ui/archive";
 import { SleepHardwareStatus } from "./sleep-hardware-status";
 import { useAccessibleDialog } from "@/src/lib/use-accessible-dialog";
 import { getReadyEvidenceSyntheses } from "@/src/lib/game-engine/evidence-synthesis";
+import { getGameViewPath } from "@/src/lib/game-routes";
 
-export function TopBar({ chapter, onDemo, onHome, onHardware }: { chapter: number; onDemo: () => void; onHome: () => void; onHardware: () => void }) {
-  useGameStore((state) => state.campaignId);
-  const { campaign, locale, t } = useI18n();
+export function BrandMark({ onHome }: { onHome: () => void }) {
+  const { t } = useI18n();
   return (
-    <header className="topbar">
-      <button className="brand-mark compact" onClick={onHome}><span aria-hidden="true" /><div><b>{t("夜班侦探")}</b><small>NIGHT SHIFT</small></div></button>
+    <button className="brand-mark global-brand" onClick={onHome}>
+      <span aria-hidden="true" />
+      <div><b>{t("夜班侦探")}</b><small>NIGHT SHIFT</small></div>
+    </button>
+  );
+}
+
+export function TopBar({ chapter, onHardware }: { chapter: number; onHardware: () => void }) {
+  useGameStore((state) => state.campaignId);
+  const { campaign, locale } = useI18n();
+  return (
+    <header className="game-chrome">
       <div className="case-heading"><small>CASE {campaign.presentation.archiveNumber} · {locale === "en" ? `NIGHT ${chapter}` : `第 ${chapter} 夜`}</small><b>{campaign.case.title}</b></div>
-      <div className="topbar-actions"><SleepHardwareStatus onOpen={onHardware} /><button className="demo-pill" onClick={onDemo}><Zap size={14} /> DEMO</button></div>
+      <div className="topbar-actions"><SleepHardwareStatus onOpen={onHardware} /></div>
     </header>
   );
 }
 
-export function BottomNav({ view, setView }: { view: GameView; setView: (view: GameView) => void }) {
+export function BottomNav({ view }: { view: GameView }) {
   const { unlockedClueIds, synthesizedEvidenceIds } = useGameStore();
   const { campaign, locale, t } = useI18n();
   const readyCount = getReadyEvidenceSyntheses({
@@ -31,9 +48,21 @@ export function BottomNav({ view, setView }: { view: GameView; setView: (view: G
     synthesizedEvidenceIds,
   }).length;
   const items: [GameView, ReactNode, string][] = [
-    ["report", <Coffee key="c" />, t("今晨")], ["board", <Search key="s" />, t("案件板")], ["tonight", <Moon key="m" />, t("今晚")], ["collection", <Gift key="g" />, t("收藏")], ["archive", <Archive key="a" />, t("档案")],
+    ["report", <CoffeeIcon key="c" />, t("今晨")], ["board", <SearchIcon key="s" />, t("案件板")], ["tonight", <MoonIcon key="m" />, t("今晚")], ["collection", <ReceiptEuroIcon key="g" />, t("收藏")], ["archive", <ArchiveIcon key="a" />, t("档案")],
   ];
-  return <nav className="bottom-nav" aria-label={t("主要导航")}>{items.map(([id, icon, label]) => <button type="button" aria-current={view === id ? "page" : undefined} className={view === id ? "active" : ""} key={id} onClick={() => setView(id)}>{icon}<span>{label}</span>{id === "board" && readyCount > 0 && <i className="nav-ready-badge" aria-label={locale === "en" ? `${readyCount} inferences ready` : `${readyCount} 条推论可以整理`}>{readyCount}</i>}</button>)}</nav>;
+  return (
+    <Dock className="bottom-nav" role="navigation" aria-label={t("主要导航")} iconSize={46} iconMagnification={68} iconDistance={120} direction="bottom">
+      {items.map(([id, icon, label]) => (
+        <DockIcon key={id}>
+          <Link href={getGameViewPath(id)} aria-current={view === id ? "page" : undefined} className={view === id ? "active" : ""} onClick={(event) => { if (view !== id) return; event.preventDefault(); window.scrollTo({ top: 0, left: 0 }); }}>
+            <div className="dock-icon-box">{icon}</div>
+            <span className="dock-icon-label">{label}</span>
+            {id === "board" && readyCount > 0 && <i className="nav-ready-badge" aria-label={locale === "en" ? `${readyCount} inferences ready` : `${readyCount} 条推论可以整理`}>{readyCount}</i>}
+          </Link>
+        </DockIcon>
+      ))}
+    </Dock>
+  );
 }
 
 export function DemoDrawer({ onClose, setView }: { onClose: () => void; setView: (view: GameView) => void }) {

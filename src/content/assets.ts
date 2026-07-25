@@ -1,5 +1,6 @@
 import { thirteenthLoafAssets } from "./thirteenth-loaf-assets";
 import { chihayaNoaAssets } from "./chihaya-noa-assets";
+import { fogWithoutWolvesAssets } from "./fog-without-wolves-assets";
 
 export interface GameAsset {
   id: string;
@@ -317,6 +318,9 @@ export const assets = {
   ...thirteenthLoafAssets,
   ...Object.fromEntries(
     Object.entries(chihayaNoaAssets).map(([key, asset]) => [`chihayaNoa.${key}`, asset]),
+  ),
+  ...Object.fromEntries(
+    Object.entries(fogWithoutWolvesAssets).map(([key, asset]) => [`fogWithoutWolves.${key}`, asset]),
   ),
 } as const satisfies Record<string, GameAsset>;
 

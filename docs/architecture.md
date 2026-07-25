@@ -2,7 +2,7 @@
 
 ## 运行形态
 
-项目使用 Next App Router、React 与 TypeScript，并保留两套明确的生产目标：默认 `next build` 生成 Vercel 使用的 `.next/`；`build:sites` 通过 Vinext、Vite 与 Cloudflare 插件生成 Sites/Worker 使用的 `dist/`。游戏页面组织成一个客户端状态机，以减少阶段切换等待；案件书架在同一外壳内选择编译期注册的 `CampaignManifest`，两套目标都由服务端渲染首屏元数据和外壳。
+项目使用 Next App Router、React 与 TypeScript，并保留两套明确的生产目标：默认 `next build` 生成 Vercel 使用的 `.next/`；`build:sites` 通过 Vinext、Vite 与 Cloudflare 插件生成 Sites/Worker 使用的 `dist/`。URL 负责表达案件书架、序章和游戏页面位置，Zustand 状态机继续独占案件进度与 `day → ready → night → morning → ending` 转换；案件书架选择编译期注册的 `CampaignManifest`，两套目标都由服务端渲染首屏元数据和当前路由外壳。
 
 原生 Next 构建的 TypeScript 范围排除 `build/`、`db/`、`examples/`、`worker/` 与 `vite.config.ts`：这些文件只属于 Sites 脚手架、Cloudflare 绑定或未启用的 D1 示例，不被产品应用导入。它们仍由 Vinext/Vite 实际构建和 ESLint 检查，不能把 Cloudflare Worker 模块混入 Vercel 的 Node 运行时。
 
@@ -12,7 +12,7 @@
 |---|---|---|
 | 案件包契约 | `src/content/campaigns/types.ts` | `CampaignManifest`、引用完整性校验与案件内容查询 |
 | 案件序章 | `src/components/game/case-prologue.tsx` | 首次开案的三幕案件导入、返回与接案动作 |
-| 案件注册表 | `src/content/campaigns/registry.ts` | 当前四案、默认案件和合法 `campaignId` 白名单 |
+| 案件注册表 | `src/content/campaigns/registry.ts` | 当前五案、默认案件和合法 `campaignId` 白名单 |
 | 首案内容包 | `src/content/campaigns/last-tram.ts` | 组合既有首案模块与视觉／结局规则 |
 | 本地化核心 | `src/i18n/core.ts`、`src/i18n/server.ts`、`src/i18n/request-locale-provider.tsx`、`src/i18n/provider.tsx` | Cookie／请求语言协商、案件能力回退、递归内容投影和界面翻译上下文 |
 | 首案英文目录 | `src/i18n/en-catalog.ts`、`src/i18n/en-overrides.ts` | 首案完整英文覆盖与关键文学文本人工润色 |
@@ -21,6 +21,8 @@
 | 第三案视觉包 | `src/content/thirteenth-loaf-assets.ts` | 第三案 34 张专属横幅、夜印、明信片、植物、收藏、人物与城区资产 |
 | 第四案内容包 | `src/content/campaigns/chihaya-noa.ts` | 《千早诺亚的第十三次旅行》的五夜完整内容 |
 | 第四案视觉包 | `src/content/chihaya-noa-assets.ts` | 第四案 34 张专属横幅、夜印、明信片、植物、收藏、人物与城区资产 |
+| 第五案内容包 | `src/content/campaigns/fog-without-wolves.ts` | 《雾中无狼》的五夜完整内容与五条分层推论 |
+| 第五案视觉包 | `src/content/fog-without-wolves-assets.ts` | 第五案 34 张专属横幅、夜印、明信片、植物、收藏、人物与城区资产 |
 | 首案核心内容 | `src/content/case.ts` | 首案五夜章节、12 条线索、8 件藏品与固定报告文本 |
 | 随身物内容 | `src/content/preparations.ts` | 三件准备物、五夜各自的确定性环境回响 |
 | 归来明信片 | `src/content/postcards.ts` | 五夜地点、城市传闻、背面短笺与三种随身物附言 |
@@ -57,7 +59,10 @@
 | 推论合成 | `src/lib/game-engine/evidence-synthesis.ts` | 证物库存、就绪配方、统一档案投影与依赖图校验 |
 | 结局资格 | `src/lib/game-engine/ending.ts` | 三结局白名单与真结局的线索、藏品、推论门槛 |
 | 游戏存档 | `src/stores/game-store.ts` | Zustand 状态、阶段转换与浏览器持久化 |
-| 产品外壳 | `app/page.tsx` | 阶段判断、视图编排、Demo 抽屉开关与顶层导航 |
+| 路由契约 | `src/lib/game-routes.ts` | 稳定页面路径、阶段恢复目标与水合后路径规范化 |
+| 产品运行时 | `src/components/game/app-runtime.tsx` | 案件本地化、首次加载、好友线索入口、全局弹层与阶段路由守卫 |
+| 游戏路由外壳 | `src/components/game/game-layout.tsx`、`app/(night-shift)/game/` | 顶栏、底部链接导航、路由级页面与沉浸式夜班／结局边界 |
+| 案件书架／序章路由 | `app/(night-shift)/page.tsx`、`app/(night-shift)/case-intro/page.tsx` | 案件选择、恢复入口与首次接案 |
 | 落地叙事 | `src/components/game/landing.tsx` | 首页主视觉与案件书架 |
 | 夜间循环 | `src/components/game/night-cycle.tsx` | 睡前准备、夜班会话、晨报与空晨报状态 |
 | 调查与归档 | `src/components/game/investigation.tsx` | 案件板、收藏柜、档案与结局 |
@@ -67,19 +72,24 @@
 | 游戏框架 | `src/components/game/shell.tsx` | 顶栏、底部导航与 Demo 控制台 |
 | 共享游戏 UI | `src/components/game/shared.tsx` | 纸卡、印章、城市路线与睡眠文案 |
 | 视觉系统 | `app/globals.css` | 色板、纸张、地图、雨雾、响应式与动效 |
+| 全局背景音乐 | `src/components/background-music.tsx` | 根布局单实例音频、自动播放重试、可见性暂停与本地关闭偏好 |
 
-收藏页本身不建立新的存档投影。`Collection` 只把既有 store 字段映射为四个显示组：核心物证、夜班归来、城市回声与口袋小物。CSS `order` 让核心物证在桌面连续长卷中位于首位；900 px 以下只显示当前 `activeCollectionCategory` 对应的现有 section。分类状态不持久化、不参与解锁或结局，切换案件后仍由各案件的隔离存档提供内容。
+收藏页把内容映射为五个显示组：核心物证、夜班归来、城市回声、夜兆牌桌与口袋小物。前四类案件成果只读取既有 game store；夜兆使用完全独立的 `night-shift-tarot-v1` 本地存档，按案件与本地自然日保存一张文学旁注，绝不写回游戏进度。CSS `order` 让核心物证在桌面连续长卷中位于首位；900 px 以下只显示当前 `activeCollectionCategory` 对应的 section。分类状态不持久化、不参与解锁或结局，夜兆边界见 [[docs/tarot-night-omens]]。
 
 Demo、睡眠硬件、好友线索、Injective、证物信笺和推论信笺共用 `src/lib/use-accessible-dialog.ts`：挂载时记录触发焦点、锁定 Body 滚动，并沿弹层到 `body` 的祖先链把旁支节点设为 `inert` 与 `aria-hidden`；Tab 在当前对话框的可见可聚焦元素中循环，Escape 关闭；卸载时精确恢复原属性、滚动和焦点。弹层根节点使用 `data-dialog-layer`，确保遮罩仍可关闭，同时背景不能被指针或键盘访问。
+
+全局背景音乐挂在根布局，案件库、序章、游戏和海报共享同一个 `<audio>`，站内路由不重建曲目。它读取独立布尔偏好 `night-shift-bgm-enabled-v1`，不进入 game store；默认立即尝试有声播放，浏览器策略拒绝时只在下一次可信交互中重试。标签页隐藏时暂停，音频缺失或解码失败只改变右上角控制器状态，不阻断任何页面。固定曲目路径和浏览器边界见 [[docs/background-music]]。
 
 打开 Demo 控制台不再调用 `begin()`。`DemoDrawer` 只在玩家确认具体操作后调用现有 `jumpToChapter`、`unlockBoard` 或 `reset`；“完整案件板”确认路径先显式 `begin()`，其余章节快照由游戏 store 自身标记开始。确认层只解释并约束 UI 写入时机，不改变这些 store action 的确定性结果与案件隔离。
 | 资产清单 | `src/content/assets.ts` | 四幕页头／结局画面、物证、夜印、明信片、植物、社团纹章、纪念物、人物与地区的 manifest 和解析函数 |
 
 ## 状态模型
 
-`AppBootBoundary` 在应用首次进入时把真实产品内容标记为 `inert`，避免半水合页面被误点；它等待 `window.load` 与 `document.fonts.ready`，首页主视觉则由 Next Image 的单一 preload 路径负责，不再用另一条裸 URL 重复请求。加载幕至少保留 700 ms 以避免冷暖缓存之间闪烁，最迟 7 秒主动放行，图片失败也会安全进入产品。退出后不会因切换案件重复播放整页加载幕。案件板、夜间循环、结局与硬件中心通过 `next/dynamic` 从首页入口拆分，在真正进入对应界面时使用轻量局部反馈。
+`AppBootBoundary` 在应用首次进入时把真实产品内容标记为 `inert`，避免半水合页面被误点；它等待 `window.load` 与 `document.fonts.ready`，首页主视觉则由 Next Image 的单一 preload 路径负责。加载幕至少保留 700 ms 以避免冷暖缓存之间闪烁，最迟 7 秒主动放行。它位于 `(night-shift)` 共享 layout 内，客户端路由切换和案件切换都不会重复播放整页加载幕。游戏页面由 App Router 自身拆分，`game/loading.tsx` 为尚未到达的页面提供轻量局部反馈；硬件面板继续按需加载。
 
 主要阶段为 `day → ready → night → morning → ending`。章节结算只通过当前案件 manifest 的确定性内容函数产生，不由生成模型决定。Zustand 使用 `night-shift-save-v1` 保存到浏览器 `localStorage`，当前持久化结构版本为 18。`campaignId` 标识活动案件，活动进度仍保持扁平供组件读取；切换时先把它快照到 `campaignSaves[campaignId]`，再恢复目标案件或创建新档。章节、线索、已合成推论、密文解答、结局、夜间历史和放下纸条因此按案隔离。v18 将旧二元关系与画布坐标替换为推论库存；`persist.migrate` 对任何低于 18 的版本直接返回首案新档，不保留旧进度。同版本读取仍按当前 manifest 白名单修复非法案件与内容 ID。
+
+稳定页面路径为 `/` 案件书架、`/case-intro` 案件序章、`/game/tonight` 今晚、`/game/report` 今晨、`/game/board` 案件板、`/game/collection` 收藏、`/game/archive` 档案、`/game/night` 夜班运行与 `/game/ending` 结局。路径不保存 `campaignId`、章节或结算数据。共享运行时等待浏览器存档水合后调用纯函数守卫：未开案的游戏页回到书架，活动夜班强制停留 `/game/night`，结局中的游戏页强制进入 `/game/ending`，清晨访问今晚则回到当前晨报。普通底部链接写入浏览器历史；开始／结束夜班和进入结局使用 replace，避免历史记录出现已经失效的强制阶段。案件库在结局后保持可访问，以便切换案件。
 
 「今晨」不再把 `phase === morning` 当作晨报存在性的唯一来源。页面从 `completedReports` 选择最新合法章节，并把该章节显式传给 `MorningReport`；组件再从 `choiceHistory`、`preparationHistory`、`growthHistory`、`societyHistory`、`correspondenceHistory`、`souvenirHistory`、`opportunityHistory` 与 `restRitualHistory` 读取同一夜快照。方向、准备物、质量、时长、时辰和睡隙优先取同一份 `growthHistory`；只有 `endedAt`、质量与时辰均匹配时才允许全局 `lastSleepSession` 补充实际会话和硬件回执，避免跨章混读。去案件板只切换视图并保持 `morning`，明确结束当日才调用 `continueDay()`；进入 `day／ready` 后仍可严格只读地重放最新晨报，未寄出的问函也不能在日期结束后补答。该模型不增加存档字段或版本，也不会再次调用任何结算写入。
 
@@ -89,7 +99,7 @@ Demo、睡眠硬件、好友线索、Injective、证物信笺和推论信笺共�
 
 案件 manifest 同时提供章节数、线索数、藏品数、真结局门槛、档案标题和逐夜视觉。`resolveNight`、关系匹配、结局资格、迁移过滤和页面投影都显式接收当前 manifest；通用模块不按具体案件 ID 写业务分支。`defineCampaign` 要求案件恰好五夜、章节从 1 连续排列、每个 choice 有路线、每夜拥有明信片／植物／四时辰回声／睡隙回声／夜印，并拒绝跨案件线索引用和不可达门槛。
 
-新案件第一次从书架打开时，`app/page.tsx` 先显示 manifest 提供的三幕 `CampaignPrologue`，再在玩家明确接案后调用 `begin()` 进入 `tonight`。序章只拥有当前幕这一项组件内展示状态，不写存档，也不改变章节、路线或结算；玩家返回书架不会误开案件。已有 `started` 存档继续直接恢复原视图，重置本案后才会再次看见序章。由此所有案件共享“案件库 → 案件导入 → 今夜交接 → 等待 → 晨报”的首夜生命周期，同时保留各案自己的文字与美术。
+新案件第一次从书架打开时，`/case-intro` 显示 manifest 提供的三幕 `CampaignPrologue`，再在玩家明确接案后调用 `begin()` 并 replace 到 `/game/tonight`。序章只拥有当前幕这一项组件内展示状态，不写存档，也不改变章节、路线或结算；玩家返回书架不会误开案件。已有 `started` 存档从书架按持久化阶段恢复到今晚、今晨、夜班或结局；重置本案后才会再次看见序章。由此所有案件共享“案件库 → 案件导入 → 今夜交接 → 等待 → 晨报”的首夜生命周期，同时保留各案自己的文字与美术。
 
 睡眠质量为 `interrupted`、`regular`、`restful`：三者都至少解锁一条主线线索；差异只体现在路线长度、收藏数量、回声事件和环境观察。`selectedPreparationId` 记录当前随身物，`preparationHistory` 按章节保存已经归来的准备；`selectedChoice` 记录当前方向，`choiceHistory` 按章节保存路线履历。方向决定四个路线节点、五段夜间事件、城市遭遇与归来来信，但同章节三个方向的线索和藏品结果保持一致。完成一夜后，章节编号会加入持久化的 `nightSealIds` 与 `completedReports`，旅程册据此解锁明信片与路线履历。
 
@@ -109,13 +119,13 @@ Home Assistant 使用第四份独立存档 `night-shift-ambient-hardware-v1`，�
 
 第一夜归来后的四个白天各由 `getOpportunityCandidates` 从十二张告示中稳定取三张，并排除 `opportunityHistory` 里所有曾展示的 ID。选择一张会保存对应答复，全部收起则只保存三张展示记录；两种方式都不会重抽或阻断调查。下一份晨报读取同章节记录显示一句回响，收藏页剪报册保存结果。v9 迁移不替旧档伪造白天选择，Demo 跳章才生成明确的第一选项演示履历。
 
-第四案同样把 34 张专属图像作为静态 WebP 提交，提示词与映射见 [[docs/art-prompts/chihaya-noa-visual-archive]]；两案都不在运行时生成画面或事实。
+第四、第五案同样各把 34 张专属图像作为静态 WebP 提交，提示词与映射见 [[docs/art-prompts/chihaya-noa-visual-archive]] 与 [[docs/art-prompts/fog-without-wolves-visual-archive]]；所有案件都不在运行时生成画面或核心事实。
 
 ## 内容边界
 
 链上藏品是确定性内容之外的可选公开回执层。服务端只为案件注册表中真实存在的收藏品生成元数据和 15 分钟 EIP-712 voucher，前端钱包在 Injective EVM Testnet 调用 ERC-721 合约；合约按钱包、案件和收藏拒绝重复领取。`night-shift-injective-mints-v1` 与游戏 store 完全分离，任何钱包、RPC、签名或交易失败都不得进入 `resolveNight`、存档迁移或结局资格。完整部署和隐私边界见 [[docs/injective-keepsake-mint]]。
 
-生成式能力用于编译期视觉资产和玩家明确授权的晨间短笺风格。第三案的 34 张专属图像已作为静态 WebP 随构建提交，运行时不会为案件生成画面或事实，提示词与映射见 [[docs/art-prompts/thirteenth-loaf-visual-archive]]。晨间短笺部署必须同时配置模型密钥、访问码和持久化 Redis 配额；访问码只用于换取带独立会话 ID 的 24 小时 HMAC 签名 HttpOnly、SameSite Strict Cookie，不写入游戏存档。访问尝试、单会话额度、部署每日预算和纸条 `requestId` 幂等均由 Redis 跨实例执行，配额不可用时关闭 AI。模型只接收当前纸条、案件／章节标题、方向、地点、随身物和侦探名，并只能返回固定 `tone`／`image` 枚举；服务端以校验后的枚举组合安全短笺，不直接展示自由模型文本。未配置模型、权限失效、超时、上游错误和无效输出都返回有明确原因的本地确定性回信。人物动机、线索存在性、核心因果与结局条件必须来自各案故事圣经。
+生成式能力用于编译期视觉资产和玩家明确授权的晨间短笺风格。第三至第五案的专属图像已作为静态 WebP 随构建提交，运行时不会为案件生成画面或事实；提示词与映射分别见 [[docs/art-prompts/thirteenth-loaf-visual-archive]]、[[docs/art-prompts/chihaya-noa-visual-archive]] 与 [[docs/art-prompts/fog-without-wolves-visual-archive]]。晨间短笺部署必须同时配置模型密钥、访问码和持久化 Redis 配额；访问码只用于换取带独立会话 ID 的 24 小时 HMAC 签名 HttpOnly、SameSite Strict Cookie，不写入游戏存档。访问尝试、单会话额度、部署每日预算和纸条 `requestId` 幂等均由 Redis 跨实例执行，配额不可用时关闭 AI。模型只接收当前纸条、案件／章节标题、方向、地点、随身物和侦探名，并只能返回固定 `tone`／`image` 枚举；服务端以校验后的枚举组合安全短笺，不直接展示自由模型文本。未配置模型、权限失效、超时、上游错误和无效输出都返回有明确原因的本地确定性回信。人物动机、线索存在性、核心因果与结局条件必须来自各案故事圣经。
 
 英文内容同样是随构建提交的确定性目录，不在运行时调用翻译服务或生成模型。内容测试要求首案英文投影不含汉字，并逐项比较章节、方向、线索、收藏、关系与结局的稳定 ID 及规则，防止翻译改变剧情图谱。
 
@@ -127,13 +137,13 @@ Home Assistant 使用第四份独立存档 `night-shift-ambient-hardware-v1`，�
 
 睡隙回声同样是只读叙事分支。每章只有一个固定 `WakeEcho`；真实会话最多记录一次，Demo 只有断续预设会形成回声。`wakeEcho` 与 `wakeEchoId` 不进入 `resolveNight`、质量派生、植物进度、社团层级或结局判断；没有醒转的历史会在睡隙回声簿中显示为完整空白，而不是待补收集项。
 
-案件板桌面端使用档案库／推理台双栏：档案库承担搜索、筛选和整卡阅档，右侧推理台在正常文档布局中显示就绪配方与已归档推论，不增加固定底栏。900 px 以下推理台先出现、档案库随后出现，保证移动端先看见当前可行动项，再在单列卡片中查阅证物。证物与推论信笺仍是可访问覆盖层；现有纸张、黄铜、墨色、蝴蝶封印和字体资产原样复用，不生成或替换美术。
+案件板在所有宽度使用居中的单栏文档流：可检索档案库位于上方，底部推理台随后显示就绪配方与已归档推论，不再占用右侧栏或形成固定遮挡。证物卡使用无生成文字与污渍干扰的 clean v2 纸张纹理；900 px 以下档案网格继续收为单列，推理台保持在档案库之后。证物与推论信笺仍是可访问覆盖层，确定性配方取代旧双卡猜配，因此不会恢复虚线预览、红线或不匹配惩罚。
 
 晨报以 900 px 为阅读层级断点。宽屏默认展开完整夜班档案；平板与手机默认把硬件回执、放下纸条、明信片、时辰、睡隙、植物、人物、机会、纪念物和社团来函收进原生 `details`，主文档流只保留夜印／日志、随身物、路线、新证物、矛盾和下一步。玩家可随时展开，折叠状态不写存档也不改变内容。案件板把档案库与推理合成台置于主文档流，再把密文台放在其后的独立 `details`；密文默认收起，以 DOM 顺序和原生展开语义表达“补充档案而非主线门槛”。
 
-好友线索使用 `?case=<案件 ID>&clue=<稳定线索 ID>` 的 local-first 深链接。分享端只从当前案件白名单生成链接和二维码；接收端在 hydration 后先验证案件，再验证该案线索，切换到对应存档后才经 `receiveSharedClue` 写入 `unlockedClueIds` 与 `receivedClueIds`，随后从地址栏移除两个 query。跨案件组合与未知 ID 不创建或污染存档，旧的仅含 `clue` 链接继续默认解释为 `case-001`。重复链接保持幂等，不传送其他进度，也不会合成推论或推进章节。赠送线索可参与普通阅档与推论合成，但真结局只计算非 `receivedClueIds` 的亲自取得线索；玩家后来完成对应夜班时，该 ID 会从好友来源表移除，转为亲自取得。
+好友线索使用 `/game/board?case=<案件 ID>&clue=<稳定线索 ID>` 的 local-first 深链接。分享端只从当前案件白名单生成链接和二维码；共享 route layout 在普通阶段守卫之前验证案件和该案线索，切换到对应存档后才经 `receiveSharedClue` 写入 `unlockedClueIds` 与 `receivedClueIds`，随后 replace 到无 query 的案件板。旧的根路径 `/?case=...&clue=...` 与仅含 `clue` 的链接继续兼容，后者默认解释为 `case-001`。跨案件组合与未知 ID 不创建或污染存档；重复链接保持幂等，不传送其他进度，也不会合成推论或推进章节。赠送线索可参与普通阅档与推论合成，但真结局只计算非 `receivedClueIds` 的亲自取得线索；玩家后来完成对应夜班时，该 ID 会从好友来源表移除，转为亲自取得。
 
-密文关卡使用独立的 `solvedCipherIds` 保存已经核对的稳定 ID。每个案件注册一份 `CipherDeskDefinition`，同时提供标题、说明、三段关卡、最终接线与全关完成回执；单个关卡可选 `CipherDial`，声明范围、步长、初始值、目标、精度和显示模式。显示模式支持时刻、MHz 和案件通用计数，并可由内容提供仪表及信号标签；刻度盘值先按范围与步长对齐并按精度截断，最终仍通过同一答案白名单进入 `solveCipher`，避免浮点漂移或绕过作者答案。文本答案经 NFKC、大小写和常见分隔符归一化后精确匹配，最终接线则要求碎片 ID 数量、唯一性与顺序完全一致，全部不使用模糊判断或生成模型。只有成功关卡和接线 ID 持久化；未提交刻度与临时排序只存在组件状态。迁移会按当前案件的三关与接线 ID 合集过滤未知和跨案件值。未注册密文的案件不显示空面板。
+密文关卡使用独立的 `solvedCipherIds` 保存已经核对的稳定 ID。每个案件注册一份 `CipherDeskDefinition`，同时提供标题、说明、三段关卡、最终接线与全关完成回执；单个关卡可选 `CipherDial`，声明范围、步长、初始值、目标、精度和显示模式。显示模式支持时刻、MHz 和案件通用计数，并可由内容提供仪表及信号标签；刻度盘值先按范围与步长对齐并按精度截断，最终仍通过同一答案白名单进入 `solveCipher`，避免浮点漂移或绕过作者答案。文本答案经 NFKC、大小写和常见分隔符归一化后精确匹配，最终接线则要求碎片 ID 数量、唯一性与顺序完全一致，全部不使用模糊判断或生成模型。十五个核心关卡通过 challenge ID 映射到桌边参考册，提供完整 A1Z26／摩尔斯表或通用时序、算式、频率与因果方法；映射不进入密文 schema，参考文本不得包含答案别名或揭示标题。只有成功关卡和接线 ID 持久化；未提交刻度、临时排序与参考册展开状态只存在组件状态。迁移会按当前案件的三关与接线 ID 合集过滤未知和跨案件值。未注册密文的案件不显示空面板。
 
 真结局资格由 `canUnlockTrueEnding` 统一判断，界面锁定与存档动作共用同一规则；因此不能通过绕开按钮直接写入未满足条件的真结局。旧存档迁移由可独立测试的 `migrateGameState` 提供。
 
@@ -159,7 +169,9 @@ Home Assistant 使用第四份独立存档 `night-shift-ambient-hardware-v1`，�
 
 当前组件按以下功能边界拆分：
 
-- `app/page.tsx`：阶段与视图编排，并统一承担视图切换／重复点击导航时的页面回顶；不拥有章节结算或功能域展示细节。
+- `app/(night-shift)/`：用稳定路径承载案件书架、序章和七个游戏页面；页面只组合功能组件，不拥有章节结算。
+- `app-runtime.tsx`：共享本地化、首次加载、全局弹层、好友线索接收和水合后阶段守卫。
+- `game-layout.tsx`：普通游戏页的顶栏与真实链接底部导航；夜班和结局保持沉浸式全屏。
 - `landing.tsx`：落地页与案件书架，不读取游戏结算规则。
 - `case-prologue.tsx`：读取当前案件的三幕序章，拥有幕间导航，不写进度或结算。
 - `night-cycle.tsx`：调查方向、随身物、林渡交接肖像与交接单、Demo／真实模式、夜印显影、归来明信片和晨报。
@@ -170,9 +182,9 @@ Home Assistant 使用第四份独立存档 `night-shift-ambient-hardware-v1`，�
 - `ambient-hardware.tsx`：硬件中心内的 Home Assistant 配对、实体绑定、试运行和只读传感器；不拥有设备令牌或剧情结算。
 - `shared.tsx`：跨功能域复用的纸张、印章和路线视觉原语。
 
-会话模型位于 `src/lib/game-engine`，跨页恢复依赖持久化时间戳而非组件生命周期。`app/page.tsx` 只保留顶层状态与视图编排，后续案件板和等待循环可以在各自功能域内独立演进。
+会话模型位于 `src/lib/game-engine`，跨页恢复依赖持久化时间戳而非组件生命周期。路由页只负责把导航回调接到既有 store action；后续案件板和等待循环可以在各自功能域内独立演进。
 
-桌面交接页是唯一采用“稳定场景栏 + 独立计划滚动区 + 固定主操作”的应用内视图；900 px 以下恢复普通文档流。固定底部导航不拥有各页面滚动状态，所有跨视图回顶仍由 `app/page.tsx` 统一保证。
+桌面交接页是唯一采用“稳定场景栏 + 独立计划滚动区 + 固定主操作”的应用内视图；900 px 以下恢复普通文档流。固定底部导航不拥有各页面滚动状态：新链接按 App Router 默认行为进入页首，重复点击当前链接显式回顶；本次没有启用 Cache Components，也不承诺保留离开页面前的组件局部状态。
 
 ## 相关文档
 

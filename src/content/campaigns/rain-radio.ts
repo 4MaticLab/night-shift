@@ -365,7 +365,7 @@ export const rainRadioCampaign = defineCampaign({
           title: "有人把整片街区藏进雨里",
           body: "旋钮背面刻着废弃电台的呼号，铜轴仍是温的。旧电话线从封死的播音间伸向城市排水沟；只有雨水接通线路时，那四十七户人家才重新拥有声音。",
           aside: "你将整理频率、电话与住址。林渡会在雨里寻找广播真正的听众。",
-          assetId: "header.morning-report",
+          assetId: "district.lantern-wharf",
         },
         {
           stage: "handoff",

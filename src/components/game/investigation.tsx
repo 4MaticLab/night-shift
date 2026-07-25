@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, Ear, FileCheck2, FileText, Flower2, KeyRound, Mail, RotateCcw, Search, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, Ear, FileCheck2, FileText, Flower2, KeyRound, RotateCcw, Search, Sparkles } from "lucide-react";
 import { getAsset } from "@/src/content/assets";
 import { getPreparation } from "@/src/content/preparations";
 import { citySocieties, getSocietyTitle } from "@/src/content/societies";
@@ -25,6 +25,7 @@ import { CipherDesk } from "./cipher-desk";
 import { InjectiveMintDialog } from "./injective-mint";
 import { readMintReceipts } from "@/src/lib/injective/client";
 import { ClueDossierDialog, SynthesisRevealDialog } from "./evidence-letters";
+import { TarotDraw } from "./tarot-draw";
 
 type ArchiveFilter = "all" | "clues" | "inferences" | "unused";
 
@@ -242,7 +243,8 @@ export function Collection() {
   const { campaign, localize, locale, t } = useI18n();
   const [mintingCollectible, setMintingCollectible] = useState<Collectible | null>(null);
   const [mintedCollectibleIds, setMintedCollectibleIds] = useState<string[]>([]);
-  const [activeCollectionCategory, setActiveCollectionCategory] = useState<"evidence" | "journey" | "city" | "pocket">("evidence");
+  const [activeCollectionCategory, setActiveCollectionCategory] = useState<"evidence" | "journey" | "city" | "tarot" | "pocket">("evidence");
+  const scrollSyncLockRef = useRef(false);
   const nightCount = campaign.case.chapters.length;
   const finalChapter = campaign.case.chapters.at(-1)!.number;
   const opportunityDays = campaign.case.chapters.filter((entry) => entry.number >= 2).map((entry) => entry.number);
@@ -281,51 +283,133 @@ export function Collection() {
       count: locale === "en" ? "4 shelves" : "4 组档案",
     },
     {
+      id: "tarot" as const,
+      targetId: "collection-night-omens",
+      icon: <Sparkles />,
+      label: locale === "en" ? "Night omens" : "夜兆牌桌",
+      count: locale === "en" ? "1 daily" : "每日 1 张",
+    },
+    {
       id: "pocket" as const,
       targetId: "collection-pocket-drawer",
       icon: <KeyRound />,
       label: locale === "en" ? "Pocket finds" : "口袋小物",
       count: `${Object.keys(souvenirHistory).length}/${nightCount}`,
     },
-  ];
-  const selectCollectionCategory = (id: typeof collectionCategories[number]["id"], targetId: string) => {
+  ] as const;
+  type CollectionCategoryId = typeof collectionCategories[number]["id"];
+  useEffect(() => {
+    const categoryIds: CollectionCategoryId[] = ["evidence", "journey", "city", "tarot", "pocket"];
+    /** One stable activation line just under the sticky index bar. */
+    const getProbeY = () => {
+      const index = document.querySelector(".collection-index");
+      if (index instanceof HTMLElement) return index.getBoundingClientRect().bottom + 28;
+      return 168;
+    };
+    /**
+     * Use only the first visual block of each category as its anchor.
+     * That avoids jitter when scrolling through multiple city/journey shelves.
+     */
+    const readCategoryAnchors = () => {
+      const firstTop = new Map<CollectionCategoryId, number>();
+      for (const section of document.querySelectorAll<HTMLElement>("[data-collection-category]")) {
+        const id = section.dataset.collectionCategory;
+        if (id !== "evidence" && id !== "journey" && id !== "city" && id !== "tarot" && id !== "pocket") continue;
+        const top = section.getBoundingClientRect().top;
+        const prev = firstTop.get(id);
+        if (prev === undefined || top < prev) firstTop.set(id, top);
+      }
+      return categoryIds
+        .filter((id) => firstTop.has(id))
+        .map((id) => ({ id, top: firstTop.get(id)! }))
+        .sort((a, b) => a.top - b.top);
+    };
+    const readActiveCategory = (previous: CollectionCategoryId): CollectionCategoryId => {
+      const anchors = readCategoryAnchors();
+      if (!anchors.length) return previous;
+      const probeY = getProbeY();
+      // Hysteresis band: switch only after the next anchor clearly crosses the probe.
+      const enterLine = probeY;
+      const leaveLine = probeY + 56;
+      let current = anchors[0].id;
+      for (const anchor of anchors) {
+        if (anchor.top <= enterLine) current = anchor.id;
+      }
+      if (current === previous) return previous;
+      const previousAnchor = anchors.find((anchor) => anchor.id === previous);
+      const nextAnchor = anchors.find((anchor) => anchor.id === current);
+      if (!previousAnchor || !nextAnchor) return current;
+      // Scrolling down into a later category.
+      if (nextAnchor.top >= previousAnchor.top) {
+        return nextAnchor.top <= enterLine ? current : previous;
+      }
+      // Scrolling up into an earlier category — require more clearance to leave.
+      return previousAnchor.top > leaveLine ? current : previous;
+    };
+    let frame = 0;
+    const syncFromScroll = () => {
+      if (scrollSyncLockRef.current) return;
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        if (scrollSyncLockRef.current) return;
+        setActiveCollectionCategory((prev) => readActiveCategory(prev));
+      });
+    };
+    syncFromScroll();
+    window.addEventListener("scroll", syncFromScroll, { passive: true });
+    window.addEventListener("resize", syncFromScroll);
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", syncFromScroll);
+      window.removeEventListener("resize", syncFromScroll);
+    };
+  }, []);
+  const selectCollectionCategory = (id: CollectionCategoryId, targetId: string) => {
     setActiveCollectionCategory(id);
-    window.requestAnimationFrame(() => document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    scrollSyncLockRef.current = true;
+    window.requestAnimationFrame(() => {
+      document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    window.setTimeout(() => {
+      scrollSyncLockRef.current = false;
+    }, 900);
   };
-  const collectionSectionClass = (id: typeof collectionCategories[number]["id"]) => `collection-section collection-section-${id}${activeCollectionCategory === id ? " is-active" : ""}`;
+  const collectionSectionClass = (id: CollectionCategoryId) => `collection-section collection-section-${id}${activeCollectionCategory === id ? " is-active" : ""}`;
   return <div className="collection-page">
     <div className="page-title"><div><p className="eyebrow">NIGHT CABINET · {t("夜间陈列柜")}</p><h2>{locale === "en" ? <>Time did not vanish.<br />Nor did the city forget.</> : <>时间没有消失。<br />城市也没有忘记。</>}</h2></div><p>{locale === "en" ? `Every wait leaves a night seal, grows a plant, returns a postcard, and lets one of the underground societies remember how you worked. These are not scores, but ${nightCount} stretches of time that can be told again.` : `每次等待都会形成一枚夜印、长成一株植物、寄回一张明信片，也让某个地下社团记住你的做事方式。这里保存的不是分数，是 ${nightCount} 段可以重新讲述的时间。`}</p></div>
     <nav className="collection-index" aria-label={locale === "en" ? "Collection archive groups" : "收藏档案分类"}>
-      <div className="collection-index-heading"><small>ARCHIVE INDEX · 04 DRAWERS</small><b>{locale === "en" ? "Choose what you came back to find." : "先看你这次回来想找什么。"}</b></div>
+      <div className="collection-index-heading"><small>ARCHIVE INDEX · 05 DRAWERS</small><b>{locale === "en" ? "Choose what you came back to find." : "先看你这次回来想找什么。"}</b></div>
       <div className="collection-index-tabs">
         {collectionCategories.map((category) => <button type="button" aria-pressed={activeCollectionCategory === category.id} className={activeCollectionCategory === category.id ? "active" : ""} onClick={() => selectCollectionCategory(category.id, category.targetId)} key={category.id}>{category.icon}<span><b>{category.label}</b><small>{category.count}</small></span></button>)}
       </div>
     </nav>
-    <section id="collection-city-echoes" className={`city-favor-ledger ${collectionSectionClass("city")}`}>
+    <section id="collection-city-echoes" data-collection-category="city" className={`city-favor-ledger ${collectionSectionClass("city")}`}>
       <div className="shelf-heading"><small>CITY REMEMBERS · {societyRecords.length}/{nightCount} NIGHTS</small><h3>{t("城市人情簿")}</h3></div>
       <p className="society-ledger-intro">{t("没有声望点数，也没有最优路线。城市只会依照你反复选择的调查姿态，更换称呼、礼数和愿意交给你的旁话。")}</p>
       <div className="society-ledger-grid">{citySocieties.map((source) => { const society = localize(source); const records = societyRecords.filter((record) => record.societyId === society.id); const latest = records.at(-1); return <article className={latest ? `society-ledger-card touched standing-${latest.standing}` : "society-ledger-card"} key={society.id}><SocietyCrest societyId={society.id} compact /><div className="society-ledger-copy"><small>{society.archiveName}</small><h3>{society.name}</h3><p className="society-concern">{t("关心")} · {society.concern}</p><blockquote>“{society.publicRumor}”</blockquote><div className="society-current-address"><small>{t("城里目前怎样称呼你")}</small><b>{latest ? t(getSocietyTitle(latest)) : t("尚未被正式称呼")}</b></div><p className="society-rule">{t("内部规矩")} · {society.privateRule}</p></div><div className="society-trace">{records.length ? records.map((record) => { const direction = getCampaignRouteDirection(campaign, record.chapter, record.choiceId); const replyRecord = correspondenceHistory[record.chapter]; return <div key={record.chapter}><span>{locale === "en" ? `Night 0${record.chapter}` : `夜 0${record.chapter}`}</span><b>{direction.dispatchTitle}</b><small>{replyRecord ? t("已回信") : t("未回信")}</small></div>; }) : <p>{t("尚无一条已归来的路线惊动他们。")}</p>}</div></article>; })}</div>
       {societyRecords.length > 0 && <div className="correspondence-ledger"><div className="correspondence-ledger-heading"><small>RETURNED ANSWERS · {correspondenceRecords.length}/{societyRecords.length}</small><h4>{t("问函与答复履历")}</h4><p>{t("没有寄出的答复也会保留为空白，不影响任何案件成果。")}</p></div><div className="correspondence-ledger-grid">{societyRecords.map((memory) => { const society = localize(citySocieties.find((item) => item.id === memory.societyId)!); const prompt = localize(getCorrespondencePrompt(memory)); const record = correspondenceHistory[memory.chapter]; const reply = record ? localize(getCorrespondenceReply(record)) : null; return <article className={reply ? "correspondence-ledger-entry answered" : "correspondence-ledger-entry"} key={memory.chapter}><small>{locale === "en" ? `Night 0${memory.chapter}` : `夜 0${memory.chapter}`} · {society.name}</small><h5>{prompt.question}</h5>{reply ? <><div><small>{t("你的答复")}</small><b>{reply.label}</b><p>{reply.summary}</p></div><blockquote><small>{t("留下的余波")}</small>{reply.echo}</blockquote></> : <div className="unanswered"><small>{t("未寄出的信封")}</small><b>{t("这一夜没有答复")}</b><p>{t("故事照常继续，城市没有替你的沉默扣除任何东西。")}</p></div>}</article>; })}</div></div>}
     </section>
-    <section id="collection-pocket-drawer" className={`pocket-drawer ${collectionSectionClass("pocket")}`}>
+    <TarotDraw active={activeCollectionCategory === "tarot"} />
+    <section id="collection-pocket-drawer" data-collection-category="pocket" className={`pocket-drawer ${collectionSectionClass("pocket")}`}>
       <div className="shelf-heading"><small>UNASKED-FOR SOUVENIRS · {Object.keys(souvenirHistory).length}/{nightCount} NIGHTS</small><h3>{t("口袋抽屉")}</h3></div>
       <p className="pocket-drawer-intro">{locale === "en" ? `Directions and packed items lead ${campaign.presentation.detectiveName} through different corners of the city, but there is no exchange table and refreshing cannot reroll a find. Each object from these ${nightCount} nights is merely a piece of incidental testimony, never an advantage.` : `方向与随身物会让${campaign.presentation.detectiveName}经过不同的城市角落，但没有兑换表，也不能靠刷新重抽。${nightCount} 夜里出现的每件小物都只是一段旁证，不会替案件增加优势。`}</p>
   <div className="pocket-drawer-grid">{souvenirs.map((source) => { const souvenir = localize(source); const record = Object.values(souvenirHistory).find((entry) => entry?.souvenirId === souvenir.id); const art = getAsset(souvenir.assetId); const direction = record ? getCampaignRouteDirection(campaign, record.chapter, record.choiceId) : null; const preparation = record ? localize(getPreparation(record.preparationId)) : null; return <article className={record ? "pocket-object unlocked" : "pocket-object locked"} key={souvenir.id}><div className="pocket-object-art"><Image className={record ? undefined : "uncollected-art"} src={art.src} alt={record ? art.alt : ""} width={1024} height={1024} sizes="(max-width: 600px) calc(100vw - 28px), 370px" /></div><div className="pocket-object-copy"><small>{record ? `${locale === "en" ? "Night" : "夜"} 0${record.chapter} · ${souvenir.archiveName}` : t("尚未出现在口袋里")}</small><h4>{record ? souvenir.name : t("未归档小物")}</h4><p>{record ? souvenir.provenance : t("城市还没有决定把什么留给这一格抽屉。")}</p>{record && <blockquote>“{souvenir.fieldNote}”</blockquote>}{record && <footer><b>{direction?.dispatchTitle}</b><span>{preparation?.shortTitle} · {direction?.destination}</span></footer>}</div></article>; })}</div>
     </section>
-    <section className={`city-clipping-book ${collectionSectionClass("city")}`}>
-      <header className="clipping-book-heading"><span aria-hidden="true"><Mail /></span><div><small>DAYLIGHT NOTICES · {Object.keys(opportunityHistory).length}/{opportunityDays.length} DAYS</small><h3>{t("城市剪报册")}</h3><p>{t("收起的纸也会留在那一天，但不会替你补写选择。这里没有行动点、分数或最优答复。")}</p></div></header>
-      <div className="clipping-envelope-grid">{opportunityDays.map((day) => { const record = opportunityHistory[day]; const notice = record?.noticeId ? localize(getOpportunityNotice(record.noticeId)) : null; const response = record ? localize(getOpportunityResponse(record)) : null; return <article className={record ? "filed" : "pending"} key={day}><div className="clipping-envelope" aria-hidden="true"><span>0{day}</span></div><div className="clipping-envelope-copy"><small>DAY 0{day} · {record ? "FILED" : "NOT YET"}</small><h4>{record ? (notice?.title ?? t("三张纸没有拆开")) : t("门缝仍然空着")}</h4><p>{record ? (response?.result ?? t("你把三张纸全部收进抽屉。没有人因此失去什么，城市也没有替沉默补写答案。")) : t("完成前一夜后，城市会递来三张可以回应、也可以收起的纸。")}</p>{response && <blockquote><small>{t("后来传回")}</small>“{response.echo}”</blockquote>}</div></article>; })}</div>
+    <section data-collection-category="city" className={`city-clipping-book ${collectionSectionClass("city")}`}>
+      <header className="clipping-book-heading"><div><small>DAYLIGHT NOTICES · {Object.keys(opportunityHistory).length}/{opportunityDays.length} DAYS</small><h3>{t("城市剪报册")}</h3><p>{t("收起的纸也会留在那一天，但不会替你补写选择。这里没有行动点、分数或最优答复。")}</p></div></header>
+      <div className="clipping-envelope-grid">{opportunityDays.map((day) => { const record = opportunityHistory[day]; const notice = record?.noticeId ? localize(getOpportunityNotice(record.noticeId)) : null; const response = record ? localize(getOpportunityResponse(record)) : null; return <article className={record ? "filed" : "pending"} key={day}><header className="clipping-paper-masthead"><div><small>{locale === "en" ? "THE CITY MORNING EDITION" : "雾灯城 · 城市晨刊"}</small><b>{locale === "en" ? "FOGLIGHT GAZETTE" : "雾灯城晨报"}</b></div><i>{locale === "en" ? `ISSUE 0${day}` : `第 0${day} 号`}</i></header><div className="clipping-envelope-copy"><small>DAY 0{day} · {record ? "FILED" : "NOT YET"}</small><h4>{record ? (notice?.title ?? t("三张纸没有拆开")) : t("门缝仍然空着")}</h4><div className="clipping-paper-columns"><p>{record ? (response?.result ?? t("你把三张纸全部收进抽屉。没有人因此失去什么，城市也没有替沉默补写答案。")) : t("完成前一夜后，城市会递来三张可以回应、也可以收起的纸。")}</p>{response ? <blockquote><small>{t("后来传回")}</small>“{response.echo}”</blockquote> : <aside><small>{locale === "en" ? "NEXT EDITION" : "等待刊印"}</small><span>{locale === "en" ? "No follow-up has reached the newsroom." : "后续消息尚未抵达编辑部。"}</span></aside>}</div><footer className="clipping-paper-folio"><span>{locale === "en" ? "FOGLIGHT CITY ARCHIVE" : "雾灯城公共档案 · 剪报存本"}</span><b>P. 0{day}</b></footer></div></article>; })}</div>
     </section>
-    <section className={`city-watch-ledger ${collectionSectionClass("city")}`}><div className="shelf-heading"><small>WHEN THE CITY RECEIVED THE SHIFT · {Object.keys(growthHistory).length}/{nightCount}</small><h3>{t("城市值更簿")}</h3></div><p>{locale === "en" ? `This records the hour at which you handed the assignment to ${campaign.presentation.detectiveName}. It changes only who remains in the street and which face the city reveals, never the case outcome.` : `这里保存你在什么时辰把任务交给${campaign.presentation.detectiveName}。它只改变当时仍在街上的人和城市愿意露出的侧面，不改变任何案件成果。`}</p><div>{campaign.case.chapters.map((entry) => { const record = growthHistory[entry.number]; if (!record) return <article className="watch-ledger-entry locked" key={entry.number}><small>NIGHT 0{entry.number} · UNFILED</small><h4>{t("时辰尚未归档")}</h4><p>{t("完成这一夜后，交接时刻会留下一段城市侧影。")}</p></article>; const watch = localize(getCityWatch(record.watchId ?? DEMO_CITY_WATCH_ID)); const echo = getCampaignWatchEcho(campaign, entry.number, watch.id); const direction = getCampaignRouteDirection(campaign, entry.number, record.choiceId); return <article className={`watch-ledger-entry watch-${watch.id}`} key={entry.number}><small>NIGHT 0{entry.number} · {watch.archiveLabel}</small><h4>{watch.label}</h4><span>{watch.window} · {direction.destination}</span><blockquote>“{echo.fieldNote}”</blockquote></article>; })}</div></section>
-    <section className={`sleep-gap-ledger ${collectionSectionClass("city")}`}><header className="sleep-gap-ledger-heading"><span aria-hidden="true"><Ear /></span><div><small>NOTES BETWEEN DREAMS · {wakeEchoCount}/{nightCount}</small><h3>{t("睡隙回声簿")}</h3><p>{t("短暂醒转可以留下声音，但不会让夜班结束。没有醒转的空白同样完整；这里没有需要补齐的收集率。")}</p></div></header><div className="sleep-gap-ledger-grid">{campaign.case.chapters.map((entry) => { const record = growthHistory[entry.number]; if (!record) return <article className="sleep-gap-entry locked" key={entry.number}><span className="sleep-gap-night">0{entry.number}</span><div><small>NIGHT 0{entry.number} · UNRETURNED</small><h4>{t("这一夜尚未归来")}</h4><p>{t("档案没有替未来的睡意预写内容。")}</p></div></article>; if (!record.wakeEchoId) return <article className="sleep-gap-entry quiet" key={entry.number}><span className="sleep-gap-night">0{entry.number}</span><div><small>NIGHT 0{entry.number} · UNDISTURBED</small><h4>{t("夜印里没有裂缝")}</h4><p>{t("这一夜没有记录醒转。空白不是遗漏，也不比回声少任何成果。")}</p></div></article>; const echo = getCampaignWakeEchoById(campaign, record.wakeEchoId); return <article className="sleep-gap-entry returned" key={entry.number}><span className="sleep-gap-night">0{entry.number}</span><div><small>NIGHT 0{entry.number} · ONE BRIEF WAKING</small><h4>{echo.title}</h4><p>{echo.sound}</p><blockquote>“{echo.fieldNote}”</blockquote></div></article>; })}</div></section>
-    <section className={`night-greenhouse ${collectionSectionClass("journey")}`}>
+    <section data-collection-category="city" className={`city-watch-ledger ${collectionSectionClass("city")}`}><div className="shelf-heading"><small>WHEN THE CITY RECEIVED THE SHIFT · {Object.keys(growthHistory).length}/{nightCount}</small><h3>{t("城市值更簿")}</h3></div><p>{locale === "en" ? `This records the hour at which you handed the assignment to ${campaign.presentation.detectiveName}. It changes only who remains in the street and which face the city reveals, never the case outcome.` : `这里保存你在什么时辰把任务交给${campaign.presentation.detectiveName}。它只改变当时仍在街上的人和城市愿意露出的侧面，不改变任何案件成果。`}</p><div>{campaign.case.chapters.map((entry) => { const record = growthHistory[entry.number]; if (!record) return <article className="watch-ledger-entry locked" key={entry.number}><small>NIGHT 0{entry.number} · UNFILED</small><h4>{t("时辰尚未归档")}</h4><p>{t("完成这一夜后，交接时刻会留下一段城市侧影。")}</p></article>; const watch = localize(getCityWatch(record.watchId ?? DEMO_CITY_WATCH_ID)); const echo = getCampaignWatchEcho(campaign, entry.number, watch.id); const direction = getCampaignRouteDirection(campaign, entry.number, record.choiceId); return <article className={`watch-ledger-entry watch-${watch.id}`} key={entry.number}><small>NIGHT 0{entry.number} · {watch.archiveLabel}</small><h4>{watch.label}</h4><span>{watch.window} · {direction.destination}</span><blockquote>“{echo.fieldNote}”</blockquote></article>; })}</div></section>
+    <section data-collection-category="city" className={`sleep-gap-ledger ${collectionSectionClass("city")}`}><header className="sleep-gap-ledger-heading"><span aria-hidden="true"><Ear /></span><div><small>NOTES BETWEEN DREAMS · {wakeEchoCount}/{nightCount}</small><h3>{t("睡隙回声簿")}</h3><p>{t("短暂醒转可以留下声音，但不会让夜班结束。没有醒转的空白同样完整；这里没有需要补齐的收集率。")}</p></div></header><div className="sleep-gap-ledger-grid">{campaign.case.chapters.map((entry) => { const record = growthHistory[entry.number]; if (!record) return <article className="sleep-gap-entry locked" key={entry.number}><span className="sleep-gap-night">0{entry.number}</span><div><small>NIGHT 0{entry.number} · UNRETURNED</small><h4>{t("这一夜尚未归来")}</h4><p>{t("档案没有替未来的睡意预写内容。")}</p></div></article>; if (!record.wakeEchoId) return <article className="sleep-gap-entry quiet" key={entry.number}><span className="sleep-gap-night">0{entry.number}</span><div><small>NIGHT 0{entry.number} · UNDISTURBED</small><h4>{t("夜印里没有裂缝")}</h4><p>{t("这一夜没有记录醒转。空白不是遗漏，也不比回声少任何成果。")}</p></div></article>; const echo = getCampaignWakeEchoById(campaign, record.wakeEchoId); return <article className="sleep-gap-entry returned" key={entry.number}><span className="sleep-gap-night">0{entry.number}</span><div><small>NIGHT 0{entry.number} · ONE BRIEF WAKING</small><h4>{echo.title}</h4><p>{echo.sound}</p><blockquote>“{echo.fieldNote}”</blockquote></div></article>; })}</div></section>
+    <section data-collection-category="journey" className={`night-greenhouse ${collectionSectionClass("journey")}`}>
       <div className="shelf-heading"><small>FOGLIGHT GREENHOUSE · {Object.keys(growthHistory).length}/{nightCount}</small><h3>{t("雾灯温室")}</h3></div>
       <p className="greenhouse-intro">{t("提前醒来不会让任何植物枯死。它只会以更小、更奇异的形态，完整保存那一夜。")}</p>
       <div className="greenhouse-grid">{campaign.botanicals.map((botanical) => { const record = growthHistory[botanical.chapter]; const art = getAsset(botanical.assetId); const direction = record ? getCampaignRouteDirection(campaign, botanical.chapter, record.choiceId) : null; const preparation = record ? localize(getPreparation(record.preparationId)) : null; const watch = record ? localize(getCityWatch(record.watchId ?? DEMO_CITY_WATCH_ID)) : null; return <article className={record ? `greenhouse-specimen unlocked quality-${record.quality}` : "greenhouse-specimen locked"} key={botanical.id}>{record ? <BotanicalSpecimen chapter={botanical.chapter} compact /> : <div className="greenhouse-locked"><Image className="uncollected-art" src={art.src} alt="" width={256} height={384} /></div>}<div className="greenhouse-copy"><small>{record ? `${watch?.label} · ${t(qualityCopy[record.quality].label)} · ${formatSleepDuration(record.durationMinutes, locale)}` : "SEED DORMANT"}</small><h3>{record ? botanical.name : t("种核尚未苏醒")}</h3><p>{record ? botanical.specimenNote : t("完成这一夜，无论睡了多久，温室都会保存一株完整植物。")}</p>{record && <span><b>{direction?.dispatchTitle}</b>{preparation?.shortTitle} · {botanical.district}</span>}</div></article>; })}</div>
     </section>
-  <section id="collection-returned-nights" className={`journey-album ${collectionSectionClass("journey")}`}><div className="shelf-heading"><small>RETURNED POSTCARDS · {completedReports.length}/{nightCount}</small><h3>{locale === "en" ? `${nightCount} nights returned by ${campaign.presentation.cityName}` : `${campaign.presentation.cityName}寄回的 ${nightCount} 个夜晚`}</h3></div><div className="journey-postcard-grid">{campaign.postcards.map((postcard) => { const unlocked = completedReports.includes(postcard.chapter); const preparationId = preparationHistory[postcard.chapter] ?? "side-lamp"; const preparation = localize(getPreparation(preparationId)); const direction = getCampaignRouteDirection(campaign, postcard.chapter, choiceHistory[postcard.chapter] ?? ""); const art = getAsset(postcard.assetId); return <article className={unlocked ? "journey-postcard unlocked" : "journey-postcard locked"} key={postcard.id}><div className="journey-postcard-image"><Image className={unlocked ? undefined : "uncollected-art"} src={art.src} alt={unlocked ? art.alt : ""} width={768} height={512} sizes="(max-width: 900px) calc(100vw - 28px), 570px" /></div><div className="journey-postcard-copy"><small>{unlocked ? postcard.location : "ROUTE NOT RETURNED"}</small><h3>{unlocked ? postcard.title : t("尚未寄回")}</h3><p>{unlocked ? postcard.message : locale === "en" ? `Complete this night's handoff and ${campaign.presentation.detectiveName} will send a postcard home from the city.` : `完成这一夜的交接，${campaign.presentation.detectiveName}会从城市里寄回一张明信片。`}</p>{unlocked && <div className="journey-route-history"><small>CHOSEN ROUTE</small><b>{direction.dispatchTitle} · {direction.destination}</b><p>{direction.returnLetter}</p></div>}{unlocked && <span><b>{preparation?.shortTitle ?? t("随身物")}</b>{postcard.preparationNotes[preparationId]}</span>}</div></article>; })}</div></section>
-  <section className={`night-seal-shelf ${collectionSectionClass("journey")}`}><div className="shelf-heading"><small>NIGHT SEALS · {nightSealIds.length}/{nightCount}</small><h3>{locale === "en" ? `${nightCount} night seals` : `${nightCount} 夜印记`}</h3></div><div className="night-seal-row">{campaign.case.chapters.map((entry) => { const art = getAsset(getCampaignNightSealAssetId(campaign, entry.number)); const unlocked = nightSealIds.includes(entry.number); return <div className={unlocked ? "night-seal unlocked" : "night-seal locked"} key={entry.number}><Image src={art.src} alt={unlocked ? art.alt : t("尚未形成的夜印")} width={160} height={160} sizes="160px" /><span>{locale === "en" ? "NIGHT" : "夜"} 0{entry.number}</span><b>{unlocked ? entry.title : t("尚未成形")}</b></div>; })}</div></section>
-    <section id="collection-core-evidence" className={`collection-evidence-cabinet ${collectionSectionClass("evidence")}`}>
+  <section id="collection-returned-nights" data-collection-category="journey" className={`journey-album ${collectionSectionClass("journey")}`}><div className="shelf-heading"><small>RETURNED POSTCARDS · {completedReports.length}/{nightCount}</small><h3>{locale === "en" ? `${nightCount} nights returned by ${campaign.presentation.cityName}` : `${campaign.presentation.cityName}寄回的 ${nightCount} 个夜晚`}</h3></div><div className="journey-postcard-grid">{campaign.postcards.map((postcard) => { const unlocked = completedReports.includes(postcard.chapter); const preparationId = preparationHistory[postcard.chapter] ?? "side-lamp"; const preparation = localize(getPreparation(preparationId)); const direction = getCampaignRouteDirection(campaign, postcard.chapter, choiceHistory[postcard.chapter] ?? ""); const art = getAsset(postcard.assetId); return <article className={unlocked ? "journey-postcard unlocked" : "journey-postcard locked"} key={postcard.id}><div className="journey-postcard-image"><Image className={unlocked ? undefined : "uncollected-art"} src={art.src} alt={unlocked ? art.alt : ""} width={768} height={512} sizes="(max-width: 900px) calc(100vw - 28px), 570px" /></div><div className="journey-postcard-copy"><small>{unlocked ? postcard.location : "ROUTE NOT RETURNED"}</small><h3>{unlocked ? postcard.title : t("尚未寄回")}</h3><p>{unlocked ? postcard.message : locale === "en" ? `Complete this night's handoff and ${campaign.presentation.detectiveName} will send a postcard home from the city.` : `完成这一夜的交接，${campaign.presentation.detectiveName}会从城市里寄回一张明信片。`}</p>{unlocked && <div className="journey-route-history"><small>CHOSEN ROUTE</small><b>{direction.dispatchTitle} · {direction.destination}</b><p>{direction.returnLetter}</p></div>}{unlocked && <span><b>{preparation?.shortTitle ?? t("随身物")}</b>{postcard.preparationNotes[preparationId]}</span>}</div></article>; })}</div></section>
+  <section data-collection-category="journey" className={`night-seal-shelf ${collectionSectionClass("journey")}`}><div className="shelf-heading"><small>NIGHT SEALS · {nightSealIds.length}/{nightCount}</small><h3>{locale === "en" ? `${nightCount} night seals` : `${nightCount} 夜印记`}</h3></div><div className="night-seal-row">{campaign.case.chapters.map((entry) => { const art = getAsset(getCampaignNightSealAssetId(campaign, entry.number)); const unlocked = nightSealIds.includes(entry.number); return <div className={unlocked ? "night-seal unlocked" : "night-seal locked"} key={entry.number}><Image src={art.src} alt={unlocked ? art.alt : t("尚未形成的夜印")} width={160} height={160} sizes="160px" /><span>{locale === "en" ? "NIGHT" : "夜"} 0{entry.number}</span><b>{unlocked ? entry.title : t("尚未成形")}</b></div>; })}</div></section>
+    <section id="collection-core-evidence" data-collection-category="evidence" className={`collection-evidence-cabinet ${collectionSectionClass("evidence")}`}>
       <div className="shelf-heading"><small>CORE EVIDENCE · {unlockedCollectibleIds.length}/{campaign.case.collectibles.length} FILED</small><h3>{locale === "en" ? "Evidence brought back to the agency" : "带回事务所的核心物证"}</h3></div>
       <p className="collection-evidence-intro">{locale === "en" ? "These are the objects that can testify in the case. Open an unlocked file here to keep it local or place an optional receipt in the Injective archive." : "这些物件会在案件里作证。已解锁的档案可以留在本机，也可以选择在 Injective 链上留下一张公开回执。"}</p>
       <div className="collection-grid">{campaign.case.collectibles.map((item, index) => { const unlocked = unlockedCollectibleIds.includes(item.id); const revealed = unlocked && chapter >= Math.min(finalChapter, item.chapter + 2); const minted = mintedCollectibleIds.includes(item.id); const art = getAsset(item.assetId); return <motion.article whileHover={unlocked ? { y: -5, rotate: index % 2 ? .3 : -.3 } : {}} key={item.id} className={`collectible-card ${unlocked ? "unlocked" : "locked"}`}><div className="item-number">0{index + 1}</div><div className="item-art"><Image src={art.src} alt={unlocked ? art.alt : t("尚未发现的物品")} width={438} height={438} sizes="(max-width: 900px) calc(100vw - 70px), 255px" /></div><div className="item-meta"><small>{unlocked ? `${item.district} · ${item.rarity}` : t("尚未发现")}</small><h3>{unlocked ? item.title : t("未归档物品")}</h3><p>{unlocked ? (revealed ? item.revealedDescription : item.surfaceDescription) : t("下一次夜间调查，也许会让它出现在林渡的口袋里。")}</p>{revealed && <Seal>{t("隐藏含义已揭示")}</Seal>}{unlocked && <button className={minted ? "collectible-mint-trigger minted" : "collectible-mint-trigger"} type="button" onClick={() => setMintingCollectible(item)}>{minted ? <FileCheck2 /> : <Sparkles />}<span>{minted ? t("此浏览器已有链上回执") : t("封进 Injective 链上档案")}</span></button>}</div></motion.article>; })}</div>

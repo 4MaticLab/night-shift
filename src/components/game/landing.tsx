@@ -2,27 +2,23 @@
 
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight, Languages, Moon, Zap } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { getAsset } from "@/src/content/assets";
 import { campaignRegistry } from "@/src/content/campaigns/registry";
 import { useGameStore } from "@/src/stores/game-store";
 import { campaignSupportsLocale, localizeCampaign } from "@/src/i18n/core";
 import { ShinyButton } from "@/src/components/ui/shiny-button";
+import { LanguagesIcon } from "@/src/components/ui/languages-icon";
 import { OptionWheel } from "./option-wheel";
 import { useI18n } from "@/src/i18n/provider";
 
-export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; onDemo: () => void; interactive: boolean }) {
+export function Hero({ onStart, interactive }: { onStart: () => void; interactive: boolean }) {
   const { campaignId, started, switchCampaign } = useGameStore();
   const { campaign, locale, preferredLocale, setLocale, t } = useI18n();
   const heroAsset = getAsset(campaign.presentation.heroAssetId);
   const wheelEntries: { label: string; id?: (typeof campaignRegistry)[number]["id"] }[] = [
     { label: t("选择剧本") },
     ...campaignRegistry.map((source) => ({ label: localizeCampaign(source, campaignSupportsLocale(source.id, preferredLocale) ? preferredLocale : "zh-CN").case.title, id: source.id })),
-    { label: "雾灯城失物招领处" },
-    { label: "第七盏路灯的告别" },
-    { label: "凌晨三点的无人书店" },
-    { label: "货运电梯里的十一月" },
-    { label: "潮汐旅馆的最后一位房客" },
   ];
   const selectedCampaignIndex = Math.max(1, wheelEntries.findIndex((entry) => entry.id === campaignId));
   const primaryLabel = started
@@ -39,16 +35,13 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
       </AnimatePresence>
       <div className="hero-vignette" />
       <nav className="landing-nav">
-        <div className="brand-mark"><span aria-hidden="true" /><div><b>{t("夜班侦探")}</b><small>NIGHT SHIFT</small></div></div>
         <div className="landing-nav-actions">
-          <button className="ghost-button language-button" disabled={!interactive} onClick={() => setLocale(preferredLocale === "en" ? "zh-CN" : "en")}><Languages size={15} /> {preferredLocale === "en" ? "中文" : "ENGLISH"}</button>
-          <button className="ghost-button" disabled={!interactive} onClick={onDemo}><Zap size={15} /> DEMO MODE</button>
+          <button className="ghost-button language-button" disabled={!interactive} aria-label={preferredLocale === "en" ? "切换到中文" : "Switch to English"} title={preferredLocale === "en" ? "切换到中文" : "Switch to English"} onClick={() => setLocale(preferredLocale === "en" ? "zh-CN" : "en")}><LanguagesIcon size={28} /></button>
         </div>
       </nav>
       <section className="hero-copy">
-        <p className="eyebrow"><Moon size={14} /> {t("一款与你轮班生活的异步侦探游戏")}</p>
-        <h1>{locale === "en" ? <>When you fall asleep,<br /><em>his work begins.</em></> : <>你睡着以后，<br /><em>他才开始工作。</em></>}</h1>
-        <p className="hero-lede">{t("白天分析线索，晚上把调查交给侦探。等你醒来，雾灯城会留下一份新的报告。")}</p>
+        <h1>{locale === "en" ? <><span className="hero-title-hand hero-title-hand-lead">When you fall asleep,</span><em className="hero-title-hand">his work begins.</em></> : <><span className="hero-title-hand hero-title-hand-lead">你睡着以后，</span><em className="hero-title-hand">他才开始工作。</em></>}</h1>
+        <p className="hero-lede hero-lede-note">{locale === "en" ? "Analyze clues by day, hand the night to the detective." : "白天分析线索，晚上把调查交给侦探"}</p>
         <div className="hero-actions">
           <ShinyButton
             className="primary-button"
@@ -57,7 +50,6 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
             onClick={onStart}
           >{primaryLabel} <ArrowRight size={18} /></ShinyButton>
         </div>
-        <div className="shift-rule"><span>{t("你负责白天推理")}</span><i /><span>{t("林渡负责夜晚调查")}</span></div>
       </section>
       <section className={interactive ? "campaign-wheel" : "campaign-wheel inert"} aria-label={t("案件剧本选择")}>
         <OptionWheel
@@ -75,6 +67,8 @@ export function Hero({ onStart, onDemo, interactive }: { onStart: () => void; on
           loop
           textColor="#9da8b5"
           activeColor="#f7f4ef"
+          soundUrl="/audio/click-soft.mp3"
+          soundVolume={1}
           onChange={(index) => { const id = wheelEntries[index]?.id; if (id) switchCampaign(id); }}
         />
         {preferredLocale === "en" && <p className="locale-availability">English edition available for Case 001. Other cases remain in Chinese.</p>}

@@ -34,6 +34,13 @@
 
 睡眠摘要不得用于诊断、治疗建议、危险告警、雇佣或保险判断。睡眠质量和任何设备指标都不得减少线索、污染人物状态、锁定结局、制造失败或形成排行榜。
 
+## 背景音乐偏好
+
+- 全局音乐只在浏览器 `night-shift-bgm-enabled-v1` 保存是否开启，不记录播放进度、收听时长、设备、页面历史或身份。
+- 音频从站点自身的 `/audio/c-minor-nocturne.mp3` 提供，不连接流媒体、广告、分析或第三方音频服务。
+- 浏览器拒绝自动播放时只等待玩家下一次可信交互，不请求额外权限、不以静音播放规避策略。
+- 页面隐藏时暂停以减少后台耗电；音乐失败或文件缺失不影响游戏。完整行为见 [[docs/background-music]]。
+
 ## Injective 公开回执
 
 - 钱包连接与 mint 完全自愿；不连接时不减少内容，钱包地址不写入案件或睡眠硬件存档。
@@ -54,4 +61,5 @@
 - [[docs/architecture]]
 - [[docs/product-overview]]
 - [[docs/injective-keepsake-mint]]
+- [[docs/background-music]]
 - [[plans/0028-sleep-hardware-bridge]]
