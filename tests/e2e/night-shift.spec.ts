@@ -1244,6 +1244,27 @@ test("keeps cipher notes local, campaign-scoped, and separate from game progress
   await expect(page.locator(".cipher-notebook").getByRole("textbox", { name: "密文草稿" })).toHaveValue("");
 });
 
+test("reveals cipher hints one at a time without persisting help usage", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: /开始第 001 宗案件/ })).toBeEnabled();
+  await page.keyboard.press("Shift+D");
+  await runDemoShortcut(page, /解锁完整案件板/);
+  await page.locator(".board-cipher-disclosure > summary").click();
+
+  const firstCipher = page.locator(".cipher-level.unlocked").first();
+  const hints = firstCipher.locator(".cipher-progressive-hints");
+  await expect(hints.locator("li")).toHaveCount(0);
+  await hints.getByRole("button", { name: "展开第一条提示" }).click();
+  await expect(hints.locator("li")).toHaveCount(1);
+  await hints.getByRole("button", { name: "再看一条提示" }).click();
+  await expect(hints.locator("li")).toHaveCount(2);
+  await expect(hints).toContainText("不会扣除任何东西，也不会写入存档");
+
+  await page.reload();
+  await page.locator(".board-cipher-disclosure > summary").click();
+  await expect(page.locator(".cipher-level.unlocked").first().locator(".cipher-progressive-hints li")).toHaveCount(0);
+});
+
 test("shares one clue as a QR deep link", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /DEMO MODE/ }).click();
