@@ -469,6 +469,7 @@
   background:
     linear-gradient(#7991a10b 1px, transparent 1px) 0 0 / 100% 9px,
     linear-gradient(180deg, #101d31 30%, #101d319e 46%, #101d3100 64%),
+    linear-gradient(0deg, #0b1220e6 0%, #0b12207a 14%, transparent 32%),
     url("/art/districts/lantern-wharf-v1.webp") center bottom / auto 60% no-repeat,
     linear-gradient(150deg, #111c2d, #0b1321);
 }
@@ -533,11 +534,13 @@
 }
 
 /* footer sits over the continued image with a readable scrim */
+/* footer melts out of the city with a soft vignette (no hard line) */
 .banner-sheet--proposition .banner-footer {
   align-items: center;
   padding-top: 0;
   padding-bottom: 3cqw;
-  background: linear-gradient(180deg, #0b1220a2 0%, #0b1220c6 58%, #0b1220e2 100%);
+  background: none;
+  text-shadow: 0 0.3cqw 1.2cqw #05090f;
 }
 
 .banner-sheet--proposition .banner-footer-copy b {
