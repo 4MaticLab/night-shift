@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/feat-cipher-progressive-hints]] | `feat/cipher-progressive-hints` | `in_progress` | `auto` | 0% | 实现两阶段无惩罚提示 |
+| [[plans/feat-cipher-progressive-hints]] | `feat/cipher-progressive-hints` | `completed` | `auto` | 100% | 两阶段提示、测试与文档已完成 |
 
 ## 使用规则
 
