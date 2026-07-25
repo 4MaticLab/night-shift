@@ -141,7 +141,7 @@
   aspect-ratio: 800 / 2000;
   overflow: hidden;
   display: grid;
-  grid-template-rows: 7% 45% 26% 22%;
+  grid-template-rows: 7% 44% 35% 14%;
   color: #d4dce5;
   background:
     linear-gradient(#7991a10b 1px, transparent 1px) 0 0 / 100% 9px,
@@ -275,7 +275,7 @@
   text-shadow: 0 1cqw 4cqw #05090f88;
 }
 
-.banner-hero h1 span {
+.banner-hero h1 > span {
   display: block;
 }
 
@@ -331,6 +331,61 @@
   font: 600 3cqw/1.3 var(--font-playfair), var(--font-noto-serif-sc), serif;
 }
 
+/* Five-case list */
+.banner-cases {
+  margin: 4cqw 0 0;
+  padding: 0;
+  display: grid;
+  gap: 2.2cqw;
+  list-style: none;
+}
+
+.banner-cases li {
+  display: grid;
+  grid-template-columns: 15cqw minmax(0, 1fr);
+  gap: 2.5cqw;
+  align-items: baseline;
+  padding-bottom: 2cqw;
+  border-bottom: 1px solid #35485d;
+}
+
+.banner-cases li i {
+  color: var(--banner-accent);
+  font: normal 1.9cqw/1 monospace;
+  letter-spacing: .1em;
+}
+
+.banner-cases li span {
+  color: #e2e8ef;
+  font: 600 3.1cqw/1.25 var(--font-playfair), var(--font-noto-serif-sc), serif;
+}
+
+/* Differentiator points */
+.banner-points {
+  margin: 4cqw 0 0;
+  padding: 0;
+  display: grid;
+  gap: 3cqw;
+  list-style: none;
+}
+
+.banner-points li {
+  position: relative;
+  padding-left: 6cqw;
+  color: #dbe2ea;
+  font: 600 3.1cqw/1.4 var(--font-playfair), var(--font-noto-serif-sc), serif;
+}
+
+.banner-point-mark {
+  position: absolute;
+  left: 0;
+  top: 1.4cqw;
+  width: 3cqw;
+  height: 3cqw;
+  border: .5cqw solid var(--banner-accent);
+  transform: rotate(45deg);
+}
+
 .banner-pull {
   margin: 5cqw 0 0;
   padding: 3cqw 3.6cqw;
@@ -352,50 +407,44 @@
   letter-spacing: .02em;
 }
 
-/* Footer: QR + CTA, kept above the bottom fold-in zone */
+/* Footer: strapline band, kept above the bottom fold-in zone */
 .banner-footer {
   min-height: 0;
-  padding: 4cqw 6cqw 0 7cqw;
-  display: grid;
-  grid-template-columns: 22cqw minmax(0, 1fr);
-  gap: 4cqw;
-  align-content: start;
+  padding: 1cqw 6cqw 0 7cqw;
+  display: flex;
+  align-items: flex-start;
+  gap: 3cqw;
   color: #a9b1bc;
   background:
-    radial-gradient(circle at 84% 8%, color-mix(in srgb, var(--banner-accent) 22%, transparent), transparent 42%),
+    radial-gradient(circle at 86% 0%, color-mix(in srgb, var(--banner-accent) 22%, transparent), transparent 46%),
     #0c1322;
 }
 
-.banner-qr {
-  width: 22cqw;
-  height: 22cqw;
-  padding: 1.6cqw;
-  background: #f4f7f9;
+.banner-footer-tick {
+  flex-shrink: 0;
+  width: 2cqw;
+  height: 7cqw;
+  margin-top: .6cqw;
+  background: var(--banner-accent);
 }
 
-.banner-qr img {
-  width: 100%;
-  height: 100%;
-}
-
-.banner-cta {
+.banner-footer-copy {
   min-width: 0;
-  align-self: center;
   display: flex;
   flex-direction: column;
-  gap: 1.6cqw;
+  gap: 1cqw;
 }
 
-.banner-cta b {
-  color: #eaf0f5;
-  font: 600 3.4cqw/1.3 var(--font-playfair), var(--font-noto-serif-sc), serif;
+.banner-footer-copy b {
+  color: #eef3f7;
+  font: 600 3.8cqw/1.25 var(--font-playfair), var(--font-noto-serif-sc), serif;
 }
 
-.banner-cta small {
-  color: #7f8998;
+.banner-footer-copy small {
+  color: #8a94a1;
   overflow-wrap: anywhere;
   font: 1.9cqw/1.4 monospace;
-  letter-spacing: .08em;
+  letter-spacing: .1em;
 }
 
 .banner-crop-note {
@@ -413,6 +462,139 @@
   background:
     linear-gradient(#0b131f00 40%, #0b131fcc 74%, #0c1424 100%),
     linear-gradient(100deg, #0a111c66, transparent 60%);
+}
+
+/* Proposition: person melts into the city through a soft, hazy transition */
+.banner-sheet--proposition {
+  background:
+    linear-gradient(#7991a10b 1px, transparent 1px) 0 0 / 100% 9px,
+    linear-gradient(180deg, #101d31 28%, #101d31cc 44%, #101d3194 56%, #101d3150 68%, #101d3118 80%, #101d3100 92%),
+    linear-gradient(0deg, #0b1220e6 0%, #0b12207a 14%, transparent 32%),
+    url("/art/districts/lantern-wharf-v1.webp") center bottom / auto 60% no-repeat,
+    linear-gradient(150deg, #111c2d, #0b1321);
+}
+
+/* person image layer, gently faded at the bottom */
+.banner-sheet--proposition::after {
+  display: block;
+  z-index: -1;
+  inset: 0 0 auto 0;
+  height: 56%;
+  border: 0;
+  pointer-events: none;
+  background: url("/art/headers/shift-handoff-v2.webp") 74% top / auto 100% no-repeat;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 42%, #00000059 72%, #0000 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 42%, #00000059 72%, #0000 100%);
+}
+
+/* no fog, no seam: the city fades in through the long veil ramp above */
+.banner-sheet--proposition::before {
+  display: none;
+}
+
+/* brand overlays the top person image; no underline; text stays crisp above the fog */
+.banner-sheet--proposition .banner-brand {
+  position: relative;
+  z-index: 8;
+  border-bottom: 0;
+  background: linear-gradient(180deg, #0a111c96 0%, #0a111c3a 60%, transparent 100%);
+  text-shadow: 0 0.3cqw 1.4cqw #05090f;
+}
+
+.banner-sheet--proposition .banner-hero {
+  background: transparent;
+}
+
+.banner-sheet--proposition .banner-hero img {
+  display: none;
+}
+
+.banner-sheet--proposition .banner-hero-veil {
+  background: linear-gradient(180deg, #0b131f00 26%, #0b131f66 50%, #10192bcc 76%, #101d31 100%);
+}
+
+/* body reveals the continued sheet image; copy pushed down into the city image */
+.banner-sheet--proposition .banner-body {
+  position: relative;
+  text-align: left;
+  padding-top: 15cqw;
+  background: linear-gradient(180deg, transparent 0%, #101d3140 16%, #101d31b8 38%, #101d31c8 58%, #101d318a 76%, transparent 100%);
+}
+
+/* footer sits over the continued image with a readable scrim */
+/* footer melts out of the city with a soft vignette (no hard line) */
+.banner-sheet--proposition .banner-footer {
+  align-items: center;
+  padding-top: 0;
+  padding-bottom: 3cqw;
+  background: none;
+  text-shadow: 0 0.3cqw 1.2cqw #05090f;
+}
+
+.banner-sheet--proposition .banner-footer-copy b {
+  font-size: 4.4cqw;
+}
+
+.banner-sheet--proposition .banner-rule,
+.banner-sheet--proposition .banner-crop-note {
+  display: none;
+}
+
+/* Proposition footer: drop the accent tick line */
+.banner-sheet--proposition .banner-footer-tick {
+  display: none;
+}
+
+/* Proposition headline: two-line staircase, second line indented + pushed down */
+.banner-sheet--proposition .banner-hero h1 > span + span {
+  padding-left: 2.2em;
+  margin-top: 0.3em;
+}
+
+/* Proposition middle copy: bigger text, looser leading, frameless pull */
+.banner-sheet--proposition .banner-lead {
+  font-size: 3.4cqw;
+  line-height: 2;
+  text-align: right;
+  text-shadow: 0 0.3cqw 1.6cqw #060b14, 0 0 0.6cqw #060b1499;
+}
+
+.banner-sheet--proposition .banner-pull {
+  margin-top: 6cqw;
+  padding: 0;
+  border-left: 0;
+  background: none;
+  font-size: 4.4cqw;
+  line-height: 1.55;
+  text-shadow: 0 0.3cqw 1.6cqw #060b14, 0 0 0.6cqw #060b1499;
+}
+
+/* Z-shaped staggered word inside the headline */
+.banner-h1-stagger {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.banner-h1-stagger > span {
+  display: inline-block;
+}
+
+.banner-h1-stagger > span[data-i="0"] {
+  transform: translateY(-0.16em);
+}
+
+.banner-h1-stagger > span[data-i="1"] {
+  transform: translateY(0.18em);
+  margin-left: 0.04em;
+}
+
+/* Manifesto headline runs to three lines, so ease the size */
+.banner-sheet--manifesto .banner-hero h1 {
+  font-size: 6.6cqw;
+}
+
+.banner-sheet--manifesto .banner-lead {
+  font-size: 2.7cqw;
 }
 
 .banner-print-hint {

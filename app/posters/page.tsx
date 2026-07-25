@@ -31,6 +31,14 @@ export default async function PostersPage() {
         ))}
       </div>
       <p className="poster-print-hint">{t("打印建议：Chrome / Edge → A3 → 边距“无”→ 缩放 100% → 开启“背景图形”。缩印 A4 时选择“适合可打印区域”，不要单独裁切二维码。")}</p>
+      <div className="poster-next-kit">
+        <div>
+          <small>BOOTH PRINT KIT · ROLL-UP 800 × 2000 MM</small>
+          <b>{t("展台易拉宝预览")}</b>
+          <span>{t("命题款黑客松易拉宝：人物与城市夜景迷雾拼接，可放大预览、截图或导出 PDF 送印。")}</span>
+        </div>
+        <Link href="/banners">{t("打开易拉宝预览 →")}</Link>
+      </div>
     </main>
   );
 }

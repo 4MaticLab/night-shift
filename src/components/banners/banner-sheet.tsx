@@ -1,7 +1,25 @@
 import Image from "next/image";
 import type { BannerDefinition } from "@/src/content/banners";
 
-export function BannerSheet({ banner, qrSrc }: { banner: BannerDefinition; qrSrc: string }) {
+function renderHeadlineLine(line: string, staggerWord?: string) {
+  if (!staggerWord || !line.includes(staggerWord)) return line;
+  const index = line.indexOf(staggerWord);
+  const before = line.slice(0, index);
+  const after = line.slice(index + staggerWord.length);
+  return (
+    <>
+      {before}
+      <span className="banner-h1-stagger">
+        {Array.from(staggerWord).map((char, i) => (
+          <span key={`${char}-${i}`} data-i={i % 2}>{char}</span>
+        ))}
+      </span>
+      {after}
+    </>
+  );
+}
+
+export function BannerSheet({ banner }: { banner: BannerDefinition }) {
   return (
     <article
       className={`banner-sheet banner-sheet--${banner.layout}`}
@@ -23,7 +41,7 @@ export function BannerSheet({ banner, qrSrc }: { banner: BannerDefinition; qrSrc
         <Image src={banner.primaryImage} alt={banner.primaryAlt} fill priority sizes="(max-width: 900px) 100vw, 520px" />
         <div className="banner-hero-veil" aria-hidden="true" />
         <h1 id={`banner-title-${banner.id}`}>
-          {banner.headline.split("\n").map((line) => <span key={line}>{line}</span>)}
+          {banner.headline.split("\n").map((line) => <span key={line}>{renderHeadlineLine(line, banner.staggerWord)}</span>)}
         </h1>
       </div>
 
@@ -41,6 +59,22 @@ export function BannerSheet({ banner, qrSrc }: { banner: BannerDefinition; qrSrc
           </ol>
         ) : null}
 
+        {banner.cases ? (
+          <ul className="banner-cases">
+            {banner.cases.map((item) => (
+              <li key={item.tag}><i>{item.tag}</i><span>{item.name}</span></li>
+            ))}
+          </ul>
+        ) : null}
+
+        {banner.points ? (
+          <ul className="banner-points">
+            {banner.points.map((point) => (
+              <li key={point}><span aria-hidden="true" className="banner-point-mark" />{point}</li>
+            ))}
+          </ul>
+        ) : null}
+
         {banner.pull ? (
           <blockquote className="banner-pull">
             {banner.pull.split("\n").map((line) => <span key={line}>{line}</span>)}
@@ -51,12 +85,10 @@ export function BannerSheet({ banner, qrSrc }: { banner: BannerDefinition; qrSrc
       </div>
 
       <footer className="banner-footer">
-        <div className="banner-qr">
-          <Image src={qrSrc} alt={`扫描二维码进入夜班侦探 · ${banner.zone}`} width={240} height={240} unoptimized />
-        </div>
-        <div className="banner-cta">
-          <b>{banner.cta}</b>
-          <small>{banner.ctaPath}</small>
+        <span className="banner-footer-tick" aria-hidden="true" />
+        <div className="banner-footer-copy">
+          <b>{banner.footerLead}</b>
+          <small>{banner.footerNote}</small>
         </div>
       </footer>
 

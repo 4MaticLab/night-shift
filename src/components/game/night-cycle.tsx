@@ -42,7 +42,6 @@ export function Tonight({ onLaunch, onHardware }: { onLaunch: (quality: SleepQua
   const [aiAccessMessage, setAiAccessMessage] = useState("");
   const [aiAccessChecking, setAiAccessChecking] = useState(false);
   const selectedDirection = selectedChoice ? getCampaignRouteDirection(campaign, chapter, selectedChoice) : null;
-  const selectedPreparation = localize(getPreparation(preparationId));
   const handoffPortrait = getAsset("character.lin-du-handoff");
   const previewWatch = localize(getCityWatch(sleepMode === "demo" ? DEMO_CITY_WATCH_ID : getCityWatchId(new Date())));
   const toggleAiRequest = async () => {
@@ -96,9 +95,8 @@ export function Tonight({ onLaunch, onHardware }: { onLaunch: (quality: SleepQua
         <div className="handoff-stack">
         <motion.figure className="handoff-portrait" initial={{ opacity: 0, y: 12, rotate: 1.4 }} animate={{ opacity: 1, y: 0, rotate: selectedDirection ? .35 : 1.15 }} transition={{ duration: .7, ease: "easeOut" }}>
           <div className="handoff-portrait-image"><Image src={handoffPortrait.src} alt={handoffPortrait.alt} fill preload sizes="(max-width: 600px) 44vw, (max-width: 900px) 34vw, 24vw" /></div>
-          <figcaption><small>LIN DU · NIGHT DETECTIVE</small><b>{campaign.presentation.detectiveName}</b><span>{selectedDirection ? t("已收到今晚的方向") : t("在等你写下方向")}</span></figcaption>
+          <figcaption><b>{campaign.presentation.detectiveName}</b></figcaption>
         </motion.figure>
-        <aside className="handoff-docket" aria-live="polite"><small>TONIGHT&apos;S HANDOFF · {t("今晚交接单")}</small><b>{selectedDirection?.dispatchTitle ?? t("方向尚未落笔")}</b><span>{selectedDirection ? `${selectedPreparation?.shortTitle ?? t("随身物")} · ${selectedDirection.destination}` : t("从右侧选择一条调查方向；林渡会负责怎样抵达。")}</span></aside>
         </div>
       </section>
       <section className="plan-panel">
