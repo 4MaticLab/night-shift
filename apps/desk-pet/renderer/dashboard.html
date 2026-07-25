@@ -64,12 +64,13 @@
       <p class="note dim" id="sensor-updated"></p>
     </section>
 
-    <!-- 床头哨站（RDK X5）连接 -->
+    <!-- 床头哨站 Mini Lindo（RDK X5）连接 -->
     <section class="card" id="sentry-card">
-      <h2>床头哨站 <span class="badge" id="sentry-badge">未连接</span></h2>
+      <h2>床头哨站 Mini Lindo <span class="badge" id="sentry-badge">未连接</span></h2>
       <p class="note">
-        把运行 <code>apps/rdk-sentry</code> 的 RDK X5 摆在床头，填入它的局域网地址。
-        摄像头画面在板上就地分析、不出板，桌宠只收环境读数与体动聚合统计。
+        Mini Lindo（小林渡）是林渡派驻床头的迷你分身：一块运行 <code>apps/rdk-sentry</code>
+        的 RDK X5。填入它的局域网地址；摄像头画面在板上就地分析、不出板，
+        桌宠作为它的通讯端只收环境读数与体动聚合统计。
       </p>
       <div class="sentry-row">
         <input id="sentry-host" type="text" placeholder="板子 IP，如 192.168.1.50" spellcheck="false" />
@@ -77,7 +78,7 @@
         <button id="sentry-connect" type="button">连接</button>
         <button id="sentry-disconnect" type="button" class="ghost hidden">断开</button>
       </div>
-      <p class="note dim" id="sentry-status-line">未配置：桌宠继续用占位数据替你守夜。</p>
+      <p class="note dim" id="sentry-status-line">未配置：小林渡还没上岗，桌宠继续用占位数据替你守夜。</p>
     </section>
 
     <!-- 虚空摄像头 -->
