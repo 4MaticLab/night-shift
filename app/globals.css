@@ -646,6 +646,7 @@ blockquote {
   font-weight: 400;
   letter-spacing: .005em;
   line-height: .92;
+  white-space: nowrap;
   transform: rotate(-1.1deg);
   transform-origin: left center;
   text-shadow:
