@@ -6,6 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
+| [[plans/feat-keepsake-qr-exchange]] | `feat/keepsake-qr-exchange` | `in_progress` | `auto` | 0% | 分享库与收取页 |
 
 ## 使用规则
 
