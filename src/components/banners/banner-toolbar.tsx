@@ -22,7 +22,7 @@ export function BannerToolbar({ activeId }: { activeId?: string }) {
             {shortLabel[banner.id] ?? banner.id}
           </Link>
         ))}
-        <Link className={!activeId ? "active" : ""} href="/banners">五款总览</Link>
+        <Link className={!activeId ? "active" : ""} href="/banners">总览</Link>
       </div>
       <button type="button" onClick={() => window.print()}><Printer /> 打印 / 导出 PDF</button>
       <Link href="/" target="_blank">打开游戏 <ExternalLink /></Link>

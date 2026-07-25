@@ -275,7 +275,7 @@
   text-shadow: 0 1cqw 4cqw #05090f88;
 }
 
-.banner-hero h1 span {
+.banner-hero h1 > span {
   display: block;
 }
 
@@ -462,6 +462,143 @@
   background:
     linear-gradient(#0b131f00 40%, #0b131fcc 74%, #0c1424 100%),
     linear-gradient(100deg, #0a111c66, transparent 60%);
+}
+
+/* Proposition: two stitched images -> person on top, city below, blended in the middle */
+.banner-sheet--proposition {
+  background:
+    linear-gradient(#7991a10b 1px, transparent 1px) 0 0 / 100% 9px,
+    url("/art/headers/shift-handoff-v2.webp") 80% 4% / auto 47% no-repeat,
+    url("/art/districts/lantern-wharf-v1.webp") center bottom / auto 58% no-repeat,
+    linear-gradient(150deg, #111c2d, #0b1321);
+}
+
+/* fog-soften the top edge (down through the brand -> person image) */
+.banner-sheet--proposition::after {
+  display: block;
+  z-index: 3;
+  inset: 0 0 auto 0;
+  height: 20%;
+  border: 0;
+  pointer-events: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.03' numOctaves='3' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0.66 0 0 0 0 0.72 0 0 0 0 0.82 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E") center / 130% 130% no-repeat,
+    radial-gradient(150% 130% at 42% 45%, #8698ad26, transparent 60%),
+    linear-gradient(180deg, transparent 0%, #5c6c8040 42%, #6a7c9246 58%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* foggy mist band blending the two stitched images */
+.banner-sheet--proposition::before {
+  display: block;
+  z-index: 0;
+  inset: 34% 0 auto 0;
+  height: 32%;
+  border: 0;
+  pointer-events: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='240'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.011 0.028' numOctaves='3' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.66 0 0 0 0 0.72 0 0 0 0 0.82 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E") center / 130% 130% no-repeat,
+    radial-gradient(150% 130% at 30% 42%, #8698ad30, transparent 60%),
+    radial-gradient(140% 130% at 74% 60%, #97a8bd2a, transparent 56%),
+    linear-gradient(180deg, transparent 0%, #5c6c8050 46%, #6a7c9258 54%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 78%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 78%, transparent 100%);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+/* brand overlays the top person image; no underline; text stays crisp above the fog */
+.banner-sheet--proposition .banner-brand {
+  position: relative;
+  z-index: 8;
+  border-bottom: 0;
+  background: linear-gradient(180deg, #0a111c96 0%, #0a111c3a 60%, transparent 100%);
+  text-shadow: 0 0.3cqw 1.4cqw #05090f;
+}
+
+.banner-sheet--proposition .banner-hero {
+  background: transparent;
+}
+
+.banner-sheet--proposition .banner-hero img {
+  display: none;
+}
+
+.banner-sheet--proposition .banner-hero-veil {
+  background: linear-gradient(180deg, #0b131f00 26%, #0b131f66 50%, #10192bcc 76%, #101d31 100%);
+}
+
+/* body reveals the continued sheet image below the copy */
+.banner-sheet--proposition .banner-body {
+  position: relative;
+  text-align: left;
+  background: linear-gradient(180deg, #101d31 0%, #101d31e6 22%, #101d31b0 42%, #101d3155 62%, #101d3116 80%, transparent 100%);
+}
+
+/* footer sits over the continued image with a readable scrim */
+.banner-sheet--proposition .banner-footer {
+  align-items: center;
+  padding-top: 0;
+  padding-bottom: 3cqw;
+  background: linear-gradient(180deg, #0b1220a2 0%, #0b1220c6 58%, #0b1220e2 100%);
+}
+
+.banner-sheet--proposition .banner-footer-copy b {
+  font-size: 4.4cqw;
+}
+
+.banner-sheet--proposition .banner-rule,
+.banner-sheet--proposition .banner-crop-note {
+  display: none;
+}
+
+/* Proposition footer: drop the accent tick line */
+.banner-sheet--proposition .banner-footer-tick {
+  display: none;
+}
+
+/* Proposition headline: two-line staircase, second line indented + pushed down */
+.banner-sheet--proposition .banner-hero h1 > span + span {
+  padding-left: 2.2em;
+  margin-top: 0.3em;
+}
+
+/* Proposition middle copy: bigger text, looser leading, frameless pull */
+.banner-sheet--proposition .banner-lead {
+  font-size: 3.4cqw;
+  line-height: 2;
+  text-align: right;
+}
+
+.banner-sheet--proposition .banner-pull {
+  margin-top: 6cqw;
+  padding: 0;
+  border-left: 0;
+  background: none;
+  font-size: 4.4cqw;
+  line-height: 1.55;
+}
+
+/* Z-shaped staggered word inside the headline */
+.banner-h1-stagger {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.banner-h1-stagger > span {
+  display: inline-block;
+}
+
+.banner-h1-stagger > span[data-i="0"] {
+  transform: translateY(-0.16em);
+}
+
+.banner-h1-stagger > span[data-i="1"] {
+  transform: translateY(0.18em);
+  margin-left: 0.04em;
 }
 
 /* Manifesto headline runs to three lines, so ease the size */

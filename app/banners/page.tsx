@@ -9,7 +9,7 @@ export default function BannersPage() {
         <div>
           <small>BOOTH PRINT KIT · ROLL-UP 800 × 2000 MM</small>
           <h1>展台易拉宝预览</h1>
-          <p>五款卷帘易拉宝，为黑客松会场设计：命题、异步循环、五案广度、重新创造休息的主张，以及给评委的三个差异点。文字全部由排版承担，图片只用已过审美术资产。点击单款可放大预览，截图或导出 PDF 即可送印。</p>
+          <p>命题款卷帘易拉宝，为黑客松会场设计。文字全部由排版承担，图片只用已过审美术资产。可放大预览，截图或导出 PDF 即可送印。</p>
         </div>
         <aside><b>800 × 2000 mm</b><span>比例 2:5 · 底部 200 mm 卷入低可读区</span></aside>
       </header>

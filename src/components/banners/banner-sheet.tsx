@@ -1,6 +1,24 @@
 import Image from "next/image";
 import type { BannerDefinition } from "@/src/content/banners";
 
+function renderHeadlineLine(line: string, staggerWord?: string) {
+  if (!staggerWord || !line.includes(staggerWord)) return line;
+  const index = line.indexOf(staggerWord);
+  const before = line.slice(0, index);
+  const after = line.slice(index + staggerWord.length);
+  return (
+    <>
+      {before}
+      <span className="banner-h1-stagger">
+        {Array.from(staggerWord).map((char, i) => (
+          <span key={`${char}-${i}`} data-i={i % 2}>{char}</span>
+        ))}
+      </span>
+      {after}
+    </>
+  );
+}
+
 export function BannerSheet({ banner }: { banner: BannerDefinition }) {
   return (
     <article
@@ -23,7 +41,7 @@ export function BannerSheet({ banner }: { banner: BannerDefinition }) {
         <Image src={banner.primaryImage} alt={banner.primaryAlt} fill priority sizes="(max-width: 900px) 100vw, 520px" />
         <div className="banner-hero-veil" aria-hidden="true" />
         <h1 id={`banner-title-${banner.id}`}>
-          {banner.headline.split("\n").map((line) => <span key={line}>{line}</span>)}
+          {banner.headline.split("\n").map((line) => <span key={line}>{renderHeadlineLine(line, banner.staggerWord)}</span>)}
         </h1>
       </div>
 
