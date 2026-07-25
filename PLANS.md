@@ -6,6 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
+| [[plans/style-caseboard-single-canvas]] | `style/morning-paper-and-butterfly-seal` | `in_progress` | `auto` | 85% | 收纳推论为按需抽屉并完成验证 |
 
 ## 使用规则
 
