@@ -24,6 +24,7 @@
 - [[docs/sleep-hardware-user-guide]] — 面向网页玩家的虚拟睡眠硬件连接、验收、撤销与常见问题。
 - [[docs/xiaomi-watch-hardware-test]] — Xiaomi Watch S4 数据源验证、真实接入 PoC、甲方演示与验收清单。
 - [[docs/home-assistant-ambient-bridge]] — 本机 Home Assistant 空间外设桥、受限实体、配对、cue 与比赛接线。
+- [[docs/rdk-x5-sleep-sentry]] — RDK X5 床头哨站：板端代理、桌宠桥接协议、降级回退与隐私边界。
 - [[docs/privacy-and-guardrails]] — 健康数据最小化、授权、撤销和非医疗边界。
 - [[docs/injective-keepsake-mint]] — Injective EVM Testnet 藏品领取、合约、部署与真实边界。
 - [[docs/tarot-night-omens]] — 收藏页每日塔罗画风夜兆的入口、确定性抽取、本地存档与非奖励护栏。

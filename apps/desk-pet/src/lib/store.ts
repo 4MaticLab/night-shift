@@ -3,13 +3,15 @@
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import type { SleepReport, VoidClip } from "../shared/contracts";
+import type { SentryConfig, SleepReport, VoidClip } from "../shared/contracts";
 
 export interface PetState {
   points: number;
   lastSeenAt: string | null;
   voidClip: VoidClip | null;
   lastReport: SleepReport | null;
+  /** 床头哨站（RDK X5）连接配置；未配置时维持占位数据。 */
+  sentryConfig: SentryConfig | null;
 }
 
 export const DEFAULT_STATE: Readonly<PetState> = Object.freeze({
@@ -17,6 +19,7 @@ export const DEFAULT_STATE: Readonly<PetState> = Object.freeze({
   lastSeenAt: null,
   voidClip: null,
   lastReport: null,
+  sentryConfig: null,
 });
 
 export function loadState(filePath: string): PetState {

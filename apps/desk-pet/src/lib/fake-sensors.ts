@@ -71,7 +71,8 @@ export function analyzeVoidCameraClip(video: { path: string; sizeBytes?: number 
 }
 
 /**
- * 睡眠质量占位评分：综合温度、空气与（可选的）虚空摄像头动作统计。
+ * 睡眠质量评分：综合温度、空气与（可选的）体动统计。
+ * 评分规则不分数据源；叙述与 source 戳跟随输入如实标注（占位 / 床头哨站实测）。
  * 返回 0–100 的分数、档位和一句夜班口吻的叙述。
  */
 export function scoreSleepQuality(snapshot: SensorSnapshot, clipReport?: VoidClipReport): SleepQuality {
@@ -94,11 +95,19 @@ export function scoreSleepQuality(snapshot: SensorSnapshot, clipReport?: VoidCli
 
   score = Math.round(clamp(score, 5, 100));
   const grade = score >= 85 ? "深睡如渊" : score >= 70 ? "安稳" : score >= 50 ? "浅眠" : "辗转";
-  const narrative = clipReport
-    ? `林渡翻了翻占位档案：室温 ${temp}°C、PM2.5 ${pm25}，录像里数出 ${clipReport.tossTurns} 次翻身。判定「${grade}」——等真传感器接上电线，这页记录会更诚实。`
-    : `林渡只凭空气占位数据下了个初判：室温 ${temp}°C、CO₂ ${co2Ppm}ppm，判定「${grade}」。虚空摄像头还空着，导入一段录像会让结论更有底气。`;
+  const live = snapshot.source === "rdk-x5";
+  let narrative: string;
+  if (live && clipReport?.source === "rdk-x5") {
+    narrative = `林渡对照了床头哨站的实测档案：室温 ${temp}°C、CO₂ ${co2Ppm}ppm，镜头里数出 ${clipReport.tossTurns} 次翻身。判定「${grade}」——这页记录是 RDK X5 在床头亲眼盯出来的。`;
+  } else if (live) {
+    narrative = `林渡翻了哨站的实测环境读数：室温 ${temp}°C、PM2.5 ${pm25}，判定「${grade}」。哨站摄像头还没上岗，体动部分等它开工再补。`;
+  } else if (clipReport) {
+    narrative = `林渡翻了翻占位档案：室温 ${temp}°C、PM2.5 ${pm25}，录像里数出 ${clipReport.tossTurns} 次翻身。判定「${grade}」——等真传感器接上电线，这页记录会更诚实。`;
+  } else {
+    narrative = `林渡只凭空气占位数据下了个初判：室温 ${temp}°C、CO₂ ${co2Ppm}ppm，判定「${grade}」。虚空摄像头还空着，导入一段录像会让结论更有底气。`;
+  }
 
-  return { score, grade, narrative, source: SENSOR_SOURCE_PLACEHOLDER };
+  return { score, grade, narrative, source: live ? snapshot.source : SENSOR_SOURCE_PLACEHOLDER };
 }
 
 function clamp(value: number, min: number, max: number): number {
