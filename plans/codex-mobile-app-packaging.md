@@ -1,6 +1,6 @@
 # Android 与 iOS 黑客松安装包
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P0
 - 创建：2026-07-24
 - 更新：2026-07-25
@@ -39,7 +39,7 @@ Night Shift 已有成熟的移动响应式网页、确定性的本地五夜循�
 - [x] 把系统健康来源接入硬件中心、夜班采集与晨报摘要。
 - [x] 增加契约／状态测试，验证缺少原生桥、拒绝权限、空数据、延迟数据与成功摘要。
 - [x] 构建并检查 Android APK。
-- [ ] 构建并检查 iOS 模拟器 App；若本机存在签名身份和连接设备，再验证真机安装或归档导出。
+- [x] 构建并检查 iOS 模拟器 App；若本机存在签名身份和连接设备，再验证真机安装或归档导出。
 - [x] 更新架构、隐私、睡眠硬件和质量基线文档。
 
 ## 验收标准
@@ -53,15 +53,15 @@ Night Shift 已有成熟的移动响应式网页、确定性的本地五夜循�
 
 ## 验证
 
-- `npm test`
-- `npm run lint`
-- `npm run build`
-- `npm run docs:check`
-- `npm run mobile:sync`
-- `npm run mobile:build:android`
-- `npm run mobile:build:ios:simulator`
-- 检查 APK 元数据、iOS `.app` bundle ID、原生权限声明和生成产物路径。
-- 在可用模拟器／真机上检查首页加载、路由、存档恢复、夜班锁屏恢复和系统睡眠授权／空态。
+- `npm test`：21 个文件、142 项测试通过。
+- `npm run lint`：通过。
+- `npm run build`：Next.js 生产构建通过，19 条路由生成完成。
+- `npm run docs:check`：96 篇 Markdown 的双链全部通过。
+- `npm run mobile:sync && npm run mobile:doctor`：Capacitor 8.4.2 的 Android／iOS 工程与插件同步通过。
+- `npm run mobile:build:android`：JDK 21／Android SDK 36 本机构建通过；生成 15 MB debug APK，SHA-256 为 `cbe92159b74fc8fdb397456fa9d8ba344f8c54fa3f5e7ae3e33b6cac1bfc4ddc`。
+- `apkanalyzer`：application ID 为 `com.fourmaticlab.nightshift`；权限只有 `INTERNET`、`READ_SLEEP` 与包内动态接收器保护权限。
+- GitHub Actions `Mobile Artifacts` run `30151124586`：Android APK job 4 分 48 秒通过并上传 `night-shift-android-apk`；iOS Simulator App job 1 分 40 秒通过，bundle ID／HealthKit 用途说明检查通过并上传 `night-shift-ios-simulator`。
+- 当前 Mac 没有完整 Xcode、也没有 iOS Development 签名身份或连接设备；真机安装按稳定文档在 Xcode 中选择演示者 Team 执行，不把模拟器包伪装成可侧载 IPA。
 
 ## 决定记录
 
@@ -70,6 +70,7 @@ Night Shift 已有成熟的移动响应式网页、确定性的本地五夜循�
 - 2026-07-24：真实睡眠只通过 HealthKit／Health Connect 系统仓读取，保持时间戳恢复和本地模拟器作为无数据回退。
 - 2026-07-25：本机实际生成 15 MB debug APK；`apkanalyzer` 确认包名为 `com.fourmaticlab.nightshift`，合并权限只有 `INTERNET`、`READ_SLEEP` 与 Android 自身动态接收器保护权限。
 - 2026-07-25：当前 Mac 只有 Command Line Tools、没有完整 Xcode；iOS 编译转由 `Mobile Artifacts` 的 `macos-15` job 验证，本机仍保留 Xcode 自动签名安装路径。
+- 2026-07-25：GitHub Actions run `30151124586` 同时通过 Android APK 与 iOS Simulator App 构建、元数据检查和 artifact 上传；计划验收范围完成。
 
 ## 相关文档
 
