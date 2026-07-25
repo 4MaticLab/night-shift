@@ -15708,6 +15708,73 @@ blockquote {
   text-align: right;
 }
 
+/* ---------- investigative loupe ---------- */
+
+.evidence-loupe {
+  position: relative;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.evidence-loupe-lens {
+  position: absolute;
+  z-index: 6;
+  border-radius: 50%;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  border: 2px solid #efe6d2;
+  box-shadow:
+    0 0 0 1px #2b262066,
+    0 10px 30px #0009,
+    inset 0 0 18px #0007;
+  opacity: 0;
+  transform: scale(.85);
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.evidence-loupe[data-active="true"] .evidence-loupe-lens {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.evidence-loupe-hint {
+  position: absolute;
+  z-index: 5;
+  left: 10px;
+  top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #0b1120b3;
+  color: #e7dcc2;
+  font-size: 9px;
+  letter-spacing: .06em;
+  backdrop-filter: blur(3px);
+  pointer-events: none;
+  opacity: .82;
+  transition: opacity .2s ease;
+}
+
+.evidence-loupe[data-active="true"] .evidence-loupe-hint {
+  opacity: 0;
+}
+
+@media (hover: none) {
+  .evidence-loupe {
+    cursor: default;
+  }
+}
+
+@media print {
+
+  .evidence-loupe-lens,
+  .evidence-loupe-hint {
+    display: none !important;
+  }
+}
+
 /* ---------- shared: flatten floating cards into printed articles ---------- */
 
 .newspaper .paper-card {
