@@ -589,7 +589,6 @@ blockquote {
   position: absolute;
   z-index: -1;
   inset: -20px -28px -24px -24px;
-  border-left: 1px solid #c59a5a66;
   background:
     linear-gradient(90deg, #c59a5a09 0 1px, transparent 1px) 15px 0 / 100% 100% no-repeat,
     repeating-linear-gradient(0deg, transparent 0 30px, #d9c8a909 31px),
@@ -631,28 +630,8 @@ blockquote {
   filter: drop-shadow(0 3px 16px #0008);
 }
 
-.hero-title-print,
 .hero-title-hand {
   display: block;
-}
-
-.hero-title-print {
-  position: relative;
-  width: max-content;
-  max-width: 100%;
-  font-family: var(--font-playfair), var(--font-noto-serif-sc), serif;
-  font-weight: 600;
-}
-
-.hero-title-print::after {
-  content: "";
-  position: absolute;
-  left: 2px;
-  right: 7%;
-  bottom: -8px;
-  height: 1px;
-  background: linear-gradient(90deg, #c59a5ab8, #c59a5a1c 74%, transparent);
-  transform: rotate(-.35deg);
 }
 
 .hero-copy h1 .hero-title-hand {
@@ -675,7 +654,12 @@ blockquote {
     0 0 18px #c59a5a1f;
 }
 
-.hero-title-hand::after {
+.hero-copy h1 .hero-title-hand-lead {
+  margin: 0 0 0 2px;
+  transform: rotate(-.6deg);
+}
+
+.hero-title-hand:not(.hero-title-hand-lead)::after {
   content: "";
   position: absolute;
   z-index: -1;
@@ -699,25 +683,11 @@ blockquote {
 .hero-lede-note {
   position: relative;
   margin: 0 0 0 5px;
-  padding: 12px 16px 12px 19px;
-  border-left: 2px solid #8b4f4c;
+  padding: 12px 16px 12px 6px;
   color: #c9c5ba;
-  background: linear-gradient(90deg, #d8c9aa0d, transparent 82%);
   font-family: var(--font-noto-serif-sc), serif;
   letter-spacing: .025em;
   transform: rotate(.12deg);
-}
-
-.hero-lede-note::before {
-  content: "林渡值更笺";
-  position: absolute;
-  top: -9px;
-  left: 18px;
-  padding-inline: 5px;
-  color: #9c7a49;
-  background: #0d1524;
-  font: 7px/1.2 monospace;
-  letter-spacing: .15em;
 }
 
 .hero-actions {
@@ -10923,7 +10893,7 @@ blockquote {
 
   .hero-lede-note {
     margin-left: 1px;
-    padding: 11px 8px 11px 14px;
+    padding: 11px 8px 11px 4px;
   }
 
   .hero-actions {
