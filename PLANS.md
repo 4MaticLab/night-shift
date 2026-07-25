@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/feat-cipher-reference-folio]] | `feat/cipher-reference-folio` | `in_progress` | `auto` | 0% | 建立十五关桌边解码参考册 |
+| [[plans/feat-cipher-reference-folio]] | `feat/cipher-reference-folio` | `completed` | `auto` | 100% | 十五关参考册、测试与文档已完成 |
 
 ## 使用规则
 
