@@ -319,15 +319,15 @@ test.describe("automatic browser locale", () => {
     await expect(page.locator(".app-boot-screen")).toContainText("The night agency is turning on its lights");
     expect((await context.cookies()).find((cookie) => cookie.name === "night-shift-locale")).toBeUndefined();
 
-    await selectCampaign(page, "The Station That Broadcasts in Rain");
+    await selectCampaign(page, "Rain Station");
     await expect(page.getByRole("heading", { name: /On nights when rain falls/ })).toBeVisible();
-    await selectCampaign(page, "The Thirteenth Loaf Before Dawn");
+    await selectCampaign(page, "Thirteenth Loaf");
     await expect(page.getByRole("heading", { name: /Seventeen years after the ovens/ })).toBeVisible();
     await expect(page.getByRole("button", { name: /Begin Case 003/ })).toBeVisible();
-    await selectCampaign(page, "Chihaya Noa's Thirteenth Journey");
+    await selectCampaign(page, "Chihaya Noa");
     await expect(page.getByRole("heading", { name: /same name has crossed the border/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /Begin Case 004/ })).toBeVisible();
-    await selectCampaign(page, "The Last Tram at 00:43");
+    await selectCampaign(page, "Last Tram 00:43");
     await expect(page.getByRole("heading", { name: /On tracks the city denies/ })).toBeVisible();
 
     await page.getByRole("button", { name: /切换到中文|中文/ }).click();

@@ -15,12 +15,28 @@ import { useI18n } from "@/src/i18n/provider";
 
 const heroCopyTransition = { duration: 0.38, ease: "easeOut" as const };
 
+/** Compact English labels for the landing wheel — full titles are too long in the arc. */
+const WHEEL_EN_LABELS: Record<string, string> = {
+  "case-001": "Last Tram 00:43",
+  "case-002": "Rain Station",
+  "case-004": "Thirteenth Loaf",
+  "case-005": "Chihaya Noa",
+  "case-006": "No Wolves",
+};
+
 /** Prefer a mapped English string, then the campaign's stable englishTitle. */
 function displayCaseTitle(source: CampaignManifest, preferredLocale: AppLocale): string {
   if (preferredLocale !== "en") return source.case.title;
   const translated = translateText(source.case.title, "en");
   if (translated !== source.case.title) return translated;
   return source.case.englishTitle;
+}
+
+function wheelCaseTitle(source: CampaignManifest, preferredLocale: AppLocale): string {
+  if (preferredLocale === "en") {
+    return WHEEL_EN_LABELS[source.id] ?? displayCaseTitle(source, preferredLocale);
+  }
+  return source.case.title;
 }
 
 export function Hero({ onStart, interactive }: { onStart: () => void; interactive: boolean }) {
@@ -34,10 +50,12 @@ export function Hero({ onStart, interactive }: { onStart: () => void; interactiv
   const heroPresentation = preferredLocale === "en"
     ? localizeValue(rawCampaign.presentation, "en")
     : rawCampaign.presentation;
-  const displayTitle = displayCaseTitle(rawCampaign, preferredLocale);
+  const displayTitle = preferredLocale === "en"
+    ? (WHEEL_EN_LABELS[rawCampaign.id] ?? displayCaseTitle(rawCampaign, preferredLocale))
+    : rawCampaign.case.title;
   const wheelEntries: { label: string; id?: (typeof campaignRegistry)[number]["id"] }[] = [
     { label: tUi("选择剧本") },
-    ...campaignRegistry.map((source) => ({ label: displayCaseTitle(source, preferredLocale), id: source.id })),
+    ...campaignRegistry.map((source) => ({ label: wheelCaseTitle(source, preferredLocale), id: source.id })),
   ];
   const selectedCampaignIndex = Math.max(1, wheelEntries.findIndex((entry) => entry.id === campaignId));
   const primaryLabel = started
