@@ -1,6 +1,6 @@
 # Electron 桌宠：林渡值更台
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P2
 - 创建：2026-07-25
 - 更新：2026-07-25
@@ -52,6 +52,14 @@
 - `npm run pet:test`（12 个单测：积分/离线补记/传感器区间/分析可复现/评分档位）。
 - `npm test`、`npm run lint` 全量。
 - 本机 `npm run pet:start` 真机启动检查主进程与渲染进程存活。
+
+## 最终验证证据（2026-07-25，基于 origin/main 83d36d3）
+
+- `npm ci` 后 `npm test`：24 个测试文件、165 个测试全部通过（含新增 `tests/desk-pet.test.ts` 12 个）。
+- `npm run lint`：0 error（仅存在与本计划无关的 `night-cycle.tsx` 历史 warning）。
+- `npm run docs:check`：100 个 Markdown 文件双链全部解析。
+- 子应用 `tsc -p apps/desk-pet/tsconfig.json` 零错误；渲染产物经 grep 确认无 require/exports 模块语法。
+- macOS 真机 `npm run pet:start`：Electron 主进程 + GPU/网络/渲染进程均存活运行 20 秒以上无崩溃。
 
 ## 决定记录
 
