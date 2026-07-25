@@ -16,12 +16,15 @@
 - [[docs/hackathon-submission-kit]] — Hack the Rest 赛道陈述、评委问答、提交材料、真实边界与部署排障。
 - [[docs/poster-series-guide]] — 五日案件碎片海报的结构、日更节奏、网页预览、印刷规格与 200 份投放方案。
 - [[docs/poster-entry-trigger-guide]] — 海报网页入口、二维码去向、路由判定、打印触发与不触发边界。
+- [[docs/booth-setup-and-printing]] — 线下展台的分区动线、物料清单、文案草稿、主视觉取图、易拉宝与背景板打印规格和现场清单。
 - [[docs/quality-baseline]] — 当前版本的质量基线、验证命令和已知边界。
 - [[docs/viewport-checklist]] — 桌面与移动端关键页面的交互检查清单。
-- [[docs/sleep-hardware-bridge]] — 虚拟睡眠设备、真实桥接预演与游戏生命周期。
+- [[docs/mobile-app-packaging]] — Android APK、iOS App、签名安装、CI 产物与原生健康权限。
+- [[docs/sleep-hardware-bridge]] — 虚拟设备、系统健康仓与游戏生命周期。
 - [[docs/sleep-hardware-user-guide]] — 面向网页玩家的虚拟睡眠硬件连接、验收、撤销与常见问题。
 - [[docs/xiaomi-watch-hardware-test]] — Xiaomi Watch S4 数据源验证、真实接入 PoC、甲方演示与验收清单。
 - [[docs/home-assistant-ambient-bridge]] — 本机 Home Assistant 空间外设桥、受限实体、配对、cue 与比赛接线。
+- [[docs/rdk-x5-sleep-sentry]] — RDK X5 床头哨站：板端代理、桌宠桥接协议、降级回退与隐私边界。
 - [[docs/privacy-and-guardrails]] — 健康数据最小化、授权、撤销和非医疗边界。
 - [[docs/injective-keepsake-mint]] — Injective EVM Testnet 藏品领取、合约、部署与真实边界。
 - [[docs/tarot-night-omens]] — 收藏页每日塔罗画风夜兆的入口、确定性抽取、本地存档与非奖励护栏。

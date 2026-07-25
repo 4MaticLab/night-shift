@@ -39,6 +39,8 @@ export interface CampaignPrologue {
 export interface CampaignPresentation {
   archiveNumber: string;
   teaser: string;
+  headlineMain: string;
+  headlineAccent: string;
   description: string;
   cityName: string;
   detectiveName: string;

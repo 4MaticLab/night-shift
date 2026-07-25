@@ -1,6 +1,6 @@
 import { getVirtualSleepDevice } from "@/src/content/sleep-devices";
 import type { SleepSession } from "@/src/lib/game-engine/schema";
-import type { ActiveSleepCapture, LiveSleepSignals, SleepSignalSummary } from "./types";
+import type { ActiveSleepCapture, LiveSleepSignals, SleepSignalSummary, VirtualDeviceId } from "./types";
 
 function hashString(value: string): number {
   let hash = 2166136261;
@@ -20,7 +20,7 @@ function has(capture: ActiveSleepCapture, permission: ActiveSleepCapture["permis
 }
 
 export function createSleepSignalSummary(capture: ActiveSleepCapture, session: SleepSession): SleepSignalSummary {
-  const device = getVirtualSleepDevice(capture.sourceId);
+  const device = getVirtualSleepDevice(capture.sourceId as VirtualDeviceId);
   if (!device) throw new Error(`Unknown virtual sleep device: ${capture.sourceId}`);
   const seed = hashString(`${capture.sessionId}:${capture.sourceId}`);
   const durationMinutes = session.durationMinutes ?? 0;
@@ -38,6 +38,7 @@ export function createSleepSignalSummary(capture: ActiveSleepCapture, session: S
   return {
     sessionId: session.id,
     sourceId: capture.sourceId,
+    sourceKind: "virtual",
     startedAt: capture.startedAt,
     endedAt: session.endedAt ?? new Date().toISOString(),
     durationMinutes,
@@ -79,4 +80,3 @@ export function projectLiveSleepSignals(capture: ActiveSleepCapture, progress: n
     tertiaryValue: `${Math.round(progress)}%`,
   };
 }
-

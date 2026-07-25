@@ -1,0 +1,195 @@
+/* 夜班面板：literary 深夜档案室风格 */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: "Songti SC", "Noto Serif SC", Georgia, serif;
+  background:
+    radial-gradient(1200px 500px at 20% -10%, rgba(52, 68, 120, 0.35), transparent),
+    #0b1020;
+  color: #e8e3d5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 28px 10px;
+}
+
+.logo { width: 44px; height: 44px; object-fit: contain; }
+
+h1 { font-size: 22px; letter-spacing: 4px; }
+
+.sub { font-size: 12px; color: rgba(232, 227, 213, 0.55); margin-top: 2px; }
+
+main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  padding: 18px 28px;
+  align-content: start;
+}
+
+.card {
+  background: rgba(17, 24, 44, 0.78);
+  border: 1px solid rgba(120, 140, 190, 0.22);
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: 0 8px 26px rgba(4, 8, 18, 0.4);
+}
+
+.card.wide { grid-column: 1 / -1; }
+
+h2 {
+  font-size: 15px;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+  color: #f0d48a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+h3 { font-size: 13px; margin: 10px 0 6px; color: rgba(240, 212, 138, 0.85); }
+
+.badge {
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px dashed rgba(212, 175, 55, 0.55);
+  color: rgba(240, 212, 138, 0.9);
+  font-weight: normal;
+}
+
+.note { font-size: 12px; line-height: 1.8; color: rgba(232, 227, 213, 0.7); margin-bottom: 10px; }
+
+.dim { color: rgba(232, 227, 213, 0.45); font-size: 12px; }
+
+.hidden { display: none !important; }
+
+/* 积分卡 */
+.points-big {
+  font-size: 44px;
+  font-weight: 700;
+  color: #f0d48a;
+  line-height: 1.2;
+}
+
+.points-meta {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+  color: rgba(232, 227, 213, 0.75);
+  margin: 6px 0 10px;
+}
+
+.rules {
+  list-style: none;
+  font-size: 12px;
+  color: rgba(232, 227, 213, 0.55);
+  line-height: 2;
+  border-top: 1px dashed rgba(120, 140, 190, 0.25);
+  padding-top: 8px;
+}
+
+/* 传感器网格 */
+.sensor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.sensor {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: rgba(11, 16, 32, 0.6);
+  border: 1px solid rgba(120, 140, 190, 0.18);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.sensor .label { font-size: 11px; color: rgba(232, 227, 213, 0.55); }
+.sensor .value { font-size: 22px; color: #cfe0ff; }
+.sensor .detail { font-size: 10px; color: rgba(212, 175, 55, 0.65); }
+
+/* 摄像头行 */
+.camera-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* 床头哨站连接行 */
+.sentry-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+
+.sentry-row input {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(120, 140, 190, 0.35);
+  background: rgba(11, 16, 32, 0.7);
+  color: #e8e3d5;
+  outline: none;
+}
+
+.sentry-row input:focus { border-color: rgba(212, 175, 55, 0.6); }
+
+#sentry-host { flex: 1; min-width: 160px; }
+#sentry-port { width: 72px; }
+
+code {
+  font-family: "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  color: rgba(207, 224, 255, 0.85);
+  background: rgba(120, 140, 190, 0.12);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+button {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  background: rgba(212, 175, 55, 0.12);
+  color: #f0d48a;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+button:hover { background: rgba(212, 175, 55, 0.24); }
+
+button.ghost {
+  border-color: rgba(150, 90, 90, 0.5);
+  background: transparent;
+  color: rgba(232, 200, 200, 0.8);
+}
+
+/* 报告 */
+.report-head { display: flex; align-items: baseline; gap: 12px; margin: 14px 0 8px; }
+
+.score { font-size: 40px; font-weight: 700; color: #cfe0ff; }
+
+.grade {
+  font-size: 15px;
+  color: #f0d48a;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 999px;
+  padding: 2px 12px;
+}
+
+#report-narrative { font-size: 13px; line-height: 2; color: rgba(232, 227, 213, 0.85); }
+
+#report-clip ul { list-style: none; font-size: 12px; line-height: 2; color: rgba(232, 227, 213, 0.7); }
+
+footer {
+  padding: 12px 28px 18px;
+  font-size: 11px;
+  color: rgba(232, 227, 213, 0.35);
+  text-align: center;
+}

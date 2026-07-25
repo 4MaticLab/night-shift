@@ -8,8 +8,8 @@ Night Shift 使用受信任的编译期案件包，而不是把某一份剧本�
 
 - `case-001`：[[docs/story-bible|《零点四十三分的末班车》]]
 - `case-002`：[[docs/rain-radio-story-bible|《只在雨中播出的电台》]]
-- `case-004`：[[docs/thirteenth-loaf-story-bible|《黎明前出炉的第十三个面包》]]，书架档案号为 `003`；技术 ID 有意跳过已退役沙盒使用过的 `case-003`。
-- `case-005`：[[docs/chihaya-noa-story-bible|《千早诺亚的第十三次旅行》]]，书架档案号为 `004`。
+- `case-004`：[[docs/thirteenth-loaf-story-bible|《面包奇谈》]]，书架档案号为 `003`；技术 ID 有意跳过已退役沙盒使用过的 `case-003`。
+- `case-005`：[[docs/chihaya-noa-story-bible|《千早诺亚的现身》]]，书架档案号为 `004`。
 - `case-006`：[[docs/fog-without-wolves-story-bible|《雾中无狼》]]，书架档案号为 `005`。
 
 ## Manifest 契约

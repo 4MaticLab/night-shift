@@ -20,6 +20,9 @@
     "connector:build": "node scripts/build-connectors.mjs",
     "connector:build:all": "node scripts/build-connectors.mjs --all",
     "connector:smoke": "node scripts/smoke-connector.mjs",
+    "pet:install": "npm --prefix apps/desk-pet install",
+    "pet:start": "npm --prefix apps/desk-pet start",
+    "pet:test": "vitest run tests/desk-pet.test.ts",
     "test": "vitest run",
     "test:render": "npm run build:sites && node --test tests/rendered-html.test.mjs",
     "test:e2e": "playwright test",
@@ -34,10 +37,18 @@
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "mobile:sync": "cap sync",
+    "mobile:doctor": "cap doctor",
+    "mobile:open:android": "cap open android",
+    "mobile:open:ios": "cap open ios",
+    "mobile:build:android": "npm run mobile:sync && cd android && ./gradlew assembleDebug",
+    "mobile:build:ios:simulator": "npm run mobile:sync && xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build CODE_SIGNING_ALLOWED=NO build"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
+    "@capacitor/core": "^8.4.2",
+    "@capgo/capacitor-health": "^8.10.0",
     "@opennextjs/cloudflare": "^1.20.2",
     "@tanstack/react-query": "^5.101.4",
     "bonjour-service": "^1.4.3",
@@ -63,6 +74,9 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.4.2",
+    "@capacitor/cli": "^8.4.2",
+    "@capacitor/ios": "^8.4.2",
     "@cloudflare/vite-plugin": "1.46.0",
     "@nomicfoundation/hardhat-toolbox-viem": "^5.0.7",
     "@openzeppelin/contracts": "^5.6.1",

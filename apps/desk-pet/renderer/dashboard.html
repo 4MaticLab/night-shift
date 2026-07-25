@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' file:; style-src 'self'" />
+  <title>Night Shift · 夜班面板</title>
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+  <header>
+    <img src="../../../public/art/brand/night-shift-logo-mark-v1.webp" alt="Night Shift" class="logo" />
+    <div>
+      <h1>夜班面板</h1>
+      <p class="sub">林渡替你守着的这段时间，都会记在这里。</p>
+    </div>
+  </header>
+
+  <main>
+    <!-- 值更点账本 -->
+    <section class="card" id="points-card">
+      <h2>值更点账本</h2>
+      <div class="points-big" id="points-total">0</div>
+      <div class="points-meta">
+        <span id="points-rank">初到夜班的访客</span>
+        <span id="points-rate">值更中 +1/min</span>
+      </div>
+      <p class="note" id="points-offline"></p>
+      <ul class="rules">
+        <li>值更（醒着）：+1 / 分钟</li>
+        <li>补眠（蓝盒子床垫）：+1.5 / 分钟</li>
+        <li>离线补记：+0.5 / 分钟，至多补一个夜班（8 小时）</li>
+      </ul>
+    </section>
+
+    <!-- 传感器区：默认占位，接上床头哨站后切换为实时数据 -->
+    <section class="card" id="sensors-card">
+      <h2>睡眠环境传感器 <span class="badge" id="sensors-badge">未接线 · 占位数据</span></h2>
+      <p class="note">
+        空气质量、温度等读数默认由占位数据驱动；在下方连接床头哨站（RDK X5）后，
+        同一批字段会切换为板上传感器的实测值，缺席的硬件继续用占位值补齐。
+      </p>
+      <div class="sensor-grid">
+        <div class="sensor">
+          <span class="label">温度传感器</span>
+          <span class="value" id="sensor-temp">--</span>
+          <span class="detail" id="sensor-temp-detail">占位 · 待接线</span>
+        </div>
+        <div class="sensor">
+          <span class="label">空气质量 PM2.5</span>
+          <span class="value" id="sensor-pm25">--</span>
+          <span class="detail" id="sensor-aqi">占位 · 待接线</span>
+        </div>
+        <div class="sensor">
+          <span class="label">CO₂</span>
+          <span class="value" id="sensor-co2">--</span>
+          <span class="detail" id="sensor-co2-detail">占位 · 待接线</span>
+        </div>
+        <div class="sensor">
+          <span class="label">湿度</span>
+          <span class="value" id="sensor-humidity">--</span>
+          <span class="detail" id="sensor-humidity-detail">占位 · 待接线</span>
+        </div>
+      </div>
+      <p class="note dim" id="sensor-updated"></p>
+    </section>
+
+    <!-- 床头哨站（RDK X5）连接 -->
+    <section class="card" id="sentry-card">
+      <h2>床头哨站 <span class="badge" id="sentry-badge">未连接</span></h2>
+      <p class="note">
+        把运行 <code>apps/rdk-sentry</code> 的 RDK X5 摆在床头，填入它的局域网地址。
+        摄像头画面在板上就地分析、不出板，桌宠只收环境读数与体动聚合统计。
+      </p>
+      <div class="sentry-row">
+        <input id="sentry-host" type="text" placeholder="板子 IP，如 192.168.1.50" spellcheck="false" />
+        <input id="sentry-port" type="text" placeholder="8302" spellcheck="false" />
+        <button id="sentry-connect" type="button">连接</button>
+        <button id="sentry-disconnect" type="button" class="ghost hidden">断开</button>
+      </div>
+      <p class="note dim" id="sentry-status-line">未配置：桌宠继续用占位数据替你守夜。</p>
+    </section>
+
+    <!-- 虚空摄像头 -->
+    <section class="card" id="camera-card">
+      <h2>虚空摄像头 <span class="badge">占位分析</span></h2>
+      <p class="note">
+        录一段夜里的视频，需要的时候点下面导入。真实视频分析管线还没接，
+        导入后会生成一份可复现的占位动作统计（翻身 / 离床 / 安静片段）。
+      </p>
+      <div class="camera-row">
+        <button id="import-clip" type="button">导入录像</button>
+        <button id="clear-clip" type="button" class="ghost hidden">移除</button>
+        <span id="clip-name" class="dim">尚未导入录像</span>
+      </div>
+    </section>
+
+    <!-- 睡眠质量报告 -->
+    <section class="card wide" id="report-card">
+      <h2>睡眠质量占位报告</h2>
+      <p class="note">综合当前假传感器读数与（可选的）虚空摄像头占位分析，给出一页夜班口吻的判断。</p>
+      <button id="generate-report" type="button">让林渡出一份报告</button>
+      <div id="report-body" class="hidden">
+        <div class="report-head">
+          <span class="score" id="report-score">--</span>
+          <span class="grade" id="report-grade">--</span>
+          <span class="dim" id="report-time"></span>
+        </div>
+        <p id="report-narrative"></p>
+        <div id="report-clip" class="hidden">
+          <h3 id="report-clip-title">虚空摄像头统计（占位）</h3>
+          <ul>
+            <li>翻身：<span id="clip-toss">-</span> 次</li>
+            <li>离床：<span id="clip-outofbed">-</span> 次</li>
+            <li>最长安静片段：<span id="clip-quiet">-</span> 分钟</li>
+            <li>不安指数：<span id="clip-restless">-</span></li>
+          </ul>
+          <p class="dim" id="clip-note"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>local-first · 所有数据只存在本机与局域网 · 画面永远不离开床头那块板子</p>
+  </footer>
+
+  <script src="../dist/renderer/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Night Shift</string>
+    <string name="title_activity_main">Night Shift</string>
+    <string name="package_name">com.fourmaticlab.nightshift</string>
+    <string name="custom_url_scheme">com.fourmaticlab.nightshift</string>
+    <string name="health_connect_privacy_policy_url">file:///android_asset/public/privacypolicy.html</string>
+</resources>

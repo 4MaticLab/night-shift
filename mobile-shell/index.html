@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#111a25" />
+    <title>Night Shift · 暂时离线</title>
+    <style>
+      :root { color-scheme: dark; font-family: ui-serif, Georgia, serif; background: #111a25; color: #eadfca; }
+      * { box-sizing: border-box; }
+      body { min-height: 100dvh; margin: 0; display: grid; place-items: center; padding: max(28px, env(safe-area-inset-top)) 24px max(28px, env(safe-area-inset-bottom)); background: radial-gradient(circle at 50% 20%, #263749 0, #111a25 58%); }
+      main { width: min(440px, 100%); text-align: center; padding: 36px 28px; border: 1px solid #806a46; border-radius: 18px; background: rgb(15 24 34 / 88%); box-shadow: 0 28px 80px rgb(0 0 0 / 35%); }
+      img { width: 92px; height: 92px; object-fit: contain; }
+      small { display: block; margin: 20px 0 10px; color: #c69a55; letter-spacing: .18em; }
+      h1 { margin: 0; font-size: clamp(28px, 8vw, 42px); }
+      p { margin: 18px 0 0; color: #bbb3a6; line-height: 1.75; }
+      button { margin-top: 28px; min-height: 48px; padding: 0 24px; border: 1px solid #c69a55; border-radius: 999px; color: #101923; background: #d8b16c; font: 700 16px/1 ui-serif, Georgia, serif; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="night-shift-logo.png" alt="" />
+      <small>NIGHT SHIFT · MOBILE LINK</small>
+      <h1>城市暂时失去信号</h1>
+      <p>黑客松安装包会连接 Night Shift 的在线案件库。请检查网络后重试；已经留在本机的存档不会因此消失。</p>
+      <button type="button" onclick="location.reload()">重新连接</button>
+    </main>
+  </body>
+</html>

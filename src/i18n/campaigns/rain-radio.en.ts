@@ -121,6 +121,8 @@ export const rainRadioEnglish: Record<string, string> = {
   "地图删名时间早于拆迁令，而四十七把钥匙仍保存原门框木屑，证明“无人居住”是事后制造的说法。": "The map deleted the names before the demolition order was issued, and forty-seven keys still preserve wood shavings from the original doorframes, proving that 'no one lives here' is a claim manufactured after the fact.",
   "只在雨中播出的电台": "The Station That Broadcasts in Rain",
   "一座停播十二年的电台，只在下雨时读出明天的消息。": "A station silent for twelve years reads tomorrow’s news aloud — but only when it rains.",
+  "雨落下来的夜晚，": "On nights when rain falls,",
+  "他调到了消失的频道。": "he tunes in to a vanished frequency.",
   "沿雨水与旧电话线找回被地图删掉的四十七户声音。": "Follow the rain and the old telephone lines to recover forty-seven households the map has erased.",
   "最后一次广播，由谁按下开关？": "Who presses the switch for the final broadcast?",
   "严洛把完整证词留在控制台，却把话筒推回居民面前。公开、保护与归还，每一种都要承担自己的回声。": "Yan Luo left the complete testimony on the console, then pushed the microphone back towards the residents. To publish, to protect, or to return — each choice must bear its own echo.",

@@ -21,13 +21,17 @@ export function SleepHardwareStatus({ onOpen, label = true }: { onOpen: () => vo
   const chevronRef = useRef<ChevronRightIconHandle>(null);
   const device = localize(getVirtualSleepDevice(selectedDeviceId));
   const bridge = localize(getSleepBridge(selectedBridgeId));
-  const connected = mode === "virtual" && consent?.sourceId === selectedDeviceId;
+  const virtualConnected = mode === "virtual" && consent?.sourceKind === "virtual" && consent.sourceId === selectedDeviceId;
+  const nativeConnected = mode === "bridge" && consent?.sourceKind === "native" && consent.sourceId === selectedBridgeId;
+  const connected = virtualConnected || nativeConnected;
   const status = activeCapture
-    ? t("采集中")
-    : connected
+    ? activeCapture.sourceKind === "native" ? t("等待晨间同步") : t("采集中")
+    : virtualConnected
       ? device?.name
-      : mode === "bridge"
-        ? `${bridge?.name} · ${t("预演")}`
+      : nativeConnected
+        ? `${bridge?.name} · ${t("已连接")}`
+        : mode === "bridge"
+          ? `${bridge?.name} · ${t("未连接")}`
         : t("睡眠硬件");
 
   useGSAP(() => {

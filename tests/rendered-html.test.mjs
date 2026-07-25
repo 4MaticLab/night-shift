@@ -13,7 +13,7 @@ test("server-renders Night Shift", async () => {
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /夜班侦探 Night Shift/);
-  assert.match(html, /你睡着以后/);
+  assert.match(html, /城市否认的轨道上/);
   assert.doesNotMatch(html, /codex-preview|Building your site/);
 });
 

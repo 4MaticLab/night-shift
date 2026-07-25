@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' file:; style-src 'self'" />
+  <title>林渡</title>
+  <link rel="stylesheet" href="pet.css" />
+</head>
+<body>
+  <div id="stage" class="awake">
+    <div id="drag-handle" title="拖拽移动">⠿ 夜班桌宠</div>
+
+    <div id="hud">
+      <span id="points-chip">值更点 0</span>
+      <span id="mode-chip">值更中 +1/min</span>
+    </div>
+
+    <div id="bubble" class="hidden"></div>
+
+    <div id="pet-zone" title="单击聊两句 · 双击哄睡/叫醒">
+      <img id="lin-du" src="../../../public/art/characters/lin-du-handoff-portrait-v1.webp" alt="林渡" draggable="false" />
+      <div id="zzz" aria-hidden="true"><span>Z</span><span>z</span><span>z</span></div>
+      <img id="mattress" src="../../../public/art/hardware/virtual-mattress-v1.webp" alt="蓝盒子床垫" draggable="false" />
+    </div>
+
+    <div id="actions">
+      <button id="open-dashboard" type="button">夜班面板</button>
+      <button id="quit" type="button" title="下班">✕</button>
+    </div>
+  </div>
+  <script src="../dist/renderer/pet.js"></script>
+</body>
+</html>

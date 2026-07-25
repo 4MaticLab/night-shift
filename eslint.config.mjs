@@ -12,9 +12,14 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "dist/**",
+    "android/**/build/**",
+    "ios/**/build/**",
+    "ios/DerivedData/**",
     "test-results/**",
     "playwright-report/**",
     "next-env.d.ts",
+    // Compiled output of the Electron desk pet subapp.
+    "apps/desk-pet/dist/**",
   ]),
 ]);
 

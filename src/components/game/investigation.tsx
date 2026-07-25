@@ -150,7 +150,7 @@ export function CaseBoard() {
             aria-label={`${item.kind === "inference" ? (locale === "en" ? "Open inference" : "查看推论") : t("打开证物档案")}：${item.title}`}
           >
             <span className="evidence-card-pin" aria-hidden="true" />
-            <Image className="evidence-card-seal" src="/art/societies/misfiled-registry-key-crest-v2.png" alt="" width={32} height={32} sizes="32px" aria-hidden="true" />
+            <Image className="evidence-card-seal" src="/art/ui/butterfly-dossier-seal-v1.webp" alt="" width={32} height={32} sizes="32px" aria-hidden="true" />
             <small>{item.kind === "inference" ? "CORE INFERENCE" : `${item.type.toUpperCase()} · NIGHT 0${item.chapter}`}</small>
             <b>{item.title}</b>
             <p>{item.summary}</p>

@@ -597,8 +597,9 @@ blockquote {
 .hero-copy h1 {
   margin: 24px 0 22px;
   color: var(--warm-paper);
-  font-size: clamp(54px, 5.5vw, 86px);
-  line-height: 1.01;
+  /* Slightly smaller responsive scale for campaign-rotating headlines. */
+  font-size: clamp(40px, 4.1vw, 64px);
+  line-height: 1.06;
   letter-spacing: -.04em;
   text-wrap: balance;
 }
@@ -606,6 +607,11 @@ blockquote {
 .hero-copy h1 em {
   color: var(--amber);
   font-weight: 400;
+}
+
+/* Opacity-only swap wrapper: do not restyle type size/color/weight. */
+.hero-copy-text {
+  display: block;
 }
 
 .hero-lede {
@@ -2184,26 +2190,37 @@ blockquote {
 
 .night-header {
   position: absolute;
-  top: 24px;
+  /* Match the global BGM control top + height so skip sits on the same horizontal line. */
+  top: max(28px, env(safe-area-inset-top));
   left: 3.2vw;
-  right: 3.2vw;
+  /* Keep the skip/wake button clear of the global BGM control (50px + its right inset). */
+  right: max(3.2vw, calc(max(4vw, 42px, env(safe-area-inset-right)) + 62px));
+  min-height: 50px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   z-index: 10;
 }
 
+.night-header .brand-mark {
+  min-width: 0;
+}
+
 .night-header button {
+  box-sizing: border-box;
+  min-height: 50px;
   color: #d9c18d;
   background: #10182799;
   border: 1px solid #c59a5a55;
-  padding: 8px 15px;
+  padding: 0 16px;
   display: flex;
   align-items: center;
   gap: 7px;
   cursor: pointer;
   font-size: 11px;
   letter-spacing: .06em;
+  line-height: 1.2;
   backdrop-filter: blur(6px);
   transition: background .25s, border-color .25s, color .25s;
 }
@@ -7098,7 +7115,7 @@ blockquote {
 .collection-index {
   position: sticky;
   z-index: 24;
-  top: 24px;
+  top: 0;
   order: 1;
   width: min(1180px, calc(100% - 48px));
   min-height: 82px;
@@ -7208,7 +7225,7 @@ blockquote {
 
 .collection-section {
   /* Keep section titles clear of the sticky index + a stable activation gap. */
-  scroll-margin-top: 128px;
+  scroll-margin-top: 120px;
 }
 
 .collection-evidence-cabinet {
@@ -7278,10 +7295,12 @@ blockquote {
 .collection-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
+  grid-auto-flow: row dense;
+  gap: 26px 20px;
   max-width: 1180px;
-  margin: 45px auto;
+  margin: 48px auto;
   padding: 0 24px;
+  align-items: start;
 }
 
 .collectible-card {
@@ -7292,10 +7311,47 @@ blockquote {
   padding: 20px;
   box-shadow: 0 12px 40px #0004;
   border: 1px solid #c4b89f;
+  transition: transform .42s cubic-bezier(.2, .7, .2, 1), box-shadow .42s ease;
+  will-change: transform;
 }
 
 .collectible-card:nth-child(2n) {
   background: #e6dac2;
+}
+
+/* Editorial magazine rhythm — break the rigid 4-up grid with a featured
+   plate every seven fragments and a faint pinned-clipping tilt/stagger. */
+.collection-grid > .collectible-card:nth-child(7n + 1) {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.collection-grid > .collectible-card:nth-child(7n + 1) .item-art {
+  height: auto;
+  min-height: 300px;
+}
+
+.collection-grid > .collectible-card:nth-child(3n + 1) {
+  transform: rotate(-.6deg) translateY(9px);
+}
+
+.collection-grid > .collectible-card:nth-child(3n + 2) {
+  transform: rotate(.55deg) translateY(-6px);
+}
+
+.collection-grid > .collectible-card:nth-child(3n + 3) {
+  transform: rotate(.75deg) translateY(15px);
+}
+
+.collection-grid > .collectible-card:nth-child(7n + 1) {
+  transform: rotate(-.35deg);
+}
+
+.collectible-card:hover,
+.collectible-card:focus-within {
+  transform: rotate(0deg) translateY(-8px) scale(1.014);
+  box-shadow: 0 26px 66px #0007;
+  z-index: 3;
 }
 
 .collectible-card.locked {
@@ -11544,6 +11600,20 @@ blockquote {
     margin-right: 52px;
   }
 
+  .night-header {
+    /* Match mobile BGM control top/height and clear its tighter right inset. */
+    top: max(18px, env(safe-area-inset-top));
+    right: max(3.2vw, calc(max(20px, env(safe-area-inset-right)) + 56px));
+    min-height: 44px;
+  }
+
+  .night-header button {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 0 12px;
+    white-space: nowrap;
+  }
+
   .landing-nav .ghost-button {
     font-size: 0;
     width: 44px;
@@ -11572,8 +11642,8 @@ blockquote {
 
   .hero-copy h1 {
     margin-block: 20px 18px;
-    font-size: clamp(47px, 13.6vw, 58px);
-    line-height: 1.02;
+    font-size: clamp(34px, 10vw, 42px);
+    line-height: 1.08;
   }
 
   .hero-lede {
@@ -11908,6 +11978,17 @@ blockquote {
     min-height: 355px;
   }
 
+  /* Flatten the editorial tilt/featured spans on phones for a clean single column. */
+  .collection-grid > .collectible-card,
+  .collection-grid > .collectible-card:nth-child(3n + 1),
+  .collection-grid > .collectible-card:nth-child(3n + 2),
+  .collection-grid > .collectible-card:nth-child(3n + 3),
+  .collection-grid > .collectible-card:nth-child(7n + 1) {
+    grid-column: auto;
+    grid-row: auto;
+    transform: none;
+  }
+
   .archive-folders,
   .ending-cards {
     grid-template-columns: 1fr;
@@ -11929,7 +12010,7 @@ blockquote {
 
 @media (max-width: 900px) {
   .collection-index {
-    top: 20px;
+    top: 0;
     width: calc(100% - 28px);
     min-height: 72px;
     margin-top: -12px;
@@ -11977,7 +12058,7 @@ blockquote {
 
 @media (max-width: 600px) {
   .collection-index {
-    top: 16px;
+    top: 0;
     width: calc(100% - 16px);
     min-height: 74px;
     margin-bottom: 18px;
@@ -12011,7 +12092,7 @@ blockquote {
   }
 
   .collection-section {
-    scroll-margin-top: 103px;
+    scroll-margin-top: 100px;
   }
 
   .collection-evidence-cabinet {
@@ -14417,12 +14498,12 @@ blockquote {
 }
 
 .evidence-archive-layout {
-  width: min(1180px, calc(100% - 48px));
+  width: min(1280px, calc(100% - 48px));
   margin: 0 auto 36px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(330px, 370px);
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .evidence-library {
@@ -14733,9 +14814,6 @@ blockquote {
 
 .ready-synthesis-list {
   padding: 15px;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
 }
 
 .ready-synthesis-card {
@@ -14746,7 +14824,7 @@ blockquote {
 }
 
 .ready-synthesis-card + .ready-synthesis-card {
-  margin-top: 0;
+  margin-top: 12px;
 }
 
 .synthesis-inputs {
@@ -14914,10 +14992,6 @@ blockquote {
   .evidence-archive-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
-  .ready-synthesis-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 900px) {
@@ -14927,6 +15001,10 @@ blockquote {
   }
 
   .synthesis-desk {
+    position: relative;
+    top: auto;
+    max-height: none;
+    overflow: visible;
     grid-row: auto;
   }
 }
@@ -15387,13 +15465,21 @@ blockquote {
   position: relative;
   padding: clamp(22px, 3.5vw, 58px) clamp(16px, 4vw, 66px) clamp(30px, 4vw, 54px);
   color: #2b2620;
-  background:
-    radial-gradient(140% 100% at 50% 0%, #f4ecd9 0, #eee3cc 55%, #e6d9bd 100%),
-    var(--warm-paper);
-  background-blend-mode: multiply, normal;
+  /*
+    Bottom layer = your paper-fiber texture (unchanged asset).
+    Top layer = slightly warmer yellow wash so the paper grain stays visible.
+  */
+  background-color: #f2d659;
+  background-image:
+    linear-gradient(180deg, #ffe06ecc 0%, #e5ad25b0 100%),
+    url("/art/ui/foglight-morning-paper-texture-v3.webp");
+  background-size: auto, 100% auto;
+  background-repeat: no-repeat, repeat-y;
+  background-position: center, top center;
+  background-blend-mode: soft-light, normal;
   box-shadow:
-    0 1px 0 #fff3 inset,
-    0 -40px 80px #5c493a14 inset,
+    0 1px 0 #ffe59166 inset,
+    0 -40px 80px #c7940a1c inset,
     0 30px 80px #00000073,
     0 4px 14px #00000066;
 }
@@ -15404,20 +15490,20 @@ blockquote {
   position: absolute;
   inset: 14px -7px -9px 10px;
   z-index: -1;
-  background: #ddcfae;
+  background:
+    linear-gradient(180deg, #e9c545 0%, #d8a61e 100%),
+    url("/art/ui/foglight-morning-paper-texture-v3.webp");
+  background-size: auto, 100% auto;
+  background-repeat: no-repeat, repeat-y;
+  background-position: center, top center;
+  background-blend-mode: soft-light, normal;
   transform: rotate(.5deg);
   box-shadow: 0 18px 50px #00000059;
 }
 
-/* faint print grain over the whole sheet */
+/* Do not draw CSS hatch grain on top of the real paper texture. */
 .newspaper .broadsheet::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    repeating-linear-gradient(0deg, transparent 0 3px, #5c493a06 4px),
-    repeating-linear-gradient(90deg, transparent 0 7px, #5c493a04 8px);
+  display: none;
 }
 
 .newspaper .broadsheet > * {
@@ -15538,6 +15624,73 @@ blockquote {
   text-align: right;
 }
 
+/* ---------- investigative loupe ---------- */
+
+.evidence-loupe {
+  position: relative;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.evidence-loupe-lens {
+  position: absolute;
+  z-index: 6;
+  border-radius: 50%;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  border: 2px solid #efe6d2;
+  box-shadow:
+    0 0 0 1px #2b262066,
+    0 10px 30px #0009,
+    inset 0 0 18px #0007;
+  opacity: 0;
+  transform: scale(.85);
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.evidence-loupe[data-active="true"] .evidence-loupe-lens {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.evidence-loupe-hint {
+  position: absolute;
+  z-index: 5;
+  left: 10px;
+  top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #0b1120b3;
+  color: #e7dcc2;
+  font-size: 9px;
+  letter-spacing: .06em;
+  backdrop-filter: blur(3px);
+  pointer-events: none;
+  opacity: .82;
+  transition: opacity .2s ease;
+}
+
+.evidence-loupe[data-active="true"] .evidence-loupe-hint {
+  opacity: 0;
+}
+
+@media (hover: none) {
+  .evidence-loupe {
+    cursor: default;
+  }
+}
+
+@media print {
+
+  .evidence-loupe-lens,
+  .evidence-loupe-hint {
+    display: none !important;
+  }
+}
+
 /* ---------- shared: flatten floating cards into printed articles ---------- */
 
 .newspaper .paper-card {
@@ -15580,7 +15733,7 @@ blockquote {
 .newspaper .character-encounter > div:first-child {
   min-height: 330px;
   border: 1px solid #2b262066;
-  outline: 5px solid #efe6d2;
+  outline: 5px solid #f5efdc;
   outline-offset: -6px;
   box-shadow: none;
   transform: none;

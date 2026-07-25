@@ -21,7 +21,7 @@ export const THIRTEENTH_LOAF_CAMPAIGN_ID = "case-004";
 
 const thirteenthLoafCase = caseSchema.parse({
   id: THIRTEENTH_LOAF_CAMPAIGN_ID,
-  title: "黎明前出炉的第十三个面包",
+  title: "面包奇谈",
   englishTitle: "The Thirteenth Loaf Before Dawn",
   chapters: [
     {
@@ -412,6 +412,8 @@ export const thirteenthLoafCampaign = defineCampaign({
   presentation: {
     archiveNumber: "003",
     teaser: "十二名烘焙师停业十七年后，街边柜里每天仍会多出第十三只面包。",
+    headlineMain: "停业十七年的烤炉，",
+    headlineAccent: "每天仍多出一只面包。",
     description: "沿面粉、热力管与分散酵母找回合作社，把一份早餐归还给无人。",
     cityName: "雾灯城",
     detectiveName: "林渡",
