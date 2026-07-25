@@ -11337,13 +11337,27 @@ blockquote {
     grid-template-columns: minmax(0, .8fr) minmax(440px, 1.2fr);
   }
 
+  .tonight-page .desk-scene {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow: visible;
+  }
+
   .tonight-page .scene-copy {
-    left: 6%;
-    max-width: 84%;
+    position: static;
+    left: auto;
+    top: auto;
+    max-width: none;
+    padding: var(--chrome-clearance) 7% 0;
   }
 
   .tonight-page .handoff-stack {
-    padding: 160px 5% 5%;
+    position: static;
+    inset: auto;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 18px 7% 30px;
     gap: 16px;
   }
 
@@ -11356,11 +11370,11 @@ blockquote {
   }
 
   .tonight-page .handoff-portrait {
-    width: min(90%, 240px);
+    width: min(100%, 300px);
   }
 
   .tonight-page .handoff-docket {
-    width: min(90%, 240px);
+    width: min(100%, 300px);
   }
 
   .plan-panel {
@@ -11383,19 +11397,28 @@ blockquote {
   }
 
   .tonight-page .desk-scene {
-    height: min(720px, 100svh);
-    min-height: 620px;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
     background-position: 20% center;
   }
 
   .tonight-page .scene-copy {
-    left: 5%;
-    top: max(8%, var(--chrome-clearance));
-    max-width: 45%;
+    position: static;
+    left: auto;
+    top: auto;
+    max-width: none;
+    padding: max(var(--chrome-clearance), 32px) 6% 0;
   }
 
   .tonight-page .handoff-stack {
-    padding: max(var(--chrome-clearance), 140px) 5% 40px;
+    position: static;
+    inset: auto;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 20px 6% 40px;
     gap: 18px;
   }
 
@@ -11408,11 +11431,11 @@ blockquote {
   }
 
   .tonight-page .handoff-portrait {
-    width: min(70%, 320px);
+    width: min(100%, 340px);
   }
 
   .tonight-page .handoff-docket {
-    width: min(70%, 320px);
+    width: min(100%, 340px);
   }
 
   .tonight-page .plan-panel {
