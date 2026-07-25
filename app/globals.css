@@ -580,6 +580,33 @@ blockquote {
   width: min(620px, 46vw);
   margin-left: 8vw;
   margin-top: 1vh;
+  padding: 28px 34px 30px 31px;
+  isolation: isolate;
+}
+
+.hero-copy::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -20px -28px -24px -24px;
+  border-left: 1px solid #c59a5a66;
+  background:
+    linear-gradient(90deg, #c59a5a09 0 1px, transparent 1px) 15px 0 / 100% 100% no-repeat,
+    repeating-linear-gradient(0deg, transparent 0 30px, #d9c8a909 31px),
+    radial-gradient(ellipse at 24% 40%, #172238a8, transparent 72%);
+  opacity: .9;
+  pointer-events: none;
+}
+
+.hero-copy::after {
+  content: "NIGHT INTAKE · 00:43";
+  position: absolute;
+  right: 2px;
+  bottom: 1px;
+  color: #7d6a4d;
+  font: 6px/1 monospace;
+  letter-spacing: .22em;
+  transform: rotate(-1deg);
 }
 
 .eyebrow {
@@ -595,17 +622,71 @@ blockquote {
 }
 
 .hero-copy h1 {
-  margin: 24px 0 22px;
+  margin: 22px 0 26px;
   color: var(--warm-paper);
-  font-size: clamp(54px, 5.5vw, 86px);
-  line-height: 1.01;
-  letter-spacing: -.04em;
+  font-size: clamp(54px, 5.25vw, 82px);
+  line-height: .98;
+  letter-spacing: -.045em;
   text-wrap: balance;
+  filter: drop-shadow(0 3px 16px #0008);
 }
 
-.hero-copy h1 em {
+.hero-title-print,
+.hero-title-hand {
+  display: block;
+}
+
+.hero-title-print {
+  position: relative;
+  width: max-content;
+  max-width: 100%;
+  font-family: var(--font-playfair), var(--font-noto-serif-sc), serif;
+  font-weight: 600;
+}
+
+.hero-title-print::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 7%;
+  bottom: -8px;
+  height: 1px;
+  background: linear-gradient(90deg, #c59a5ab8, #c59a5a1c 74%, transparent);
+  transform: rotate(-.35deg);
+}
+
+.hero-copy h1 .hero-title-hand {
+  position: relative;
+  width: max-content;
+  max-width: 100%;
+  margin: 10px 0 0 9px;
   color: var(--amber);
+  font-family: var(--font-handwriting), var(--font-noto-serif-sc), cursive;
+  font-size: 1.03em;
+  font-style: normal;
   font-weight: 400;
+  letter-spacing: .005em;
+  line-height: .92;
+  transform: rotate(-1.1deg);
+  transform-origin: left center;
+  text-shadow:
+    .5px 0 #c59a5a,
+    0 1px #7d5b2e,
+    0 0 18px #c59a5a1f;
+}
+
+.hero-title-hand::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 3%;
+  right: -2%;
+  bottom: -13px;
+  height: 12px;
+  border-top: 2px solid #c59a5a8c;
+  border-radius: 50%;
+  transform: rotate(.8deg) skewX(-16deg);
+  mask-image: linear-gradient(90deg, transparent, #000 5%, #000 93%, transparent);
 }
 
 .hero-lede {
@@ -615,11 +696,68 @@ blockquote {
   line-height: 1.85;
 }
 
+.hero-lede-note {
+  position: relative;
+  margin: 0 0 0 5px;
+  padding: 12px 16px 12px 19px;
+  border-left: 2px solid #8b4f4c;
+  color: #c9c5ba;
+  background: linear-gradient(90deg, #d8c9aa0d, transparent 82%);
+  font-family: var(--font-noto-serif-sc), serif;
+  letter-spacing: .025em;
+  transform: rotate(.12deg);
+}
+
+.hero-lede-note::before {
+  content: "林渡值更笺";
+  position: absolute;
+  top: -9px;
+  left: 18px;
+  padding-inline: 5px;
+  color: #9c7a49;
+  background: #0d1524;
+  font: 7px/1.2 monospace;
+  letter-spacing: .15em;
+}
+
 .hero-actions {
   display: flex;
   align-items: center;
   gap: 26px;
-  margin-top: 32px;
+  margin-top: 30px;
+}
+
+.hero-actions .primary-button {
+  position: relative;
+  border-radius: 2px 7px 3px 5px;
+  font-family: var(--font-noto-serif-sc), serif;
+  font-weight: 600;
+  letter-spacing: .035em;
+  transform: rotate(-.3deg);
+}
+
+.hero-actions .primary-button::before,
+.hero-actions .primary-button::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 9px;
+  height: 18px;
+  border-radius: 50%;
+  background: #0c1422;
+  transform: translateY(-50%);
+}
+
+.hero-actions .primary-button::before { left: -5px; }
+.hero-actions .primary-button::after { right: -5px; }
+
+.hero-kicker-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-noto-serif-sc), serif;
+  font-size: 10px;
+  letter-spacing: .13em;
 }
 
 .primary-button,
@@ -10732,20 +10870,60 @@ blockquote {
   }
 
   .hero-copy {
-    width: auto;
-    margin: 15vh 22px 520px;
+    width: calc(100% - 28px);
+    margin: 15vh 14px 520px;
+    padding: 22px 10px 25px 16px;
+  }
+
+  .hero-copy::before {
+    inset: -14px -8px -17px -8px;
+  }
+
+  .hero-copy::after {
+    right: 4px;
+    font-size: 5px;
   }
 
   .hero-copy h1 {
     margin-block: 20px 18px;
-    font-size: clamp(47px, 13.6vw, 58px);
+    font-size: clamp(40px, 11.6vw, 48px);
     line-height: 1.02;
+  }
+
+  .hero-copy h1 .hero-title-hand {
+    margin-top: 9px;
+    margin-left: 3px;
+    font-size: .94em;
+    line-height: .97;
+  }
+
+  .hero-kicker {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .hero-kicker-copy {
+    font-size: 8px;
+  }
+
+  .hero-kicker .shift-rule {
+    margin-left: 0;
+  }
+
+  .hero-title-hand::after {
+    bottom: -9px;
   }
 
   .hero-lede {
     max-width: 350px;
     font-size: 14px;
     line-height: 1.75;
+  }
+
+  .hero-lede-note {
+    margin-left: 1px;
+    padding: 11px 8px 11px 14px;
   }
 
   .hero-actions {
