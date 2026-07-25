@@ -14,8 +14,8 @@
   --moss: #72836b;
   --fog: #aeb7c2;
   --primary: #c59a5a;
-  --topbar-height: 74px;
   --nav-clearance: 96px;
+  --chrome-clearance: calc(80px + env(safe-area-inset-top));
 }
 
 * {
@@ -347,7 +347,7 @@ body.app-is-booting {
 }
 
 .game-section-loading {
-  min-height: min(620px, calc(100svh - var(--topbar-height) - var(--nav-clearance)));
+  min-height: min(620px, calc(100svh - var(--nav-clearance)));
   display: grid;
   place-content: center;
   gap: 9px;
@@ -485,8 +485,7 @@ blockquote {
   }
 }
 
-.landing-nav,
-.topbar {
+.landing-nav {
   position: absolute;
   z-index: 5;
   top: 0;
@@ -1285,19 +1284,44 @@ blockquote {
   padding-bottom: calc(var(--nav-clearance) + env(safe-area-inset-bottom));
 }
 
-.topbar {
-  position: sticky;
-  z-index: 40;
-  top: 0;
-  height: calc(var(--topbar-height) + env(safe-area-inset-top));
-  padding: calc(12px + env(safe-area-inset-top)) 3vw 12px;
-  background: rgba(9, 13, 24, .92);
-  border-bottom: 1px solid rgba(174, 183, 194, .1);
-  backdrop-filter: blur(16px);
+.global-brand {
+  position: fixed;
+  z-index: 45;
+  top: calc(28px + env(safe-area-inset-top));
+  left: max(4vw, 42px);
+  cursor: pointer;
 }
 
-.topbar>button {
-  min-height: 44px;
+.game-chrome {
+  position: fixed;
+  z-index: 40;
+  top: calc(28px + env(safe-area-inset-top));
+  left: max(4vw, 42px);
+  right: max(4vw, 42px);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 42px;
+  pointer-events: none;
+}
+
+.game-chrome .case-heading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  max-width: 48vw;
+  transform: translate(-50%, -50%);
+}
+
+.game-chrome .case-heading b {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.game-chrome .topbar-actions {
+  pointer-events: auto;
 }
 
 .brand-mark.compact {
@@ -1334,8 +1358,20 @@ blockquote {
 }
 
 .app-content {
-  min-height: calc(100vh - var(--topbar-height) - var(--nav-clearance));
-  min-height: calc(100svh - var(--topbar-height) - var(--nav-clearance));
+  min-height: calc(100vh - var(--nav-clearance));
+  min-height: calc(100svh - var(--nav-clearance));
+}
+
+@media (max-width: 760px) {
+  :root {
+    --chrome-clearance: calc(118px + env(safe-area-inset-top));
+  }
+
+  .game-chrome .case-heading {
+    top: calc(100% + 8px);
+    transform: translateX(-50%);
+    max-width: calc(100vw - 40px);
+  }
 }
 
 .bottom-nav {
@@ -1417,7 +1453,7 @@ blockquote {
 .content-grid {
   display: grid;
   grid-template-columns: 1.1fr .9fr;
-  height: calc(100svh - var(--topbar-height) - var(--nav-clearance));
+  height: calc(100svh - var(--nav-clearance));
   min-height: 590px;
   overflow: hidden;
 }
@@ -1462,7 +1498,7 @@ blockquote {
   position: absolute;
   z-index: 5;
   left: 7%;
-  top: 8%;
+  top: max(8%, var(--chrome-clearance));
   max-width: min(320px, 42%);
 }
 
@@ -1600,6 +1636,12 @@ blockquote {
   grid-template-rows: minmax(0, 1fr) auto;
   border-left: 1px solid #2b3548;
   overflow: hidden;
+}
+
+@media (min-width: 601px) {
+  .plan-panel {
+    padding-top: var(--chrome-clearance);
+  }
 }
 
 .plan-panel-scroll {
@@ -3368,6 +3410,7 @@ blockquote {
   justify-content: space-between;
   gap: 50px;
   padding: 55px 7vw 36px;
+  padding-top: var(--chrome-clearance);
   border-bottom: 1px solid #2d384a;
   background: radial-gradient(circle at 80% 0, #25334a, transparent 45%);
 }
@@ -10089,6 +10132,7 @@ blockquote {
 
   .plan-panel {
     padding: 30px 26px;
+    padding-top: var(--chrome-clearance);
   }
 
   .plan-panel h3 {
@@ -10106,14 +10150,14 @@ blockquote {
   }
 
   .tonight-page .desk-scene {
-    height: min(720px, calc(100svh - var(--topbar-height)));
+    height: min(720px, 100svh);
     min-height: 620px;
     background-position: 20% center;
   }
 
   .tonight-page .scene-copy {
     left: 5%;
-    top: 8%;
+    top: max(8%, var(--chrome-clearance));
     max-width: 45%;
   }
 
@@ -10417,8 +10461,15 @@ blockquote {
     opacity: .61;
   }
 
-  .topbar {
-    padding-inline: 15px;
+  .global-brand {
+    top: calc(18px + env(safe-area-inset-top));
+    left: 20px;
+  }
+
+  .game-chrome {
+    top: calc(18px + env(safe-area-inset-top));
+    left: 20px;
+    right: 20px;
   }
 
   .brand-mark.compact div {
@@ -10439,7 +10490,7 @@ blockquote {
 
   .scene-copy {
     left: 20px;
-    top: 7%;
+    top: max(7%, var(--chrome-clearance));
     max-width: 52%;
   }
 
@@ -10587,6 +10638,7 @@ blockquote {
 
   .page-title {
     padding: 42px 22px 30px;
+    padding-top: var(--chrome-clearance);
   }
 
   .page-title h2 {
@@ -12899,7 +12951,7 @@ blockquote {
 }
 
 /* Localized landing controls */
-.landing-nav-actions { display: flex; align-items: center; gap: 8px; }
+.landing-nav-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 .language-button { color: var(--amber); padding: 11px; border: none; background: none; }
 .campaign-shelf .locale-availability { margin: 9px 2px 0; color: #a49a89; font: 7px/1.5 monospace; letter-spacing: .04em; }
 

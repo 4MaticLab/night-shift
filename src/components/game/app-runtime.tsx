@@ -17,13 +17,16 @@ import {
 import { AmbientHardwareCoordinator } from "@/src/components/game/ambient-hardware-coordinator";
 import { ClueGiftNotice, type ClueGiftNoticeData } from "@/src/components/game/clue-sharing";
 import { AppBootBoundary } from "@/src/components/game/loading-screen";
-import { DemoDrawer } from "@/src/components/game/shell";
+import { BrandMark, DemoDrawer } from "@/src/components/game/shell";
 import type { GameView } from "@/src/components/game/types";
 import { I18nProvider, useI18n } from "@/src/i18n/provider";
 import { readSharedClueQuery } from "@/src/lib/game-engine/clue-sharing";
 import {
+  CASE_INTRO_PATH,
   CASE_LIBRARY_PATH,
+  ENDING_PATH,
   GAME_VIEW_PATHS,
+  NIGHT_RUN_PATH,
   getGameViewPath,
   resolveGamePath,
 } from "@/src/lib/game-routes";
@@ -112,6 +115,9 @@ function NightShiftRuntimeContent({ children }: { children: ReactNode }) {
             onProcessed={() => setClueIntakeRevision((value) => value + 1)}
           />
         </Suspense>
+        {pathname !== CASE_INTRO_PATH && pathname !== NIGHT_RUN_PATH && pathname !== ENDING_PATH && (
+          <BrandMark onHome={() => navigate(CASE_LIBRARY_PATH)} />
+        )}
         {children}
         <AnimatePresence>
           {demoOpen && (

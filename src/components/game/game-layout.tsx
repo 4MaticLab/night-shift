@@ -10,7 +10,7 @@ import { useGameStore } from "@/src/stores/game-store";
 export function GameLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const chapter = useGameStore((state) => state.chapter);
-  const { navigate, openHardware } = useGameApp();
+  const { openHardware } = useGameApp();
 
   if (pathname === NIGHT_RUN_PATH || pathname === ENDING_PATH) return children;
 
@@ -19,7 +19,6 @@ export function GameLayout({ children }: { children: ReactNode }) {
     <div className="app-shell">
       <TopBar
         chapter={chapter}
-        onHome={() => navigate("/")}
         onHardware={openHardware}
       />
       <main className="app-content">{children}</main>
