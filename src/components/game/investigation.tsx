@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, Ear, FileCheck2, FileText, Flower2, KeyRound, Minus, Plus, RotateCcw, Search, Sparkles, X } from "lucide-react";
@@ -52,6 +52,7 @@ const desktopBoardSlots: BoardPlacement[] = [
 const BOARD_SCALE_MIN = .7;
 const BOARD_SCALE_MAX = 1.12;
 const BOARD_SCALE_STEP = .08;
+type BoardPinPosition = { x: number; y: number };
 
 /**
  * Slot-grid layout: every card owns a slot, so cards can never overlap —
@@ -63,8 +64,8 @@ function computeBoardLayout(count: number, compact: boolean) {
   const rows = Math.max(1, Math.ceil(Math.max(count, 1) / cols));
   const slotW = 100 / cols;
   const cardW = slotW * .72;
-  const slotHPx = compact ? 250 : 190;
-  const canvasMinH = Math.max(compact ? 560 : 570, rows * slotHPx);
+  const slotHPx = compact ? 300 : 270;
+  const canvasMinH = Math.max(compact ? 720 : 810, rows * slotHPx);
   const positions: BoardPlacement[] = Array.from({ length: count }, (_, index) => {
     if (!compact && desktopBoardSlots[index]) return desktopBoardSlots[index]!;
     const col = index % cols;
@@ -102,6 +103,9 @@ export function CaseBoard() {
   const [letterSynthesisId, setLetterSynthesisId] = useState<string | null>(null);
   const [sharedClue, setSharedClue] = useState<Clue | null>(null);
   const [synthesisPanelOpen, setSynthesisPanelOpen] = useState(false);
+  const boardCanvasRef = useRef<HTMLDivElement | null>(null);
+  const boardPinRefs = useRef(new Map<string, HTMLSpanElement>());
+  const [boardPinPositions, setBoardPinPositions] = useState<Record<string, BoardPinPosition>>({});
   const compactBoard = useMediaQuery("(max-width: 900px)");
   const [boardScale, setBoardScale] = useState(.88);
   const archiveItems = useMemo(() => getEvidenceArchiveItems({
@@ -148,6 +152,33 @@ export function CaseBoard() {
     if (inputIds.length < 2) return [];
     return inputIds.slice(1).map((inputId) => ({ id: `${synthesis.id}-${inputIds[0]}-${inputId}`, from: inputIds[0]!, to: inputId }));
   }), [completedSyntheses, visibleBoardItemIds]);
+  const boardItemIds = boardItems.map((item) => item.id).join("|");
+  useLayoutEffect(() => {
+    const canvas = boardCanvasRef.current;
+    if (!canvas) return;
+    const measurePins = () => {
+      const canvasBounds = canvas.getBoundingClientRect();
+      if (!canvasBounds.width || !canvasBounds.height) return;
+      const nextPositions: Record<string, BoardPinPosition> = {};
+      boardPinRefs.current.forEach((pin, id) => {
+        const bounds = pin.getBoundingClientRect();
+        nextPositions[id] = {
+          x: ((bounds.left + bounds.width / 2 - canvasBounds.left) / canvasBounds.width) * 100,
+          y: ((bounds.top + bounds.height / 2 - canvasBounds.top) / canvasBounds.height) * 100,
+        };
+      });
+      setBoardPinPositions(nextPositions);
+    };
+    const frame = window.requestAnimationFrame(measurePins);
+    const observer = new ResizeObserver(measurePins);
+    observer.observe(canvas);
+    window.addEventListener("resize", measurePins);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener("resize", measurePins);
+    };
+  }, [boardItemIds, boardScale, compactBoard]);
   const availableClues = campaign.case.clues.filter((clue) => unlockedClueIds.includes(clue.id));
   const dossierClue = availableClues.find((clue) => clue.id === dossierClueId) ?? null;
   const dossierSyntheses = dossierClue
@@ -233,18 +264,17 @@ export function CaseBoard() {
         </header>
 
         {boardItems.length > 0 ? <div
+          ref={boardCanvasRef}
           className="evidence-board-canvas"
           aria-label={locale === "en" ? "Evidence board" : "线索案件板"}
-          style={{ "--board-card-scale": boardScale, "--board-card-w": `${boardLayout.cardW}%`, minHeight: boardLayout.canvasMinH } as CSSProperties}
+          style={{ "--board-card-scale": boardScale, "--board-card-w": `${boardLayout.cardW}%`, height: boardLayout.canvasMinH } as CSSProperties}
         >
           <svg className="evidence-board-threads" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
             {completedBoardLinks.map((link) => {
-              const from = boardPositions.get(link.from);
-              const to = boardPositions.get(link.to);
+              const from = boardPinPositions[link.from];
+              const to = boardPinPositions[link.to];
               if (!from || !to) return null;
-              const pinX = (point: BoardPlacement) => point.x + (boardLayout.cardW * boardScale) / 2;
-              const pinY = (point: BoardPlacement) => point.y + (12.5 * boardScale * 100) / boardLayout.canvasMinH;
-              return <line key={link.id} x1={pinX(from)} y1={pinY(from)} x2={pinX(to)} y2={pinY(to)} />;
+              return <line key={link.id} x1={from.x} y1={from.y} x2={to.x} y2={to.y} />;
             })}
           </svg>
           {boardItems.map((item, index) => {
@@ -265,7 +295,10 @@ export function CaseBoard() {
               }}
               aria-label={`${item.kind === "inference" ? (locale === "en" ? "Open inference" : "查看推论") : t("打开证物档案")}：${item.title}`}
             >
-              <span className="evidence-card-pin" aria-hidden="true" />
+              <span ref={(node) => {
+                if (node) boardPinRefs.current.set(item.id, node);
+                else boardPinRefs.current.delete(item.id);
+              }} className="evidence-card-pin" aria-hidden="true" />
               {item.kind === "clue" ? <button type="button" className="evidence-card-seal" onClick={(event) => { event.stopPropagation(); openEvidence(item.id); }} aria-label={`${locale === "en" ? "Open dossier" : "查看档案"}：${item.title}`}><Image src="/art/ui/butterfly-dossier-seal-v1.webp" alt="" width={32} height={32} sizes="32px" aria-hidden="true" /></button> : <span className="evidence-card-seal inference-seal" aria-hidden="true"><Check /></span>}
               <small>{item.kind === "inference" ? "CORE INFERENCE" : `${item.type.toUpperCase()} · NIGHT 0${item.chapter}`}</small>
               <b>{item.title}</b>
