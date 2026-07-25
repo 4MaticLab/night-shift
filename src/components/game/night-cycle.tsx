@@ -19,6 +19,7 @@ import { elapsedSessionMinutes, formatSleepDuration, nightSealProgress } from "@
 import { useGameStore } from "@/src/stores/game-store";
 import { getReadyEvidenceSyntheses } from "@/src/lib/game-engine/evidence-synthesis";
 import { BotanicalSpecimen, CityRoute, PaperCard, qualityCopy, Seal, SocietyCrest } from "./shared";
+import { NightDiorama } from "./night-diorama";
 import type { GameView } from "./types";
 import { SleepHardwareHandoff, SleepHardwareMorningReceipt, SleepHardwareNightTelemetry } from "./sleep-hardware";
 import { REST_INTENTION_MAX_LENGTH, restReflectionResponseSchema, type RestRitualInput } from "@/src/lib/rest-ritual";
@@ -197,19 +198,7 @@ export function NightRun({ onFinish, onHardware }: { onFinish: () => void; onHar
       <div className="night-title"><p>{sleepMode === "real" ? t("合上页面也没关系。城市记得交接的时刻。") : t("你休息的时候，他会继续。")}</p><h2>{current.title}</h2><span>{sessionLine}</span></div>
       <div className="night-stage">
         <motion.section className="night-center" initial={{ opacity: 0, scale: .975, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: .75, ease: "easeOut" }}>
-          <figure className="night-map-frame">
-            <i className="frame-corner fc-tl" aria-hidden="true" /><i className="frame-corner fc-tr" aria-hidden="true" /><i className="frame-corner fc-bl" aria-hidden="true" /><i className="frame-corner fc-br" aria-hidden="true" />
-            <svg className="map-compass" viewBox="0 0 64 64" aria-hidden="true">
-              <circle className="map-compass-ring" cx="32" cy="32" r="30" />
-              <circle className="map-compass-dial" cx="32" cy="32" r="24" />
-              <path className="map-compass-ticks" d="M32 2v6M62 32h-6M32 62v-6M2 32h6M53.2 10.8l-3 3M53.2 53.2l-3-3M10.8 53.2l3-3M10.8 10.8l3 3" />
-              <g className="map-compass-rose"><path d="M32 10 35 29 32 32 29 29Z" /><path d="M32 54 35 35 32 32 29 35Z" /><path d="M10 32 29 29 32 32 29 35Z" /><path d="M54 32 35 29 32 32 35 35Z" /></g>
-              <circle className="map-compass-pin" cx="32" cy="32" r="2.2" />
-            </svg>
-            <CityRoute progress={progress} routeNodes={direction.routeNodes} variant={direction.mapVariant} />
-            <div className="night-seal-growth" aria-label={locale === "en" ? `Night ${chapter} seal forming` : `第${chapter}夜的夜印正在形成`}><Image className="seal-ghost" src={nightSeal.src} alt="" width={118} height={118} sizes="118px" /><span style={{ height: `${progress}%` }}><Image src={nightSeal.src} alt={nightSeal.alt} width={118} height={118} sizes="118px" /></span></div>
-            <figcaption className="night-map-caption"><small>Cartographia Noctis · {locale === "en" ? `Night 0${chapter}` : `第 ${chapter} 夜`}</small><b>{direction.dispatchTitle}</b></figcaption>
-          </figure>
+          <NightDiorama progress={progress} routeNodes={direction.routeNodes} variant={direction.mapVariant} watchId={watch.id} />
           <div className="event-ticker"><small className="event-ticker-label"><i aria-hidden="true" />Wire from the night · {t("夜线电报")}<i aria-hidden="true" /></small><div className="event-ticker-lines">{result.events.slice(0, eventCount).map((event, index) => <motion.div key={event} initial={{ opacity: 0, x: -10 }} animate={{ opacity: index === eventCount - 1 ? 1 : .45, x: 0 }}><i />{event}</motion.div>)}</div></div>
           <div className="night-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress)} aria-label={t("夜班进度")}><span style={{ width: `${progress}%` }} /><b>{Math.round(progress)}%</b></div>
         </motion.section>
