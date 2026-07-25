@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, Ear, FileCheck2, FileText, Flower2, KeyRound, RotateCcw, Search, Sparkles } from "lucide-react";
+import { BookTextIcon, FileCheck2Icon, FileStackIcon, KeyIcon, SparklesIcon } from "lucide-animated";
 import { getAsset } from "@/src/content/assets";
 import { getPreparation } from "@/src/content/preparations";
 import { citySocieties, getSocietyTitle } from "@/src/content/societies";
@@ -264,35 +265,35 @@ export function Collection() {
     {
       id: "evidence" as const,
       targetId: "collection-core-evidence",
-      icon: <FileCheck2 />,
+      icon: <FileCheck2Icon size={20} />,
       label: locale === "en" ? "Core evidence" : "核心物证",
       count: `${unlockedCollectibleIds.length}/${campaign.case.collectibles.length}`,
     },
     {
       id: "journey" as const,
       targetId: "collection-returned-nights",
-      icon: <BookOpen />,
+      icon: <BookTextIcon size={20} />,
       label: locale === "en" ? "Returned nights" : "夜班归来",
       count: `${completedReports.length}/${nightCount}`,
     },
     {
       id: "city" as const,
       targetId: "collection-city-echoes",
-      icon: <FileText />,
+      icon: <FileStackIcon size={20} />,
       label: locale === "en" ? "City echoes" : "城市回声",
       count: locale === "en" ? "4 shelves" : "4 组档案",
     },
     {
       id: "tarot" as const,
       targetId: "collection-night-omens",
-      icon: <Sparkles />,
+      icon: <SparklesIcon size={20} />,
       label: locale === "en" ? "Night omens" : "夜兆牌桌",
       count: locale === "en" ? "1 daily" : "每日 1 张",
     },
     {
       id: "pocket" as const,
       targetId: "collection-pocket-drawer",
-      icon: <KeyRound />,
+      icon: <KeyIcon size={20} />,
       label: locale === "en" ? "Pocket finds" : "口袋小物",
       count: `${Object.keys(souvenirHistory).length}/${nightCount}`,
     },

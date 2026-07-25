@@ -92,29 +92,39 @@ export function Tonight({ onLaunch, onHardware }: { onLaunch: (quality: SleepQua
     <div className="content-grid tonight-page">
       <section className={selectedDirection ? "desk-scene handoff-ready" : "desk-scene"}>
         <div className="scene-copy"><p className="eyebrow"><Clock3 size={14} /> {t("今晚的任务 · 23:40 前交接")}</p><h2 className={locale === "en" ? "scene-title scene-title-en" : "scene-title"}>{locale === "en" ? <><span>Lin Du is arranging</span><span>tonight&apos;s equipment.</span></> : <><span>林渡正在整理</span><span>今晚的装备。</span></>}</h2><p>{locale === "en" ? <>Choose an investigative direction.<br />However you sleep tonight, the story will continue.</> : <>选择一个调查方向。<br />无论你今晚睡得如何，故事都会继续。</>}</p></div>
+        <div className="handoff-stack">
         <motion.figure className="handoff-portrait" initial={{ opacity: 0, y: 12, rotate: 1.4 }} animate={{ opacity: 1, y: 0, rotate: selectedDirection ? .35 : 1.15 }} transition={{ duration: .7, ease: "easeOut" }}>
           <div className="handoff-portrait-image"><Image src={handoffPortrait.src} alt={handoffPortrait.alt} fill preload sizes="(max-width: 600px) 44vw, (max-width: 900px) 34vw, 24vw" /></div>
           <figcaption><small>LIN DU · NIGHT DETECTIVE</small><b>{campaign.presentation.detectiveName}</b><span>{selectedDirection ? t("已收到今晚的方向") : t("在等你写下方向")}</span></figcaption>
         </motion.figure>
         <aside className="handoff-docket" aria-live="polite"><small>TONIGHT&apos;S HANDOFF · {t("今晚交接单")}</small><b>{selectedDirection?.dispatchTitle ?? t("方向尚未落笔")}</b><span>{selectedDirection ? `${selectedPreparation?.shortTitle ?? t("随身物")} · ${selectedDirection.destination}` : t("从右侧选择一条调查方向；林渡会负责怎样抵达。")}</span></aside>
+        </div>
       </section>
       <section className="plan-panel">
         <div className="plan-panel-scroll">
         {chapter > 1 && <DaytimeNotices />}
-        <div className="section-label"><span>{locale === "en" ? `Night ${chapter}` : `夜 ${chapter}`}</span><small>{current.title}</small></div>
+        <section className="tonight-step">
+        <div className="tonight-step-head"><span>01</span><div><small>{locale === "en" ? `NIGHT ${chapter}` : `夜 ${chapter}`} · {current.title}</small><b>{t("选择调查方向")}</b></div><em className="tonight-step-required">{t("必选")}</em></div>
         <h3>{current.question}</h3>
         <p className="city-aside">“{current.cityAside}”</p>
         <div className="choice-list">{current.choices.map((choice, i) => { const direction = getCampaignRouteDirection(campaign, chapter, choice.id); const society = localize(getCitySociety(direction.societyId)); return <button type="button" aria-pressed={selectedChoice === choice.id} key={choice.id} className={selectedChoice === choice.id ? "choice selected" : "choice"} onClick={() => selectChoice(choice.id)}><span>0{i + 1}</span><div><b>{choice.label}</b><small>{choice.note}</small><em>{t("可能惊动")} · {society.name}</em></div>{selectedChoice === choice.id ? <Check /> : <ChevronRight />}</button>; })}</div>
-        <div className="preparation-box"><div className="preparation-heading"><small>PACK ONE THING · {t("随身物")}</small><b>{t("准备，然后放手")}</b></div><div className="preparation-list">{preparations.map((source) => { const item = localize(source); return <button type="button" aria-pressed={preparationId === item.id} key={item.id} className={preparationId === item.id ? "preparation selected" : "preparation"} onClick={() => setPreparationId(item.id)}><span><Image src={item.imageSrc} alt={item.imageAlt} width={80} height={80} sizes="80px" /></span><div><b>{item.title}</b><small>{item.promise}</small></div>{preparationId === item.id && <Check size={15} />}</button>; })}</div></div>
-        <div className="quality-box">
-          <div><small>NIGHT HANDOFF</small><b>{t("选择交接方式")}</b></div>
+        </section>
+        <section className="tonight-step">
+        <div className="tonight-step-head"><span>02</span><div><small>PACK ONE THING · {t("随身物")}</small><b>{t("准备，然后放手")}</b></div></div>
+        <div className="preparation-list">{preparations.map((source) => { const item = localize(source); return <button type="button" aria-pressed={preparationId === item.id} key={item.id} className={preparationId === item.id ? "preparation selected" : "preparation"} onClick={() => setPreparationId(item.id)}><span><Image src={item.imageSrc} alt={item.imageAlt} width={80} height={80} sizes="80px" /></span><div><b>{item.title}</b><small>{item.promise}</small></div>{preparationId === item.id && <Check size={15} />}</button>; })}</div>
+        </section>
+        <section className="tonight-step">
+          <div className="tonight-step-head"><span>03</span><div><small>NIGHT HANDOFF · {t("交接方式")}</small><b>{t("选择交接方式")}</b></div></div>
           <div className="mode-toggle" role="group" aria-label={t("夜班模式")}>
             <button type="button" aria-pressed={sleepMode === "demo"} className={sleepMode === "demo" ? "active" : ""} onClick={() => setSleepMode("demo")}><Zap size={14} /> {t("演示旅程")}</button>
             <button type="button" aria-pressed={sleepMode === "real"} className={sleepMode === "real" ? "active" : ""} onClick={() => setSleepMode("real")}><Moon size={14} /> {t("今夜真实交接")}</button>
           </div>
           {sleepMode === "demo" ? <div className="quality-tabs">{(Object.keys(qualityCopy) as SleepQuality[]).map((id) => <button type="button" aria-pressed={quality === id} key={id} className={quality === id ? "active" : ""} onClick={() => setQuality(id)} title={t(qualityCopy[id].note)}>{t(qualityCopy[id].label)}</button>)}</div> : <p className="real-mode-note">{t("从交接那一刻起计时。你可以锁屏、关闭页面，醒来后再回来拆晨报；提前醒来也不会失去主线线索。")}</p>}
           <div className={`watch-preview watch-${previewWatch.id}`}><Clock3 /><div><small>{sleepMode === "demo" ? "DEMO FIXED WATCH" : "LOCAL HANDOFF WATCH"}</small><b>{previewWatch.label} · {previewWatch.window}</b><span>{previewWatch.description}</span></div></div>
-        </div>
+        </section>
+        <div className="tonight-optional-divider"><span>{t("以下可选 · 不影响线索或评分")}</span></div>
+        <details className="tonight-optional">
+          <summary><span><small>LEAVE IT FOR THE NIGHT · {t("休息仪式")}</small><b>{t("今晚，先放下一件事")}</b><p>{t("写一张短笺；不参与睡眠评分、案件结算或奖励。")}</p></span><ChevronRight /></summary>
         <section className="rest-intention-box" aria-labelledby="rest-intention-title">
           <div className="rest-intention-heading"><PenLine /><div><small>LEAVE IT FOR THE NIGHT · {t("可选休息仪式")}</small><b id="rest-intention-title">{t("今晚，有什么可以先不解决？")}</b></div></div>
           <p>{t("写下一件想暂时放下的事。它不参与睡眠评分、案件结算或奖励，清晨只会换回一张短笺。")}</p>
@@ -124,6 +134,7 @@ export function Tonight({ onLaunch, onHardware }: { onLaunch: (quality: SleepQua
           <button type="button" className={aiRequested ? "ai-consent selected" : "ai-consent"} aria-pressed={aiRequested} disabled={!restIntention.trim() || aiAccessChecking} onClick={() => void toggleAiRequest()}><span>{aiRequested ? <Check /> : <Sparkles />}</span><div><b>{aiAccessChecking ? t("正在确认 AI 访问权限") : t("请 AI 替林渡选择晨间短笺风格")}</b><small>{t("仅发送本夜纸条，以及案件／章节标题、地点、方向、随身物和侦探名；AI 只选择受限风格，短笺由安全模板组成。需要部署者访问码。")}</small></div></button>
           {aiAccessOpen && <div className="ai-access-gate"><label htmlFor="ai-access-code">{t("AI 访问码")}</label><div><input id="ai-access-code" type="password" autoComplete="off" value={aiAccessCode} maxLength={128} onChange={(event) => setAiAccessCode(event.target.value)} placeholder={t("由部署者提供")} /><button type="button" disabled={!aiAccessCode.trim() || aiAccessChecking} onClick={() => void unlockAiRequest()}>{t("验证并启用")}</button></div><p role="status">{aiAccessMessage}</p></div>}
         </section>
+        </details>
         <SleepHardwareHandoff onOpen={onHardware} />
         </div>
   <button type="button" disabled={!selectedChoice || phase !== "ready"} className="handoff-button" onClick={() => onLaunch(quality, preparationId, sleepMode, restIntention.trim() ? { intention: restIntention, aiRequested, locale } : undefined)}>{!selectedChoice ? t("先选择一个调查方向") : sleepMode === "real" ? t("开始今夜的真实交接") : t("今晚交给你了")} <Moon size={18} /></button>
@@ -342,8 +353,17 @@ export function MorningReport({ reportChapter, reviewingCurrentMorning, onReview
             ? t("纸条到达应用服务端，但访问权限已失效，因此没有发送给模型。")
             : t("应用服务端已尝试请求模型，但请求失败或输出未通过校验，因此改用本地回信。");
   return (
-    <div className="report-wrap">
-      <section className="report-hero"><Image className="report-hero-art" src={morningHeader.src} alt={morningHeader.alt} fill preload sizes="100vw" /><div><Seal>{t("调查报告")} · 0{chapter}</Seal><p>{t("昨夜调查完成")}</p><h2>{current.title}</h2><small>{t("记录人：")}{campaign.presentation.detectiveName} · {campaign.presentation.cityName} · {reportClock}</small></div></section>
+    <div className="report-wrap newspaper">
+      <div className="broadsheet">
+      <header className="paper-masthead">
+        <div className="masthead-topline"><span>{locale === "en" ? "MORNING EDITION" : "晨间版"} · NO. 0{chapter}</span><span>{locale === "en" ? `PRINTED AT ${reportClock}` : `印于 ${reportClock}`}</span><span>{locale === "en" ? "PRICE · ONE LANTERN" : "定价 · 一盏灯"}</span></div>
+        <h1>{locale === "en" ? `${campaign.presentation.cityName} Morning Herald` : `${campaign.presentation.cityName}晨报`}</h1>
+        <div className="masthead-dateline"><span>{t("记录人：")}{campaign.presentation.detectiveName}</span><span>{t("昨夜调查完成")}</span><span>{campaign.presentation.cityName} · {locale === "en" ? `NIGHT 0${chapter}` : `第 ${chapter} 夜`}</span></div>
+      </header>
+      <section className="paper-lead">
+        <div className="lead-copy"><Seal>{t("调查报告")} · 0{chapter}</Seal><h2>{current.title}</h2><small>{t("记录人：")}{campaign.presentation.detectiveName} · {campaign.presentation.cityName} · {reportClock}</small></div>
+        <figure className="lead-figure"><Image className="report-hero-art" src={morningHeader.src} alt={morningHeader.alt} fill preload sizes="(max-width: 900px) 100vw, 60vw" /><figcaption>{morningHeader.alt}</figcaption></figure>
+      </section>
       {!reviewingCurrentMorning && <aside className="report-replay-note"><FileText /><span><small>LATEST MORNING REPORT · {t("最新晨报重读")}</small><b>{t("这份报纸保持为上一次归来时的内容。")}</b><p>{t("你可以继续整理案件板，也可以回到今晚的交接；重读不会改写任何归档。")}</p></span></aside>}
       <details className="report-archive-details" open={reportArchiveOpen} onToggle={(event) => setReportArchiveOpen(event.currentTarget.open)}>
         <summary>
@@ -375,6 +395,7 @@ export function MorningReport({ reportChapter, reviewingCurrentMorning, onReview
       <div className="report-action">
         <button className="report-board-action" onClick={onReviewEvidence}><FileText size={18} />{readyInferenceCount > 0 ? (locale === "en" ? `${readyInferenceCount} inference${readyInferenceCount > 1 ? "s" : ""} ready to file` : `${readyInferenceCount} 条新推论可以整理`) : (locale === "en" ? "Open the evidence archive" : "去线索档案继续整理")}</button>
         <button className="primary-button" onClick={reviewingCurrentMorning ? onFinishDay : onPrepareTonight}>{reviewingCurrentMorning ? (chapter === campaign.case.chapters.at(-1)!.number ? t("做出最终决定") : t("结束今日，准备下一夜")) : t("去准备今晚")}<ArrowRight size={18} /></button>
+      </div>
       </div>
     </div>
   );
