@@ -68,13 +68,13 @@
       const degradedNote = status.degradedFields.length > 0
         ? ` · 缺席硬件：${status.degradedFields.join("、")}`
         : "";
-      line.textContent = `已连接 ${status.device ?? "rdk-x5"} · 最近心跳 ${status.lastSeenAt ? new Date(status.lastSeenAt).toLocaleTimeString("zh-CN") : "--"}${degradedNote}`;
+      line.textContent = `Mini Lindo（${status.device ?? "rdk-x5"}）已上岗 · 最近心跳 ${status.lastSeenAt ? new Date(status.lastSeenAt).toLocaleTimeString("zh-CN") : "--"}${degradedNote}`;
     } else if (status.state === "error") {
       badge.textContent = "掉线 · 已回退占位";
-      line.textContent = `哨站暂时联系不上（${status.error ?? "未知原因"}），桌宠已退回占位数据，会继续重试。`;
+      line.textContent = `小林渡暂时联系不上（${status.error ?? "未知原因"}），桌宠已退回占位数据，会继续重试。`;
     } else {
       badge.textContent = "未连接";
-      line.textContent = "未配置：桌宠继续用占位数据替你守夜。";
+      line.textContent = "未配置：小林渡还没上岗，桌宠继续用占位数据替你守夜。";
     }
   }
 
@@ -98,7 +98,7 @@
     if (report.clipReport) {
       clipSection.classList.remove("hidden");
       el("report-clip-title").textContent = report.clipReport.source === "rdk-x5"
-        ? "床头哨站体动统计（实测）"
+        ? "Mini Lindo 体动统计（床头实测）"
         : "虚空摄像头统计（占位）";
       el("clip-toss").textContent = String(report.clipReport.tossTurns);
       el("clip-outofbed").textContent = String(report.clipReport.outOfBedEvents);

@@ -129,6 +129,7 @@ describe("rdk-bridge 体动统计解析", () => {
     expect(report.clipPath).toBe("http://10.0.0.7:8302/api/v1/motion");
     expect(report.tossTurns).toBe(6);
     expect(report.longestQuietMinutes).toBe(43);
+    expect(report.note).toContain("Mini Lindo");
     expect(report.note).toContain("画面未离开开发板");
   });
 });
@@ -149,12 +150,13 @@ describe("rdk-bridge 评分叙述随数据源切换", () => {
     const result = scoreSleepQuality(liveSnapshot, clipReport);
     expect(result.source).toBe(SENSOR_SOURCE_SENTRY);
     expect(result.narrative).toContain("床头哨站");
+    expect(result.narrative).toContain("Mini Lindo");
   });
 
   it("哨站快照但摄像头未上岗 → 叙述如实说明", () => {
     const result = scoreSleepQuality(liveSnapshot);
     expect(result.source).toBe(SENSOR_SOURCE_SENTRY);
-    expect(result.narrative).toContain("哨站");
+    expect(result.narrative).toContain("Mini Lindo");
   });
 
   it("占位快照的老叙述保持不变", () => {

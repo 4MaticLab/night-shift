@@ -1,4 +1,4 @@
-"""哨站 HTTP/JSON 服务：标准库 ThreadingHTTPServer，桌宠作为通讯端来轮询。
+"""哨站 HTTP/JSON 服务：标准库 ThreadingHTTPServer，桌宠作为 Mini Lindo 的通讯端来轮询。
 
 端点（均为 GET，无鉴权，仅限局域网使用）：
 - /api/v1/health    设备与各传感器在线状态
@@ -13,7 +13,7 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 
-from . import DEVICE_NAME, PROTOCOL_VERSION
+from . import DEVICE_NAME, PRODUCT_NAME, PROTOCOL_VERSION
 from .camera import CameraWorker
 from .drivers import SensorHub
 from .mock import MockSource
@@ -41,6 +41,7 @@ class SentryRuntime:
             sensors["camera"] = bool(self.camera and self.camera.online)
         return {
             "ok": True,
+            "product": PRODUCT_NAME,
             "device": DEVICE_NAME,
             "protocol": PROTOCOL_VERSION,
             "mock": self.mock_mode,
@@ -115,8 +116,8 @@ def run_server(host: str, port: int, camera_index: int, mock: bool) -> None:
     runtime = SentryRuntime(camera_index=camera_index, mock=mock)
     server = ThreadingHTTPServer((host, port), make_handler(runtime))
     mode = "mock（合成数据）" if mock else "hardware"
-    print(f"night-shift sentry listening on http://{host}:{port} · mode={mode}")
-    print("画面与原始读数不出板，只对局域网暴露聚合统计。Ctrl+C 停止。")
+    print(f"{PRODUCT_NAME} sentry listening on http://{host}:{port} · mode={mode}")
+    print("小林渡上岗：画面与原始读数不出板，只对局域网暴露聚合统计。Ctrl+C 下班。")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

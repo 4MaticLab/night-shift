@@ -98,9 +98,9 @@ export function scoreSleepQuality(snapshot: SensorSnapshot, clipReport?: VoidCli
   const live = snapshot.source === "rdk-x5";
   let narrative: string;
   if (live && clipReport?.source === "rdk-x5") {
-    narrative = `林渡对照了床头哨站的实测档案：室温 ${temp}°C、CO₂ ${co2Ppm}ppm，镜头里数出 ${clipReport.tossTurns} 次翻身。判定「${grade}」——这页记录是 RDK X5 在床头亲眼盯出来的。`;
+    narrative = `林渡对照了床头哨站的实测档案：室温 ${temp}°C、CO₂ ${co2Ppm}ppm，镜头里数出 ${clipReport.tossTurns} 次翻身。判定「${grade}」——这页记录是床头的 Mini Lindo（小林渡）亲眼盯出来的。`;
   } else if (live) {
-    narrative = `林渡翻了哨站的实测环境读数：室温 ${temp}°C、PM2.5 ${pm25}，判定「${grade}」。哨站摄像头还没上岗，体动部分等它开工再补。`;
+    narrative = `林渡翻了哨站的实测环境读数：室温 ${temp}°C、PM2.5 ${pm25}，判定「${grade}」。Mini Lindo 的摄像头还没上岗，体动部分等小家伙开工再补。`;
   } else if (clipReport) {
     narrative = `林渡翻了翻占位档案：室温 ${temp}°C、PM2.5 ${pm25}，录像里数出 ${clipReport.tossTurns} 次翻身。判定「${grade}」——等真传感器接上电线，这页记录会更诚实。`;
   } else {

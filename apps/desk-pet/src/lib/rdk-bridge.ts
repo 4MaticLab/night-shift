@@ -137,6 +137,6 @@ export function motionToClipReport(stats: SentryMotionStats, config: SentryConfi
     outOfBedEvents: stats.outOfBedEvents,
     longestQuietMinutes: Math.round(stats.longestQuietMinutes),
     restlessnessIndex: Math.round(stats.restlessnessIndex * 100) / 100,
-    note: `床头哨站实测：${stats.windowMinutes.toFixed(0)} 分钟观察窗内的体动聚合统计，画面未离开开发板。`,
+    note: `床头哨站 Mini Lindo 实测：${stats.windowMinutes.toFixed(0)} 分钟观察窗内的体动聚合统计，画面未离开开发板。`,
   };
 }
