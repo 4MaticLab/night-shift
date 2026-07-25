@@ -61,9 +61,9 @@ describe("Night Shift case content", () => {
     expect(collectStrings(english).filter((text) => /\p{Script=Han}/u.test(text))).toEqual([]);
     expect(campaignSupportsLocale(lastTramCampaign.id, "en")).toBe(true);
     expect(campaignSupportsLocale(rainRadioCampaign.id, "en")).toBe(true);
-    expect(campaignSupportsLocale(thirteenthLoafCampaign.id, "en")).toBe(false);
-    expect(campaignSupportsLocale(chihayaNoaCampaign.id, "en")).toBe(false);
-    expect(campaignSupportsLocale(fogWithoutWolvesCampaign.id, "en")).toBe(false);
+    expect(campaignSupportsLocale(thirteenthLoafCampaign.id, "en")).toBe(true);
+    expect(campaignSupportsLocale(chihayaNoaCampaign.id, "en")).toBe(true);
+    expect(campaignSupportsLocale(fogWithoutWolvesCampaign.id, "en")).toBe(true);
   });
 
   it("contains the complete five-night mystery", () => {
