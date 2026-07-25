@@ -2303,10 +2303,12 @@ blockquote {
 
 .night-header {
   position: absolute;
-  top: 24px;
+  /* Match the global BGM control top + height so skip sits on the same horizontal line. */
+  top: max(28px, env(safe-area-inset-top));
   left: 3.2vw;
   /* Keep the skip/wake button clear of the global BGM control (50px + its right inset). */
   right: max(3.2vw, calc(max(4vw, 42px, env(safe-area-inset-right)) + 62px));
+  min-height: 50px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2319,16 +2321,19 @@ blockquote {
 }
 
 .night-header button {
+  box-sizing: border-box;
+  min-height: 50px;
   color: #d9c18d;
   background: #10182799;
   border: 1px solid #c59a5a55;
-  padding: 8px 15px;
+  padding: 0 16px;
   display: flex;
   align-items: center;
   gap: 7px;
   cursor: pointer;
   font-size: 11px;
   letter-spacing: .06em;
+  line-height: 1.2;
   backdrop-filter: blur(6px);
   transition: background .25s, border-color .25s, color .25s;
 }
@@ -11684,12 +11689,16 @@ blockquote {
   }
 
   .night-header {
-    /* Mobile BGM control is 44px with a tighter right inset. */
+    /* Match mobile BGM control top/height and clear its tighter right inset. */
+    top: max(18px, env(safe-area-inset-top));
     right: max(3.2vw, calc(max(20px, env(safe-area-inset-right)) + 56px));
+    min-height: 44px;
   }
 
   .night-header button {
     flex: 0 0 auto;
+    min-height: 44px;
+    padding: 0 12px;
     white-space: nowrap;
   }
 
