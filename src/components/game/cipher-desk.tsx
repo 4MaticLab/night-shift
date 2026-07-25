@@ -1,11 +1,13 @@
 "use client";
 
 import { useMemo, useState, type FormEvent } from "react";
-import { Cable, Check, ChevronRight, KeyRound, Lightbulb, LockKeyhole, RadioTower, RotateCcw, X } from "lucide-react";
+import { Cable, Check, ChevronRight, KeyRound, LockKeyhole, RadioTower, RotateCcw, X } from "lucide-react";
 import { getCampaignCipherDesk, isCipherUnlocked } from "@/src/content/ciphers";
 import { useI18n } from "@/src/i18n/provider";
 import { useGameStore } from "@/src/stores/game-store";
 import { CipherDialControl } from "./cipher-dial";
+import { CipherNotebook } from "./cipher-notebook";
+import { ProgressiveCipherHints } from "./progressive-cipher-hints";
 import { CipherReferenceFolio } from "./cipher-reference-folio";
 
 export function CipherDesk() {
@@ -86,6 +88,8 @@ export function CipherDesk() {
       })}
     </div>
 
+    <CipherNotebook key={campaign.id} />
+
     <div className="cipher-levels">
       {challenges.map((challenge) => {
         const unlocked = isCipherUnlocked(challenge, unlockedClueIds);
@@ -110,14 +114,14 @@ export function CipherDesk() {
             {unlocked && !solved && challenge.dial && <>
               <CipherDialControl challenge={challenge} value={dialValues[challenge.id] ?? challenge.dial.initial} onChange={(value) => { setDialValues((current) => ({ ...current, [challenge.id]: value })); setFeedback((current) => { const next = { ...current }; delete next[challenge.id]; return next; }); }} onLock={(answer) => submitAnswer(challenge.id, answer)} />
               {feedback[challenge.id] === "incorrect" && <p className="cipher-feedback error" role="status">{t("密文没有回应。再检查排列、时刻或字母对应；错误不会被记录。")}</p>}
-              <details className="cipher-hints"><summary><Lightbulb /> {t("展开提示")}</summary><ol>{challenge.hints.map((hint) => <li key={hint}>{hint}</li>)}</ol></details>
+              <ProgressiveCipherHints hints={challenge.hints} />
             </>}
 
             {unlocked && !solved && !challenge.dial && <form className="cipher-answer" onSubmit={(event) => submit(event, challenge.id)}>
               <label htmlFor={`cipher-${challenge.id}`}>{challenge.prompt}</label>
               <div><input id={`cipher-${challenge.id}`} value={answers[challenge.id] ?? ""} maxLength={48} autoComplete="off" onChange={(event) => { setAnswers((current) => ({ ...current, [challenge.id]: event.target.value })); setFeedback((current) => { const next = { ...current }; delete next[challenge.id]; return next; }); }} placeholder={t("在此写下解码结果")} /><button type="submit" disabled={!answers[challenge.id]?.trim()}>{t("核对密文")} <ChevronRight /></button></div>
               {feedback[challenge.id] === "incorrect" && <p className="cipher-feedback error" role="status">{t("密文没有回应。再检查排列、时刻或字母对应；错误不会被记录。")}</p>}
-              <details className="cipher-hints"><summary><Lightbulb /> {t("展开提示")}</summary><ol>{challenge.hints.map((hint) => <li key={hint}>{hint}</li>)}</ol></details>
+              <ProgressiveCipherHints hints={challenge.hints} />
             </form>}
 
             {solved && <div className="cipher-reveal" aria-live="polite"><span><Check /> {t("密文已归档")}</span><h5>{challenge.revealTitle}</h5><p>{challenge.revealText}</p><small>{t("答案已保存在本机")}</small></div>}
@@ -140,7 +144,7 @@ export function CipherDesk() {
       </ol>
       {relayFeedback[desk.relay.id] === "incorrect" && <p className="cipher-relay-feedback" role="status">{t("接线顺序没有形成完整信号。可以撤回任意碎片再重新排列；错误不会被记录。")}</p>}
       <div className="cipher-relay-actions"><button type="button" onClick={resetRelay} disabled={!relaySequence.length}><RotateCcw /> {t("重置接线")}</button><button type="button" className="primary" onClick={submitRelay} disabled={relaySequence.length !== desk.relay.fragments.length}><Cable /> {t("发送最终信号")}</button></div>
-      <details className="cipher-hints cipher-relay-hints"><summary><Lightbulb /> {t("展开接线提示")}</summary><ol>{desk.relay.hints.map((hint) => <li key={hint}>{hint}</li>)}</ol></details>
+      <ProgressiveCipherHints hints={desk.relay.hints} relay />
     </aside>}
     {completed && <aside className="cipher-completion" aria-live="polite"><RadioTower /><div><small>{desk.completionLabel}</small><h4>{desk.completionTitle}</h4><p>{desk.completionText}</p></div><span><Check /> {t("完整归档")}</span></aside>}
     <footer>{t("密文只展开补充旁注，不增加奖励、不替代联合推理，也不改变任何结局资格。")}</footer>
