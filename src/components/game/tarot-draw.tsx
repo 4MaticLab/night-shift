@@ -55,7 +55,7 @@ export function TarotDraw({ active }: { active: boolean }) {
     : "";
 
   return (
-    <section id="collection-night-omens" className={`night-omen-table collection-section collection-section-tarot${active ? " is-active" : ""}`}>
+    <section id="collection-night-omens" data-collection-category="tarot" className={`night-omen-table collection-section collection-section-tarot${active ? " is-active" : ""}`}>
       <header className="night-omen-heading">
         <span aria-hidden="true"><MoonStar /></span>
         <div>
