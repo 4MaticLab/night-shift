@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-mobile-app-packaging]] | `codex/mobile-app-packaging` | `in_progress` | `manual` | 0% | 建立 Capacitor 双平台工程与原生睡眠桥 |
+| [[plans/codex-mobile-app-packaging]] | `codex/mobile-app-packaging` | `in_progress` | `manual` | 75% | 同步主线、完成 iOS CI 构建与稳定文档 |
 
 ## 使用规则
 

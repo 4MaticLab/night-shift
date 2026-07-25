@@ -1,0 +1,97 @@
+name: Mobile Artifacts
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "codex/mobile-app-packaging"
+  pull_request:
+    paths:
+      - "android/**"
+      - "ios/**"
+      - "mobile-shell/**"
+      - "assets/**"
+      - "capacitor.config.ts"
+      - "package.json"
+      - "package-lock.json"
+      - "src/lib/sleep-hardware/**"
+      - "src/stores/sleep-hardware-store.ts"
+      - ".github/workflows/mobile-artifacts.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  android-apk:
+    name: Android APK
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - uses: android-actions/setup-android@v3
+
+      - run: npm ci
+      - run: sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+      - run: npm run mobile:build:android
+
+      - name: Verify package and minimum permissions
+        run: |
+          test "$(apkanalyzer manifest application-id android/app/build/outputs/apk/debug/app-debug.apk)" = "com.fourmaticlab.nightshift"
+          apkanalyzer manifest permissions android/app/build/outputs/apk/debug/app-debug.apk | sort > /tmp/permissions.txt
+          grep -Fx "android.permission.INTERNET" /tmp/permissions.txt
+          grep -Fx "android.permission.health.READ_SLEEP" /tmp/permissions.txt
+          if grep -E "WRITE_|HEART_RATE|OXYGEN|RESPIRATORY" /tmp/permissions.txt; then
+            echo "Unexpected health permission in APK"
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: night-shift-android-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+  ios-simulator:
+    name: iOS Simulator App
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run mobile:sync
+      - run: xcodebuild -resolvePackageDependencies -project ios/App/App.xcodeproj -scheme App
+      - run: npm run mobile:build:ios:simulator
+
+      - name: Verify bundle and package simulator app
+        run: |
+          APP_PATH="ios/build/Build/Products/Debug-iphonesimulator/App.app"
+          test -d "$APP_PATH"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP_PATH/Info.plist")" = "com.fourmaticlab.nightshift"
+          /usr/libexec/PlistBuddy -c 'Print :NSHealthShareUsageDescription' "$APP_PATH/Info.plist"
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" ios/build/Night-Shift-iOS-Simulator.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: night-shift-ios-simulator
+          path: ios/build/Night-Shift-iOS-Simulator.zip
+          if-no-files-found: error

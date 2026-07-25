@@ -3,7 +3,7 @@
 - 状态：`in_progress`
 - 优先级：P0
 - 创建：2026-07-24
-- 更新：2026-07-24
+- 更新：2026-07-25
 - 负责人：Codex
 - 分支：`codex/mobile-app-packaging`
 - 依赖：Node 22、Android SDK/JDK、Xcode；真机 iOS 安装最终需要可用 Apple 签名身份
@@ -33,12 +33,12 @@ Night Shift 已有成熟的移动响应式网页、确定性的本地五夜循�
 
 ## 任务
 
-- [ ] 建立 Capacitor 配置、移动构建命令和可测试的 Web 原生桥契约。
-- [ ] 生成 Android 工程，实现 Health Connect 权限与睡眠会话查询。
-- [ ] 生成 iOS 工程，实现 HealthKit 权限与睡眠样本查询。
-- [ ] 把系统健康来源接入硬件中心、夜班采集与晨报摘要。
-- [ ] 增加契约／状态测试，验证缺少原生桥、拒绝权限、空数据、延迟数据与成功摘要。
-- [ ] 构建并检查 Android APK。
+- [x] 建立 Capacitor 配置、移动构建命令和可测试的 Web 原生桥契约。
+- [x] 生成 Android 工程，实现 Health Connect 权限与睡眠会话查询。
+- [x] 生成 iOS 工程，实现 HealthKit 权限与睡眠样本查询。
+- [x] 把系统健康来源接入硬件中心、夜班采集与晨报摘要。
+- [x] 增加契约／状态测试，验证缺少原生桥、拒绝权限、空数据、延迟数据与成功摘要。
+- [x] 构建并检查 Android APK。
 - [ ] 构建并检查 iOS 模拟器 App；若本机存在签名身份和连接设备，再验证真机安装或归档导出。
 - [ ] 更新架构、隐私、睡眠硬件和质量基线文档。
 
@@ -68,6 +68,8 @@ Night Shift 已有成熟的移动响应式网页、确定性的本地五夜循�
 - 2026-07-24：用户明确要求完成 Android 与 iOS 两个平台安装包，且黑客松目标不包含商店审核；计划以 `manual` 模式直接进入 `in_progress`。
 - 2026-07-24：选择 Capacitor 复用现有 Next.js 产品，黑客松包默认加载固定 Vercel 生产站点；不把服务端路由和 46 MB 资产强行改造成离线静态导出。
 - 2026-07-24：真实睡眠只通过 HealthKit／Health Connect 系统仓读取，保持时间戳恢复和本地模拟器作为无数据回退。
+- 2026-07-25：本机实际生成 15 MB debug APK；`apkanalyzer` 确认包名为 `com.fourmaticlab.nightshift`，合并权限只有 `INTERNET`、`READ_SLEEP` 与 Android 自身动态接收器保护权限。
+- 2026-07-25：当前 Mac 只有 Command Line Tools、没有完整 Xcode；iOS 编译转由 `Mobile Artifacts` 的 `macos-15` job 验证，本机仍保留 Xcode 自动签名安装路径。
 
 ## 相关文档
 
@@ -76,4 +78,3 @@ Night Shift 已有成熟的移动响应式网页、确定性的本地五夜循�
 - [[docs/privacy-and-guardrails]]
 - [[docs/quality-baseline]]
 - [[docs/viewport-checklist]]
-
