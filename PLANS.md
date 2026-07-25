@@ -6,7 +6,6 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/feat-cipher-case-notebook]] | `feat/cipher-case-notebook` | `completed` | `auto` | 100% | 本地笔记、导出、测试与隐私文档已完成 |
 
 ## 使用规则
 
