@@ -15509,18 +15509,20 @@ blockquote {
   position: relative;
   padding: clamp(22px, 3.5vw, 58px) clamp(16px, 4vw, 66px) clamp(30px, 4vw, 54px);
   color: #2b2620;
-  /* Keep the existing paper-fiber texture; only wash the tone toward white-yellow. */
-  background-color: #fbf7e8;
-  background-image:
-    linear-gradient(180deg, #fffdf8e6 0%, #faf3e0cc 48%, #f3e9c8b8 100%),
-    url("/art/ui/foglight-morning-paper-texture-v3.webp");
-  background-size: auto, 100% auto;
-  background-repeat: no-repeat, repeat-y;
-  background-position: center, top center;
-  background-blend-mode: soft-light, multiply;
+  /*
+    Paper fiber texture stays the sole background image.
+    White-yellow comes only from a light base color under multiply —
+    do not replace or paint over the texture asset.
+  */
+  background-color: #faf6e4;
+  background-image: url("/art/ui/foglight-morning-paper-texture-v3.webp");
+  background-size: 100% auto;
+  background-repeat: repeat-y;
+  background-position: top center;
+  background-blend-mode: multiply;
   box-shadow:
-    0 1px 0 #ffffff88 inset,
-    0 -40px 80px #d4c49212 inset,
+    0 1px 0 #ffffff66 inset,
+    0 -40px 80px #d4c49210 inset,
     0 30px 80px #00000073,
     0 4px 14px #00000066;
 }
@@ -15536,7 +15538,7 @@ blockquote {
   box-shadow: 0 18px 50px #00000059;
 }
 
-/* no extra CSS grain — fiber texture already provides the paper grain */
+/* Texture asset supplies the grain; no CSS hatch overlay. */
 .newspaper .broadsheet::after {
   display: none;
 }
