@@ -468,7 +468,7 @@
 .banner-sheet--proposition {
   background:
     linear-gradient(#7991a10b 1px, transparent 1px) 0 0 / 100% 9px,
-    url("/art/headers/shift-handoff-v2.webp") 80% top / auto 52% no-repeat,
+    url("/art/headers/shift-handoff-v2.webp") 74% top / auto 52% no-repeat,
     url("/art/districts/lantern-wharf-v1.webp") center bottom / auto 60% no-repeat,
     linear-gradient(150deg, #111c2d, #0b1321);
 }
