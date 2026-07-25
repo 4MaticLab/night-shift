@@ -1172,11 +1172,23 @@ test("restores and settles a real night after reload", async ({ page }) => {
 test("reads, searches, and synthesizes evidence without pair guessing", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
-  await page.getByRole("button", { name: /DEMO MODE/ }).click();
+  await expect(page.getByRole("button", { name: /开始第 001 宗案件/ })).toBeEnabled();
+  await page.keyboard.press("Shift+D");
   await runDemoShortcut(page, /解锁完整案件板/);
   await expect(page.getByRole("heading", { name: "已收录 12 份档案" })).toBeVisible();
   await expect(page.locator(".evidence-archive-card")).toHaveCount(12);
   await expect(page.locator(".ready-synthesis-card")).toHaveCount(3);
+  const [libraryLayout, synthesisLayout] = await Promise.all([
+    page.locator(".evidence-library").boundingBox(),
+    page.locator(".synthesis-desk").boundingBox(),
+  ]);
+  expect(libraryLayout).not.toBeNull();
+  expect(synthesisLayout).not.toBeNull();
+  expect(Math.abs((libraryLayout!.x + libraryLayout!.width / 2) - 720)).toBeLessThan(2);
+  expect(synthesisLayout!.y).toBeGreaterThanOrEqual(libraryLayout!.y + libraryLayout!.height - 1);
+  expect(await page.locator(".evidence-archive-card").first().evaluate((element) =>
+    getComputedStyle(element).backgroundImage.includes("evidence-paper-clean-01-v2.png"),
+  )).toBe(true);
 
   await page.getByRole("button", { name: /打开证物档案：四十三天/ }).click();
   const dossierDialog = page.getByRole("dialog", { name: "四十三天" });
@@ -1489,7 +1501,8 @@ test.describe("tablet portrait 820x1180", () => {
 
   test("keeps the case board and inference desk in one touch-scroll flow", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("button", { name: /DEMO MODE/ }).click();
+    await expect(page.getByRole("button", { name: /开始第 001 宗案件/ })).toBeEnabled();
+    await page.keyboard.press("Shift+D");
     await runDemoShortcut(page, /解锁完整案件板/);
     await expect(page.locator(".demo-drawer")).toHaveCount(0);
 
@@ -1504,7 +1517,7 @@ test.describe("tablet portrait 820x1180", () => {
     expect(library).not.toBeNull();
     expect(desk!.width).toBeGreaterThan(750);
     expect(library!.width).toBeGreaterThan(750);
-    expect(library!.y).toBeGreaterThanOrEqual(desk!.y + desk!.height - 1);
+    expect(desk!.y).toBeGreaterThanOrEqual(library!.y + library!.height - 1);
     await expect(page.locator(".ready-synthesis-card")).toHaveCount(3);
     await expect(page.getByRole("button", { name: "整理这条推论" }).first()).toBeVisible();
     const cipherDisclosure = page.locator(".board-cipher-disclosure");

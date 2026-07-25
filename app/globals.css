@@ -13447,10 +13447,10 @@ blockquote {
 }
 
 .evidence-archive-layout {
-  width: min(1280px, calc(100% - 48px));
+  width: min(1180px, calc(100% - 48px));
   margin: 0 auto 36px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(330px, 370px);
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
   align-items: start;
 }
@@ -13566,7 +13566,7 @@ blockquote {
 }
 
 .evidence-archive-card {
-  --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-01.webp");
+  --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-clean-01-v2.png");
   min-height: 226px;
   padding: 30px 18px 17px;
   position: relative;
@@ -13583,13 +13583,13 @@ blockquote {
   transition: transform .16s ease, box-shadow .16s ease;
 }
 
-.evidence-archive-card.evidence-paper-1 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-01.webp"); }
-.evidence-archive-card.evidence-paper-2 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-02.webp"); }
-.evidence-archive-card.evidence-paper-3 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-03.webp"); }
-.evidence-archive-card.evidence-paper-4 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-04.webp"); }
-.evidence-archive-card.evidence-paper-5 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-05.webp"); }
-.evidence-archive-card.evidence-paper-6 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-06.webp"); }
-.evidence-archive-card.evidence-paper-7 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-07.webp"); }
+.evidence-archive-card.evidence-paper-1 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-clean-01-v2.png"); }
+.evidence-archive-card.evidence-paper-2 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-clean-02-v2.png"); }
+.evidence-archive-card.evidence-paper-3 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-clean-03-v2.png"); }
+.evidence-archive-card.evidence-paper-4 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-clean-04-v2.png"); }
+.evidence-archive-card.evidence-paper-5 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-clean-05-v2.png"); }
+.evidence-archive-card.evidence-paper-6 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-clean-06-v2.png"); }
+.evidence-archive-card.evidence-paper-7 { --evidence-paper: url("/art/ui/evidence-cards/evidence-paper-clean-07-v2.png"); }
 
 .evidence-archive-card:hover {
   transform: translateY(-4px) rotate(.15deg);
@@ -13713,10 +13713,10 @@ blockquote {
 }
 
 .synthesis-desk {
-  position: sticky;
-  top: 78px;
-  max-height: calc(100svh - 164px);
-  overflow: auto;
+  position: relative;
+  top: auto;
+  max-height: none;
+  overflow: visible;
   border: 12px solid #252119;
   background:
     linear-gradient(150deg, #172235f7, #101827fa),
@@ -13763,6 +13763,9 @@ blockquote {
 
 .ready-synthesis-list {
   padding: 15px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .ready-synthesis-card {
@@ -13773,7 +13776,7 @@ blockquote {
 }
 
 .ready-synthesis-card + .ready-synthesis-card {
-  margin-top: 12px;
+  margin-top: 0;
 }
 
 .synthesis-inputs {
@@ -13938,11 +13941,11 @@ blockquote {
 }
 
 @media (max-width: 1080px) {
-  .evidence-archive-layout {
-    grid-template-columns: minmax(0, 1fr) 320px;
+  .evidence-archive-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .evidence-archive-grid {
+  .ready-synthesis-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -13954,15 +13957,7 @@ blockquote {
   }
 
   .synthesis-desk {
-    position: relative;
-    top: auto;
-    max-height: none;
-    overflow: visible;
-    grid-row: 1;
-  }
-
-  .evidence-library {
-    grid-row: 2;
+    grid-row: auto;
   }
 }
 
@@ -14016,6 +14011,7 @@ blockquote {
 
   .ready-synthesis-list {
     padding: 12px;
+    grid-template-columns: 1fr;
   }
 
   .evidence-letter-inputs {
