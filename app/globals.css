@@ -14438,10 +14438,10 @@ blockquote {
 }
 
 .evidence-archive-layout {
-  width: min(1180px, calc(100% - 48px));
+  width: min(1280px, calc(100% - 48px));
   margin: 0 auto 36px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(330px, 370px);
   gap: 20px;
   align-items: start;
 }
@@ -14704,10 +14704,10 @@ blockquote {
 }
 
 .synthesis-desk {
-  position: relative;
-  top: auto;
-  max-height: none;
-  overflow: visible;
+  position: sticky;
+  top: 78px;
+  max-height: calc(100svh - 164px);
+  overflow: auto;
   border: 12px solid #252119;
   background:
     linear-gradient(150deg, #172235f7, #101827fa),
@@ -14948,6 +14948,10 @@ blockquote {
   }
 
   .synthesis-desk {
+    position: relative;
+    top: auto;
+    max-height: none;
+    overflow: visible;
     grid-row: auto;
   }
 }
