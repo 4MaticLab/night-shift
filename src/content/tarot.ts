@@ -108,7 +108,7 @@ export const nightOmenCards: NightOmenCard[] = [
     number: "VII",
     title: { zh: "索引蛾", en: "The Index Moth" },
     archiveName: { zh: "错误指向也能留下关系", en: "A wrong direction can still reveal a relation" },
-    assetSrc: "/art/souvenirs/index-moth-wing-v1.webp",
+    assetSrc: "/art/societies/misfiled-registry-key-crest-v2.png",
     assetAlt: { zh: "会自行换页的错页蛾索引翅片", en: "The index wing of a moth that changes pages by itself" },
     upright: { zh: "一个错误索引正在暴露相邻事物之间的联系。不要只纠正页码，也记下它反复错向何处。", en: "A faulty index is exposing a relation between neighboring things. Correct the page, but record where it repeatedly points." },
     reversed: { zh: "信息太多，索引开始代替你思考。暂时合上目录，直接阅读一份原始证词。", en: "The index has begun thinking on your behalf. Close the catalogue and read one original testimony directly." },

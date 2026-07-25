@@ -12,7 +12,7 @@
 | `map.foglight.css` | 雾灯城路线图 | CSS scene | `app/globals.css` | 完成 | 夜间、晨报 |
 | `board.case-001.css` | 纸质案件板 | CSS scene | `app/globals.css` | 完成 | 案件板 |
 | `ui.case-board.paper` | 案件板揉皱底纸 | UI texture | `/public/art/ui/case-board-crumpled-paper-v2.webp` | 完成 | 案件板、证物档案 |
-| `ui.evidence-card.seal` | 蝴蝶档案封印 | UI mark | `/public/art/ui/butterfly-dossier-seal-v1.webp` | 完成 | 证物档案卡 |
+| `ui.evidence-card.seal` | 错页登记处钥匙纹章 | UI mark | `/public/art/societies/misfiled-registry-key-crest-v2.png` | 完成 | 证物档案卡 |
 | `preparation.side-lamp` | 黄铜提灯 | Preparation | `/public/art/preparations/side-lamp-v1.webp` | 完成 | 睡前准备 |
 | `preparation.flower-note` | 夜香花笺 | Preparation | `/public/art/preparations/flower-note-v1.webp` | 完成 | 睡前准备 |
 | `preparation.tram-fare` | 旧制电车零钱 | Preparation | `/public/art/preparations/tram-fare-v1.webp` | 完成 | 睡前准备 |
@@ -35,12 +35,12 @@
 | `botanical.night-03` | 退房藤 | Botanical plate | `/public/art/botany/night-03-checkout-vine-v1.webp` | 完成 | 第三夜成长、晨报、温室 |
 | `botanical.night-04` | 误分类温室苔 | Botanical plate | `/public/art/botany/night-04-misfiled-moss-v1.webp` | 完成 | 第四夜成长、晨报、温室 |
 | `botanical.night-05` | 零点四十三分钟花 | Botanical plate | `/public/art/botany/night-05-clockflower-v1.webp` | 完成 | 第五夜成长、晨报、温室 |
-| `society.misfiled-registry` | 错页登记处纹章 | Society crest | `/public/art/societies/misfiled-registry-crest-v1.webp` | 完成 | 晨报、城市人情簿 |
+| `society.misfiled-registry` | 错页登记处钥匙纹章 | Society crest | `/public/art/societies/misfiled-registry-key-crest-v2.png` | 完成 | 晨报、城市人情簿 |
 | `society.mislaid-consulate` | 失物领事馆纹章 | Society crest | `/public/art/societies/mislaid-consulate-crest-v1.webp` | 完成 | 晨报、城市人情簿 |
 | `society.afterlight-cartographers` | 熄灯测绘社纹章 | Society crest | `/public/art/societies/afterlight-cartographers-crest-v1.webp` | 完成 | 晨报、城市人情簿 |
 | `souvenir.rain-receipt` | 未盖章的雨水收据 | Pocket souvenir | `/public/art/souvenirs/rain-receipt-v1.webp` | 完成 | 晨报、口袋抽屉 |
 | `souvenir.orphaned-drawer-pull` | 无主抽屉的黄铜拉手 | Pocket souvenir | `/public/art/souvenirs/orphaned-drawer-pull-v1.webp` | 完成 | 晨报、口袋抽屉 |
-| `souvenir.index-moth-wing` | 错页蛾的索引翅片 | Pocket souvenir | `/public/art/souvenirs/index-moth-wing-v1.webp` | 完成 | 晨报、口袋抽屉 |
+| `souvenir.index-moth-wing` | 错页登记处钥匙纹章 | Pocket souvenir | `/public/art/societies/misfiled-registry-key-crest-v2.png` | 完成 | 晨报、口袋抽屉 |
 | `souvenir.return-punch-ticket` | 只有返程孔的旧车票 | Pocket souvenir | `/public/art/souvenirs/return-punch-ticket-v1.webp` | 完成 | 晨报、口袋抽屉 |
 | `souvenir.mistaken-cufflink` | 认错主人的袖扣 | Pocket souvenir | `/public/art/souvenirs/mistaken-cufflink-v1.webp` | 完成 | 晨报、口袋抽屉 |
 | `souvenir.seed-post-tube` | 没有收件人的花籽邮管 | Pocket souvenir | `/public/art/souvenirs/seed-post-tube-v1.webp` | 完成 | 晨报、口袋抽屉 |

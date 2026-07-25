@@ -39,7 +39,7 @@ Subject: an extinguished hooded streetlamp above two precise contour lines that 
 
 ## 运行时文件
 
-- `/public/art/societies/misfiled-registry-crest-v1.webp`
+- `/public/art/societies/misfiled-registry-key-crest-v2.png`
 - `/public/art/societies/mislaid-consulate-crest-v1.webp`
 - `/public/art/societies/afterlight-cartographers-crest-v1.webp`
 
