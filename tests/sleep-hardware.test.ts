@@ -33,18 +33,19 @@ describe("sleep hardware bridge", () => {
     expect(hardwareModule.useSleepHardwareStore.getState().activeCapture).toBeNull();
   });
 
-  it("captures a local virtual ring summary and no raw timeline", () => {
+  it("captures a local virtual ring summary and no raw timeline", async () => {
     const store = hardwareModule.useSleepHardwareStore.getState();
     store.selectVirtualDevice("night-ring");
     expect(hardwareModule.useSleepHardwareStore.getState().grantConsent(["sleep-window", "heart-rate", "movement"])).toBe(true);
     const session = startSleepSession("demo", "restful", new Date("2026-07-23T22:00:00.000Z"));
     expect(hardwareModule.useSleepHardwareStore.getState().beginCapture(session)).toBe(true);
     const completed = finishSleepSession(session, new Date("2026-07-24T06:00:00.000Z"));
-    const summary = hardwareModule.useSleepHardwareStore.getState().finishCapture(completed);
+    const summary = await hardwareModule.useSleepHardwareStore.getState().finishCapture(completed);
 
     expect(summary).toMatchObject({
       sessionId: session.id,
       sourceId: "night-ring",
+      sourceKind: "virtual",
       durationMinutes: 484,
       derivedQuality: "restful",
     });
@@ -102,6 +103,7 @@ describe("sleep hardware bridge", () => {
     const capture = {
       sessionId: session.id,
       sourceId: "under-mattress" as const,
+      sourceKind: "virtual" as const,
       startedAt: session.startedAt,
       quality: session.quality,
       permissions: ["sleep-window", "movement", "respiration"] as const,

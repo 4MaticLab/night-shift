@@ -3,6 +3,9 @@ import type { SleepQuality } from "@/src/lib/game-engine/schema";
 export type SleepHardwareMode = "off" | "virtual" | "bridge";
 export type VirtualDeviceId = "night-ring" | "watch-17" | "under-mattress" | "quiet-pillow";
 export type SleepBridgeId = "apple-health" | "health-connect" | "oura-cloud" | "fitbit-web";
+export type NativeSleepBridgeId = Extract<SleepBridgeId, "apple-health" | "health-connect">;
+export type SleepSourceId = VirtualDeviceId | NativeSleepBridgeId;
+export type SleepSourceKind = "virtual" | "native";
 export type SleepPermissionId = "sleep-window" | "sleep-stages" | "heart-rate" | "movement" | "respiration";
 
 export interface VirtualSleepDevice {
@@ -26,7 +29,8 @@ export interface SleepBridge {
 }
 
 export interface SleepHardwareConsent {
-  sourceId: VirtualDeviceId;
+  sourceId: SleepSourceId;
+  sourceKind: SleepSourceKind;
   permissions: SleepPermissionId[];
   grantedAt: string;
   localOnly: true;
@@ -34,7 +38,8 @@ export interface SleepHardwareConsent {
 
 export interface ActiveSleepCapture {
   sessionId: string;
-  sourceId: VirtualDeviceId;
+  sourceId: SleepSourceId;
+  sourceKind: SleepSourceKind;
   startedAt: string;
   quality: SleepQuality;
   permissions: SleepPermissionId[];
@@ -42,7 +47,9 @@ export interface ActiveSleepCapture {
 
 export interface SleepSignalSummary {
   sessionId: string;
-  sourceId: VirtualDeviceId;
+  sourceId: SleepSourceId;
+  sourceKind: SleepSourceKind;
+  sourceName?: string;
   startedAt: string;
   endedAt: string;
   durationMinutes: number;
@@ -65,4 +72,3 @@ export interface LiveSleepSignals {
   tertiaryLabel: string;
   tertiaryValue: string;
 }
-

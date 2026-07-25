@@ -60,15 +60,15 @@ export const sleepBridges: SleepBridge[] = [
     id: "apple-health",
     name: "Apple Health",
     ecosystem: "iPhone / Apple Watch",
-    note: "计划通过 HealthKit 读取用户明确授权的睡眠摘要。",
-    permissions: ["sleep-window", "sleep-stages", "heart-rate", "respiration"],
+    note: "移动 App 可通过 HealthKit 读取用户明确授权的睡眠时段与阶段摘要。",
+    permissions: ["sleep-window", "sleep-stages"],
   },
   {
     id: "health-connect",
     name: "Health Connect",
     ecosystem: "Android / Wear OS",
-    note: "计划通过 Health Connect 汇总兼容设备写入的睡眠记录。",
-    permissions: ["sleep-window", "sleep-stages", "heart-rate", "respiration"],
+    note: "移动 App 可汇总兼容设备已经写入 Health Connect 的睡眠会话。",
+    permissions: ["sleep-window", "sleep-stages"],
   },
   {
     id: "oura-cloud",
@@ -93,4 +93,3 @@ export function getVirtualSleepDevice(id: string | undefined): VirtualSleepDevic
 export function getSleepBridge(id: string | undefined): SleepBridge | undefined {
   return sleepBridges.find((bridge) => bridge.id === id);
 }
-

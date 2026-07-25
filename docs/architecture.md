@@ -2,7 +2,7 @@
 
 ## 运行形态
 
-项目使用 Next App Router、React 与 TypeScript，并保留两套明确的生产目标：默认 `next build` 生成 Vercel 使用的 `.next/`；`build:sites` 通过 Vinext、Vite 与 Cloudflare 插件生成 Sites/Worker 使用的 `dist/`。URL 负责表达案件书架、序章和游戏页面位置，Zustand 状态机继续独占案件进度与 `day → ready → night → morning → ending` 转换；案件书架选择编译期注册的 `CampaignManifest`，两套目标都由服务端渲染首屏元数据和当前路由外壳。
+项目使用 Next App Router、React 与 TypeScript，并保留两套明确的 Web 生产目标：默认 `next build` 生成 Vercel 使用的 `.next/`；`build:sites` 通过 Vinext、Vite 与 Cloudflare 插件生成 Sites/Worker 使用的 `dist/`。Capacitor 8 另提供 Android 与 iOS 原生壳，默认通过安全 WebView 加载 Vercel 生产地址，继续复用服务端路由，并在安装后的 App 中暴露最小系统健康桥。URL 负责表达案件书架、序章和游戏页面位置，Zustand 状态机继续独占案件进度与 `day → ready → night → morning → ending` 转换；案件书架选择编译期注册的 `CampaignManifest`，全部运行形态共享同一产品界面和本地存档契约。
 
 原生 Next 构建的 TypeScript 范围排除 `build/`、`db/`、`examples/`、`worker/` 与 `vite.config.ts`：这些文件只属于 Sites 脚手架、Cloudflare 绑定或未启用的 D1 示例，不被产品应用导入。它们仍由 Vinext/Vite 实际构建和 ESLint 检查，不能把 Cloudflare Worker 模块混入 Vercel 的 Node 运行时。
 
@@ -47,8 +47,10 @@
 | 夜间结算 | `src/lib/game-engine/resolve-night.ts` | 根据章节、睡眠质量、随身物与调查方向选择确定性结果 |
 | 睡眠会话 | `src/lib/game-engine/sleep-session.ts` | 创建、恢复和结束 Demo／真实夜班，按时长生成质量与夜印进度 |
 | 睡眠硬件契约 | `src/lib/sleep-hardware/` | 厂商无关设备／权限模型、确定性虚拟信号和本地摘要 |
+| 原生睡眠桥 | `src/lib/sleep-hardware/native-health.ts`、`@capgo/capacitor-health` | 平台识别、只读授权、时间窗查询与 HealthKit／Health Connect 摘要规范化 |
 | 睡眠硬件存档 | `src/stores/sleep-hardware-store.ts` | 可撤销授权、活动采集和最近 8 条本地摘要 |
 | 睡眠硬件界面 | `src/components/game/sleep-hardware.tsx` | 硬件中心、交接状态、夜间遥测和晨报回执 |
+| 移动原生工程 | `capacitor.config.ts`、`android/`、`ios/`、`mobile-shell/` | 统一应用 ID、远端生产地址、品牌壳、平台权限与可重复打包 |
 | 空间外设契约 | `src/lib/ambient-hardware/` | Home Assistant 白名单实体、语义 cue、桥协议和浏览器客户端 |
 | 空间外设 Connector | `apps/connector/` | loopback 设置页、Home Assistant 配置／发现、桥生命周期与无终端入口 |
 | 空间外设桥 | `tools/home-assistant-bridge/` | loopback HTTP、显式配对、mDNS、Home Assistant WebSocket、状态订阅和受限 service 翻译 |
@@ -105,7 +107,7 @@ Demo、睡眠硬件、好友线索、Injective、证物信笺和推论信笺共�
 
 `sleepMode` 区分 12 秒压缩演示和真实夜班。开始交接时创建包含 `startedAt` 与 `watchId` 的 `activeSleepSession`；Demo 始终保存 `midnight`，真实模式按浏览器本地小时冻结掌灯（19:00–22:59）、夜半（23:00–01:59）、末更（02:00–05:59）或白昼小憩（06:00–18:59）。真实模式不依赖后台定时器，而是在重开页面后由开始时间与当前时间重新计算进度；刷新不会因当前时刻改变已经冻结的城市时辰。真实夜班的 `recordWakeEcho` 只在活动会话尚无 `wakeEcho` 时写入一次章节回声和本地时间，不改变 phase；Demo 只为 `interrupted` 质量预置一条确定性回声。玩家最终结束会话时写入 `endedAt`、实际分钟数和按阈值派生的质量，并把会话保存为 `lastSleepSession` 供晨报读取。少于 5 小时为断续，5 小时至不足 7 小时为普通，7 小时及以上为安稳；任一结果都推进主线。
 
-睡眠硬件使用第三份独立存档 `night-shift-sleep-hardware-v1`。游戏存档只在 `SleepSession` 边界通知硬件域开始／结束采集，不保存任何硬件字段。只有经过本地授权的虚拟设备能创建活动采集；真实厂商桥接入口保持预演状态。虚拟模拟器从会话与设备 ID 确定性生成摘要，运行时变化不持久化，晨报最多保留最近 8 条摘要。设备撤销或切换会终止采集但不结束剧情会话，详见 [[docs/sleep-hardware-bridge]]。
+睡眠硬件使用第三份独立存档 `night-shift-sleep-hardware-v1`，持久化结构为 v2。游戏存档只在 `SleepSession` 边界通知硬件域开始／结束采集，不保存任何硬件字段。网页可授权四类虚拟设备；安装后的 iOS／Android App 还可分别授权 Apple Health／Health Connect，开始时冻结会话时间窗，结束或再次回到前台时查询系统已经同步的睡眠记录。虚拟模拟器从会话与设备 ID 确定性生成摘要；原生桥合并系统样本后只保存规范化摘要，原始逐点数据都不持久化，晨报最多保留最近 8 条。设备撤销或切换会终止采集但不结束剧情会话；Oura、Fitbit 与厂商私有 SDK 仍保持预演，详见 [[docs/sleep-hardware-bridge]] 与 [[docs/mobile-app-packaging]]。
 
 Home Assistant 使用第四份独立存档 `night-shift-ambient-hardware-v1`，只保存启用状态与三项实体 ID 绑定。`AmbientHardwareCoordinator` 观察既有 `phase`、`activeSleepSession` 与 `lastSleepSession`，生成包含案件、章节、会话和 cue 的稳定请求 ID；它不写 game store，也不等待桥响应。Connector 设置页位于 `127.0.0.1:43118`，桥位于 `127.0.0.1:43117`；前者持有进程内 `HA_TOKEN` 并管理后者，后者持有短期配对摘要、实体投影、动作白名单与临时恢复快照。Vercel 浏览器通过 Chrome Local Network Access 和 `targetAddressSpace: loopback` 访问固定桥地址，但没有 mDNS、任意局域网枚举或任意 Home Assistant service 能力。桥离线只改变外设 store 的连接状态，详见 [[docs/home-assistant-ambient-bridge]]。
 
@@ -194,6 +196,7 @@ Home Assistant 使用第四份独立存档 `night-shift-ambient-hardware-v1`，�
 - [[docs/campaign-authoring]]
 - [[docs/decision-log]]
 - [[docs/quality-baseline]]
+- [[docs/mobile-app-packaging]]
 - [[docs/sleep-hardware-bridge]]
 - [[docs/home-assistant-ambient-bridge]]
 - [[docs/privacy-and-guardrails]]
