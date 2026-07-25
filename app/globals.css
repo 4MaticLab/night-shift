@@ -14443,7 +14443,7 @@ blockquote {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(330px, 370px);
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .evidence-library {
@@ -14704,10 +14704,10 @@ blockquote {
 }
 
 .synthesis-desk {
-  position: sticky;
-  top: 78px;
-  max-height: calc(100svh - 164px);
-  overflow: auto;
+  position: relative;
+  top: auto;
+  max-height: none;
+  overflow: visible;
   border: 12px solid #252119;
   background:
     linear-gradient(150deg, #172235f7, #101827fa),
@@ -14754,9 +14754,6 @@ blockquote {
 
 .ready-synthesis-list {
   padding: 15px;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
 }
 
 .ready-synthesis-card {
@@ -14767,7 +14764,7 @@ blockquote {
 }
 
 .ready-synthesis-card + .ready-synthesis-card {
-  margin-top: 0;
+  margin-top: 12px;
 }
 
 .synthesis-inputs {
@@ -14933,10 +14930,6 @@ blockquote {
 
 @media (max-width: 1080px) {
   .evidence-archive-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .ready-synthesis-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
