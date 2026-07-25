@@ -6,6 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
+| [[plans/feat-evidence-loupe-details]] | `feat/evidence-loupe-details` | `in_progress` | `auto` | 0% | 放大镜组件与接入 |
 
 ## 使用规则
 
