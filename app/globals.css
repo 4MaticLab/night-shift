@@ -11602,8 +11602,8 @@ blockquote {
 
   .hero-copy h1 {
     margin-block: 20px 18px;
-    font-size: clamp(47px, 13.6vw, 58px);
-    line-height: 1.02;
+    font-size: clamp(38px, 11.2vw, 48px);
+    line-height: 1.05;
   }
 
   .hero-lede {
