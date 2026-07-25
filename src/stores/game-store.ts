@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { boardPositionSchema, cityWatchIdSchema, correspondenceRecordSchema, nightGrowthRecordSchema, opportunityRecordSchema, sleepModeSchema, sleepQualitySchema, wakeEchoIdSchema, wakeEchoRecordSchema, type BoardPosition, type CorrespondenceRecord, type NightGrowthRecord, type OpportunityRecord, type SleepMode, type SleepQuality, type SleepSession, type SocietyMemoryRecord, type SouvenirRecord } from "@/src/lib/game-engine/schema";
+import { cityWatchIdSchema, correspondenceRecordSchema, nightGrowthRecordSchema, opportunityRecordSchema, sleepModeSchema, sleepQualitySchema, wakeEchoIdSchema, wakeEchoRecordSchema, type CorrespondenceRecord, type NightGrowthRecord, type OpportunityRecord, type SleepMode, type SleepQuality, type SleepSession, type SocietyMemoryRecord, type SouvenirRecord } from "@/src/lib/game-engine/schema";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import { getPreparation, preparations, type PreparationId } from "@/src/content/preparations";
 import { finishSleepSession, recordWakeEcho, startSleepSession } from "@/src/lib/game-engine/sleep-session";
@@ -13,10 +13,11 @@ import { createSouvenirRecord, DEMO_JOURNEY_SEED } from "@/src/content/souvenirs
 import { createOpportunityRecord, getOpportunityCandidates } from "@/src/content/opportunities";
 import { DEMO_CITY_WATCH_ID, getCityWatchId } from "@/src/content/watches";
 import { DEFAULT_CAMPAIGN_ID, getCampaign, isCampaignId, type CampaignId } from "@/src/content/campaigns/registry";
-import { getCampaignRouteDirection, getCampaignWakeEcho, matchCampaignEvidenceRelation, type CampaignManifest } from "@/src/content/campaigns/types";
+import { getCampaignEvidenceSynthesis, getCampaignRouteDirection, getCampaignWakeEcho, type CampaignManifest } from "@/src/content/campaigns/types";
 import { useSleepHardwareStore } from "@/src/stores/sleep-hardware-store";
 import { createRestRitualRecord, restReflectionResponseSchema, restRitualRecordSchema, type RestReflectionReason, type RestReflectionSource, type RestRitualInput, type RestRitualRecord } from "@/src/lib/rest-ritual";
 import { getCampaignCipherChallenge, getCampaignCipherProgressIds, getCampaignCipherRelay, isCipherRelayUnlocked, isCipherUnlocked, matchesCipherAnswer, matchesCipherRelay } from "@/src/content/ciphers";
+import { canSynthesizeEvidence } from "@/src/lib/game-engine/evidence-synthesis";
 
 export type Phase = "day" | "ready" | "night" | "morning" | "ending";
 
@@ -45,9 +46,8 @@ export interface GameState {
   receivedClueIds: string[];
   unlockedCollectibleIds: string[];
   completedReports: number[];
-  confirmedRelations: string[];
+  synthesizedEvidenceIds: string[];
   solvedCipherIds: string[];
-  boardPositions: Record<string, BoardPosition>;
   nightSealIds: number[];
   endingId?: string;
   begin: () => void;
@@ -60,15 +60,13 @@ export interface GameState {
   resolveOpportunity: (noticeId: string, responseId: string) => boolean;
   dismissOpportunities: () => boolean;
   continueDay: () => void;
-  connectClues: (firstClueId: string, secondClueId: string) => string | null;
+  synthesizeEvidence: (synthesisId: string) => boolean;
   solveCipher: (challengeId: string, answer: string) => "solved" | "already-solved" | "locked" | "incorrect" | "invalid";
   solveCipherRelay: (relayId: string, fragmentIds: string[]) => "solved" | "already-solved" | "locked" | "incorrect" | "invalid";
   receiveSharedClue: (clueId: string) => "received" | "already-received" | "already-owned" | "invalid";
   switchCampaign: (campaignId: CampaignId) => boolean;
-  setBoardPosition: (clueId: string, position: BoardPosition) => boolean;
-  resetBoardPositions: () => void;
   jumpToChapter: (chapter: number) => void;
-  unlockBoard: (confirmRelations?: boolean) => void;
+  unlockBoard: (confirmSyntheses?: boolean) => void;
   chooseEnding: (endingId: EndingId) => void;
   reset: () => void;
 }
@@ -79,7 +77,7 @@ export type CampaignProgress = Pick<GameState,
   | "societyHistory" | "correspondenceHistory" | "journeySeed" | "souvenirHistory" | "opportunityHistory"
   | "restRitualHistory"
   | "unlockedClueIds" | "receivedClueIds" | "unlockedCollectibleIds" | "completedReports"
-  | "confirmedRelations" | "solvedCipherIds" | "boardPositions" | "nightSealIds" | "endingId"
+  | "synthesizedEvidenceIds" | "solvedCipherIds" | "nightSealIds" | "endingId"
 >;
 
 const initialProgress: CampaignProgress = {
@@ -105,9 +103,8 @@ const initialProgress: CampaignProgress = {
   receivedClueIds: [] as string[],
   unlockedCollectibleIds: [] as string[],
   completedReports: [] as number[],
-  confirmedRelations: [] as string[],
+  synthesizedEvidenceIds: [] as string[],
   solvedCipherIds: [] as string[],
-  boardPositions: {} as Record<string, BoardPosition>,
   nightSealIds: [] as number[],
 };
 
@@ -132,9 +129,8 @@ function createInitialProgress(): CampaignProgress {
     receivedClueIds: [],
     unlockedCollectibleIds: [],
     completedReports: [],
-    confirmedRelations: [],
+    synthesizedEvidenceIds: [],
     solvedCipherIds: [],
-    boardPositions: {},
     nightSealIds: [],
     endingId: undefined,
   };
@@ -164,9 +160,8 @@ function snapshotCampaignProgress(state: GameState): CampaignProgress {
     receivedClueIds: state.receivedClueIds,
     unlockedCollectibleIds: state.unlockedCollectibleIds,
     completedReports: state.completedReports,
-    confirmedRelations: state.confirmedRelations,
+    synthesizedEvidenceIds: state.synthesizedEvidenceIds,
     solvedCipherIds: state.solvedCipherIds,
-    boardPositions: state.boardPositions,
     nightSealIds: state.nightSealIds,
     endingId: state.endingId,
   };
@@ -327,13 +322,16 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
     if (state.chapter >= finalChapter) set({ phase: "ending" });
     else set({ chapter: state.chapter + 1, phase: "day", selectedChoice: "", selectedPreparationId: "" });
   },
-  connectClues: (firstClueId, secondClueId) => {
+  synthesizeEvidence: (synthesisId) => {
     const state = get();
-    if (!state.unlockedClueIds.includes(firstClueId) || !state.unlockedClueIds.includes(secondClueId)) return null;
-    const relation = matchCampaignEvidenceRelation(getCampaign(state.campaignId), firstClueId, secondClueId);
-    if (!relation) return null;
-    set({ confirmedRelations: Array.from(new Set([...state.confirmedRelations, relation.id])) });
-    return relation.id;
+    const synthesis = getCampaignEvidenceSynthesis(getCampaign(state.campaignId), synthesisId);
+    if (!synthesis || !canSynthesizeEvidence({
+      synthesis,
+      unlockedClueIds: state.unlockedClueIds,
+      synthesizedEvidenceIds: state.synthesizedEvidenceIds,
+    })) return false;
+    set({ synthesizedEvidenceIds: [...state.synthesizedEvidenceIds, synthesis.id] });
+    return true;
   },
   solveCipher: (challengeId, answer) => {
     const state = get();
@@ -385,14 +383,6 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
     });
     return true;
   },
-  setBoardPosition: (clueId, position) => {
-    const state = get();
-    const parsed = boardPositionSchema.safeParse(position);
-    if (!parsed.success || !state.unlockedClueIds.includes(clueId)) return false;
-    set({ boardPositions: { ...state.boardPositions, [clueId]: parsed.data } });
-    return true;
-  },
-  resetBoardPositions: () => set({ boardPositions: {} }),
   jumpToChapter: (chapter) => {
     const campaign = getCampaign(get().campaignId);
     if (!campaign.case.chapters.some((item) => item.number === chapter)) return;
@@ -404,9 +394,9 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
     const state = get();
     set({ ...createInitialProgress(), campaignId: state.campaignId, campaignSaves: state.campaignSaves, started: true, chapter, phase: "day", journeySeed: DEMO_JOURNEY_SEED, souvenirHistory: createLegacySouvenirHistory(campaign, priorChapters, preparationHistory, choiceHistory, DEMO_JOURNEY_SEED, growthHistory), opportunityHistory: createDemoOpportunityHistory(priorChapters, DEMO_JOURNEY_SEED), nightSealIds: priorChapters, completedReports: priorChapters, preparationHistory, choiceHistory, growthHistory, societyHistory, correspondenceHistory: createDemoCorrespondenceHistory(priorChapters, societyHistory), unlockedClueIds: campaign.case.clues.filter((clue) => clue.chapter < chapter).map((clue) => clue.id), unlockedCollectibleIds: campaign.case.collectibles.filter((item) => item.chapter < chapter).map((item) => item.id) });
   },
-  unlockBoard: (confirmRelations = false) => {
+  unlockBoard: (confirmSyntheses = false) => {
     const campaign = getCampaign(get().campaignId);
-    set({ unlockedClueIds: campaign.case.clues.map((clue) => clue.id), receivedClueIds: [], unlockedCollectibleIds: campaign.case.collectibles.map((item) => item.id), confirmedRelations: confirmRelations ? campaign.relations.map((relation) => relation.id) : [] });
+    set({ unlockedClueIds: campaign.case.clues.map((clue) => clue.id), receivedClueIds: [], unlockedCollectibleIds: campaign.case.collectibles.map((item) => item.id), synthesizedEvidenceIds: confirmSyntheses ? campaign.syntheses.map((synthesis) => synthesis.id) : [] });
   },
   chooseEnding: (endingId) => {
     const state = get();
@@ -420,11 +410,18 @@ export const useGameStore = create<GameState>()(persist((set, get) => ({
   },
 }), {
   name: "night-shift-save-v1",
-  version: 17,
-  migrate: migrateGameState,
+  version: 18,
+  migrate: (persistedState, persistedVersion) => migrateGameState(persistedState, persistedVersion),
 }));
 
-export function migrateGameState(persistedState: unknown): GameState {
+export function migrateGameState(persistedState: unknown, persistedVersion = 18): GameState {
+  if (persistedVersion < 18) {
+    return {
+      campaignId: DEFAULT_CAMPAIGN_ID,
+      campaignSaves: {},
+      ...createInitialProgress(),
+    } as GameState;
+  }
   const persisted = persistedState && typeof persistedState === "object" ? persistedState as Partial<GameState> : {};
   const campaignId = isCampaignId(persisted.campaignId) ? persisted.campaignId : DEFAULT_CAMPAIGN_ID;
   const campaign = getCampaign(campaignId);
@@ -447,7 +444,7 @@ function migrateCampaignProgress(value: unknown, campaign: CampaignManifest): Ca
   const validChapters = new Set(campaign.case.chapters.map((chapter) => chapter.number));
   const validClueIds = new Set(campaign.case.clues.map((clue) => clue.id));
   const validCollectibleIds = new Set(campaign.case.collectibles.map((item) => item.id));
-  const validRelationIds = new Set(campaign.relations.map((relation) => relation.id));
+  const validSynthesisIds = new Set(campaign.syntheses.map((synthesis) => synthesis.id));
   const completedReports = Array.from(new Set((persisted.completedReports ?? []).filter((chapter) => validChapters.has(chapter))));
   const preparationHistory = sanitizePreparationHistory(persisted.preparationHistory, validChapters);
   const choiceHistory = sanitizeChoiceHistory(persisted.choiceHistory, campaign);
@@ -489,9 +486,8 @@ function migrateCampaignProgress(value: unknown, campaign: CampaignManifest): Ca
     unlockedClueIds,
     receivedClueIds,
     unlockedCollectibleIds: (persisted.unlockedCollectibleIds ?? []).filter((itemId) => validCollectibleIds.has(itemId)),
-    confirmedRelations: (persisted.confirmedRelations ?? []).filter((relationId) => validRelationIds.has(relationId)),
+    synthesizedEvidenceIds: (persisted.synthesizedEvidenceIds ?? []).filter((synthesisId) => validSynthesisIds.has(synthesisId)),
     solvedCipherIds: sanitizeSolvedCipherIds(persisted.solvedCipherIds, campaign),
-    boardPositions: sanitizeBoardPositions(persisted.boardPositions, validClueIds),
     nightSealIds: (persisted.nightSealIds ?? []).filter((item) => validChapters.has(item)),
     endingId: campaign.endings.some((ending) => ending.id === persisted.endingId) ? persisted.endingId : undefined,
   };
@@ -565,14 +561,6 @@ function sanitizeSolvedCipherIds(value: unknown, campaign: CampaignManifest): st
   if (!Array.isArray(value)) return [];
   const validIds = new Set(getCampaignCipherProgressIds(campaign.id));
   return Array.from(new Set(value.filter((challengeId): challengeId is string => typeof challengeId === "string" && validIds.has(challengeId))));
-}
-
-function sanitizeBoardPositions(value: unknown, validClueIds?: Set<string>): Record<string, BoardPosition> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
-  return Object.fromEntries(Object.entries(value).flatMap(([clueId, position]) => {
-    const parsed = boardPositionSchema.safeParse(position);
-    return parsed.success && (!validClueIds || validClueIds.has(clueId)) ? [[clueId, parsed.data]] : [];
-  }));
 }
 
 function migrateSleepSession(session: SleepSession | null | undefined): SleepSession | null {

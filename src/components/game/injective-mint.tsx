@@ -6,24 +6,27 @@ import { motion } from "motion/react";
 import { ExternalLink, FileCheck2, LoaderCircle, ShieldCheck, Sparkles, WalletCards, X } from "lucide-react";
 import {
   createPublicClient,
-  createWalletClient,
-  custom,
   http,
   type Address,
-  type EIP1193Provider,
   type Hex,
 } from "viem";
+import {
+  useConnect,
+  useConnection,
+  useConnectors,
+  useSwitchChain,
+} from "wagmi";
+import { getWalletClient } from "wagmi/actions";
 import type { Collectible } from "@/src/lib/game-engine/schema";
 import {
   injectiveEvmTestnet,
   INJECTIVE_EVM_TESTNET_CHAIN_ID,
-  INJECTIVE_EVM_TESTNET_EXPLORER_URL,
-  INJECTIVE_EVM_TESTNET_RPC_URL,
   keepsakeContractAbi,
   mintAuthorizationResponseSchema,
   type MintKeepsakeReceipt,
 } from "@/src/lib/injective/keepsake";
 import { saveMintReceipt } from "@/src/lib/injective/client";
+import { injectiveWagmiConfig } from "@/src/lib/injective/wagmi";
 import { useI18n } from "@/src/i18n/provider";
 import { useAccessibleDialog } from "@/src/lib/use-accessible-dialog";
 
@@ -36,10 +39,6 @@ interface MintStatus {
   rpcUrl: string;
   explorerUrl: string;
   contractAddress?: Address;
-}
-
-function getWalletProvider(): EIP1193Provider | undefined {
-  return (window as Window & { ethereum?: EIP1193Provider }).ethereum;
 }
 
 function shortAddress(value: string) {
@@ -68,11 +67,19 @@ export function InjectiveMintDialog({
 }) {
   const { locale, t } = useI18n();
   const dialogRef = useRef<HTMLElement>(null);
+  const connection = useConnection();
+  const connectors = useConnectors();
+  type InjectiveConnector = (typeof connectors)[number];
+  const { mutateAsync: connect } = useConnect();
+  const { mutateAsync: switchChain } = useSwitchChain();
   const [step, setStep] = useState<MintStep>("checking");
   const [status, setStatus] = useState<MintStatus | null>(null);
-  const [wallet, setWallet] = useState<Address | null>(null);
+  const [availableConnectorUids, setAvailableConnectorUids] = useState<readonly string[]>([]);
+  const [walletsChecked, setWalletsChecked] = useState(false);
   const [receipt, setReceipt] = useState<MintKeepsakeReceipt | null>(null);
   const [problem, setProblem] = useState("");
+  const wallet = connection.address ?? null;
+  const availableConnectors = connectors.filter((connector) => availableConnectorUids.includes(connector.uid));
 
   useAccessibleDialog(dialogRef, onClose);
 
@@ -98,39 +105,43 @@ export function InjectiveMintDialog({
     };
   }, []);
 
-  const connectWallet = async () => {
-    const provider = getWalletProvider();
-    if (!provider) {
-      setProblem("wallet-missing");
-      setStep("error");
-      return null;
-    }
+  useEffect(() => {
+    let active = true;
+    Promise.all(connectors.map(async (connector) => {
+      try {
+        const provider = await connector.getProvider();
+        return provider ? { connector, provider } : null;
+      } catch {
+        return null;
+      }
+    })).then((resolved) => {
+      if (!active) return;
+      const seenProviders = new Set<unknown>();
+      const ordered = resolved
+        .filter((result) => result !== null)
+        .sort((left, right) => Number(Boolean(right.connector.rdns)) - Number(Boolean(left.connector.rdns)));
+      setAvailableConnectorUids(ordered.flatMap(({ connector, provider }) => {
+        if (seenProviders.has(provider)) return [];
+        seenProviders.add(provider);
+        return [connector.uid];
+      }));
+      setWalletsChecked(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [connectors]);
+
+  const connectWallet = async (connector: InjectiveConnector) => {
     setProblem("");
     setStep("connecting");
     try {
-      const accounts = await provider.request({ method: "eth_requestAccounts" }) as Address[];
-      const account = accounts[0];
+      const connected = await connect({ connector });
+      const account = connected.accounts[0];
       if (!account) throw new Error("wallet-empty");
-      try {
-        await provider.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: `0x${INJECTIVE_EVM_TESTNET_CHAIN_ID.toString(16)}` }],
-        });
-      } catch (error) {
-        const code = error && typeof error === "object" && "code" in error ? Number(error.code) : 0;
-        if (code !== 4902) throw error;
-        await provider.request({
-          method: "wallet_addEthereumChain",
-          params: [{
-            chainId: `0x${INJECTIVE_EVM_TESTNET_CHAIN_ID.toString(16)}`,
-            chainName: "Injective EVM Testnet",
-            nativeCurrency: { name: "Injective", symbol: "INJ", decimals: 18 },
-            rpcUrls: [status?.rpcUrl ?? INJECTIVE_EVM_TESTNET_RPC_URL],
-            blockExplorerUrls: [status?.explorerUrl ?? INJECTIVE_EVM_TESTNET_EXPLORER_URL],
-          }],
-        });
+      if (connected.chainId !== INJECTIVE_EVM_TESTNET_CHAIN_ID) {
+        await switchChain({ chainId: INJECTIVE_EVM_TESTNET_CHAIN_ID });
       }
-      setWallet(account);
       setStep("ready");
       return account;
     } catch (error) {
@@ -141,12 +152,14 @@ export function InjectiveMintDialog({
   };
 
   const mint = async () => {
-    const account = wallet ?? await connectWallet();
-    const provider = getWalletProvider();
-    if (!account || !provider || !status?.contractAddress) return;
+    const account = wallet;
+    if (!account || !status?.contractAddress) return;
     setProblem("");
     setStep("authorizing");
     try {
+      if (connection.chainId !== INJECTIVE_EVM_TESTNET_CHAIN_ID) {
+        await switchChain({ chainId: INJECTIVE_EVM_TESTNET_CHAIN_ID });
+      }
       const response = await fetch("/api/injective/mint-authorization", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -182,12 +195,11 @@ export function InjectiveMintDialog({
       }
 
       setStep("confirming");
-      const walletClient = createWalletClient({
-        account,
-        chain: injectiveEvmTestnet,
-        transport: custom(provider),
+      const walletClient = await getWalletClient(injectiveWagmiConfig, {
+        chainId: INJECTIVE_EVM_TESTNET_CHAIN_ID,
       });
       const txHash = await walletClient.writeContract({
+        account,
         address: authorization.contractAddress as Address,
         abi: keepsakeContractAbi,
         functionName: "redeem",
@@ -290,13 +302,22 @@ export function InjectiveMintDialog({
         </div>
 
         {wallet && step !== "success" && <p className="injective-wallet-line"><WalletCards /> {t("领取钱包")} <b>{shortAddress(wallet)}</b></p>}
+        {step === "ready" && !wallet && walletsChecked && availableConnectors.length === 0 && <div className="injective-mint-notice"><WalletCards /><div><b>{t("没有检测到浏览器钱包")}</b><p>{t("请安装支持 EVM 的浏览器钱包，或在钱包内置浏览器中打开本站后重试。当前版本不启用 WalletConnect。")}</p></div></div>}
         {step === "unconfigured" && <div className="injective-mint-notice"><FileCheck2 /><div><b>{t("链上档案尚未开门")}</b><p>{t("部署者配置合约地址与签名密钥后，这里会自动启用；本地收藏和主线不受影响。")}</p></div></div>}
         {step === "error" && <div className="injective-mint-notice error" role="alert"><ShieldCheck /><div><b>{t("这次没有写入链上")}</b><p>{problemCopy[problem] ?? t("链上归档暂时没有完成。收藏品仍安全地留在本机档案里。")}</p></div></div>}
         {busy && <div className="injective-mint-progress" role="status"><LoaderCircle /><div><b>{step === "checking" ? t("正在确认档案室") : step === "connecting" ? t("等待钱包回应") : step === "authorizing" ? t("正在领取事务所签章") : t("请在钱包中确认铸造")}</b><p>{step === "confirming" ? t("交易确认后，这张回执会自动留在浏览器里。") : t("请保留这个窗口，主线游戏不会因此暂停或改变。")}</p></div></div>}
         {step === "success" && receipt && <div className="injective-mint-success" role="status"><Sparkles /><small>ARCHIVE RECEIPT · TOKEN #{receipt.tokenId}</small><h3>{t("雾灯城记住了这件东西")}</h3><p>{t("这是一枚测试网纪念凭证，不证明链下通关，也不赋予游戏优势或资产价值。")}</p><a href={receipt.explorerUrl} target="_blank" rel="noreferrer">{t("在 Injective 浏览器查看回执")} <ExternalLink /></a></div>}
 
         <footer>
-          {step === "ready" && !wallet && <button type="button" className="injective-mint-primary" onClick={connectWallet}><WalletCards /> {t("连接钱包，准备归档")}</button>}
+          {step === "ready" && !wallet && availableConnectors.length > 0 && <div className="injective-wallet-options" role="group" aria-label={t("选择浏览器钱包")}>{availableConnectors.map((connector) => {
+            const connectorName = connector.name === "Injected" ? t("默认浏览器钱包") : connector.name;
+            return <button
+              type="button"
+              key={connector.uid}
+              onClick={() => connectWallet(connector)}
+              aria-label={`${t("连接钱包，准备归档")}：${connectorName}`}
+            ><WalletCards /><span><b>{connectorName}</b><small>{t("浏览器钱包")}</small></span></button>;
+          })}</div>}
           {step === "ready" && wallet && <button type="button" className="injective-mint-primary" onClick={mint}><Sparkles /> {t("领取签章并铸造")}</button>}
           {step === "error" && <button type="button" className="injective-mint-primary" onClick={retry}>{t("重新尝试")}</button>}
           {step === "success" && <button type="button" className="injective-mint-primary" onClick={onClose}>{t("收好回执")}</button>}

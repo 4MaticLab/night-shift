@@ -159,6 +159,8 @@
 - 状态：已采用
 - 背景：案件书架需要第三个完整 Night Shift 五夜案例来证明内容扩展能力；已退役 Blackwater Creek 曾使用 `case-003`，旧浏览器可能仍保存该 ID。第二案又复用了首案部分画面，不能充分证明剧本与视觉都能作为独立内容包接入。
 - 决定：《黎明前出炉的第十三个面包》在书架显示 CASE 003，技术 ID 使用 `case-004`，让旧 `case-003` 继续按非法案件安全回落。案件使用 34 张专属静态 WebP，覆盖四幕、夜印、明信片、植物、收藏、人物和城区；通用运行时仍只读取 manifest，不按新 ID 增加业务分支。
+- 代价：展示编号与技术 ID 不再连续一致，维护者必须从 `presentation.archiveNumber` 理解书架编号；专属视觉显著增加仓库体积和内容制作成本。换来的收益是旧存档不被误解释，并形成可复用的完整案件交付基线。
+- 相关：[[docs/thirteenth-loaf-story-bible]]、[[docs/art-prompts/thirteenth-loaf-visual-archive]]、[[docs/campaign-authoring]]。
 
 ## ADR-019：第四案把“多个原本”适配为五夜异步调查
 
@@ -166,8 +168,17 @@
 - 状态：accepted
 - 背景：《千早诺亚的第十三次旅行》原始策划包含三夜实时同行、即时选择版本与长期搭档关系，直接搬入会破坏 Night Shift 的“你睡了，我干活”生命周期。
 - 决定：只保留十三次抵达、未成线生活与观察者裁决的固定因果，把调查重排为五夜 `CampaignManifest`。通用 `defineCampaign` 明确拒绝非五夜案件；返照镜台只增加数据驱动计数刻度，不参与主线或结局。第四案技术 ID 为 `case-005`、书架号为 `004`，并使用 34 张专属静态 WebP。
-- 代价：展示编号与技术 ID 不再连续一致，维护者必须从 `presentation.archiveNumber` 理解书架编号；专属视觉显著增加仓库体积和内容制作成本。换来的收益是旧存档不被误解释，并形成可复用的完整案件交付基线。
-- 相关：[[docs/thirteenth-loaf-story-bible]]、[[docs/art-prompts/thirteenth-loaf-visual-archive]]、[[docs/campaign-authoring]]。
+
+## ADR-023：第五案保留双重真实记忆，但拒绝即时同行与隐藏关系数值
+
+- 日期：2026-07-24
+- 状态：已采用
+- 背景：《雾中无狼》原稿以拉普拉斯、特蕾莎即时同行、异常战斗、隐藏共鸣／承认／裂隙数值和五结局展开，直接移植会建立另一套角色关系、结算与生命周期。
+- 决定：保留同一声暮钟分裂出两段真实记忆、第三见证者触发删除、钟后聆听者与角色交换的固定因果，把调查重排为统一的三幕序章与五夜异步 `CampaignManifest`。玩家仍只在白天分析、睡前交接，林渡独立夜查；拉普拉斯与特蕾莎不受玩家实时操控，也没有隐藏关系数值。五结局收束为公开、保护和交还三个有代价的确定性结局。
+- 玩法边界：回声调谐台复用现有密文台和刻度盘，只整理已归档证据，不增加页面、存档状态、失败条件或结局资格。第五案技术 ID 为 `case-006`、书架号为 `005`。
+- 视觉边界：34 张专属静态 WebP 以首案编辑蚀刻、旧纸、冷蓝黑与稀薄琥珀光为严格参照；钟后聆听者只通过负空间和制度器物出现，不生成直白怪物或另起哥特／动漫视觉语言。
+- 代价：原稿的即时同行张力与五结局细分不进入产品；专属视觉和完整确定性文本显著增加仓库体积与制作成本。换来的收益是第五案仍像同一款 Night Shift，案件特产也不会成为另一套游戏。
+- 相关：[[docs/fog-without-wolves-story-bible]]、[[docs/art-prompts/fog-without-wolves-visual-archive]]、[[docs/campaign-authoring]]。
 
 ## ADR-019：最新晨报由历史快照重放，结束当日独立推进
 
@@ -177,3 +188,31 @@
 - 决定：当前 `morning` 保持到玩家明确结束当日；去案件板只切换视图。`day／ready` 阶段的「今晨」从最新 `completedReports` 章节及既有方向、随身物、成长、社团、纪念物和会话快照重放同一份报纸，不新增报告副本或存档字段。
 - 代价：只提供最新一份晨报重放，不保存滚动位置，也不建立历史报告选择器；换来的收益是线索归档、晨报重读和下一夜准备各自拥有明确动作，刷新后仍保持一致。
 - 相关：[[docs/product-overview]]、[[docs/architecture]]、Issue #19。
+
+## ADR-020：案件板改为可检索档案与确定性推论合成
+
+- 日期：2026-07-24
+- 状态：已采用
+- 背景：React Flow 案件板把阅档、拖拽、A／B 选择、错误配对和结果回看压在同一画布，并在窄屏产生手势与遮挡负担。底层内容实际已经知道正确证物组合，要求玩家穷举连线只是在隐藏作者答案。
+- 决定：用 `syntheses` 配方图替换二元关系；输入可引用原始线索或已合成推论，运行时校验未知引用、重复输出与循环。案件板改为可搜索／筛选的统一档案库和只显示已到齐配方的推理台，玩家明确点击后才归档推论。移除画布坐标与 React Flow 依赖。持久化版本升至 v18，低版本存档直接清为首案新档，不承担尚无真实用户时的兼容复杂度。
+- 视觉约束：这是纯玩法重构。继续复用现有 Cozy Storybook Noir 的纸张、黄铜、墨色、蝴蝶封印、字体、颜色变量与证物图，不生成、不替换、不重绘任何美术资产。
+- 代价：玩家不再拥有自由摆放证物的桌面感，旧开发存档会被清空；换来的收益是线索可直接阅读、行动项可发现、手机自然滚动、推论可链式扩展，并消除无意义的配对试错。
+- 相关：[[docs/product-overview]]、[[docs/architecture]]、[[docs/campaign-authoring]]、[[docs/viewport-checklist]]。
+
+## ADR-021：Home Assistant 通过 loopback 桥成为独立空间外设域
+
+- 日期：2026-07-24
+- 状态：已采用
+- 背景：比赛版本需要接入通用房间硬件，但普通网页无法可靠发现 HomeKit、Matter 或局域网设备，也不应保管 Home Assistant 长期令牌。现有睡眠硬件域又承载健康数据最小化语义，不能把灯光和插座伪装成睡眠来源。
+- 决定：用 Bun 编译的跨平台 Connector 在 `127.0.0.1` 提供设置页与受限桥，连接 Home Assistant WebSocket API。Vercel 页面只在 Chrome Local Network Access 权限后访问固定 loopback 地址，经六位码换取 12 小时 bearer；它只读取归一化白名单实体，并发送 `night.started`、`wake.echo`、`morning.arrived` 三种幂等语义 cue。桥只翻译场景、灯、开关和风扇的固定动作，传感器只读，危险域与任意 service 拒绝。空间外设使用独立 store，只持久化启用和实体 ID 绑定，任何错误都不阻塞游戏状态机。
+- 代价：比赛机必须下载并保持未签名的 Connector 运行，非 Chrome 浏览器不承诺公网到 loopback 的路径，桥重启也会丢失 token、配对和临时恢复快照。换来的收益是正式 Vercel 页面可在用户授权后接入本机 Home Assistant，长期 token 不落前端，局域网发现边界明确，并可复用 Home Assistant 已有的 HomeKit、Matter、Zigbee 与厂商集成。
+- 相关：[[docs/home-assistant-ambient-bridge]]、[[docs/sleep-hardware-bridge]]、[[docs/privacy-and-guardrails]]、[[docs/architecture]]。
+
+## ADR-022：URL 管理页面位置，Zustand 管理案件进度
+
+- 日期：2026-07-24
+- 状态：已采用
+- 背景：产品已经使用 Next App Router，但案件书架、序章、五个底部页面、夜班与结局仍压在根页面的客户端条件渲染中。浏览器地址不能表达当前页面，前进／后退和直接访问缺少语义，案件库刷新还需要额外 sessionStorage 标记。
+- 决定：为案件书架、序章、今晚、今晨、案件板、收藏、档案、夜班和结局建立稳定路径，用共享 route layout 保留本地化、首次加载、硬件协调与全局弹层。普通页面使用真实链接和浏览器历史；水合后的纯函数守卫以持久化 `started`／`phase` 规范强制阶段。Zustand 继续独占案件、章节、睡眠、证物、推论和结局，不把这些数据复制进 URL。本次不启用 Cache Components。
+- 代价：直接访问游戏路径必须先等待本地存档水合再决定是否重定向；页面局部搜索、展开和滚动状态在离开路由后仍可能丢失。Next 与 Vinext 两套构建都必须验证路由、导航 hooks 和分享 query 行为。
+- 相关：[[docs/architecture]]、[[docs/quality-baseline]]。

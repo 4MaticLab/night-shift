@@ -18,6 +18,7 @@ import {
   Sparkles,
   Unplug,
   Waves,
+  Router,
   X,
 } from "lucide-react";
 import { getAsset } from "@/src/content/assets";
@@ -34,6 +35,7 @@ import type { SleepPermissionId } from "@/src/lib/sleep-hardware/types";
 import { useSleepHardwareStore } from "@/src/stores/sleep-hardware-store";
 import { useI18n } from "@/src/i18n/provider";
 import { useAccessibleDialog } from "@/src/lib/use-accessible-dialog";
+import { AmbientHardwareWorkbench } from "./ambient-hardware";
 
 const bridgeVirtualMatches = {
   "apple-health": "watch-17",
@@ -45,7 +47,7 @@ const bridgeVirtualMatches = {
 export function SleepHardwarePanel({ onClose }: { onClose: () => void }) {
   const hardware = useSleepHardwareStore();
   const { localize, locale, t } = useI18n();
-  const [tab, setTab] = useState<"virtual" | "bridge">(hardware.mode === "bridge" ? "bridge" : "virtual");
+  const [tab, setTab] = useState<"virtual" | "bridge" | "ambient">(hardware.mode === "bridge" ? "bridge" : "virtual");
   const [draftDeviceId, setDraftDeviceId] = useState(hardware.selectedDeviceId);
   const [draftBridgeId, setDraftBridgeId] = useState(hardware.selectedBridgeId);
   const [justConnected, setJustConnected] = useState(false);
@@ -139,9 +141,10 @@ export function SleepHardwarePanel({ onClose }: { onClose: () => void }) {
         <div className="sleep-source-tabs" role="tablist" aria-label={t("硬件来源")}>
           <button type="button" role="tab" aria-selected={tab === "virtual"} onClick={() => setTab("virtual")}><Sparkles /> {t("虚拟硬件")} <small>{t("现在可玩")}</small></button>
           <button type="button" role="tab" aria-selected={tab === "bridge"} onClick={() => setTab("bridge")}><Cloud /> {t("真实桥接")} <small>{t("接口预演")}</small></button>
+          <button type="button" role="tab" aria-selected={tab === "ambient"} onClick={() => setTab("ambient")}><Router /> {t("房间外设")} <small>HOME ASSISTANT</small></button>
         </div>
 
-        {tab === "virtual" ? (
+        {tab === "ambient" ? <AmbientHardwareWorkbench /> : tab === "virtual" ? (
           <section className="sleep-device-workbench">
             <header className="sleep-workbench-heading">
               <div><small>STEP 01 · CHOOSE A SIGNAL</small><h3>{t("选择今晚要模拟的设备")}</h3></div>

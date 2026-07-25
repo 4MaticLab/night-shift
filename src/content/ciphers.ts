@@ -3,6 +3,7 @@ import { LAST_TRAM_CAMPAIGN_ID } from "./campaigns/last-tram";
 import { RAIN_RADIO_CAMPAIGN_ID } from "./campaigns/rain-radio";
 import { THIRTEENTH_LOAF_CAMPAIGN_ID } from "./campaigns/thirteenth-loaf";
 import { CHIHAYA_NOA_CAMPAIGN_ID } from "./campaigns/chihaya-noa";
+import { FOG_WITHOUT_WOLVES_CAMPAIGN_ID } from "./campaigns/fog-without-wolves";
 
 const cipherDialSchema = z.object({
   min: z.number(),
@@ -362,6 +363,81 @@ const chihayaNoaCiphers = [
   },
 ].map((challenge) => cipherChallengeSchema.parse(challenge));
 
+const fogWithoutWolvesCiphers = [
+  {
+    id: "fog-split-waveform",
+    campaignId: FOG_WITHOUT_WOLVES_CAMPAIGN_ID,
+    order: 1,
+    archiveLabel: "ECHO 01 · DOUBLE CYLINDER",
+    title: "同一秒钟的两段声纹",
+    subtitle: "两只蜡筒都在缺失的一分钟前留下了相同背景波峰。",
+    requiredClueIds: ["laplace-cylinder", "theresa-cylinder"],
+    cipherLabel: "共振刻度",
+    cipherTokens: ["23", "缺刻", "43", "kHz"],
+    instruction: "把缺刻当作小数点，让两只蜡筒的背景波峰同时变得清晰。调谐不会判断哪一份证词更真。",
+    prompt: "两段录音共享的共振刻度是多少？",
+    answerAliases: ["23.43", "23.43kHz", "二十三点四三"],
+    hints: ["停摆钟表保留了 23 与 43 两组数字。", "把缺刻放在两组数字之间：23.43 kHz。"],
+    revealTitle: "23.43 kHz · 双重回声",
+    revealText: "两只蜡筒在同一刻度同时清晰。调谐台没有真伪灯，因为声学证据只证明两段记忆共享同一个事件。",
+    dial: {
+      min: 23.35,
+      max: 23.51,
+      step: 0.01,
+      initial: 23.37,
+      target: 23.43,
+      precision: 2,
+      mode: "frequency",
+      instrumentLabel: "回声调谐环",
+      signalLabels: {
+        silent: "静默 · 两只蜡筒都离开声场",
+        faint: "微弱 · 一段哭声开始显形",
+        clear: "清晰 · 两份背景波形正在重合",
+        locked: "已对齐 · 两段记忆同样清楚",
+      },
+      ariaLabel: "双蜡筒回声调谐刻度",
+      decreaseLabel: "共振降低零点零一千赫",
+      increaseLabel: "共振升高零点零一千赫",
+      lockLabel: "锁定双重声纹",
+      unit: "kHz",
+    },
+  },
+  {
+    id: "fog-missing-minute",
+    campaignId: FOG_WITHOUT_WOLVES_CAMPAIGN_ID,
+    order: 2,
+    archiveLabel: "ECHO 02 · MUNICIPAL GAP",
+    title: "登记册失去的六十秒",
+    subtitle: "停摆钟、怀表缺刻与市政订线共同绕开同一段时间。",
+    requiredClueIds: ["stopped-clocks-2343", "missing-minute-register", "second-handwriting-log"],
+    cipherLabel: "计时差值",
+    cipherTokens: ["23:43:00", "→", "23:44:00"],
+    instruction: "只计算两次合法校时之间被登记册跳过的时长。空白不是故障，而是被维护的入口。",
+    prompt: "第三见证者通过多长的时间缺口进入分裂现实？",
+    answerAliases: ["60", "60秒", "六十秒", "一分钟", "1分钟"],
+    hints: ["从 23:43:00 到 23:44:00。", "相差正好六十秒，也就是一分钟。"],
+    revealTitle: "60 SECONDS · 一分钟入口",
+    revealText: "所有钟表都能越过缺口继续运行。被移走的六十秒并非时间停止，而是见证者被允许进入两段现实的制度门。",
+  },
+  {
+    id: "fog-role-exchange",
+    campaignId: FOG_WITHOUT_WOLVES_CAMPAIGN_ID,
+    order: 3,
+    archiveLabel: "ECHO 03 · FORBIDDEN EXCHANGE",
+    title: "被协议禁止的交换",
+    subtitle: "训练协议、手套磨痕与最终表格记录了同一条禁令。",
+    requiredClueIds: ["hunter-pair-protocol", "mismatched-gloves", "final-witness-form"],
+    cipherLabel: "角色因果",
+    cipherTokens: ["聆听者定位", "命名者裁决", "第三人删去矛盾"],
+    instruction: "找出能让固定分工失效的动作。答案不是谁更擅长，而是两名当事人可以怎样改变被训练的位置。",
+    prompt: "什么会让暮钟失去固定两名相反证人的能力？",
+    answerAliases: ["EXCHANGE", "SWAP", "交换", "角色交换", "交换角色"],
+    hints: ["手套磨痕证明她们都练习过对方的位置。", "暮钟馆明令禁止的动作，就是交换聆听与命名。"],
+    revealTitle: "EXCHANGE · 交换角色",
+    revealText: "固定分工不是天性，而是仪式结构。只要拉普拉斯与特蕾莎交换聆听和命名，暮钟就无法再把她们锁成相反证人。",
+  },
+].map((challenge) => cipherChallengeSchema.parse(challenge));
+
 const cipherRegistry: Record<string, CipherDeskDefinition> = {
   [LAST_TRAM_CAMPAIGN_ID]: cipherDeskSchema.parse({
     campaignId: LAST_TRAM_CAMPAIGN_ID,
@@ -458,6 +534,30 @@ const cipherRegistry: Record<string, CipherDeskDefinition> = {
       hints: ["先写发生了多少次抵达，再写这些记录属于什么。", "完整顺序是 ARRIVALS → LIVES → RIGHT。"],
     },
     challenges: chihayaNoaCiphers,
+  }),
+  [FOG_WITHOUT_WOLVES_CAMPAIGN_ID]: cipherDeskSchema.parse({
+    campaignId: FOG_WITHOUT_WOLVES_CAMPAIGN_ID,
+    archiveLabel: "ECHO TUNING TABLE · 回声调谐台",
+    title: "让两段回声分别清晰，而不是把旋钮误当成真伪裁判。",
+    description: "三组调谐只重排已经归档的声学与制度证据。错位不会损坏蜡筒，打开提示也不会影响人物关系、线索或结局资格。",
+    completionLabel: "ALL THREE ECHOES FILED",
+    completionTitle: "两段真实已经分别显影",
+    completionText: "双重声纹、缺失一分钟与角色交换互相作证：暮钟无法自动选择真相，只能借第三见证者和固定分工删除其中一个人。",
+    relay: {
+      id: "fog-without-wolves-final-relay",
+      archiveLabel: "FINAL RESONANCE · 最终回声",
+      title: "把三份结论写回未签报告",
+      description: "空白报告只保留 EVENT、TRIGGER、EXIT 三个字段。每份答案只能使用一次。",
+      instruction: "依次选择 EVENT（发生了什么）、TRIGGER（谁让删除开始）、EXIT（如何关闭入口）。点已放入的碎片可以撤回。",
+      fragments: [
+        { id: "fog-exit", label: "EXCHANGE ROLES", note: "EXIT · 交换聆听与命名" },
+        { id: "fog-event", label: "TWO TRUE MEMORIES", note: "EVENT · 一声钟分裂出的事实" },
+        { id: "fog-trigger", label: "THIRD WITNESS", note: "TRIGGER · 提交唯一报告的人" },
+      ],
+      solutionIds: ["fog-event", "fog-trigger", "fog-exit"],
+      hints: ["先写暮钟制造了什么，再写谁让删除生效。", "完整顺序是 EVENT → TRIGGER → EXIT。"],
+    },
+    challenges: fogWithoutWolvesCiphers,
   }),
 };
 

@@ -19,6 +19,12 @@
 
 服务端 API 对相同 `requestId + wallet + campaign + collectible` 保留 15 分钟进程内幂等结果，每个来源地址每小时最多创建 8 份新授权。该限制是黑客松部署的滥用护栏，不是生产级跨实例配额；合约才是最终的重复铸造防线。
 
+## 钱包连接边界
+
+前端使用 wagmi 3 管理 EVM 钱包发现、连接恢复、账户状态、切链和所选 connector 的 wallet client，并继续复用 viem 的合约类型和公共 RPC 客户端。现有藏品对话框直接呈现 injected connector；支持传统 `window.ethereum` 和 EIP-6963 多钱包发现，多个 provider 指向同一钱包时只显示一次。连接或铸造前，wagmi 将钱包切换到已配置的 Injective EVM Testnet。
+
+当前比赛版本刻意不配置 WalletConnect，不需要 Reown project ID，也不包含 WalletConnect connector 或 provider 依赖。因此桌面浏览器扩展和钱包内置浏览器可连接；普通手机浏览器、Codex 内嵌浏览器和其他没有注入 EIP-1193 provider 的环境只显示安装提示，不提供二维码或 deep link。以后启用 WalletConnect 只扩展 connector 配置，不改变 voucher 或合约协议。
+
 ## 合约与元数据
 
 - 合约：`contracts/NightShiftKeepsake.sol`
@@ -32,6 +38,22 @@
 元数据只从编译期案件注册表和资产 manifest 生成，客户端不能自定义名称、描述、图片或属性。token URI 使用内嵌 JSON data URI，图片和回到游戏的链接使用部署 origin；部署在固定域名时应设置 `INJECTIVE_NFT_METADATA_ORIGIN`，避免预览域名进入永久元数据。
 
 第二案目前与首案复用部分收藏品画面，这是现有内容资产的公开边界；第三案的八件收藏品则使用 `/art/cases/thirteenth-loaf/collectibles/` 中的专属画面。链上卡面应被理解为当前案件 manifest 绑定的档案版画，不能把第二案宣称为已有完全独立美术。新增案件应按 [[docs/campaign-authoring]] 与 [[docs/art-direction]] 提供专属资产。
+
+## 当前测试网部署
+
+- 合约地址：[`0x4016a9165f655618055c8bbd2f992FB20895288C`](https://testnet.blockscout.injective.network/address/0x4016a9165f655618055c8bbd2f992FB20895288C)
+- 部署交易：[`0xbe4520df00904a6d67341f226f04e8836a826879785fa270844ff2e4b3b66d39`](https://testnet.blockscout.injective.network/tx/0xbe4520df00904a6d67341f226f04e8836a826879785fa270844ff2e4b3b66d39)
+- 部署区块：`134536213`
+- 部署日期：2026-07-24
+- owner／`claimSigner`：`0xC02b873Ef4F79Da50435c164C76e941365a7b7ca`
+- 验证状态：Blockscout 已验证 Solidity 源码和编译设置
+- 生产站点：[`https://www.shiftx.top`](https://www.shiftx.top)
+- 授权 API：[`https://www.shiftx.top/api/injective/mint-authorization`](https://www.shiftx.top/api/injective/mint-authorization)
+- Vercel 状态：production 已配置 signer secret、合约地址和固定 metadata origin
+
+这是比赛演示用 Injective EVM Testnet 部署；临时 owner／签名钱包不得复用于主网。Ignition 部署记录保存在 `ignition/deployments/chain-1439/`。公共 RPC 在这笔交易确认后曾短暂无法通过 `eth_getTransactionReceipt` 返回回执，但区块级回执、部署字节码、nonce、owner、`claimSigner`、名称、符号和 Blockscout 均已交叉验证；不得因单点回执缺失重复部署。
+
+2026-07-24 的 production smoke test 已确认：状态 API 返回 `configured: true`、chain ID `1439` 和上述合约地址；为首案 `torn-ticket` 请求的授权可由链上 `claimSigner` 通过 EIP-712 恢复验证，`tokenUriHash` 与内嵌 metadata 一致，图片和 `external_url` 均固定使用 `https://www.shiftx.top`。该验证只签发限时 voucher，没有代替玩家钱包调用 `redeem` 或铸造 NFT。
 
 ## 本地部署
 
@@ -52,6 +74,16 @@ npm run contract:deploy
 
 Ignition 默认把部署账户同时设为 owner 和 `claimSigner`，适合一次性 Demo。若要分离签名人，在 Ignition 参数中为 `NightShiftKeepsakeModule#claimSigner` 指定服务端签名地址。部署完成后，Vercel／Next 服务至少配置：
 
+Blockscout 源码验证使用与部署相同的 production build profile 和构造参数：
+
+```bash
+npx hardhat verify blockscout \
+  --network injectiveTestnet \
+  --build-profile production \
+  --contract contracts/NightShiftKeepsake.sol:NightShiftKeepsake \
+  -- "$CONTRACT_ADDRESS" "$OWNER_ADDRESS" "$CLAIM_SIGNER_ADDRESS"
+```
+
 ```bash
 INJECTIVE_MINT_SIGNER_PRIVATE_KEY=0x...
 INJECTIVE_NFT_CONTRACT_ADDRESS=0x...
@@ -65,7 +97,7 @@ INJECTIVE_NFT_METADATA_ORIGIN=https://your-fixed-origin.example
 - Solidity 测试覆盖正常领取、重复领取、冒领、过期、URI 篡改和错误签名。
 - Vitest 覆盖白名单、规范元数据、EIP-712 可验证签名、既有 token、同源、未配置、幂等、限流和本地回执净化。
 - Playwright 覆盖未配置态、模拟既有 mint 成功、刷新保留，以及 `390 × 844`、`820 × 1180`、`1440 × 900` 响应式几何。
-- 当前仓库不提交真实测试网私钥、不部署真实合约，也不声称本地存档能证明玩家在链下完成案件。
+- 当前仓库不提交真实测试网私钥；已部署的测试网合约不声称本地存档能证明玩家在链下完成案件。
 
 Injective 官方参考：[EVM 网络参数](https://docs.injective.network/developers-evm/network-information)、[连接 MetaMask](https://docs.injective.network/developers-evm/dapps/connect-with-metamask)、[Solidity 合约](https://docs.injective.network/developers-evm/smart-contracts)。
 

@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { nightShiftCase } from "@/src/content/case";
 import { resolveNight } from "@/src/lib/game-engine/resolve-night";
 import { preparations } from "@/src/content/preparations";
@@ -11,7 +13,7 @@ import {
   recordWakeEcho,
   startSleepSession,
 } from "@/src/lib/game-engine/sleep-session";
-import { evidenceRelations, matchEvidenceRelation } from "@/src/content/relations";
+import { evidenceSyntheses } from "@/src/content/relations";
 import { getDefaultChoiceId, getRouteDirection, routeDirections } from "@/src/content/routes";
 import { getNightBotanical, growthStageFromProgress, nightBotanicals } from "@/src/content/botany";
 import { citySocieties, createSocietyMemory, getCitySociety, getSocietyLetter, getSocietyTitle } from "@/src/content/societies";
@@ -26,10 +28,11 @@ import { getWakeEcho, getWakeEchoById, wakeEchoes } from "@/src/content/wake-ech
 import { createClueShareUrl, readSharedClueQuery, removeSharedClueQuery } from "@/src/lib/game-engine/clue-sharing";
 import { campaignRegistry, DEFAULT_CAMPAIGN_ID, RAIN_RADIO_CAMPAIGN_ID, THIRTEENTH_LOAF_CAMPAIGN_ID } from "@/src/content/campaigns/registry";
 import { chihayaNoaCampaign } from "@/src/content/campaigns/chihaya-noa";
+import { fogWithoutWolvesCampaign } from "@/src/content/campaigns/fog-without-wolves";
 import { lastTramCampaign } from "@/src/content/campaigns/last-tram";
 import { rainRadioCampaign } from "@/src/content/campaigns/rain-radio";
 import { thirteenthLoafCampaign } from "@/src/content/campaigns/thirteenth-loaf";
-import { getCampaignRouteDirection, matchCampaignEvidenceRelation } from "@/src/content/campaigns/types";
+import { getCampaignEvidenceSynthesis, getCampaignRouteDirection } from "@/src/content/campaigns/types";
 import { campaignSupportsLocale, localizeCampaign } from "@/src/i18n/core";
 
 describe("Night Shift case content", () => {
@@ -47,7 +50,7 @@ describe("Night Shift case content", () => {
       clues: campaign.case.clues.map((clue) => clue.id),
       collectibles: campaign.case.collectibles.map((item) => item.id),
       routes: campaign.routes.map((route) => [route.id, route.choiceId, route.societyId]),
-      relations: campaign.relations.map((relation) => [relation.id, ...relation.clueIds]),
+      syntheses: campaign.syntheses.map((synthesis) => [synthesis.id, ...synthesis.inputIds]),
       endings: campaign.endings.map((ending) => ending.id),
     });
 
@@ -60,6 +63,7 @@ describe("Night Shift case content", () => {
     expect(campaignSupportsLocale(rainRadioCampaign.id, "en")).toBe(true);
     expect(campaignSupportsLocale(thirteenthLoafCampaign.id, "en")).toBe(false);
     expect(campaignSupportsLocale(chihayaNoaCampaign.id, "en")).toBe(false);
+    expect(campaignSupportsLocale(fogWithoutWolvesCampaign.id, "en")).toBe(false);
   });
 
   it("contains the complete five-night mystery", () => {
@@ -68,9 +72,9 @@ describe("Night Shift case content", () => {
     expect(nightShiftCase.collectibles).toHaveLength(8);
   });
 
-  it("registers four complete Night Shift campaigns", () => {
-    expect(campaignRegistry.map((campaign) => campaign.id)).toEqual(["case-001", "case-002", "case-004", "case-005"]);
-    expect(new Set(campaignRegistry.map((campaign) => campaign.case.title))).toHaveLength(4);
+  it("registers five complete Night Shift campaigns", () => {
+    expect(campaignRegistry.map((campaign) => campaign.id)).toEqual(["case-001", "case-002", "case-004", "case-005", "case-006"]);
+    expect(new Set(campaignRegistry.map((campaign) => campaign.case.title))).toHaveLength(5);
     expect(new Set(campaignRegistry.flatMap((campaign) => campaign.case.clues.map((clue) => clue.id))).size)
       .toBe(campaignRegistry.reduce((total, campaign) => total + campaign.case.clues.length, 0));
 
@@ -82,6 +86,14 @@ describe("Night Shift case content", () => {
       expect(campaign.botanicals).toHaveLength(campaign.case.chapters.length);
       expect(campaign.wakeEchoes).toHaveLength(campaign.case.chapters.length);
       expect(campaign.presentation.nightSealAssetIds).toHaveLength(campaign.case.chapters.length);
+      expect(campaign.presentation.prologue.scenes.map((scene) => scene.stage)).toEqual(["incident", "evidence", "handoff"]);
+      expect(campaign.presentation.prologue.acceptLabel.length).toBeGreaterThan(0);
+      for (const scene of campaign.presentation.prologue.scenes) {
+        expect(scene.title.length).toBeGreaterThan(0);
+        expect(scene.body.length).toBeGreaterThanOrEqual(30);
+        expect(scene.aside.length).toBeGreaterThanOrEqual(12);
+        expect(getAsset(scene.assetId).status).toBe("complete");
+      }
       for (const chapter of campaign.case.chapters) {
         for (const quality of ["interrupted", "regular", "restful"] as const) {
           expect(resolveNight(campaign, chapter.number, quality).clueIds.length).toBeGreaterThan(0);
@@ -92,10 +104,18 @@ describe("Night Shift case content", () => {
       }
     }
     expect(rainRadioCampaign.case.title).toBe("只在雨中播出的电台");
+    expect(rainRadioCampaign.presentation.prologue.scenes.map((scene) => scene.assetId)).toEqual([
+      "header.night-shift.hero",
+      "district.lantern-wharf",
+      "header.night-expedition",
+    ]);
+    expect(new Set(rainRadioCampaign.presentation.prologue.scenes.map((scene) => getAsset(scene.assetId).src))).toHaveLength(3);
     expect(thirteenthLoafCampaign.case.title).toBe("黎明前出炉的第十三个面包");
     expect(thirteenthLoafCampaign.presentation.archiveNumber).toBe("003");
     expect(chihayaNoaCampaign.case.title).toBe("千早诺亚的第十三次旅行");
     expect(chihayaNoaCampaign.presentation.archiveNumber).toBe("004");
+    expect(fogWithoutWolvesCampaign.case.title).toBe("雾中无狼");
+    expect(fogWithoutWolvesCampaign.presentation.archiveNumber).toBe("005");
     expect(lastTramCampaign.case.clues.some((clue) => rainRadioCampaign.case.clues.some((other) => other.id === clue.id))).toBe(false);
     expect(campaignRegistry.flatMap((campaign) => campaign.case.clues).filter((clue) => clue.id === "commons-charter")).toHaveLength(1);
   });
@@ -141,6 +161,14 @@ describe("Night Shift case content", () => {
       results[0].clueIds,
       results[0].clueIds,
     ]);
+  });
+
+  it("serves preparation art locally as WebP", () => {
+    expect(new Set(preparations.map((item) => item.imageSrc))).toHaveLength(preparations.length);
+    for (const item of preparations) {
+      expect(item.imageSrc).toMatch(/^\/art\/preparations\/.+\.webp$/);
+      expect(existsSync(join(process.cwd(), "public", item.imageSrc.slice(1)))).toBe(true);
+    }
   });
 
   it("defines three complete and distinct route directions for every night", () => {
@@ -455,19 +483,17 @@ describe("Night Shift case content", () => {
     expect(nightSealProgress(session, new Date("2026-07-23T08:00:00.000Z"))).toBe(100);
   });
 
-  it("defines three evidence relations using real case clues", () => {
+  it("defines three evidence syntheses using real case clues", () => {
     const clueIds = new Set(nightShiftCase.clues.map((clue) => clue.id));
-    expect(evidenceRelations).toHaveLength(3);
-    for (const relation of evidenceRelations) {
-      expect(relation.clueIds.every((clueId) => clueIds.has(clueId))).toBe(true);
+    expect(evidenceSyntheses).toHaveLength(3);
+    for (const synthesis of evidenceSyntheses) {
+      expect(synthesis.inputIds.every((clueId) => clueIds.has(clueId))).toBe(true);
     }
   });
 
-  it("matches evidence pairs in either order and rejects false links", () => {
-    expect(matchEvidenceRelation("flower-cycle", "postcard")?.id).toBe("mina-evelyn");
-    expect(matchEvidenceRelation("postcard", "flower-cycle")?.id).toBe("mina-evelyn");
-    expect(matchEvidenceRelation("ticket-date", "postcard")).toBeUndefined();
-    expect(matchEvidenceRelation("postcard", "postcard")).toBeUndefined();
+  it("looks up deterministic synthesis recipes by stable output id", () => {
+    expect(getCampaignEvidenceSynthesis(lastTramCampaign, "mina-evelyn")?.inputIds).toEqual(["flower-cycle", "postcard"]);
+    expect(getCampaignEvidenceSynthesis(lastTramCampaign, "missing-synthesis")).toBeUndefined();
   });
 
   it("builds and validates a single-clue share link", () => {
@@ -491,9 +517,9 @@ describe("Night Shift case content", () => {
     expect(removeSharedClueQuery("https://night-shift-zeta.vercel.app/?case=case-001&clue=flower-cycle&from=qr#desk")).toBe("/?from=qr#desk");
   });
 
-  it("matches evidence only inside the selected campaign", () => {
-    const relation = rainRadioCampaign.relations[0];
-    expect(matchCampaignEvidenceRelation(rainRadioCampaign, relation.clueIds[0], relation.clueIds[1])).toEqual(relation);
-    expect(matchCampaignEvidenceRelation(rainRadioCampaign, "flower-cycle", "postcard")).toBeUndefined();
+  it("looks up evidence only inside the selected campaign", () => {
+    const synthesis = rainRadioCampaign.syntheses[0];
+    expect(getCampaignEvidenceSynthesis(rainRadioCampaign, synthesis.id)).toEqual(synthesis);
+    expect(getCampaignEvidenceSynthesis(rainRadioCampaign, "mina-evelyn")).toBeUndefined();
   });
 });

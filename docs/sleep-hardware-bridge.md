@@ -23,6 +23,12 @@
 
 硬件中心提供 Apple Health、Android Health Connect、Oura Cloud 与 Fitbit Web API 的厂商选择、拟用权限和数据映射。它们当前明确标记为“接口预演”，不会发起 OAuth、SDK 调用或真实采集，也不会显示“已连接”。浏览厂商只修改面板内的临时草稿，不覆盖已连接虚拟设备；每个厂商都提供一台能力相近的虚拟设备作为可玩的后续入口。真实接入需要独立的原生权限层或服务端令牌桥。
 
+网页玩家的完整操作步骤见 [[docs/sleep-hardware-user-guide]]。以 Xiaomi Watch S4、Mi Fitness 和 Health Connect 为例的数据源验证、原生 Companion 方案与甲方演示边界见 [[docs/xiaomi-watch-hardware-test]]；只有测试手机的 Health Connect 确实出现可追溯的 Mi Fitness 睡眠记录，才能把该段判定为真实数据源链路通过。
+
+### Home Assistant 空间外设
+
+硬件中心的第三个入口连接真实 Home Assistant，但它属于房间环境域，不是睡眠健康来源。浏览器经 `127.0.0.1` 本地桥显式配对，只能把夜班出发、睡隙回声与晨报抵达绑定到白名单中的场景、灯、开关或风扇；传感器只读。任何连接或动作失败都不影响 `SleepSession`、硬件采集、晨报或案件结算。完整接线、安全范围和本地存档见 [[docs/home-assistant-ambient-bridge]]。
+
 ## 交互模型
 
 硬件中心采用三段式链路：
@@ -42,6 +48,9 @@
 | `src/lib/sleep-hardware/simulator.ts` | 确定性摘要和运行时信号投影 |
 | `src/stores/sleep-hardware-store.ts` | 独立 localStorage 授权、活动采集与最近摘要 |
 | `src/components/game/sleep-hardware.tsx` | 硬件中心、交接状态、夜间遥测和晨报回执 |
+| `src/lib/ambient-hardware/` | Home Assistant 实体、语义 cue 与浏览器桥客户端契约 |
+| `src/stores/ambient-hardware-store.ts` | 独立的外设启用／绑定存档和非阻塞连接状态 |
+| `tools/home-assistant-bridge/` | loopback 桥、Home Assistant WebSocket、实体白名单与动作翻译 |
 
 `game-store` 只在 `SleepSession` 开始／结束边界调用 `beginCapture` 和 `finishCapture`。硬件域不持有剧情进度，游戏域也不持有健康字段，因此更换或移除硬件层不会迁移案件存档。
 
@@ -58,7 +67,10 @@
 ## 相关文档
 
 - [[docs/architecture]]
+- [[docs/sleep-hardware-user-guide]]
+- [[docs/xiaomi-watch-hardware-test]]
 - [[docs/privacy-and-guardrails]]
+- [[docs/home-assistant-ambient-bridge]]
 - [[docs/product-overview]]
 - [[docs/art-prompts/sleep-hardware-dossiers]]
 - [[plans/0028-sleep-hardware-bridge]]

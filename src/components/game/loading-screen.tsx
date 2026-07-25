@@ -30,27 +30,6 @@ function waitForWindowLoad() {
   return new Promise<void>((resolve) => window.addEventListener("load", () => resolve(), { once: true }));
 }
 
-function preloadImage(src: string) {
-  return new Promise<void>((resolve) => {
-    const image = new Image();
-    let settled = false;
-    const settle = () => {
-      if (settled) return;
-      settled = true;
-      const decoded = typeof image.decode === "function"
-        ? image.decode().catch(() => undefined)
-        : Promise.resolve();
-      void decoded.finally(resolve);
-    };
-    image.onload = settle;
-    image.onerror = () => resolve();
-    image.decoding = "async";
-    image.fetchPriority = "high";
-    image.src = src;
-    if (image.complete) settle();
-  });
-}
-
 export function LoadingScreenFrame({
   locale = "zh-CN",
   phase = "starting",
@@ -80,7 +59,7 @@ export function LoadingScreenFrame({
   );
 }
 
-export function AppBootBoundary({ heroSrc, children }: { heroSrc: string; children: ReactNode }) {
+export function AppBootBoundary({ children }: { children: ReactNode }) {
   const { locale } = useI18n();
   const [visible, setVisible] = useState(true);
   const [leaving, setLeaving] = useState(false);
@@ -118,7 +97,7 @@ export function AppBootBoundary({ heroSrc, children }: { heroSrc: string; childr
     };
 
     const fontReady = document.fonts?.ready ?? Promise.resolve();
-    void Promise.allSettled([waitForWindowLoad(), fontReady, preloadImage(heroSrc)]).then(finish);
+    void Promise.allSettled([waitForWindowLoad(), fontReady]).then(finish);
     later(finish, 7000);
 
     return () => {
@@ -126,7 +105,7 @@ export function AppBootBoundary({ heroSrc, children }: { heroSrc: string; childr
       timers.forEach((timer) => window.clearTimeout(timer));
       document.body.classList.remove("app-is-booting");
     };
-  }, [heroSrc]);
+  }, []);
 
   return (
     <>

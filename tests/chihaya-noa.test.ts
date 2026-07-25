@@ -20,7 +20,7 @@ describe("Chihaya Noa's Thirteenth Journey", () => {
     expect(chihayaNoaCampaign.case.clues).toHaveLength(12);
     expect(chihayaNoaCampaign.case.collectibles).toHaveLength(8);
     expect(chihayaNoaCampaign.routes).toHaveLength(15);
-    expect(chihayaNoaCampaign.relations).toHaveLength(3);
+    expect(chihayaNoaCampaign.syntheses).toHaveLength(3);
     expect(chihayaNoaCampaign.endings).toHaveLength(3);
     expect(chihayaNoaCampaign.characters).toHaveLength(4);
     expect(chihayaNoaCampaign.districts).toHaveLength(3);
@@ -28,7 +28,7 @@ describe("Chihaya Noa's Thirteenth Journey", () => {
       trueEndingId: "return",
       requiredClueCount: 12,
       requiredCollectibleCount: 7,
-      requiredRelationCount: 3,
+      requiredSynthesisCount: 3,
     });
     expect(chihayaNoaCampaign.case.clues.find((clue) => clue.id === "twelve-entry-stamps")?.detail).toMatch(/都真实/);
     expect(chihayaNoaCampaign.case.clues.find((clue) => clue.id === "unmade-address-book")?.summary).toMatch(/连续生活/);

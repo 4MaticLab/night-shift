@@ -3,7 +3,7 @@
 import { useRef, type ReactNode } from "react";
 import { motion } from "motion/react";
 import { Check, Link2, QrCode, X } from "lucide-react";
-import type { Clue, EvidenceRelation } from "@/src/lib/game-engine/schema";
+import type { Clue, EvidenceSynthesis } from "@/src/lib/game-engine/schema";
 import { useAccessibleDialog } from "@/src/lib/use-accessible-dialog";
 import { useI18n } from "@/src/i18n/provider";
 
@@ -49,14 +49,14 @@ function EvidenceLetterLayer({
 export function ClueDossierDialog({
   clue,
   received,
-  relations,
+  syntheses,
   detectiveName,
   onClose,
   onShare,
 }: {
   clue: Clue;
   received: boolean;
-  relations: EvidenceRelation[];
+  syntheses: EvidenceSynthesis[];
   detectiveName: string;
   onClose: () => void;
   onShare: () => void;
@@ -75,33 +75,38 @@ export function ClueDossierDialog({
     <p className="evidence-letter-body">{clue.detail}</p>
     <blockquote className="evidence-letter-quote"><small>{t("城市异议")}</small>“{clue.cityObjection}”</blockquote>
     <div className="evidence-letter-note"><small>{detectiveName} · {t("页边批注")}</small>{clue.marginNote}</div>
-    {relations.length > 0 && <footer className="evidence-letter-footer">
+    {syntheses.length > 0 && <footer className="evidence-letter-footer">
       <small>{t("这份证物已经参与作证")}</small>
-      {relations.map((relation) => <b key={relation.id}><Link2 /> {relation.statement}</b>)}
+      {syntheses.map((synthesis) => <b key={synthesis.id}><Link2 /> {synthesis.title}</b>)}
     </footer>}
   </EvidenceLetterLayer>;
 }
 
-export function RelationRevealDialog({
-  relation,
+export function SynthesisRevealDialog({
+  synthesis,
+  inputTitles,
   onClose,
 }: {
-  relation: EvidenceRelation;
+  synthesis: EvidenceSynthesis;
+  inputTitles: string[];
   onClose: () => void;
 }) {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
 
   return <EvidenceLetterLayer labelledBy="evidence-relation-title" onClose={onClose}>
     <button className="evidence-letter-close" type="button" data-dialog-initial-focus aria-label={t("关闭核心推论")} onClick={onClose}><X /></button>
     <div className="evidence-letter-seal confirmed" aria-hidden="true"><span /><Check /></div>
     <header className="evidence-letter-head">
       <small>CORE INFERENCE · {t("核心推论")}</small>
-      <span>CONFIRMED · {t("核对成立")}</span>
-      <h2 id="evidence-relation-title">{relation.statement}</h2>
+      <span>FILED · {locale === "en" ? "SYNTHESIS COMPLETE" : "推论已归档"}</span>
+      <h2 id="evidence-relation-title">{synthesis.title}</h2>
     </header>
-    <p className="evidence-letter-body">{relation.explanation}</p>
+    <div className="evidence-letter-inputs" aria-label={locale === "en" ? "Evidence used" : "采用的证物"}>
+      {inputTitles.map((title, index) => <span key={`${index}-${title}`}>{index > 0 && <i aria-hidden="true">+</i>}<b>{title}</b></span>)}
+    </div>
+    <p className="evidence-letter-body">{synthesis.explanation}</p>
     <footer className="evidence-letter-footer soft">
-      <small>{t("论断已经归入底部核心推论浮窗，并在案件板上留下连线。")}</small>
+      <small>{locale === "en" ? "This inference is now a searchable case file and may support a later synthesis." : "这条推论已经进入可检索档案，也可以继续作为后续推理的证物。"}</small>
     </footer>
   </EvidenceLetterLayer>;
 }

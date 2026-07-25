@@ -3,6 +3,30 @@ import { configVariable, defineConfig } from "hardhat/config";
 
 export default defineConfig({
   plugins: [hardhatToolboxViemPlugin],
+  chainDescriptors: {
+    1439: {
+      name: "Injective EVM Testnet",
+      chainType: "l1",
+      blockExplorers: {
+        blockscout: {
+          name: "Injective Testnet Blockscout",
+          url: "https://testnet.blockscout.injective.network",
+          apiUrl: "https://testnet.blockscout-api.injective.network/api",
+        },
+      },
+    },
+  },
+  verify: {
+    blockscout: {
+      enabled: true,
+    },
+    etherscan: {
+      enabled: false,
+    },
+    sourcify: {
+      enabled: false,
+    },
+  },
   paths: {
     tests: {
       nodejs: "./contract-tests",

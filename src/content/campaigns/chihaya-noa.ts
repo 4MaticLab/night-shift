@@ -4,7 +4,7 @@ import {
   cityDistrictSchema,
   cityWatchEchoSchema,
   endingEpilogueSchema,
-  evidenceRelationSchema,
+  evidenceSynthesisSchema,
   journeyPostcardSchema,
   nightBotanicalSchema,
   routeDirectionSchema,
@@ -221,26 +221,26 @@ const chihayaNoaRoutes: RouteDirection[] = chihayaNoaCase.chapters.flatMap((chap
   })),
 );
 
-const chihayaNoaRelations = [
+const chihayaNoaSyntheses = [
   {
     id: "noa-resets-left-travelers",
-    clueIds: ["twelve-entry-stamps", "paper-knot-route"],
-    statement: "每次城市重置都留下了一位真实旅行者",
+    inputIds: ["twelve-entry-stamps", "paper-knot-route"],
+    title: "每次城市重置都留下了一位真实旅行者",
     explanation: "十二份合法入境记录与十二套只能由亲自走过者留下的纸结路线逐层对应，证明旧诺亚不是一次性复制品。",
   },
   {
     id: "noa-unmade-lives-continue",
-    clueIds: ["mirror-shard-memory", "unmade-address-book"],
-    statement: "未成线中的诺亚仍拥有连续生活",
+    inputIds: ["mirror-shard-memory", "unmade-address-book"],
+    title: "未成线中的诺亚仍拥有连续生活",
     explanation: "返照镜片中的房间细节与住址簿里的租住、借书和工作记录互相验证，旧版本在被主城排除后仍作为人生活。",
   },
   {
     id: "noa-observer-performs-erasure",
-    clueIds: ["observer-chair-log", "thirteen-signed-tickets"],
-    statement: "抹除来自观察者裁决，不来自镜子辨认真伪",
+    inputIds: ["observer-chair-log", "thirteen-signed-tickets"],
+    title: "抹除来自观察者裁决，不来自镜子辨认真伪",
     explanation: "裁决记录显示每次线路坍缩都发生在观察者签字之后，而十三张签名票证明没有任何一位缺少独立人生。",
   },
-].map((item) => evidenceRelationSchema.parse(item));
+].map((item) => evidenceSynthesisSchema.parse(item));
 
 const chihayaNoaEndings: EndingEpilogue[] = [
   {
@@ -433,7 +433,7 @@ export const chihayaNoaCampaign = defineCampaign({
   version: 1,
   case: chihayaNoaCase,
   routes: chihayaNoaRoutes,
-  relations: chihayaNoaRelations,
+  syntheses: chihayaNoaSyntheses,
   endings: chihayaNoaEndings,
   postcards: chihayaNoaPostcards,
   botanicals: chihayaNoaBotanicals,
@@ -445,7 +445,7 @@ export const chihayaNoaCampaign = defineCampaign({
     trueEndingId: "return",
     requiredClueCount: chihayaNoaCase.clues.length,
     requiredCollectibleCount: 7,
-    requiredRelationCount: chihayaNoaRelations.length,
+    requiredSynthesisCount: chihayaNoaSyntheses.length,
   },
   presentation: {
     archiveNumber: "004",
@@ -461,5 +461,34 @@ export const chihayaNoaCampaign = defineCampaign({
     endingQuestion: "十三段人生都能自证以后，谁还有资格指定唯一原本？",
     endingPrompt: "入境记录、未成线住址与观察者协议都已查明。最后要决定的是公开、保护，还是把名字、出口与沉默权逐一交还。",
     closingRefrain: "天已经亮了，十三扇门仍分别通向自己的清晨。",
+    prologue: {
+      scenes: [
+        {
+          stage: "incident",
+          eyebrow: "雾港 22:08 · 第十三号停用站台",
+          title: "同一名少女已经抵达十二次",
+          body: "雾港保存着十二份千早诺亚的合法入境记录：日期、衣着和行李互不相同，指纹却全部通过检验。今晚，她本人带着第十三张车票走进事务所。",
+          aside: "那张票要到明天才发售，边缘却已经被许多年的旅途磨旧。",
+          assetId: "case.chihaya-noa.header.handoff",
+        },
+        {
+          stage: "evidence",
+          eyebrow: "接案物证 · 十三份互斥证词",
+          title: "她们都记得自己怎样长大",
+          body: "十三张寄宿学校照片各有不同的童年，十二个住址指向地图上从未建成的街区。诺亚不要求事务所找出赝品，只要求在观察者抵达以前证明：矛盾不等于虚假。",
+          aside: "你将核对车票、纸结与返照镜。林渡会沿每一段未成线人生分别取证。",
+          assetId: "collectible.chihaya-noa.future-ticket",
+        },
+        {
+          stage: "handoff",
+          eyebrow: "第一夜交接 · 林渡",
+          title: "今晚不替任何人挑选原本",
+          body: "林渡把十三张车票分装进十三只透明袋，没有在任何一只上写“副本”。他先去寄宿学校旧档室，再赶往雾港核对那些被制度判作互斥的抵达。",
+          aside: "“你去睡。我保证带回来的每一份证词，都拥有自己的名字。”",
+          assetId: "case.chihaya-noa.header.night",
+        },
+      ],
+      acceptLabel: "接下案件，进入事务所",
+    },
   },
 });

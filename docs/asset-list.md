@@ -2,7 +2,7 @@
 
 | ID | 名称 | 类别 | 文件 | 状态 | 页面 |
 |---|---|---|---|---|---|
-| `brand.night-shift.logo` | Night Shift 品牌 Logo | Brand mark | `/public/art/brand/night-shift-logo-v1.png` | 完成 | 导航、夜班、晨报、Apple 图标 |
+| `brand.night-shift.logo` | Night Shift 品牌 Logo | Brand mark | `/public/art/brand/night-shift-logo-mark-v1.webp`、`/public/art/brand/night-shift-logo-v1.png` | 完成 | 导航；Apple 图标保留高分辨率 PNG |
 | `brand.night-shift.favicon` | Night Shift favicon | Site icon | `/public/favicon.png`、`/app/icon.png` | 完成 | 浏览器标签、Next.js 站点图标 |
 | `header.night-shift.hero` | 夜班交接 | Header / Character / City | `/public/art/headers/shift-handoff-v2.webp` | 完成 | 首页、睡前 |
 | `header.night-expedition` | 雨夜高架调查 | Header / Character / City | `/public/art/headers/night-expedition-v1.webp` | 完成 | 夜间调查 |
@@ -11,6 +11,11 @@
 | `social.night-shift.og` | 夜班侦探分享封面 | Social | `/public/og.png` | 完成 | 链接预览 |
 | `map.foglight.css` | 雾灯城路线图 | CSS scene | `app/globals.css` | 完成 | 夜间、晨报 |
 | `board.case-001.css` | 纸质案件板 | CSS scene | `app/globals.css` | 完成 | 案件板 |
+| `ui.case-board.paper` | 案件板揉皱底纸 | UI texture | `/public/art/ui/case-board-crumpled-paper-v2.webp` | 完成 | 案件板、证物档案 |
+| `ui.evidence-card.seal` | 蝴蝶档案封印 | UI mark | `/public/art/ui/butterfly-dossier-seal-v1.webp` | 完成 | 证物档案卡 |
+| `preparation.side-lamp` | 黄铜提灯 | Preparation | `/public/art/preparations/side-lamp-v1.webp` | 完成 | 睡前准备 |
+| `preparation.flower-note` | 夜香花笺 | Preparation | `/public/art/preparations/flower-note-v1.webp` | 完成 | 睡前准备 |
+| `preparation.tram-fare` | 旧制电车零钱 | Preparation | `/public/art/preparations/tram-fare-v1.webp` | 完成 | 睡前准备 |
 | `collectible.torn-ticket` | 43号线残票 | Engraved object | `/public/art/collectibles/torn-ticket-v1.png` | 完成 | 晨报、收藏 |
 | `collectible.matchbox` | 旧火柴盒 | Engraved object | `/public/art/collectibles/matchbox-v1.png` | 完成 | 晨报、收藏 |
 | `collectible.pressed-flower` | 夜香花标本 | Engraved object | `/public/art/collectibles/pressed-flower-v1.png` | 完成 | 晨报、收藏 |
@@ -59,7 +64,11 @@
 
 第四案同样拥有完全专属的 34 张 WebP，统一位于 `/public/art/cases/chihaya-noa/`，并按同一 4／5／5／5／8／4／3 资产层级组织。具体 ID、文件、替代文本与类别由 `src/content/chihaya-noa-assets.ts` 登记；提示词、人物连续性与文化表达边界见 [[docs/art-prompts/chihaya-noa-visual-archive]]。
 
-品牌 Logo、核心插画、八件首案物证、五枚首案夜印、五张首案城市明信片、五张首案植物学标本、三枚社团纹章、九件口袋纪念物、林渡交接肖像、四张首案人物肖像、三张首案地区版画、四张睡眠硬件档案，以及第三、第四案各 34 张专属视觉由内置图像生成能力生成；地图、纸张、图钉、路线、信号读数、四阶段揭示、交接标签和档案材质保持代码原生，以便响应式缩放与动效控制。品牌 Logo 的提示词与透明化记录见 [[docs/art-prompts/night-shift-logo]]；林渡的身份连续性与最终提示词见 [[docs/art-prompts/lin-du-handoff-portrait]]；明信片的生成约束与场景差异见 [[docs/art-prompts/city-postcards]]，植物提示词见 [[docs/art-prompts/night-greenhouse]]，纹章提示词见 [[docs/art-prompts/city-societies]]，纪念物提示词见 [[docs/art-prompts/pocket-souvenirs]]，人物提示词与源图映射见 [[docs/art-prompts/city-witness-portraits]]，地区提示词见 [[docs/art-prompts/foglight-districts]]，硬件提示词见 [[docs/art-prompts/sleep-hardware-dossiers]]，第三案提示词与映射见 [[docs/art-prompts/thirteenth-loaf-visual-archive]]，第四案见 [[docs/art-prompts/chihaya-noa-visual-archive]]。内容资产通过 `src/content/assets.ts` manifest 解析；全局品牌 Logo 与 CSS 场景由站点外壳直接引用。
+第五案拥有完全专属的 34 张 WebP，统一位于 `/public/art/cases/fog-without-wolves/`，沿用同一 4／5／5／5／8／4／3 层级。具体 ID、文件、替代文本与类别由 `src/content/fog-without-wolves-assets.ts` 登记；提示词、负空间怪异表达和首案风格对照见 [[docs/art-prompts/fog-without-wolves-visual-archive]]。
+
+品牌 Logo、核心插画、八件首案物证、五枚首案夜印、五张首案城市明信片、五张首案植物学标本、三枚社团纹章、九件口袋纪念物、林渡交接肖像、四张首案人物肖像、三张首案地区版画、四张睡眠硬件档案，以及第三至第五案各 34 张专属视觉由内置图像生成能力生成；地图、纸张、图钉、路线、信号读数、四阶段揭示、交接标签和档案材质保持代码原生，以便响应式缩放与动效控制。品牌 Logo 的提示词与透明化记录见 [[docs/art-prompts/night-shift-logo]]；林渡的身份连续性与最终提示词见 [[docs/art-prompts/lin-du-handoff-portrait]]；明信片的生成约束与场景差异见 [[docs/art-prompts/city-postcards]]，植物提示词见 [[docs/art-prompts/night-greenhouse]]，纹章提示词见 [[docs/art-prompts/city-societies]]，纪念物提示词见 [[docs/art-prompts/pocket-souvenirs]]，人物提示词与源图映射见 [[docs/art-prompts/city-witness-portraits]]，地区提示词见 [[docs/art-prompts/foglight-districts]]，硬件提示词见 [[docs/art-prompts/sleep-hardware-dossiers]]，第三案提示词与映射见 [[docs/art-prompts/thirteenth-loaf-visual-archive]]，第四案见 [[docs/art-prompts/chihaya-noa-visual-archive]]，第五案见 [[docs/art-prompts/fog-without-wolves-visual-archive]]。内容资产通过 `src/content/assets.ts` manifest 解析；全局品牌 Logo 与 CSS 场景由站点外壳直接引用。
+
+三件睡前随身物不再依赖第三方图床，统一以 160×160 WebP 从 `/public/art/preparations/` 同域交付。Next Image 为组件内美术生成按布局选择的响应式候选；CSS 背景图则继续使用预先缩放的 WebP，避免在小尺寸界面下载原始生成图。
 
 ## 相关文档
 
