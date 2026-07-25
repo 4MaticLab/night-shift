@@ -1,6 +1,6 @@
 # 本地纪念品二维码交换
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P2
 - 创建：2026-07-25
 - 更新：2026-07-25
@@ -31,11 +31,11 @@
 
 ## 任务
 
-- [ ] `keepsake-sharing.ts` 纯函数 + 单测。
-- [ ] `keepsake-store.ts` 独立本地存档。
-- [ ] `/keepsake` 页面：收取 + 陈列/分享（二维码 + 海报卡）。
-- [ ] CSS 与 i18n。
-- [ ] 验证：`vitest run`、`eslint .`、`next build`。
+- [x] `keepsake-sharing.ts` 纯函数 + 单测。
+- [x] `keepsake-store.ts` 独立本地存档。
+- [x] `/keepsake` 页面：收取 + 陈列/分享（二维码 + 海报卡）。
+- [x] CSS 与文案。
+- [x] 验证：`vitest run`、`eslint .`、`next build`。
 
 ## 验收标准
 
@@ -53,6 +53,7 @@
 ## 决定记录
 
 - 2026-07-25：创建计划，`auto` 模式自审进入 `in_progress`。纪念品为非评分内容，独立本地键避免主存档迁移，符合 local-first 与隐私护栏。
+- 2026-07-25：完成实现。`keepsake-sharing` + `keepsake-store`（`night-shift-keepsakes-v1`）+ `/keepsake` 页（扫码收取 + 二维码/海报分享）；页面为 zh-only（与 `/posters` 一致，不依赖游戏 i18n provider）。验证：`vitest run` 21 文件 144 用例全过（含 6 条 keepsake 用例）、`eslint .` 通过、`next build` 成功、浏览器实测 `?keepsake=rain-receipt` 收取、幂等与“已收藏”标记生效。
 
 ## 相关文档
 
