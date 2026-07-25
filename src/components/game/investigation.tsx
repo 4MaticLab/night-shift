@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, Ear, FileCheck2, FileText, Flower2, KeyRound, RotateCcw, Search, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, Ear, FileCheck2, FileText, Flower2, KeyRound, Minus, Plus, RotateCcw, Search, Sparkles, X } from "lucide-react";
 import { BookTextIcon, FileCheck2Icon, FileStackIcon, KeyIcon, SparklesIcon } from "lucide-animated";
 import { getAsset } from "@/src/content/assets";
 import { getPreparation } from "@/src/content/preparations";
@@ -30,14 +30,80 @@ import { TarotDraw } from "./tarot-draw";
 
 type ArchiveFilter = "all" | "clues" | "inferences" | "unused";
 
+type BoardPlacement = { x: number; y: number; rotation: number };
+
+const boardRotations = [-2.1, 1.4, -1.2, 1.6, -.7, 2.1, 1.1, -1.7, .8, -1.4, 1.9, -.9];
+
+const desktopBoardSlots: BoardPlacement[] = [
+  { x: 4, y: 6, rotation: -2.3 },
+  { x: 29, y: 3, rotation: 1.7 },
+  { x: 54, y: 8, rotation: -1.4 },
+  { x: 78, y: 4, rotation: 2.1 },
+  { x: 6, y: 39, rotation: 1.2 },
+  { x: 31, y: 35, rotation: -1.8 },
+  { x: 53, y: 42, rotation: 2.4 },
+  { x: 79, y: 37, rotation: -.9 },
+  { x: 3, y: 69, rotation: -1.5 },
+  { x: 28, y: 66, rotation: 2.2 },
+  { x: 55, y: 71, rotation: -2 },
+  { x: 77, y: 67, rotation: 1.3 },
+];
+
+const BOARD_SCALE_MIN = .7;
+const BOARD_SCALE_MAX = 1.12;
+const BOARD_SCALE_STEP = .08;
+
+/**
+ * Slot-grid layout: every card owns a slot, so cards can never overlap —
+ * the tiny jitter and rotation stay inside slot bounds. The canvas grows
+ * with the row count instead of recycling positions when files pile up.
+ */
+function computeBoardLayout(count: number, compact: boolean) {
+  const cols = compact ? 2 : 4;
+  const rows = Math.max(1, Math.ceil(Math.max(count, 1) / cols));
+  const slotW = 100 / cols;
+  const cardW = slotW * .72;
+  const slotHPx = compact ? 250 : 190;
+  const canvasMinH = Math.max(compact ? 560 : 570, rows * slotHPx);
+  const positions: BoardPlacement[] = Array.from({ length: count }, (_, index) => {
+    if (!compact && desktopBoardSlots[index]) return desktopBoardSlots[index]!;
+    const col = index % cols;
+    const row = Math.floor(index / cols);
+    const jitterX = (((index * 7) % 5) - 2) * .55;
+    const jitterY = (((index * 5) % 5) - 2) * .35;
+    return {
+      x: col * slotW + (slotW - cardW) / 2 + jitterX,
+      y: (row * 100) / rows + 2.4 + jitterY,
+      rotation: boardRotations[index % boardRotations.length]!,
+    };
+  });
+  return { positions, cardW, canvasMinH };
+}
+
+function useMediaQuery(query: string): boolean {
+  return useSyncExternalStore(
+    (callback) => {
+      const media = window.matchMedia(query);
+      media.addEventListener("change", callback);
+      return () => media.removeEventListener("change", callback);
+    },
+    () => window.matchMedia(query).matches,
+    () => false,
+  );
+}
+
 export function CaseBoard() {
   const { unlockedClueIds, receivedClueIds, synthesizedEvidenceIds, synthesizeEvidence } = useGameStore();
   const { campaign, locale, t } = useI18n();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<ArchiveFilter>("all");
+  const [boardSelectionId, setBoardSelectionId] = useState<string | null>(null);
   const [dossierClueId, setDossierClueId] = useState<string | null>(null);
   const [letterSynthesisId, setLetterSynthesisId] = useState<string | null>(null);
   const [sharedClue, setSharedClue] = useState<Clue | null>(null);
+  const [synthesisPanelOpen, setSynthesisPanelOpen] = useState(false);
+  const compactBoard = useMediaQuery("(max-width: 900px)");
+  const [boardScale, setBoardScale] = useState(.88);
   const archiveItems = useMemo(() => getEvidenceArchiveItems({
     clues: campaign.case.clues,
     syntheses: campaign.syntheses,
@@ -61,14 +127,27 @@ export function CaseBoard() {
   ]), [campaign.case.clues, campaign.syntheses]);
   const normalizedQuery = query.trim().toLocaleLowerCase(locale === "en" ? "en" : "zh-CN");
   const visibleItems = archiveItems.filter((item) => {
+    // The inferences filter mirrors the archived clue set too: filing an
+    // inference keeps a readable copy of its inputs on the board view.
     const matchesFilter = filter === "all"
       || (filter === "clues" && item.kind === "clue")
-      || (filter === "inferences" && item.kind === "inference")
+      || (filter === "inferences" && (item.kind === "inference" || usedEvidenceIds.has(item.id)))
       || (filter === "unused" && !usedEvidenceIds.has(item.id));
     const matchesQuery = !normalizedQuery
       || item.searchText.toLocaleLowerCase(locale === "en" ? "en" : "zh-CN").includes(normalizedQuery);
     return matchesFilter && matchesQuery;
   });
+  // Filed inferences belong in the desk; the board remains a readable map of source clues.
+  const boardItems = useMemo(() => visibleItems.filter((item) => item.kind === "clue"), [visibleItems]);
+  const allBoardItems = useMemo(() => archiveItems.filter((item) => item.kind === "clue"), [archiveItems]);
+  const boardLayout = useMemo(() => computeBoardLayout(allBoardItems.length, compactBoard), [allBoardItems.length, compactBoard]);
+  const boardPositions = useMemo(() => new Map(allBoardItems.map((item, index) => [item.id, boardLayout.positions[index] ?? boardLayout.positions[0]!])), [allBoardItems, boardLayout]);
+  const visibleBoardItemIds = useMemo(() => new Set(boardItems.map((item) => item.id)), [boardItems]);
+  const completedBoardLinks = useMemo(() => completedSyntheses.flatMap((synthesis) => {
+    const inputIds = synthesis.inputIds.filter((id) => visibleBoardItemIds.has(id));
+    if (inputIds.length < 2) return [];
+    return inputIds.slice(1).map((inputId) => ({ id: `${synthesis.id}-${inputIds[0]}-${inputId}`, from: inputIds[0]!, to: inputId }));
+  }), [completedSyntheses, visibleBoardItemIds]);
   const availableClues = campaign.case.clues.filter((clue) => unlockedClueIds.includes(clue.id));
   const dossierClue = availableClues.find((clue) => clue.id === dossierClueId) ?? null;
   const dossierSyntheses = dossierClue
@@ -114,13 +193,14 @@ export function CaseBoard() {
   return <div className="board-page evidence-archive-page">
     <div className="page-title"><div><p className="eyebrow">CASE FILES · {locale === "en" ? "EVIDENCE ARCHIVE" : "线索档案"}</p><h2>{locale === "en" ? <>Read what returned.<br />File what it proves.</> : <>先把线索读清，<br />再把推论归档。</>}</h2></div><p>{locale === "en" ? "Every recovered clue can be opened directly. When all evidence for an inference has arrived, the synthesis desk will invite you to file it." : "每份带回的线索都可以直接阅档。只有组成推论的证物全部到齐后，推理台才会请你整理归档。"}</p></div>
 
-    <div className="evidence-archive-layout">
-      <section className="evidence-library" aria-labelledby="evidence-library-title">
+    <div className="evidence-archive-layout evidence-board-layout">
+      <section className="evidence-library evidence-canvas-library" aria-labelledby="evidence-library-title">
         <header className="evidence-library-toolbar">
           <div>
             <small>CLUE INDEX · {locale === "en" ? "SEARCHABLE FILES" : "可检索档案"}</small>
             <h3 id="evidence-library-title">{locale === "en" ? `${archiveItems.length} files recovered` : `已收录 ${archiveItems.length} 份档案`}</h3>
           </div>
+          <div className="evidence-search-stack">
           <label className="evidence-search">
             <Search aria-hidden="true" />
             <span className="sr-only">{locale === "en" ? "Search evidence" : "检索线索"}</span>
@@ -131,6 +211,17 @@ export function CaseBoard() {
               placeholder={locale === "en" ? "Search titles and notes" : "检索标题、摘要与批注"}
             />
           </label>
+          <button type="button" className={`board-synthesis-launcher ${readySyntheses.length > 0 ? "ready" : ""}`} onClick={() => setSynthesisPanelOpen(true)}>
+            <span className="board-synthesis-launcher-icon" aria-hidden="true"><Sparkles /></span>
+            <span className="board-synthesis-launcher-label">
+              <small>INFERENCE DESK</small>
+              <b>{readySyntheses.length > 0
+                ? (locale === "en" ? `${readySyntheses.length} inference ${readySyntheses.length === 1 ? "is" : "are"} ready` : `${readySyntheses.length} 组线索可以整理`)
+                : (locale === "en" ? "Inference desk" : "推理台")}</b>
+            </span>
+            <ChevronRight aria-hidden="true" />
+          </button>
+          </div>
           <div className="evidence-filter-row" aria-label={locale === "en" ? "Evidence filters" : "线索筛选"}>
             {filterOptions.map((option) => <button
               type="button"
@@ -141,30 +232,82 @@ export function CaseBoard() {
           </div>
         </header>
 
-        {visibleItems.length > 0 ? <div className="evidence-archive-grid">
-          {visibleItems.map((item, index) => <button
-            type="button"
-            key={item.id}
-            className={`evidence-archive-card evidence-paper-${(index % 7) + 1} ${item.kind}`}
-            onClick={() => openEvidence(item.id)}
-            aria-label={`${item.kind === "inference" ? (locale === "en" ? "Open inference" : "查看推论") : t("打开证物档案")}：${item.title}`}
-          >
-            <span className="evidence-card-pin" aria-hidden="true" />
-            <Image className="evidence-card-seal" src="/art/ui/butterfly-dossier-seal-v1.webp" alt="" width={32} height={32} sizes="32px" aria-hidden="true" />
-            <small>{item.kind === "inference" ? "CORE INFERENCE" : `${item.type.toUpperCase()} · NIGHT 0${item.chapter}`}</small>
-            <b>{item.title}</b>
-            <p>{item.summary}</p>
-            <span className="evidence-card-action">{locale === "en" ? "Open file" : "打开档案"} <ChevronRight /></span>
-            {item.kind === "clue" && receivedClueIds.includes(item.id) && <em>{t("好友送达")}</em>}
-          </button>)}
+        {boardItems.length > 0 ? <div
+          className="evidence-board-canvas"
+          aria-label={locale === "en" ? "Evidence board" : "线索案件板"}
+          style={{ "--board-card-scale": boardScale, "--board-card-w": `${boardLayout.cardW}%`, minHeight: boardLayout.canvasMinH } as CSSProperties}
+        >
+          <svg className="evidence-board-threads" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            {completedBoardLinks.map((link) => {
+              const from = boardPositions.get(link.from);
+              const to = boardPositions.get(link.to);
+              if (!from || !to) return null;
+              const pinX = (point: BoardPlacement) => point.x + (boardLayout.cardW * boardScale) / 2;
+              const pinY = (point: BoardPlacement) => point.y + (12.5 * boardScale * 100) / boardLayout.canvasMinH;
+              return <line key={link.id} x1={pinX(from)} y1={pinY(from)} x2={pinX(to)} y2={pinY(to)} />;
+            })}
+          </svg>
+          {boardItems.map((item, index) => {
+            const placement = boardPositions.get(item.id) ?? boardLayout.positions[0]!;
+            return <article
+              key={item.id}
+              className={`evidence-archive-card evidence-board-card evidence-paper-${(index % 7) + 1} ${item.kind} ${boardSelectionId === item.id ? "selected" : ""}`}
+              style={{ "--board-x": `${placement.x}%`, "--board-y": `${placement.y}%`, "--board-rotation": `${placement.rotation}deg` } as CSSProperties}
+              role="button"
+              tabIndex={0}
+              onClick={() => { setBoardSelectionId(item.id); openEvidence(item.id); }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  setBoardSelectionId(item.id);
+                  openEvidence(item.id);
+                }
+              }}
+              aria-label={`${item.kind === "inference" ? (locale === "en" ? "Open inference" : "查看推论") : t("打开证物档案")}：${item.title}`}
+            >
+              <span className="evidence-card-pin" aria-hidden="true" />
+              {item.kind === "clue" ? <button type="button" className="evidence-card-seal" onClick={(event) => { event.stopPropagation(); openEvidence(item.id); }} aria-label={`${locale === "en" ? "Open dossier" : "查看档案"}：${item.title}`}><Image src="/art/ui/butterfly-dossier-seal-v1.webp" alt="" width={32} height={32} sizes="32px" aria-hidden="true" /></button> : <span className="evidence-card-seal inference-seal" aria-hidden="true"><Check /></span>}
+              <small>{item.kind === "inference" ? "CORE INFERENCE" : `${item.type.toUpperCase()} · NIGHT 0${item.chapter}`}</small>
+              <b>{item.title}</b>
+              <p>{item.summary}</p>
+              <span className="evidence-card-action">{locale === "en" ? "Open file" : "打开档案"} <ChevronRight /></span>
+              {item.kind === "clue" && receivedClueIds.includes(item.id) && <em>{t("好友送达")}</em>}
+            </article>;
+          })}
+          <div className="board-size-control" role="group" aria-label={locale === "en" ? "Adjust clue card size" : "调节线索卡片大小"}>
+            <button type="button" onClick={() => setBoardScale((value) => Math.max(BOARD_SCALE_MIN, +(value - BOARD_SCALE_STEP).toFixed(2)))} disabled={boardScale <= BOARD_SCALE_MIN} aria-label={locale === "en" ? "Shrink clue cards" : "缩小线索卡片"}><Minus size={14} /></button>
+            <span aria-live="polite">{Math.round(boardScale * 100)}%</span>
+            <button type="button" onClick={() => setBoardScale((value) => Math.min(BOARD_SCALE_MAX, +(value + BOARD_SCALE_STEP).toFixed(2)))} disabled={boardScale >= BOARD_SCALE_MAX} aria-label={locale === "en" ? "Enlarge clue cards" : "放大线索卡片"}><Plus size={14} /></button>
+          </div>
         </div> : <div className="evidence-archive-empty">
           <Search />
-          <h3>{archiveItems.length ? (locale === "en" ? "No files match this search." : "没有符合条件的档案") : t("案件板还很安静")}</h3>
-          <p>{archiveItems.length ? (locale === "en" ? "Try another keyword or evidence filter." : "换一个关键词或筛选条件再找找。") : t("完成第一夜调查，林渡带回的证物会出现在这里。")}</p>
+          <h3>{filter === "inferences" && !normalizedQuery
+            ? (locale === "en" ? "No filed inferences yet." : "还没有归档的推论")
+            : archiveItems.length ? (locale === "en" ? "No files match this search." : "没有符合条件的档案") : t("案件板还很安静")}</h3>
+          <p>{filter === "inferences" && !normalizedQuery
+            ? (locale === "en" ? "Once the desk files its first inference, the clues it archived will be mirrored here." : "推理台整理出第一条推论后，参与归档的线索会同步一份到这里。")
+            : archiveItems.length ? (locale === "en" ? "Try another keyword or evidence filter." : "换一个关键词或筛选条件再找找。") : t("完成第一夜调查，林渡带回的证物会出现在这里。")}</p>
         </div>}
       </section>
 
-      <aside className="synthesis-desk" aria-labelledby="synthesis-desk-title">
+      <AnimatePresence>
+      {synthesisPanelOpen && <>
+        <motion.button
+          className="board-synthesis-scrim"
+          type="button"
+          aria-label={locale === "en" ? "Close inference desk" : "关闭推理台"}
+          onClick={() => setSynthesisPanelOpen(false)}
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        />
+        <motion.aside
+          className="synthesis-desk board-synthesis-desk"
+          aria-labelledby="synthesis-desk-title"
+          role="dialog"
+          aria-modal="true"
+          initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
+          transition={{ type: "spring", damping: 28, stiffness: 280 }}
+        >
+        <button className="board-synthesis-close" type="button" onClick={() => setSynthesisPanelOpen(false)} aria-label={locale === "en" ? "Close inference desk" : "关闭推理台"}><X /></button>
         <header>
           <small>INFERENCE DESK · {locale === "en" ? "SYNTHESIS" : "推理合成"}</small>
           <h3 id="synthesis-desk-title">{locale === "en" ? "Evidence ready to be filed" : "把已经到齐的证词整理成推论"}</h3>
@@ -197,7 +340,9 @@ export function CaseBoard() {
             <Check /><span><small>CONFIRMED</small><b>{synthesis.title}</b></span><ChevronRight />
           </button>)}
         </section>}
-      </aside>
+        </motion.aside>
+      </>}
+      </AnimatePresence>
     </div>
 
     <details className="board-cipher-disclosure">
