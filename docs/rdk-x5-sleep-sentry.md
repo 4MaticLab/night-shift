@@ -13,7 +13,7 @@
 - 开发板：D-Robotics（地瓜机器人）RDK X5，Sunrise 5 芯片，RDK OS（Ubuntu 系），40PIN 树莓派兼容排针（3.3V，I2C/SPI/UART/PWM）。
 - 摆放：床头，摄像头朝向睡眠区域，接入用户家里的局域网。
 - 摄像头：USB UVC 摄像头（默认 `--camera 0`）；MIPI CSI 需按板端 `hobot_vio.libsrcampy` 适配，`camera.py` 中留有 `_open_mipi()` 挂点。
-- 传感器（全部可选，缺谁降谁）：
+- 传感器（全部可选，缺谁降谁；接线、驱动细节与排障见 [[docs/mini-lindo-sensor-guide]]）：
   - SHT3x（I2C `0x44`）：温度 + 湿度；
   - SGP30（I2C `0x58`）：CO₂ 当量 + TVOC；
   - PMS5003（UART `/dev/ttyS1`）：PM2.5。
@@ -61,6 +61,7 @@ python3 sentry.py --mock          # 合成数据模式，可在任何机器上�
 
 ## 相关文档
 
+- [[docs/mini-lindo-sensor-guide]] — 传感器手册：40PIN 接线、逐路驱动细节、字段流向与板上排障。
 - [[docs/sleep-hardware-bridge]] — 网页端虚拟睡眠硬件（与本硬件链路互相独立）。
 - [[docs/privacy-and-guardrails]] — 健康数据最小化与非医疗边界。
 - [[docs/architecture]] — 仓库整体工程结构。
