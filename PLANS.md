@@ -6,7 +6,7 @@
 
 | 计划 | 分支 | 状态 | 模式 | 进度 | 下一步 |
 |---|---|---|---|---:|---|
-| [[plans/codex-mobile-app-packaging]] | `codex/mobile-app-packaging` | `in_progress` | `manual` | 75% | 同步主线、完成 iOS CI 构建与稳定文档 |
+| [[plans/codex-mobile-app-packaging]] | `codex/mobile-app-packaging` | `in_progress` | `manual` | 90% | 推送分支并完成 Android／iOS CI 产物验证 |
 
 ## 使用规则
 

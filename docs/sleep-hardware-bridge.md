@@ -19,9 +19,22 @@
 
 模拟器以 `sessionId + sourceId` 生成确定性摘要；相同会话和设备重复计算结果一致。夜间 UI 可以投影变化中的信号，但原始逐点序列不会写入存档。归来时只保存时长、派生质量、置信度和已授权字段的少量汇总。
 
-### 真实桥接预演
+### 系统健康仓
 
-硬件中心提供 Apple Health、Android Health Connect、Oura Cloud 与 Fitbit Web API 的厂商选择、拟用权限和数据映射。它们当前明确标记为“接口预演”，不会发起 OAuth、SDK 调用或真实采集，也不会显示“已连接”。浏览厂商只修改面板内的临时草稿，不覆盖已连接虚拟设备；每个厂商都提供一台能力相近的虚拟设备作为可玩的后续入口。真实接入需要独立的原生权限层或服务端令牌桥。
+安装后的移动 App 已接入两个真实系统来源：
+
+| 平台 | 来源 | 当前权限 | 读取时机 |
+|---|---|---|---|
+| iOS | Apple Health／HealthKit | `sleep` 只读 | 真实夜班结束与晨间回到前台 |
+| Android | Health Connect | `READ_SLEEP` | 真实夜班结束与晨间回到前台 |
+
+授权页由操作系统展示。夜班运行不依赖后台 JavaScript：App 只冻结开始与结束时间，在晨间按时间窗读取系统已经同步的记录。桥会合并重叠的睡眠／分期区间，只留下时长、派生质量、深睡分钟、醒转次数、置信度和主要来源名称；原始样本不写入 Zustand 或服务端。
+
+HealthKit 不向 App 明示用户是否拒绝了读取权限，因此 iOS 授权流程完成只表示系统设置已配置；空查询始终按无数据处理。Health Connect 会核对 `sleep` 读取授权。任一平台拒绝、空数据、同步延迟或系统服务不可用都不会阻断夜班，用户也可以随时改用虚拟设备。
+
+### 厂商桥接预演
+
+网页中的 Apple Health 与 Health Connect 入口只说明必须安装 App；只有当前移动平台对应的系统仓能发起真实授权。Oura Cloud 与 Fitbit Web API 仍明确标记为“接口预演”，不会发起 OAuth、SDK 调用或真实采集。浏览预演来源只修改面板内的临时草稿，不覆盖已连接设备；每个来源都提供一台能力相近的虚拟设备作为可玩的后续入口。厂商私有接入仍需要独立 SDK 或服务端令牌桥。
 
 网页玩家的完整操作步骤见 [[docs/sleep-hardware-user-guide]]。以 Xiaomi Watch S4、Mi Fitness 和 Health Connect 为例的数据源验证、原生 Companion 方案与甲方演示边界见 [[docs/xiaomi-watch-hardware-test]]；只有测试手机的 Health Connect 确实出现可追溯的 Mi Fitness 睡眠记录，才能把该段判定为真实数据源链路通过。
 
@@ -33,7 +46,7 @@
 
 硬件中心采用三段式链路：
 
-1. 选择虚拟设备。点选只更新面板草稿，现有授权和活动采集不变。
+1. 选择虚拟设备或当前平台可用的系统健康仓。点选只更新面板草稿，现有授权和活动采集不变。
 2. 确认摘要字段。睡眠窗口是建立会话边界所必需的最小字段，其他字段可以逐项关闭。
 3. 明确授权后原子替换设备与权限。连接成功会给出可返回游戏的完成态，下一次夜班自动采集。
 
@@ -46,6 +59,7 @@
 | `src/lib/sleep-hardware/types.ts` | 设备、权限、采集和标准化摘要契约 |
 | `src/content/sleep-devices.ts` | 四类虚拟设备、四个桥接方向及权限说明 |
 | `src/lib/sleep-hardware/simulator.ts` | 确定性摘要和运行时信号投影 |
+| `src/lib/sleep-hardware/native-health.ts` | 原生可用性、只读授权、睡眠时间窗查询和摘要规范化 |
 | `src/stores/sleep-hardware-store.ts` | 独立 localStorage 授权、活动采集与最近摘要 |
 | `src/components/game/sleep-hardware.tsx` | 硬件中心、交接状态、夜间遥测和晨报回执 |
 | `src/lib/ambient-hardware/` | Home Assistant 实体、语义 cue 与浏览器桥客户端契约 |
@@ -62,12 +76,13 @@
 撤销即停止采集 ← 最近 8 条本地摘要 ← 结束 SleepSession
 ```
 
-活动采集冻结设备、权限、开始时间和睡眠质量快照。中途切换来源或撤销会终止设备采集，但不会结束 `SleepSession`。桥接预演永远不创建活动采集。
+活动采集冻结设备／系统来源、权限、开始时间和睡眠质量快照。中途切换来源或撤销会终止设备采集，但不会结束 `SleepSession`。系统来源不伪装锁屏后台持续采集，只在晨间查询同一时间窗；厂商桥接预演永远不创建活动采集。
 
 ## 相关文档
 
 - [[docs/architecture]]
 - [[docs/sleep-hardware-user-guide]]
+- [[docs/mobile-app-packaging]]
 - [[docs/xiaomi-watch-hardware-test]]
 - [[docs/privacy-and-guardrails]]
 - [[docs/home-assistant-ambient-bridge]]

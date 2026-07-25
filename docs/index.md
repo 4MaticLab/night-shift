@@ -18,7 +18,8 @@
 - [[docs/poster-entry-trigger-guide]] — 海报网页入口、二维码去向、路由判定、打印触发与不触发边界。
 - [[docs/quality-baseline]] — 当前版本的质量基线、验证命令和已知边界。
 - [[docs/viewport-checklist]] — 桌面与移动端关键页面的交互检查清单。
-- [[docs/sleep-hardware-bridge]] — 虚拟睡眠设备、真实桥接预演与游戏生命周期。
+- [[docs/mobile-app-packaging]] — Android APK、iOS App、签名安装、CI 产物与原生健康权限。
+- [[docs/sleep-hardware-bridge]] — 虚拟设备、系统健康仓与游戏生命周期。
 - [[docs/sleep-hardware-user-guide]] — 面向网页玩家的虚拟睡眠硬件连接、验收、撤销与常见问题。
 - [[docs/xiaomi-watch-hardware-test]] — Xiaomi Watch S4 数据源验证、真实接入 PoC、甲方演示与验收清单。
 - [[docs/home-assistant-ambient-bridge]] — 本机 Home Assistant 空间外设桥、受限实体、配对、cue 与比赛接线。
