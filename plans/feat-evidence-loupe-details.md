@@ -1,6 +1,6 @@
 # 证物放大镜与隐藏细节
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P2
 - 创建：2026-07-25
 - 更新：2026-07-25
@@ -29,10 +29,10 @@
 
 ## 任务
 
-- [ ] `computeLoupe` 纯函数 + 单测。
-- [ ] `EvidenceLoupe` 客户端组件 + CSS。
-- [ ] 晨报头图接入。
-- [ ] 验证：`vitest run`、`eslint .`、`next build`。
+- [x] `computeLoupe` 纯函数 + 单测。
+- [x] `EvidenceLoupe` 客户端组件 + CSS。
+- [x] 晚报头图接入。
+- [x] 验证：`vitest run`、`eslint .`、`next build`。
 
 ## 验收标准
 
@@ -49,6 +49,7 @@
 ## 决定记录
 
 - 2026-07-25：创建计划，`auto` 模式自审进入 `in_progress`。
+- 2026-07-25：完成实现。`computeLoupe` 纯函数 + `EvidenceLoupe` 组件，接入晚报头图；屏幕专用，打印/减动效安全。验证：`vitest run` 21 文件 143 用例全过（含 5 条 loupe 用例）、`eslint .` 通过、`next build` 成功。
 
 ## 相关文档
 
