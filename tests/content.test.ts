@@ -104,6 +104,12 @@ describe("Night Shift case content", () => {
       }
     }
     expect(rainRadioCampaign.case.title).toBe("只在雨中播出的电台");
+    expect(rainRadioCampaign.presentation.prologue.scenes.map((scene) => scene.assetId)).toEqual([
+      "header.night-shift.hero",
+      "district.lantern-wharf",
+      "header.night-expedition",
+    ]);
+    expect(new Set(rainRadioCampaign.presentation.prologue.scenes.map((scene) => getAsset(scene.assetId).src))).toHaveLength(3);
     expect(thirteenthLoafCampaign.case.title).toBe("黎明前出炉的第十三个面包");
     expect(thirteenthLoafCampaign.presentation.archiveNumber).toBe("003");
     expect(chihayaNoaCampaign.case.title).toBe("千早诺亚的第十三次旅行");
