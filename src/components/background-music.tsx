@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Volume2, VolumeX } from "lucide-react";
+import { VolumeIcon, type VolumeIconHandle } from "@/src/components/ui/volume";
 
 export const BGM_SOURCE = "/audio/c-minor-nocturne.mp3";
 export const BGM_PREFERENCE_KEY = "night-shift-bgm-enabled-v1";
@@ -15,6 +15,7 @@ export function readMusicPreference(storage: Pick<Storage, "getItem">): boolean 
 
 export function BackgroundMusic() {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const iconRef = useRef<VolumeIconHandle>(null);
   const initialAttemptedRef = useRef(false);
   const [enabled, setEnabled] = useState(true);
   const [hydrated, setHydrated] = useState(false);
@@ -103,6 +104,10 @@ export function BackgroundMusic() {
   };
 
   const label = getMusicLabel(enabled, state);
+  useEffect(() => {
+    if (enabled) iconRef.current?.startAnimation();
+    else iconRef.current?.stopAnimation();
+  }, [enabled]);
   return <div className={`background-music-control state-${state}${enabled ? " enabled" : " disabled"}`}>
     <audio
       ref={audioRef}
@@ -116,7 +121,7 @@ export function BackgroundMusic() {
     />
     <button type="button" aria-label={label} aria-pressed={!enabled} onClick={toggle}>
       <span className="background-music-icon" aria-hidden="true">
-        {enabled ? <Volume2 /> : <VolumeX />}
+        <VolumeIcon ref={iconRef} size={28} />
       </span>
     </button>
   </div>;

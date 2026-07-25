@@ -19,11 +19,6 @@ export function Hero({ onStart, interactive }: { onStart: () => void; interactiv
   const wheelEntries: { label: string; id?: (typeof campaignRegistry)[number]["id"] }[] = [
     { label: t("选择剧本") },
     ...campaignRegistry.map((source) => ({ label: localizeCampaign(source, campaignSupportsLocale(source.id, preferredLocale) ? preferredLocale : "zh-CN").case.title, id: source.id })),
-    { label: "雾灯城失物招领处" },
-    { label: "第七盏路灯的告别" },
-    { label: "凌晨三点的无人书店" },
-    { label: "货运电梯里的十一月" },
-    { label: "潮汐旅馆的最后一位房客" },
   ];
   const selectedCampaignIndex = Math.max(1, wheelEntries.findIndex((entry) => entry.id === campaignId));
   const primaryLabel = started
@@ -45,7 +40,7 @@ export function Hero({ onStart, interactive }: { onStart: () => void; interactiv
         </div>
       </nav>
       <section className="hero-copy">
-        <p className="eyebrow"><Moon size={14} /> {t("一款与你轮班生活的异步侦探游戏")}</p>
+        <p className="eyebrow"><Moon size={14} /> {t("一款与你轮班生活的异步侦探游戏")}<span className="shift-rule"><span className="shift-rule-face shift-rule-day"><b aria-hidden="true">●</b>{t("你负责白天推理")}</span><span className="shift-rule-face shift-rule-night"><b aria-hidden="true">☾</b>{t("林渡负责夜晚调查")}</span></span></p>
         <h1>{locale === "en" ? <>When you fall asleep,<br /><em>his work begins.</em></> : <>你睡着以后，<br /><em>他才开始工作。</em></>}</h1>
         <p className="hero-lede">{t("白天分析线索，晚上把调查交给侦探。等你醒来，雾灯城会留下一份新的报告。")}</p>
         <div className="hero-actions">
@@ -56,7 +51,6 @@ export function Hero({ onStart, interactive }: { onStart: () => void; interactiv
             onClick={onStart}
           >{primaryLabel} <ArrowRight size={18} /></ShinyButton>
         </div>
-        <div className="shift-rule"><span>{t("你负责白天推理")}</span><i /><span>{t("林渡负责夜晚调查")}</span></div>
       </section>
       <section className={interactive ? "campaign-wheel" : "campaign-wheel inert"} aria-label={t("案件剧本选择")}>
         <OptionWheel
@@ -74,6 +68,8 @@ export function Hero({ onStart, interactive }: { onStart: () => void; interactiv
           loop
           textColor="#9da8b5"
           activeColor="#f7f4ef"
+          soundUrl="/audio/click-soft.mp3"
+          soundVolume={1}
           onChange={(index) => { const id = wheelEntries[index]?.id; if (id) switchCampaign(id); }}
         />
         {preferredLocale === "en" && <p className="locale-availability">English edition available for Case 001. Other cases remain in Chinese.</p>}

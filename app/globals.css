@@ -49,10 +49,10 @@ body {
 }
 
 .background-music-control {
-  position: fixed;
+  position: absolute;
   z-index: 1100;
-  top: max(15px, env(safe-area-inset-top));
-  right: max(15px, env(safe-area-inset-right));
+  top: max(28px, env(safe-area-inset-top));
+  right: max(4vw, 42px, env(safe-area-inset-right));
 }
 
 .background-music-control>audio {
@@ -61,8 +61,8 @@ body {
 
 .background-music-control>button {
   position: relative;
-  width: 44px;
-  height: 44px;
+  width: 50px;
+  height: 50px;
   padding: 0;
   display: grid;
   place-items: center;
@@ -96,20 +96,20 @@ body {
 
 .background-music-icon {
   position: relative;
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
   display: grid;
   place-items: center;
 }
 
 .background-music-icon>svg {
-  width: 19px;
-  height: 19px;
+  width: 28px;
+  height: 28px;
 }
 
 .landing-nav-actions,
 .topbar-actions {
-  margin-right: 52px;
+  margin-right: 58px;
 }
 
 body.app-is-booting {
@@ -591,6 +591,7 @@ blockquote {
   display: flex;
   align-items: center;
   gap: 9px;
+  flex-wrap: wrap;
 }
 
 .hero-copy h1 {
@@ -660,20 +661,89 @@ blockquote {
 }
 
 .shift-rule {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  color: #848d99;
-  margin-top: 42px;
+  display: inline-grid;
+  margin-left: 5px;
+  padding: 6px 14px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--warm-paper);
   font-family: monospace;
   font-size: 10px;
   letter-spacing: .09em;
+  transition: background-color .3s ease, border-color .3s ease;
 }
 
-.shift-rule i {
-  display: block;
-  width: 46px;
-  border-top: 1px dashed #596271;
+.shift-rule-face {
+  grid-area: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  transition: opacity .26s ease, transform .26s ease;
+}
+
+.shift-rule-face b {
+  font-weight: 400;
+}
+
+.shift-rule-day {
+  color: #10151f;
+}
+
+.shift-rule-night {
+  color: var(--warm-paper);
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.shift-rule-night b {
+  color: var(--amber);
+}
+
+.shift-rule:hover {
+  background: #05070d;
+  border-color: rgba(247, 244, 239, .28);
+}
+
+.shift-rule:hover .shift-rule-day {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+.shift-rule:hover .shift-rule-night {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Touch devices have no hover: alternate day/night automatically instead. */
+@media (hover: none) and (prefers-reduced-motion: no-preference) {
+  .shift-rule {
+    animation: shift-rule-pill 8s ease-in-out infinite;
+  }
+
+  .shift-rule-day {
+    animation: shift-rule-day 8s ease-in-out infinite;
+  }
+
+  .shift-rule-night {
+    animation: shift-rule-night 8s ease-in-out infinite;
+  }
+}
+
+@keyframes shift-rule-pill {
+  0%, 44%, 100% { background: var(--warm-paper); border-color: transparent; }
+  50%, 94% { background: #05070d; border-color: rgba(247, 244, 239, .28); }
+}
+
+@keyframes shift-rule-day {
+  0%, 44%, 100% { opacity: 1; transform: translateY(0); }
+  50%, 94% { opacity: 0; transform: translateY(-6px); }
+}
+
+@keyframes shift-rule-night {
+  0%, 44%, 100% { opacity: 0; transform: translateY(6px); }
+  50%, 94% { opacity: 1; transform: translateY(0); }
 }
 
 .campaign-shelf {
@@ -1285,7 +1355,7 @@ blockquote {
 }
 
 .global-brand {
-  position: fixed;
+  position: absolute;
   z-index: 45;
   top: calc(28px + env(safe-area-inset-top));
   left: max(4vw, 42px);
@@ -1293,7 +1363,7 @@ blockquote {
 }
 
 .game-chrome {
-  position: fixed;
+  position: absolute;
   z-index: 40;
   top: calc(28px + env(safe-area-inset-top));
   left: max(4vw, 42px);
@@ -10360,6 +10430,21 @@ blockquote {
     padding: 18px 20px;
   }
 
+  .background-music-control {
+    top: max(18px, env(safe-area-inset-top));
+    right: max(20px, env(safe-area-inset-right));
+  }
+
+  .background-music-control>button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .landing-nav-actions,
+  .topbar-actions {
+    margin-right: 52px;
+  }
+
   .landing-nav .ghost-button {
     font-size: 0;
     width: 44px;
@@ -10412,7 +10497,6 @@ blockquote {
   }
 
   .shift-rule {
-    margin-top: 24px;
     font-size: 8px;
   }
 
@@ -12589,7 +12673,7 @@ blockquote {
 .sleep-hardware-status.recording > svg:first-child { animation: hardwarePulse 1.7s ease-in-out infinite; }
 @keyframes hardwarePulse { 50% { filter: drop-shadow(0 0 7px #83aaa4); opacity: .55; } }
 
-.sleep-hardware-layer { position: fixed; z-index: 250; inset: 0; pointer-events: none; }
+.sleep-hardware-layer { position: fixed; z-index: 1150; inset: 0; pointer-events: none; }
 .sleep-hardware-scrim { position: fixed; z-index: 0; inset: 0; border: 0; background: #03060bd9; backdrop-filter: blur(9px); cursor: pointer; pointer-events: auto; }
 .sleep-hardware-panel { position: fixed; z-index: 1; top: 0; right: 0; width: min(700px, 100%); height: 100dvh; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scroll-padding-top: 78px; padding: 34px clamp(22px, 4vw, 46px) calc(42px + env(safe-area-inset-bottom)); border-left: 1px solid #6c5b43; color: #aab2bc; pointer-events: auto; outline: none; background:
   linear-gradient(90deg, transparent 0 31px, #8a694e20 32px, transparent 33px),
