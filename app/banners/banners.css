@@ -464,30 +464,43 @@
     linear-gradient(100deg, #0a111c66, transparent 60%);
 }
 
-/* Proposition: person image dissolves into the city for a seamless blend */
+/* Proposition: person melts into the city through a soft, hazy transition */
 .banner-sheet--proposition {
   background:
     linear-gradient(#7991a10b 1px, transparent 1px) 0 0 / 100% 9px,
+    linear-gradient(180deg, #101d31 30%, #101d319e 46%, #101d3100 64%),
     url("/art/districts/lantern-wharf-v1.webp") center bottom / auto 60% no-repeat,
     linear-gradient(150deg, #111c2d, #0b1321);
 }
 
-/* person image layer, faded at the bottom so it melts into the city (no seam line) */
+/* person image layer, gently faded at the bottom */
 .banner-sheet--proposition::after {
   display: block;
   z-index: -1;
   inset: 0 0 auto 0;
-  height: 54%;
+  height: 56%;
   border: 0;
   pointer-events: none;
   background: url("/art/headers/shift-handoff-v2.webp") 74% top / auto 100% no-repeat;
-  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 58%, #0000 100%);
-  mask-image: linear-gradient(180deg, #000 0%, #000 58%, #0000 100%);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 42%, #00000059 72%, #0000 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 42%, #00000059 72%, #0000 100%);
 }
 
-/* mid band removed; the mask crossfade is the transition */
+/* soft hazy mist over the meeting point for a dreamy, non-rigid blend */
 .banner-sheet--proposition::before {
-  display: none;
+  display: block;
+  z-index: 0;
+  inset: 32% 0 auto 0;
+  height: 38%;
+  border: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(150% 120% at 42% 46%, #9aabbf22, transparent 66%),
+    linear-gradient(180deg, transparent 0%, #6a7c9222 42%, #7a8ca42e 52%, #6a7c9222 62%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 26%, #000 74%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 26%, #000 74%, transparent 100%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 /* brand overlays the top person image; no underline; text stays crisp above the fog */
