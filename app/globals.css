@@ -597,8 +597,9 @@ blockquote {
 .hero-copy h1 {
   margin: 24px 0 22px;
   color: var(--warm-paper);
-  font-size: clamp(54px, 5.5vw, 86px);
-  line-height: 1.01;
+  /* Slightly smaller responsive scale for campaign-rotating headlines. */
+  font-size: clamp(46px, 4.7vw, 72px);
+  line-height: 1.04;
   letter-spacing: -.04em;
   text-wrap: balance;
 }
