@@ -1536,13 +1536,8 @@ blockquote {
   min-height: 0;
   height: 100%;
   position: relative;
-  overflow: hidden auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: safe center;
-  gap: 10px;
-  padding: var(--chrome-clearance) 7% 5%;
-  background: linear-gradient(180deg, rgba(16, 28, 48, .1), var(--ink)), url("/art/headers/shift-handoff-v2.webp") left center/cover;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(16, 28, 48, .12), var(--ink)), url("/art/headers/night-expedition-v1.webp") 62% center / cover;
   isolation: isolate;
 }
 
@@ -1574,9 +1569,11 @@ blockquote {
 }
 
 .scene-copy {
-  position: relative;
+  position: absolute;
   z-index: 5;
-  max-width: 420px;
+  left: 7%;
+  top: max(9%, var(--chrome-clearance));
+  max-width: min(360px, 60%);
 }
 
 .scene-copy h2 {
@@ -1602,14 +1599,18 @@ blockquote {
 }
 
 .tonight-page .handoff-stack {
-  position: relative;
-  inset: auto;
+  position: absolute;
   z-index: 4;
+  right: 5%;
+  bottom: 5%;
+  left: auto;
+  top: auto;
+  width: min(44%, 210px);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: flex-start;
-  gap: 16px;
+  gap: 12px;
   padding: 0;
 }
 
@@ -1960,16 +1961,16 @@ blockquote {
 
 /* Tonight prep — narrower immersive scene column */
 .tonight-page .scene-copy {
-  max-width: min(360px, 88%);
+  max-width: min(320px, 54%);
 }
 
 .tonight-page .handoff-stack {
   padding: 0;
-  gap: 14px;
+  gap: 10px;
 }
 
 .tonight-page .handoff-portrait {
-  width: min(82%, 280px);
+  width: 100%;
 }
 
 .tonight-page .handoff-docket {
@@ -11320,44 +11321,23 @@ blockquote {
     grid-template-columns: minmax(0, .8fr) minmax(440px, 1.2fr);
   }
 
-  .tonight-page .desk-scene {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    overflow: visible;
-  }
-
   .tonight-page .scene-copy {
-    position: static;
-    left: auto;
-    top: auto;
-    max-width: none;
-    padding: var(--chrome-clearance) 7% 0;
+    left: 6%;
+    max-width: min(300px, 54%);
   }
 
   .tonight-page .handoff-stack {
-    position: static;
-    inset: auto;
-    align-items: flex-start;
-    justify-content: flex-start;
-    padding: 12px 7% 16px;
-    gap: 12px;
+    right: 5%;
+    bottom: 5%;
+    width: min(52%, 200px);
   }
 
   .scene-copy h2 {
-    font-size: clamp(34px, 3.6vw, 40px);
+    font-size: clamp(32px, 3.4vw, 38px);
   }
 
   .scene-title-en {
-    font-size: clamp(27px, 2.9vw, 31px) !important;
-  }
-
-  .tonight-page .handoff-portrait {
-    width: min(68%, 220px);
-  }
-
-  .tonight-page .handoff-docket {
-    width: min(100%, 300px);
+    font-size: clamp(26px, 2.8vw, 30px) !important;
   }
 
   .plan-panel {
@@ -11380,45 +11360,29 @@ blockquote {
   }
 
   .tonight-page .desk-scene {
-    display: flex;
-    flex-direction: column;
-    height: auto;
-    min-height: 0;
-    overflow: visible;
-    background-position: 20% center;
+    height: min(660px, 76svh);
+    min-height: 540px;
+    background-position: 58% center;
   }
 
   .tonight-page .scene-copy {
-    position: static;
-    left: auto;
-    top: auto;
-    max-width: none;
-    padding: max(var(--chrome-clearance), 32px) 6% 0;
+    left: 6%;
+    top: max(9%, var(--chrome-clearance));
+    max-width: 56%;
   }
 
   .tonight-page .handoff-stack {
-    position: static;
-    inset: auto;
-    align-items: flex-start;
-    justify-content: flex-start;
-    padding: 20px 6% 40px;
-    gap: 18px;
+    right: 6%;
+    bottom: 6%;
+    width: min(52%, 250px);
   }
 
   .tonight-page .scene-copy h2 {
-    font-size: clamp(38px, 5.4vw, 46px);
+    font-size: clamp(34px, 5vw, 44px);
   }
 
   .tonight-page .scene-title-en {
-    font-size: clamp(30px, 4vw, 34px) !important;
-  }
-
-  .tonight-page .handoff-portrait {
-    width: min(100%, 340px);
-  }
-
-  .tonight-page .handoff-docket {
-    width: min(100%, 340px);
+    font-size: clamp(28px, 4vw, 34px) !important;
   }
 
   .tonight-page .plan-panel {
@@ -11710,7 +11674,7 @@ blockquote {
   .scene-copy {
     left: 20px;
     top: max(7%, var(--chrome-clearance));
-    max-width: 52%;
+    max-width: 48%;
   }
 
   .scene-copy h2 {
@@ -11727,10 +11691,13 @@ blockquote {
     line-height: 1.65;
   }
 
+  .tonight-page .handoff-stack {
+    width: min(44%, 150px);
+    right: 4%;
+    bottom: 20px;
+  }
+
   .handoff-portrait {
-    width: 43%;
-    right: 12px;
-    bottom: 22px;
     padding: 5px 5px 0;
   }
 
