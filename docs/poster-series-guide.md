@@ -86,6 +86,7 @@
 
 - [[docs/art-direction]]
 - [[docs/asset-list]]
+- [[docs/booth-setup-and-printing]]
 - [[docs/demo-script]]
 - [[docs/hackathon-submission-kit]]
 - [[docs/poster-entry-trigger-guide]]

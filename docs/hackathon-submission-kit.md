@@ -91,6 +91,7 @@ Night Shift 是一款 local-first 异步侦探游戏。玩家在睡前完成调�
 
 - [[docs/product-overview]]
 - [[docs/demo-script]]
+- [[docs/booth-setup-and-printing]]
 - [[docs/quality-baseline]]
 - [[docs/privacy-and-guardrails]]
 - [[docs/sleep-hardware-bridge]]
