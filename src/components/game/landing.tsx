@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Moon } from "lucide-react";
 import { getAsset } from "@/src/content/assets";
 import { campaignRegistry } from "@/src/content/campaigns/registry";
 import { useGameStore } from "@/src/stores/game-store";
@@ -40,8 +40,9 @@ export function Hero({ onStart, interactive }: { onStart: () => void; interactiv
         </div>
       </nav>
       <section className="hero-copy">
-        <h1>{locale === "en" ? <><span className="hero-title-hand hero-title-hand-lead">When you fall asleep,</span><em className="hero-title-hand">his work begins.</em></> : <><span className="hero-title-hand hero-title-hand-lead">你睡着以后，</span><em className="hero-title-hand">他才开始工作。</em></>}</h1>
-        <p className="hero-lede hero-lede-note">{locale === "en" ? "Analyze clues by day, hand the night to the detective." : "白天分析线索，晚上把调查交给侦探"}</p>
+        <p className="eyebrow"><Moon size={14} /> {t("一款与你轮班生活的异步侦探游戏")}<span className="shift-rule"><span className="shift-rule-face shift-rule-day"><b aria-hidden="true">●</b>{t("你负责白天推理")}</span><span className="shift-rule-face shift-rule-night"><b aria-hidden="true">☾</b>{t("林渡负责夜晚调查")}</span></span></p>
+        <h1>{locale === "en" ? <>When you fall asleep,<br /><em>his work begins.</em></> : <>你睡着以后，<br /><em>他才开始工作。</em></>}</h1>
+        <p className="hero-lede">{t("白天分析线索，晚上把调查交给侦探。等你醒来，雾灯城会留下一份新的报告。")}</p>
         <div className="hero-actions">
           <ShinyButton
             className="primary-button"
