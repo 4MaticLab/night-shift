@@ -11064,18 +11064,32 @@ blockquote {
   }
 
   .preparation-list {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
   }
 
   .preparation {
-    min-height: 52px;
-    display: grid;
-    grid-template-columns: 34px 1fr 18px;
+    min-height: 0;
+    max-width: none;
+    margin: 0;
+    padding: 10px 4px 9px;
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    gap: 6px;
   }
 
   .preparation>span {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
     margin: 0;
+  }
+
+  .preparation>span img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
 
   .night-run {
