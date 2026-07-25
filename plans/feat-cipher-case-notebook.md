@@ -1,6 +1,6 @@
 # 案件密文笔记本
 
-- 状态：`in_progress`
+- 状态：`completed`
 - 优先级：P1
 - 创建：2026-07-25
 - 更新：2026-07-25
@@ -29,10 +29,10 @@
 
 ## 任务
 
-- [ ] 实现独立笔记存档、迁移与输入限制。
-- [ ] 实现笔记本、保存状态、清除和导出。
-- [ ] 添加测试、响应式样式、隐私与架构文档。
-- [ ] 运行测试、lint、构建和浏览器检查。
+- [x] 实现独立笔记存档、迁移与输入限制。
+- [x] 实现笔记本、保存状态、清除和导出。
+- [x] 添加测试、响应式样式、隐私与架构文档。
+- [x] 运行测试、lint、构建和浏览器检查。
 
 ## 验收标准
 
@@ -44,11 +44,11 @@
 
 ## 验证
 
-- `npm test`
-- `npm run lint`
-- `npm run build`
-- `npm run docs:check`
-- Playwright 检查保存、刷新、清除确认与 game store 隔离
+- `npm test`：18 个测试文件、134 项测试通过。
+- `npm run lint`：通过。
+- `npm run build`：通过。
+- `npm run docs:check`：95 个 Markdown 文件通过。
+- Playwright Chromium：保存、刷新恢复、二次清空与 game store 隔离通过。
 
 ## 决定记录
 
