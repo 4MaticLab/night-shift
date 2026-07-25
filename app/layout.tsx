@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Libre_Baskerville, Ma_Shan_Zheng, Noto_Serif_SC, Playfair_Display } from "next/font/google";
+import { Libre_Baskerville, Noto_Serif_SC, Playfair_Display } from "next/font/google";
 import { headers } from "next/headers";
 import { ClickSpark } from "@/src/components/click-spark";
 import { BackgroundMusic } from "@/src/components/background-music";
@@ -11,7 +11,6 @@ import "./globals.css";
 const playfair = Playfair_Display({ variable: "--font-playfair", subsets: ["latin"], weight: ["400", "600", "700"] });
 const baskerville = Libre_Baskerville({ variable: "--font-baskerville", subsets: ["latin"], weight: ["400", "700"] });
 const notoSerifSC = Noto_Serif_SC({ variable: "--font-noto-serif-sc", subsets: ["latin"], weight: ["400", "500", "600", "700"] });
-const handwriting = Ma_Shan_Zheng({ variable: "--font-handwriting", subsets: ["latin"], weight: "400" });
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
@@ -32,5 +31,5 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const requestLocale = await getRequestLocale();
-  return <html lang={requestLocale}><body className={`${playfair.variable} ${baskerville.variable} ${notoSerifSC.variable} ${handwriting.variable}`}><RequestLocaleProvider initialLocale={requestLocale}><InjectiveWalletProvider>{children}<BackgroundMusic /><ClickSpark /></InjectiveWalletProvider></RequestLocaleProvider></body></html>;
+  return <html lang={requestLocale}><body className={`${playfair.variable} ${baskerville.variable} ${notoSerifSC.variable}`}><RequestLocaleProvider initialLocale={requestLocale}><InjectiveWalletProvider>{children}<BackgroundMusic /><ClickSpark /></InjectiveWalletProvider></RequestLocaleProvider></body></html>;
 }
