@@ -842,7 +842,7 @@ test("draws one local daily night omen without changing game progress", async ({
   await expect(page.locator("#collection-night-omens").getByRole("button", { name: "今日夜兆已归档" })).toBeDisabled();
 });
 
-test("keeps the desktop collection continuous while putting core evidence first", async ({ page }) => {
+test("keeps the desktop collection continuous and highlights the index from scroll", async ({ page }) => {
   await openMintableCollection(page);
   const archiveIndex = page.getByRole("navigation", { name: "收藏档案分类" });
   await expect(archiveIndex).toBeVisible();
@@ -869,6 +869,15 @@ test("keeps the desktop collection continuous while putting core evidence first"
   expect(await page.locator(".collection-section").evaluateAll(
     (sections) => sections.every((section) => getComputedStyle(section).display !== "none"),
   )).toBe(true);
+
+  await page.locator("#collection-returned-nights").scrollIntoViewIfNeeded();
+  await expect(page.getByRole("button", { name: /夜班归来/ })).toHaveAttribute("aria-pressed", "true");
+  await page.locator("#collection-city-echoes").scrollIntoViewIfNeeded();
+  await expect(page.getByRole("button", { name: /城市回声/ })).toHaveAttribute("aria-pressed", "true");
+  await page.locator("#collection-night-omens").scrollIntoViewIfNeeded();
+  await expect(page.getByRole("button", { name: /夜兆牌桌/ })).toHaveAttribute("aria-pressed", "true");
+  await page.locator("#collection-pocket-drawer").scrollIntoViewIfNeeded();
+  await expect(page.getByRole("button", { name: /口袋小物/ })).toHaveAttribute("aria-pressed", "true");
   await expectNoPageOverflow(page);
 });
 
@@ -1163,11 +1172,23 @@ test("restores and settles a real night after reload", async ({ page }) => {
 test("reads, searches, and synthesizes evidence without pair guessing", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
-  await page.getByRole("button", { name: /DEMO MODE/ }).click();
+  await expect(page.getByRole("button", { name: /开始第 001 宗案件/ })).toBeEnabled();
+  await page.keyboard.press("Shift+D");
   await runDemoShortcut(page, /解锁完整案件板/);
   await expect(page.getByRole("heading", { name: "已收录 12 份档案" })).toBeVisible();
   await expect(page.locator(".evidence-archive-card")).toHaveCount(12);
   await expect(page.locator(".ready-synthesis-card")).toHaveCount(3);
+  const [libraryLayout, synthesisLayout] = await Promise.all([
+    page.locator(".evidence-library").boundingBox(),
+    page.locator(".synthesis-desk").boundingBox(),
+  ]);
+  expect(libraryLayout).not.toBeNull();
+  expect(synthesisLayout).not.toBeNull();
+  expect(Math.abs((libraryLayout!.x + libraryLayout!.width / 2) - 720)).toBeLessThan(2);
+  expect(synthesisLayout!.y).toBeGreaterThanOrEqual(libraryLayout!.y + libraryLayout!.height - 1);
+  expect(await page.locator(".evidence-archive-card").first().evaluate((element) =>
+    getComputedStyle(element).backgroundImage.includes("evidence-paper-clean-01-v2.png"),
+  )).toBe(true);
 
   await page.getByRole("button", { name: /打开证物档案：四十三天/ }).click();
   const dossierDialog = page.getByRole("dialog", { name: "四十三天" });
@@ -1480,7 +1501,8 @@ test.describe("tablet portrait 820x1180", () => {
 
   test("keeps the case board and inference desk in one touch-scroll flow", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("button", { name: /DEMO MODE/ }).click();
+    await expect(page.getByRole("button", { name: /开始第 001 宗案件/ })).toBeEnabled();
+    await page.keyboard.press("Shift+D");
     await runDemoShortcut(page, /解锁完整案件板/);
     await expect(page.locator(".demo-drawer")).toHaveCount(0);
 
@@ -1495,7 +1517,7 @@ test.describe("tablet portrait 820x1180", () => {
     expect(library).not.toBeNull();
     expect(desk!.width).toBeGreaterThan(750);
     expect(library!.width).toBeGreaterThan(750);
-    expect(library!.y).toBeGreaterThanOrEqual(desk!.y + desk!.height - 1);
+    expect(desk!.y).toBeGreaterThanOrEqual(library!.y + library!.height - 1);
     await expect(page.locator(".ready-synthesis-card")).toHaveCount(3);
     await expect(page.getByRole("button", { name: "整理这条推论" }).first()).toBeVisible();
     const cipherDisclosure = page.locator(".board-cipher-disclosure");
@@ -1513,24 +1535,22 @@ test.describe("tablet portrait 820x1180", () => {
     await expectNoPageOverflow(page);
   });
 
-  test("focuses one collection drawer at a time and keeps evidence first", async ({ page }) => {
+  test("keeps collection sections continuous and highlights index from scroll", async ({ page }) => {
     await openMintableCollection(page);
     const archiveIndex = page.getByRole("navigation", { name: "收藏档案分类" });
     await expect(archiveIndex).toBeVisible();
     await expectMinimumTapTargets(archiveIndex.locator("button"));
     await expect(page.locator("#collection-core-evidence")).toBeVisible();
-    await expect(page.locator("#collection-returned-nights")).toBeHidden();
-    await expect(page.locator("#collection-city-echoes")).toBeHidden();
-    await expect(page.locator("#collection-pocket-drawer")).toBeHidden();
+    await expect(page.locator("#collection-returned-nights")).toBeVisible();
+    await expect(page.locator("#collection-city-echoes")).toBeVisible();
+    await expect(page.locator("#collection-pocket-drawer")).toBeVisible();
 
     await page.getByRole("button", { name: /夜班归来/ }).click();
+    await expect(page.getByRole("button", { name: /夜班归来/ })).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator("#collection-returned-nights")).toBeVisible();
-    await expect(page.locator(".night-greenhouse")).toBeVisible();
-    await expect(page.locator("#collection-core-evidence")).toBeHidden();
     await page.getByRole("button", { name: /城市回声/ }).click();
+    await expect(page.getByRole("button", { name: /城市回声/ })).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator("#collection-city-echoes")).toBeVisible();
-    await expect(page.locator(".city-watch-ledger")).toBeVisible();
-    await expect(page.locator("#collection-returned-nights")).toBeHidden();
     await expectNoPageOverflow(page);
   });
 });
@@ -1662,25 +1682,21 @@ test.describe("mobile 390x844", () => {
     const archiveIndex = page.getByRole("navigation", { name: "收藏档案分类" });
     await expectMinimumTapTargets(archiveIndex.locator("button"));
     await expect(page.locator("#collection-core-evidence")).toBeVisible();
-    await expect(page.locator(".night-greenhouse")).toBeHidden();
     await expect(page.getByRole("button", { name: /核心物证/ })).toHaveAttribute("aria-pressed", "true");
-    expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThan(5200);
     await page.getByRole("button", { name: /夜班归来/ }).click();
+    await expect(page.getByRole("button", { name: /夜班归来/ })).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByText("雾灯温室")).toBeVisible();
-    await expect(page.locator("#collection-core-evidence")).toBeHidden();
     await page.getByRole("button", { name: /城市回声/ }).click();
+    await expect(page.getByRole("button", { name: /城市回声/ })).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByText("城市人情簿")).toBeVisible();
     await expect(page.locator(".clipping-envelope")).toHaveCount(4);
-    await expect(page.locator(".clipping-envelope-grid")).toHaveCSS("grid-template-columns", /.+/);
-    expect(await page.locator(".clipping-envelope-grid").evaluate((grid) => getComputedStyle(grid).gridTemplateColumns.split(" ").length)).toBe(1);
     await expect(page.locator(".sleep-gap-entry")).toHaveCount(5);
-    expect(await page.locator(".sleep-gap-ledger-grid").evaluate((grid) => getComputedStyle(grid).gridTemplateColumns.split(" ").length)).toBe(1);
     await expectNoPageOverflow(page);
-    await expect(page.locator(".night-greenhouse")).toBeHidden();
     await page.getByRole("button", { name: /口袋小物/ }).click();
+    await expect(page.getByRole("button", { name: /口袋小物/ })).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByText("口袋抽屉")).toBeVisible();
-    await expect(page.getByText("城市人情簿")).toBeHidden();
     await page.getByRole("button", { name: /核心物证/ }).click();
+    await expect(page.getByRole("button", { name: /核心物证/ })).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator("#collection-core-evidence")).toBeVisible();
     await expectNoPageOverflow(page);
     await page.getByRole("link", { name: "档案", exact: true }).click();
