@@ -4050,6 +4050,89 @@ blockquote {
   background: #10272b;
 }
 
+.cipher-reference-folio {
+  margin-top: 12px;
+  border: 1px solid #4b5869;
+  background: #0e1725;
+}
+
+.cipher-reference-folio>summary {
+  min-height: 54px;
+  padding: 9px 11px;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+  color: #aab5c2;
+  cursor: pointer;
+  list-style: none;
+}
+
+.cipher-reference-folio>summary::-webkit-details-marker { display: none; }
+
+.cipher-reference-folio>summary>svg {
+  width: 18px;
+  color: var(--teal);
+}
+
+.cipher-reference-folio>summary small,
+.cipher-reference-folio>summary b { display: block; }
+
+.cipher-reference-folio>summary small {
+  color: #728f8b;
+  font: 6px/1.3 monospace;
+  letter-spacing: .1em;
+}
+
+.cipher-reference-folio>summary b {
+  margin-top: 3px;
+  font: 12px/1.3 var(--font-playfair), var(--font-noto-serif-sc);
+}
+
+.cipher-reference-folio[open]>summary {
+  border-bottom: 1px solid #3b4859;
+  color: var(--paper);
+}
+
+.cipher-reference-folio>div {
+  padding: 12px;
+  color: #9ca7b3;
+}
+
+.cipher-reference-folio p {
+  margin: 0 0 10px;
+  font-size: 9px;
+  line-height: 1.65;
+}
+
+.cipher-reference-folio code {
+  padding: 10px;
+  display: grid;
+  gap: 5px;
+  overflow-x: auto;
+  border: 1px solid #455266;
+  color: #d6c8ac;
+  background: #09111d;
+  font: 8px/1.65 monospace;
+  white-space: nowrap;
+}
+
+.cipher-reference-folio code span { display: block; }
+
+.cipher-reference-folio ol {
+  margin: 0;
+  padding-left: 22px;
+  font-size: 8px;
+  line-height: 1.7;
+}
+
+.cipher-reference-folio>div>small {
+  display: block;
+  margin-top: 9px;
+  color: #667485;
+  font: 6px/1.5 monospace;
+}
+
 .cipher-reveal>span {
   display: flex;
   align-items: center;

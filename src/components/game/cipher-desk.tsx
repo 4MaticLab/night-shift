@@ -6,6 +6,7 @@ import { getCampaignCipherDesk, isCipherUnlocked } from "@/src/content/ciphers";
 import { useI18n } from "@/src/i18n/provider";
 import { useGameStore } from "@/src/stores/game-store";
 import { CipherDialControl } from "./cipher-dial";
+import { CipherReferenceFolio } from "./cipher-reference-folio";
 
 export function CipherDesk() {
   const { campaign, locale, localize, t } = useI18n();
@@ -103,6 +104,8 @@ export function CipherDesk() {
               <div className="cipher-strip" aria-label={challenge.cipherLabel}><small>{challenge.cipherLabel}</small><div>{challenge.cipherTokens.map((token, index) => <code key={`${token}-${index}`}>{token}</code>)}</div></div>
               <p className="cipher-instruction">{challenge.instruction}</p>
             </>}
+
+            {unlocked && !solved && <CipherReferenceFolio challengeId={challenge.id} />}
 
             {unlocked && !solved && challenge.dial && <>
               <CipherDialControl challenge={challenge} value={dialValues[challenge.id] ?? challenge.dial.initial} onChange={(value) => { setDialValues((current) => ({ ...current, [challenge.id]: value })); setFeedback((current) => { const next = { ...current }; delete next[challenge.id]; return next; }); }} onLock={(answer) => submitAnswer(challenge.id, answer)} />
