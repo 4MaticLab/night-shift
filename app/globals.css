@@ -15509,13 +15509,15 @@ blockquote {
   position: relative;
   padding: clamp(22px, 3.5vw, 58px) clamp(16px, 4vw, 66px) clamp(30px, 4vw, 54px);
   color: #2b2620;
-  background:
-    radial-gradient(140% 100% at 50% 0%, #f4ecd9 0, #eee3cc 55%, #e6d9bd 100%),
-    var(--warm-paper);
-  background-blend-mode: multiply, normal;
+  /* Morning sheet: whiter cream-yellow paper, less brown tea-stain. */
+  background-color: #fbf7e8;
+  background-image:
+    radial-gradient(140% 100% at 50% 0%, #fffef8 0, #faf4e0 48%, #f3e9c8 100%),
+    linear-gradient(180deg, #ffffff66 0%, transparent 42%, #f0e4b81a 100%);
+  background-blend-mode: normal, soft-light;
   box-shadow:
-    0 1px 0 #fff3 inset,
-    0 -40px 80px #5c493a14 inset,
+    0 1px 0 #ffffff88 inset,
+    0 -40px 80px #d4c49212 inset,
     0 30px 80px #00000073,
     0 4px 14px #00000066;
 }
@@ -15526,20 +15528,20 @@ blockquote {
   position: absolute;
   inset: 14px -7px -9px 10px;
   z-index: -1;
-  background: #ddcfae;
+  background: #efe6c8;
   transform: rotate(.5deg);
   box-shadow: 0 18px 50px #00000059;
 }
 
-/* faint print grain over the whole sheet */
+/* faint print grain over the whole sheet — keep light so it does not muddy the page */
 .newspaper .broadsheet::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
-    repeating-linear-gradient(0deg, transparent 0 3px, #5c493a06 4px),
-    repeating-linear-gradient(90deg, transparent 0 7px, #5c493a04 8px);
+    repeating-linear-gradient(0deg, transparent 0 3px, #b59a5a05 4px),
+    repeating-linear-gradient(90deg, transparent 0 7px, #b59a5a03 8px);
 }
 
 .newspaper .broadsheet > * {
