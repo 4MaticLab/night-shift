@@ -6,6 +6,7 @@ import { getCampaignCipherDesk, isCipherUnlocked } from "@/src/content/ciphers";
 import { useI18n } from "@/src/i18n/provider";
 import { useGameStore } from "@/src/stores/game-store";
 import { CipherDialControl } from "./cipher-dial";
+import { CipherNotebook } from "./cipher-notebook";
 
 export function CipherDesk() {
   const { campaign, locale, localize, t } = useI18n();
@@ -84,6 +85,8 @@ export function CipherDesk() {
         return <i className={solved ? "solved" : unlocked ? "unlocked" : "locked"} key={challenge.id}><span>{challenge.order}</span></i>;
       })}
     </div>
+
+    <CipherNotebook key={campaign.id} />
 
     <div className="cipher-levels">
       {challenges.map((challenge) => {

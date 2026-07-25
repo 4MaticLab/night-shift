@@ -3600,6 +3600,132 @@ blockquote {
   gap: 8px;
 }
 
+.cipher-notebook {
+  margin: 18px 0;
+  padding: 18px;
+  border: 1px solid #77664e;
+  color: #4b4b45;
+  background:
+    linear-gradient(90deg, transparent 0 31px, #9f695329 32px, transparent 33px),
+    repeating-linear-gradient(0deg, transparent 0 27px, #6d7b8617 28px),
+    #ddd0b5;
+  box-shadow: 0 12px 30px #0005;
+}
+
+.cipher-notebook>header {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.cipher-notebook>header>svg {
+  width: 24px;
+  color: #745a3e;
+}
+
+.cipher-notebook h4,
+.cipher-notebook header small { margin: 0; }
+
+.cipher-notebook header small {
+  color: #8a6849;
+  font: 7px/1.3 monospace;
+  letter-spacing: .12em;
+}
+
+.cipher-notebook h4 {
+  color: #353630;
+  font: 600 20px/1.2 var(--font-playfair), var(--font-noto-serif-sc);
+}
+
+.cipher-notebook>header>span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #677167;
+  font: 7px/1.3 monospace;
+}
+
+.cipher-notebook>header>span svg { width: 12px; }
+
+.cipher-notebook>p {
+  margin: 12px 0;
+  color: #666258;
+  font-size: 9px;
+}
+
+.cipher-notebook textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 10px 12px;
+  resize: vertical;
+  border: 1px solid #8b795f;
+  outline: 0;
+  color: #33352f;
+  background: #f1e7d188;
+  font: 12px/1.85 var(--font-baskerville), var(--font-noto-serif-sc);
+}
+
+.cipher-notebook textarea:focus {
+  border-color: #86633f;
+  box-shadow: 0 0 0 2px #86633f2e;
+}
+
+.cipher-notebook textarea:disabled { opacity: .55; }
+
+.cipher-notebook>footer {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cipher-notebook>footer>span {
+  color: #7f7566;
+  font: 7px monospace;
+}
+
+.cipher-notebook>footer>div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.cipher-notebook button {
+  min-height: 40px;
+  padding: 7px 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #827057;
+  color: #4d4b44;
+  background: #e7dbc3;
+  cursor: pointer;
+  font-size: 8px;
+}
+
+.cipher-notebook button svg { width: 13px; }
+.cipher-notebook button:disabled { opacity: .42; cursor: default; }
+.cipher-notebook button.danger { border-color: #8b4f4c; color: #713d3b; background: #e4c7bd; }
+
+.cipher-notebook>small {
+  display: block;
+  margin-top: 9px;
+  color: #807667;
+  font: 6px/1.5 monospace;
+}
+
+@media (max-width: 600px) {
+  .cipher-notebook { padding: 14px; }
+  .cipher-notebook>header { grid-template-columns: 28px minmax(0, 1fr); }
+  .cipher-notebook>header>span { grid-column: 2; }
+  .cipher-notebook>footer { align-items: flex-start; }
+  .cipher-notebook>footer>div { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .cipher-notebook button { min-height: 44px; justify-content: center; }
+}
+
 .cipher-progress i {
   height: 4px;
   position: relative;
