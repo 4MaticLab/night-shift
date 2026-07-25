@@ -7397,10 +7397,12 @@ blockquote {
 .collection-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
+  grid-auto-flow: row dense;
+  gap: 26px 20px;
   max-width: 1180px;
-  margin: 45px auto;
+  margin: 48px auto;
   padding: 0 24px;
+  align-items: start;
 }
 
 .collectible-card {
@@ -7411,10 +7413,47 @@ blockquote {
   padding: 20px;
   box-shadow: 0 12px 40px #0004;
   border: 1px solid #c4b89f;
+  transition: transform .42s cubic-bezier(.2, .7, .2, 1), box-shadow .42s ease;
+  will-change: transform;
 }
 
 .collectible-card:nth-child(2n) {
   background: #e6dac2;
+}
+
+/* Editorial magazine rhythm — break the rigid 4-up grid with a featured
+   plate every seven fragments and a faint pinned-clipping tilt/stagger. */
+.collection-grid > .collectible-card:nth-child(7n + 1) {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.collection-grid > .collectible-card:nth-child(7n + 1) .item-art {
+  height: auto;
+  min-height: 300px;
+}
+
+.collection-grid > .collectible-card:nth-child(3n + 1) {
+  transform: rotate(-.6deg) translateY(9px);
+}
+
+.collection-grid > .collectible-card:nth-child(3n + 2) {
+  transform: rotate(.55deg) translateY(-6px);
+}
+
+.collection-grid > .collectible-card:nth-child(3n + 3) {
+  transform: rotate(.75deg) translateY(15px);
+}
+
+.collection-grid > .collectible-card:nth-child(7n + 1) {
+  transform: rotate(-.35deg);
+}
+
+.collectible-card:hover,
+.collectible-card:focus-within {
+  transform: rotate(0deg) translateY(-8px) scale(1.014);
+  box-shadow: 0 26px 66px #0007;
+  z-index: 3;
 }
 
 .collectible-card.locked {
@@ -12076,6 +12115,17 @@ blockquote {
 
   .collectible-card {
     min-height: 355px;
+  }
+
+  /* Flatten the editorial tilt/featured spans on phones for a clean single column. */
+  .collection-grid > .collectible-card,
+  .collection-grid > .collectible-card:nth-child(3n + 1),
+  .collection-grid > .collectible-card:nth-child(3n + 2),
+  .collection-grid > .collectible-card:nth-child(3n + 3),
+  .collection-grid > .collectible-card:nth-child(7n + 1) {
+    grid-column: auto;
+    grid-row: auto;
+    transform: none;
   }
 
   .archive-folders,
