@@ -468,7 +468,7 @@
 .banner-sheet--proposition {
   background:
     linear-gradient(#7991a10b 1px, transparent 1px) 0 0 / 100% 9px,
-    linear-gradient(180deg, #101d31 26%, #101d31b8 44%, #101d3140 60%, #101d3100 78%),
+    linear-gradient(180deg, #101d31 28%, #101d31cc 44%, #101d3194 56%, #101d3150 68%, #101d3118 80%, #101d3100 92%),
     linear-gradient(0deg, #0b1220e6 0%, #0b12207a 14%, transparent 32%),
     url("/art/districts/lantern-wharf-v1.webp") center bottom / auto 60% no-repeat,
     linear-gradient(150deg, #111c2d, #0b1321);
@@ -487,22 +487,9 @@
   mask-image: linear-gradient(180deg, #000 0%, #000 42%, #00000059 72%, #0000 100%);
 }
 
-/* soft hazy mist over the meeting point for a dreamy, non-rigid blend */
+/* no fog, no seam: the city fades in through the long veil ramp above */
 .banner-sheet--proposition::before {
-  display: block;
-  z-index: 0;
-  inset: 40% 0 auto 0;
-  height: 34%;
-  border: 0;
-  pointer-events: none;
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='280'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.009 0.02' numOctaves='3' seed='9'/%3E%3CfeColorMatrix values='0 0 0 0 0.70 0 0 0 0 0.76 0 0 0 0 0.86 0 0 0 0.7 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E") center / 160% 160% no-repeat,
-    radial-gradient(150% 120% at 45% 50%, #a3b4c84a, transparent 68%),
-    linear-gradient(180deg, transparent 0%, #8496ac44 42%, #93a5bb58 54%, #8496ac44 66%, transparent 100%);
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
-  mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 82%, transparent 100%);
-  backdrop-filter: blur(11px);
-  -webkit-backdrop-filter: blur(11px);
+  display: none;
 }
 
 /* brand overlays the top person image; no underline; text stays crisp above the fog */
