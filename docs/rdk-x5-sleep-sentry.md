@@ -1,19 +1,13 @@
-# Mini Lindo：RDK X5 床头睡眠哨站
+# RDK X5 床头睡眠哨站
 
-本文记录 **Mini Lindo（小林渡）** —— `apps/rdk-sentry`（运行在地瓜机器人 RDK X5 开发板上的床头哨站）与 `apps/desk-pet`（Electron 桌宠，哨站的通讯端）的完整链路：名分与世界观、硬件形态、板端代理、桥接协议、桌宠侧回退逻辑与隐私边界。
-
-## 名分
-
-- **产品名：Mini Lindo（中文口语：小林渡）**，指整套「床头硬件哨站 + 桌宠通讯端」方案，而非单指某一端。
-- **世界观身份**：林渡派驻在你床头的迷你分身，替他值离你最近的那一班岗——看着你睡，把夜里的事记成聚合统计交回桌上的林渡。口吻与主线一致：守夜不监视，陈述不诊断。
-- **称呼规范**：面向用户的文案用 Mini Lindo / 小林渡；技术标识保持不变——协议 `device: "rdk-x5"`、契约 `SensorSource: "rdk-x5"`、目录 `apps/rdk-sentry/`（存档与契约兼容，不随产品名漂移）。板端 `rdk_sentry/__init__.py` 以 `PRODUCT_NAME = "Mini Lindo"` 为唯一产品名常量，`/api/v1/health` 附带 `product` 字段。
+本文记录 `apps/rdk-sentry`（运行在地瓜机器人 RDK X5 开发板上的床头哨站）与 `apps/desk-pet`（Electron 桌宠，哨站的通讯端）之间的完整链路：硬件形态、板端代理、桥接协议、桌宠侧回退逻辑与隐私边界。哨站是 Mini Lindo 开源睡眠套件的硬件监控端；套件层面的定位见 README。
 
 ## 硬件形态
 
 - 开发板：D-Robotics（地瓜机器人）RDK X5，Sunrise 5 芯片，RDK OS（Ubuntu 系），40PIN 树莓派兼容排针（3.3V，I2C/SPI/UART/PWM）。
 - 摆放：床头，摄像头朝向睡眠区域，接入用户家里的局域网。
 - 摄像头：USB UVC 摄像头（默认 `--camera 0`）；MIPI CSI 需按板端 `hobot_vio.libsrcampy` 适配，`camera.py` 中留有 `_open_mipi()` 挂点。
-- 传感器（全部可选，缺谁降谁；接线、驱动细节与排障见 [[docs/mini-lindo-sensor-guide]]）：
+- 传感器（全部可选，缺谁降谁）：
   - SHT3x（I2C `0x44`）：温度 + 湿度；
   - SGP30（I2C `0x58`）：CO₂ 当量 + TVOC；
   - PMS5003（UART `/dev/ttyS1`）：PM2.5。
@@ -50,7 +44,7 @@ python3 sentry.py --mock          # 合成数据模式，可在任何机器上�
 
 - 摄像头画面在板上就地差分分析，**不落盘、不出板**；局域网上只传输聚合统计数值。
 - 无鉴权端口仅监听局域网，端点全部只读，不接受任何写入。
-- 桌宠端随时可断开并清除持久化配置；断开后立即回到占位数据，行为与从未连接过一致。小林渡不在岗不是错误，只是回到想象值班。
+- 桌宠端随时可断开并清除持久化配置；断开后立即回到占位数据，行为与从未连接过一致。
 - 遵循 [[docs/privacy-and-guardrails]]：设备信号只丰富叙事与报告，不诊断、不惩罚、不锁内容。
 
 ## 验证
@@ -61,7 +55,7 @@ python3 sentry.py --mock          # 合成数据模式，可在任何机器上�
 
 ## 相关文档
 
-- [[docs/mini-lindo-sensor-guide]] — 传感器手册：40PIN 接线、逐路驱动细节、字段流向与板上排障。
+- [[docs/mini-lindo-sensor-guide]] — 套件传感器手册：40PIN 接线、逐路驱动细节、字段流向与板上排障。
 - [[docs/sleep-hardware-bridge]] — 网页端虚拟睡眠硬件（与本硬件链路互相独立）。
 - [[docs/privacy-and-guardrails]] — 健康数据最小化与非医疗边界。
 - [[docs/architecture]] — 仓库整体工程结构。
