@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import {
   Activity,
   Check,
@@ -37,6 +39,8 @@ import { useI18n } from "@/src/i18n/provider";
 import { useAccessibleDialog } from "@/src/lib/use-accessible-dialog";
 import { AmbientHardwareWorkbench } from "./ambient-hardware";
 
+gsap.registerPlugin(useGSAP);
+
 const bridgeVirtualMatches = {
   "apple-health": "watch-17",
   "health-connect": "watch-17",
@@ -53,6 +57,11 @@ export function SleepHardwarePanel({ onClose }: { onClose: () => void }) {
   const [justConnected, setJustConnected] = useState(false);
   const panelRef = useRef<HTMLElement>(null);
   const consentRef = useRef<HTMLElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
+  const ledeRef = useRef<HTMLParagraphElement>(null);
+  const summaryRef = useRef<HTMLElement>(null);
+  const stepsRef = useRef<HTMLOListElement>(null);
+  const tabsRef = useRef<HTMLDivElement>(null);
   const selectedDevice = localize(getVirtualSleepDevice(draftDeviceId) ?? virtualSleepDevices[0]);
   const selectedBridge = localize(getSleepBridge(draftBridgeId) ?? sleepBridges[0]);
   const connectedDevice = hardware.mode === "virtual" && hardware.consent
@@ -67,6 +76,18 @@ export function SleepHardwarePanel({ onClose }: { onClose: () => void }) {
   const connected = Boolean(connectedDevice);
 
   useAccessibleDialog(panelRef, onClose, { returnFocusSelector: ".sleep-hardware-status" });
+
+  useGSAP(() => {
+    const media = gsap.matchMedia();
+    media.add("(prefers-reduced-motion: no-preference)", () => {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      tl.from(headerRef.current, { y: -30, opacity: 0, duration: .8 })
+        .from(ledeRef.current, { y: 20, opacity: 0, duration: .7 }, "-=0.5")
+        .from(summaryRef.current, { y: 20, opacity: 0, duration: .7 }, "-=0.5")
+        .from(stepsRef.current, { y: 20, opacity: 0, duration: .6 }, "-=0.4")
+        .from(tabsRef.current, { y: 20, opacity: 0, duration: .6 }, "-=0.4");
+    });
+  }, { scope: panelRef, dependencies: [] });
 
   useEffect(() => {
     panelRef.current?.scrollTo({ top: 0 });
@@ -106,13 +127,13 @@ export function SleepHardwarePanel({ onClose }: { onClose: () => void }) {
     <motion.div className="sleep-hardware-layer" data-dialog-layer initial={{ opacity: 1 }} animate={{ opacity: 1 }} exit={{ opacity: 1 }}>
       <motion.button type="button" aria-label={t("关闭睡眠硬件中心")} className="sleep-hardware-scrim" onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
       <motion.aside ref={panelRef} className="sleep-hardware-panel" role="dialog" aria-modal="true" aria-labelledby="sleep-hardware-title" tabIndex={-1} initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 30, stiffness: 280 }}>
-        <header className="sleep-hardware-panel-header">
+        <header ref={headerRef} className="sleep-hardware-panel-header">
           <div><small>SOMATIC NIGHT DESK · {t("感官夜班台")}</small><h2 id="sleep-hardware-title">{locale === "en" ? <>Give the faint light<br />of a night to the city.</> : <>把一夜的微光<br />交给城市。</>}</h2></div>
           <button type="button" data-dialog-initial-focus onClick={onClose} aria-label={t("关闭")}><X /></button>
         </header>
-        <p className="sleep-hardware-lede">{t("设备信号只会丰富夜行与晨报。没有设备、没有好数据、或中途撤销，都不会让故事失败。")}</p>
+        <p ref={ledeRef} className="sleep-hardware-lede">{t("设备信号只会丰富夜行与晨报。没有设备、没有好数据、或中途撤销，都不会让故事失败。")}</p>
 
-        <aside className={`sleep-connection-summary ${connected ? "connected" : ""} ${hardware.activeCapture ? "recording" : ""}`}>
+        <aside ref={summaryRef} className={`sleep-connection-summary ${connected ? "connected" : ""} ${hardware.activeCapture ? "recording" : ""}`}>
           <span>{hardware.activeCapture ? <Activity /> : connected ? <Radio /> : <Waves />}</span>
           <div>
             <small>{hardware.activeCapture ? "NIGHT SIGNAL LIVE" : connected ? "LOCAL LINK READY" : "OPTIONAL SOMATIC LAYER"}</small>
@@ -132,13 +153,13 @@ export function SleepHardwarePanel({ onClose }: { onClose: () => void }) {
           {connected && <i><ShieldCheck /> {t("仅本机")}</i>}
         </aside>
 
-        <ol className="sleep-setup-steps" aria-label={t("连接步骤")}>
+        <ol ref={stepsRef} className="sleep-setup-steps" aria-label={t("连接步骤")}>
           <li className={tab === "virtual" ? "active" : ""}><span>01</span><b>{t("选择设备")}</b></li>
           <li><span>02</span><b>{t("确认摘要")}</b></li>
           <li className={connected ? "done" : ""}><span>{connected ? <Check /> : "03"}</span><b>{t("夜班自动记录")}</b></li>
         </ol>
 
-        <div className="sleep-source-tabs" role="tablist" aria-label={t("硬件来源")}>
+        <div ref={tabsRef} className="sleep-source-tabs" role="tablist" aria-label={t("硬件来源")}>
           <button type="button" role="tab" aria-selected={tab === "virtual"} onClick={() => setTab("virtual")}><Sparkles /> {t("虚拟硬件")} <small>{t("现在可玩")}</small></button>
           <button type="button" role="tab" aria-selected={tab === "bridge"} onClick={() => setTab("bridge")}><Cloud /> {t("真实桥接")} <small>{t("接口预演")}</small></button>
           <button type="button" role="tab" aria-selected={tab === "ambient"} onClick={() => setTab("ambient")}><Router /> {t("房间外设")} <small>HOME ASSISTANT</small></button>
