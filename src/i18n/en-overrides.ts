@@ -530,4 +530,12 @@ export const englishOverrides: Record<string, string> = {
   "今晚先让纸张开口": "Tonight, let the paper speak first",
   "林渡把车票夹进防水证物袋，肩包里只留一盏灯和一张空地图。他会从封闭维修站出发，赶在清晨以前确认：是谁让一张不存在的车票继续售出。": "Lin Du slips the ticket into a waterproof evidence sleeve, leaving only a lamp and a blank map in his shoulder bag. He will begin at the sealed maintenance depot and learn, before dawn, who keeps issuing a ticket that does not exist.",
   "“你可以去睡。等你醒来，我会把城市撒过的第一句谎带回来。”": "“You can sleep. When you wake, I will bring back the first lie the city told.”",
+  "收起交接栏": "Collapse the dispatch rail",
+  "展开交接栏": "Expand the dispatch rail",
+  "收起夜行志栏": "Collapse the field notes rail",
+  "展开夜行志栏": "Expand the field notes rail",
+  "交接": "Dispatch",
+  "夜行志": "Field notes",
+  "夜线电报": "Night wire",
+  "夜班进度": "Night progress",
 };
