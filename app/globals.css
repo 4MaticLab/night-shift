@@ -15513,17 +15513,17 @@ blockquote {
     Bottom layer = your paper-fiber texture (unchanged asset).
     Top layer = slightly warmer yellow wash so the grain stays visible.
   */
-  background-color: #f2df9e;
+  background-color: #efd57a;
   background-image:
-    linear-gradient(180deg, #ffefb0c4 0%, #ebcc6ea8 100%),
+    linear-gradient(180deg, #ffe68acc 0%, #e0b84ab0 100%),
     url("/art/ui/foglight-morning-paper-texture-v3.webp");
   background-size: auto, 100% auto;
   background-repeat: no-repeat, repeat-y;
   background-position: center, top center;
   background-blend-mode: soft-light, normal;
   box-shadow:
-    0 1px 0 #fff3c066 inset,
-    0 -40px 80px #c49a3818 inset,
+    0 1px 0 #ffe9a066 inset,
+    0 -40px 80px #c492201c inset,
     0 30px 80px #00000073,
     0 4px 14px #00000066;
 }
@@ -15535,7 +15535,7 @@ blockquote {
   inset: 14px -7px -9px 10px;
   z-index: -1;
   background:
-    linear-gradient(180deg, #ecd68e 0%, #e0c46c 100%),
+    linear-gradient(180deg, #e6c96a 0%, #d9b448 100%),
     url("/art/ui/foglight-morning-paper-texture-v3.webp");
   background-size: auto, 100% auto;
   background-repeat: no-repeat, repeat-y;
