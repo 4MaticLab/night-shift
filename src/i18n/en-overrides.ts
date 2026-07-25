@@ -4,6 +4,8 @@ export const englishOverrides: Record<string, string> = {
   "林渡": "Lin Du",
   "夜班侦探": "Night Shift Detective",
   "一辆不存在的电车，每晚仍在穿过这座城市。": "A tram that does not exist still crosses the city every night.",
+  "城市否认的轨道上，": "On tracks the city denies,",
+  "他仍在数站台脚步声。": "he still counts footsteps on the platform.",
   "追查被城市否认的四十三号线，把失踪者的选择权送回原处。": "Trace the Line 43 that the city denies, and return a missing woman's story to its rightful owner.",
   "最后的决定，由你写进档案。": "The final decision is yours to enter into the record.",
   "伊芙琳把账册留在站台，却没有把决定也留下。三种真相，都有各自的代价。": "Evelyn left the ledger on the platform, but not the decision. Each of the three truths carries its own cost.",

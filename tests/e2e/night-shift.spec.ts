@@ -315,34 +315,34 @@ test.describe("automatic browser locale", () => {
   test("renders English on the first response and lets a cookie override it", async ({ page, context }) => {
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(await response?.text()).toContain('<html lang="en"');
-    await expect(page.getByRole("heading", { name: /When you fall asleep/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /On tracks the city denies/ })).toBeVisible();
     await expect(page.locator(".app-boot-screen")).toContainText("The night agency is turning on its lights");
     expect((await context.cookies()).find((cookie) => cookie.name === "night-shift-locale")).toBeUndefined();
 
     await selectCampaign(page, "The Station That Broadcasts in Rain");
-    await expect(page.getByRole("heading", { name: /When you fall asleep/ })).toBeVisible();
-    await selectCampaign(page, "黎明前出炉的第十三个面包");
-    await expect(page.getByRole("heading", { name: /你睡着以后/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /On nights when rain falls/ })).toBeVisible();
+    await selectCampaign(page, "面包奇谈");
+    await expect(page.getByRole("heading", { name: /停业十七年的烤炉/ })).toBeVisible();
     await expect(page.getByRole("button", { name: /开始第 003 宗案件/ })).toBeVisible();
-    await selectCampaign(page, "千早诺亚的第十三次旅行");
-    await expect(page.getByRole("heading", { name: /你睡着以后/ })).toBeVisible();
+    await selectCampaign(page, "千早诺亚的现身");
+    await expect(page.getByRole("heading", { name: /同一个名字过境十二次/ })).toBeVisible();
     await expect(page.getByRole("button", { name: /开始第 004 宗案件/ })).toBeVisible();
     await selectCampaign(page, "The Last Tram at 00:43");
-    await expect(page.getByRole("heading", { name: /When you fall asleep/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /On tracks the city denies/ })).toBeVisible();
 
     await page.getByRole("button", { name: "中文", exact: true }).click();
-    await expect(page.getByRole("heading", { name: /你睡着以后/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /城市否认的轨道上/ })).toBeVisible();
     expect((await context.cookies()).find((cookie) => cookie.name === "night-shift-locale")?.value).toBe("zh-CN");
     await page.reload();
     await expect(page.locator("html")).toHaveAttribute("lang", "zh-CN");
-    await expect(page.getByRole("heading", { name: /你睡着以后/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /城市否认的轨道上/ })).toBeVisible();
   });
 });
 
 test("migrates a legacy local language preference into the cookie", async ({ page, context }) => {
   await page.addInitScript(() => window.localStorage.setItem("night-shift-locale", "en"));
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /When you fall asleep/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /On tracks the city denies/ })).toBeVisible();
   expect((await context.cookies()).find((cookie) => cookie.name === "night-shift-locale")?.value).toBe("en");
 });
 
@@ -385,7 +385,7 @@ test("plays the first case in English and preserves the language preference", as
   await page.goto("/");
   await page.getByRole("button", { name: /ENGLISH/ }).click();
   await expect(page.getByRole("button", { name: /Begin Case 001/ })).toBeVisible();
-  await expect(page.getByRole("heading", { name: /When you fall asleep/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /On tracks the city denies/ })).toBeVisible();
   await page.reload();
   await expect(page.getByRole("button", { name: /Begin Case 001/ })).toBeVisible();
 
@@ -1338,7 +1338,7 @@ test("rejects an unknown friend clue without starting a save", async ({ page }) 
 
   await expect(page.locator(".clue-gift-notice")).toContainText("这封线索无法归档");
   await expect(page).toHaveURL("/");
-  await expect(page.getByRole("heading", { name: /你睡着以后/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /城市否认的轨道上/ })).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem("night-shift-save-v1"))).toBeNull();
 });
 
@@ -1390,12 +1390,12 @@ test("remembers the case library after reload (issue #35)", async ({ page }) => 
 
   await page.locator(".global-brand").click();
   await expect(page.locator(".hero-shell")).toBeVisible();
-  await expect(page.getByRole("heading", { name: /When you fall asleep|你睡着以后/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /On tracks the city denies|城市否认的轨道上/ })).toBeVisible();
   await expect(page.locator(".campaign-wheel")).toBeVisible();
 
   await page.reload();
   await expect(page.locator(".hero-shell")).toBeVisible();
-  await expect(page.getByRole("heading", { name: /When you fall asleep|你睡着以后/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /On tracks the city denies|城市否认的轨道上/ })).toBeVisible();
   await expect(page.locator(".campaign-wheel")).toBeVisible();
   await expect(page.locator(".app-shell")).toHaveCount(0);
 });
@@ -1457,7 +1457,7 @@ test("switches to the rain-radio campaign and completes its five-night story", a
 test("switches to the thirteenth-loaf campaign and completes its five-night story", async ({ page }) => {
   const reportTitles = ["柜中多出的一只", "没有第十三名烘焙师", "火从炉外开始", "整座街区保管一块酵母", "把一份归还给无人"];
   await page.goto("/");
-  await selectCampaign(page, "黎明前出炉的第十三个面包");
+  await selectCampaign(page, "面包奇谈");
   await page.getByRole("button", { name: /开始第 003 宗案件/ }).click();
   await page.getByRole("button", { name: "继续" }).click();
   await page.getByRole("button", { name: "继续" }).click();
@@ -1487,7 +1487,7 @@ test("switches to the thirteenth-loaf campaign and completes its five-night stor
 test("switches to the Chihaya Noa campaign and completes its five-night story", async ({ page }) => {
   const reportTitles = ["明日才抵达的委托人", "两个都记得昨夜的人", "拱灯学会的假东方", "未成线的十二个地址", "拒绝唯一原本"];
   await page.goto("/");
-  await selectCampaign(page, "千早诺亚的第十三次旅行");
+  await selectCampaign(page, "千早诺亚的现身");
   await page.getByRole("button", { name: /开始第 004 宗案件/ }).click();
   await page.getByRole("button", { name: "继续" }).click();
   await page.getByRole("button", { name: "继续" }).click();
@@ -1632,14 +1632,14 @@ test.describe("mobile 390x844", () => {
     await selectCampaign(page, "只在雨中播出的电台");
     await expect(page.getByRole("button", { name: /开始第 002 宗案件/ })).toBeVisible();
     await expectNoPageOverflow(page);
-    await selectCampaign(page, "黎明前出炉的第十三个面包");
+    await selectCampaign(page, "面包奇谈");
     await expect(page.getByRole("button", { name: /开始第 003 宗案件/ })).toBeVisible();
     await expect(page.getByRole("img", { name: /林渡站在夜班事务所门边/ })).toHaveAttribute(
       "src",
       /thirteenth-loaf.*shift-handoff-v1/,
     );
     await expectNoPageOverflow(page);
-    await selectCampaign(page, "千早诺亚的第十三次旅行");
+    await selectCampaign(page, "千早诺亚的现身");
     await expect(page.getByRole("button", { name: /开始第 004 宗案件/ })).toBeVisible();
     await expect(page.getByRole("img", { name: /千早诺亚在夜班事务所交接桌前/ })).toHaveAttribute(
       "src",

@@ -21,7 +21,7 @@ export const CHIHAYA_NOA_CAMPAIGN_ID = "case-005";
 
 const chihayaNoaCase = caseSchema.parse({
   id: CHIHAYA_NOA_CAMPAIGN_ID,
-  title: "千早诺亚的第十三次旅行",
+  title: "千早诺亚的现身",
   englishTitle: "Chihaya Noa's Thirteenth Journey",
   chapters: [
     {
@@ -450,6 +450,8 @@ export const chihayaNoaCampaign = defineCampaign({
   presentation: {
     archiveNumber: "004",
     teaser: "同一名少女连续十二天抵达雾灯城，第十三张车票却要到明天才发售。",
+    headlineMain: "同一个名字过境十二次，",
+    headlineAccent: "他等她说出来处。",
     description: "沿入境章、纸结与返照镜走进被删除的城市，把十三段人生的命名权还给本人。",
     cityName: "雾灯城",
     detectiveName: "林渡",

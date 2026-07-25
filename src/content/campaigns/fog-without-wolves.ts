@@ -462,6 +462,8 @@ export const fogWithoutWolvesCampaign = defineCampaign({
   presentation: {
     archiveNumber: "005",
     teaser: "两名旧猎手记得同一声钟的两个真实结局，第三见证者被要求删除其中一个。",
+    headlineMain: "两封遗书出自同一笔迹，",
+    headlineAccent: "他不肯删掉任何一个结局。",
     description: "沿双面遗书、两只蜡筒与缺失一分钟走进暮钟工场，拒绝把理解彼此重新写成服从。",
     cityName: "雾灯城",
     detectiveName: "林渡",

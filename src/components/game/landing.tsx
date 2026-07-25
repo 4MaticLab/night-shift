@@ -12,6 +12,8 @@ import { LanguagesIcon } from "@/src/components/ui/languages-icon";
 import { OptionWheel } from "./option-wheel";
 import { useI18n } from "@/src/i18n/provider";
 
+const heroCopyTransition = { duration: 0.38, ease: "easeOut" as const };
+
 export function Hero({ onStart, interactive }: { onStart: () => void; interactive: boolean }) {
   const { campaignId, started, switchCampaign } = useGameStore();
   const { campaign, locale, preferredLocale, setLocale, t } = useI18n();
@@ -41,8 +43,23 @@ export function Hero({ onStart, interactive }: { onStart: () => void; interactiv
       </nav>
       <section className="hero-copy">
         <p className="eyebrow"><Moon size={14} /> {t("一款与你轮班生活的异步侦探游戏")}<span className="shift-rule"><span className="shift-rule-face shift-rule-day"><b aria-hidden="true">●</b>{t("你负责白天推理")}</span><span className="shift-rule-face shift-rule-night"><b aria-hidden="true">☾</b>{t("林渡负责夜晚调查")}</span></span></p>
-        <h1>{locale === "en" ? <>When you fall asleep,<br /><em>his work begins.</em></> : <>你睡着以后，<br /><em>他才开始工作。</em></>}</h1>
-        <p className="hero-lede">{t("白天分析线索，晚上把调查交给侦探。等你醒来，雾灯城会留下一份新的报告。")}</p>
+        <div className="hero-copy-swap">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={campaign.id}
+              className="hero-copy-swap-inner"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={heroCopyTransition}
+            >
+              <h1>
+                {campaign.presentation.headlineMain}<br /><em>{campaign.presentation.headlineAccent}</em>
+              </h1>
+              <p className="hero-lede">{campaign.presentation.teaser}</p>
+            </motion.div>
+          </AnimatePresence>
+        </div>
         <div className="hero-actions">
           <ShinyButton
             className="primary-button"

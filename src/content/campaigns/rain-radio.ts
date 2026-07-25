@@ -338,6 +338,8 @@ export const rainRadioCampaign = defineCampaign({
   presentation: {
     archiveNumber: "002",
     teaser: "一座停播十二年的电台，只在下雨时读出明天的消息。",
+    headlineMain: "雨落下来的夜晚，",
+    headlineAccent: "他调到了消失的频道。",
     description: "沿雨水与旧电话线找回被地图删掉的四十七户声音。",
     cityName: "雾灯城",
     detectiveName: "林渡",
