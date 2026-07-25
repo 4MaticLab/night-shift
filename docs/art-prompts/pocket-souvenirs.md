@@ -31,7 +31,7 @@ Constraints: original fictional object; no people, hands, text, letters, numbers
 
 - `/public/art/souvenirs/rain-receipt-v1.webp`
 - `/public/art/souvenirs/orphaned-drawer-pull-v1.webp`
-- `/public/art/souvenirs/index-moth-wing-v1.webp`
+- `/public/art/societies/misfiled-registry-key-crest-v2.png`
 - `/public/art/souvenirs/return-punch-ticket-v1.webp`
 - `/public/art/souvenirs/mistaken-cufflink-v1.webp`
 - `/public/art/souvenirs/seed-post-tube-v1.webp`

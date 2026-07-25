@@ -197,8 +197,8 @@ export const assets = {
   },
   societyMisfiledRegistry: {
     id: "society.misfiled-registry",
-    src: "/art/societies/misfiled-registry-crest-v1.webp",
-    alt: "错页登记处的档案蛾、钥匙孔与索引签纹章",
+    src: "/art/societies/misfiled-registry-key-crest-v2.png",
+    alt: "错页登记处的黄铜钥匙、钥匙孔与索引签纹章",
     category: "society-crest",
     status: "complete",
   },
@@ -232,7 +232,7 @@ export const assets = {
   },
   souvenirIndexMothWing: {
     id: "souvenir.index-moth-wing",
-    src: "/art/souvenirs/index-moth-wing-v1.webp",
+    src: "/art/societies/misfiled-registry-key-crest-v2.png",
     alt: "由深蓝纸与黄铜制成的错页蛾索引翅片",
     category: "souvenir",
     status: "complete",
