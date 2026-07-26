@@ -173,7 +173,9 @@ button.ghost {
 /* 报告 */
 .report-head { display: flex; align-items: baseline; gap: 12px; margin: 14px 0 8px; }
 
-.score { font-size: 40px; font-weight: 700; color: #cfe0ff; }
+.score-wrap { display: inline-flex; flex-direction: column; }
+.score { font-size: 40px; font-weight: 700; color: #cfe0ff; line-height: 1; }
+.score-label { margin-top: 4px; font-size: 10px; color: rgba(232, 227, 213, 0.5); }
 
 .grade {
   font-size: 15px;
