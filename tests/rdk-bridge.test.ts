@@ -67,7 +67,7 @@ describe("rdk-bridge 快照解析", () => {
     expect(parsed!.mock).toBe(false);
   });
 
-  it("缺席硬件字段用本地估算快照补齐并记入 degradedFields", () => {
+  it("缺席硬件字段用占位快照补齐并记入 degradedFields", () => {
     const parsed = parseSentrySnapshot(
       sentryPayload({ temperatureC: 22, humidityPct: 48, co2Ppm: null, pm25: null }),
       fallback,
@@ -134,7 +134,7 @@ describe("rdk-bridge 体动统计解析", () => {
   });
 });
 
-describe("rdk-bridge 评分叙述随数据源切换", () => {
+describe("rdk-bridge 环境回执随数据源切换", () => {
   const liveSnapshot = {
     capturedAt: new Date().toISOString(),
     source: SENSOR_SOURCE_SENTRY,
@@ -149,8 +149,9 @@ describe("rdk-bridge 评分叙述随数据源切换", () => {
     const clipReport = motionToClipReport(motion!, { host: "10.0.0.7", port: 8302 });
     const result = scoreSleepQuality(liveSnapshot, clipReport);
     expect(result.source).toBe(SENSOR_SOURCE_SENTRY);
-    expect(result.narrative).toContain("床头哨站");
     expect(result.narrative).toContain("Mini Lindo");
+    expect(result.narrative).toContain("板端");
+    expect(result.narrative).toContain("不是睡眠质量或医疗判断");
   });
 
   it("哨站快照但摄像头未上岗 → 叙述如实说明", () => {
@@ -159,10 +160,10 @@ describe("rdk-bridge 评分叙述随数据源切换", () => {
     expect(result.narrative).toContain("Mini Lindo");
   });
 
-  it("本地估算快照的叙述如实标注估算来源", () => {
+  it("演示快照明确说明不是实测或医疗判断", () => {
     const placeholder = { ...liveSnapshot, source: SENSOR_SOURCE_PLACEHOLDER };
     const result = scoreSleepQuality(placeholder);
     expect(result.source).toBe(SENSOR_SOURCE_PLACEHOLDER);
-    expect(result.narrative).toContain("本地估算");
+    expect(result.narrative).toContain("不是睡眠质量或医疗判断");
   });
 });

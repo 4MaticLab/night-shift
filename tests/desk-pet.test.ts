@@ -51,8 +51,8 @@ describe("desk-pet 值更点", () => {
   });
 });
 
-describe("desk-pet 本地估算传感器", () => {
-  it("读数始终落在合理区间并标记估算来源", () => {
+describe("desk-pet 占位传感器", () => {
+  it("读数始终落在合理区间并标记占位来源", () => {
     for (let i = 0; i < 50; i += 1) {
       const snapshot = createSensorSnapshot(Date.now() + i * 7 * 60_000);
       expect(snapshot.source).toBe(SENSOR_SOURCE_PLACEHOLDER);
@@ -81,7 +81,7 @@ describe("desk-pet 本地估算传感器", () => {
   });
 });
 
-describe("desk-pet 夜间录像本地分析 v0", () => {
+describe("desk-pet 虚空摄像头占位分析", () => {
   it("同一文件的分析结果稳定可复现", () => {
     const clip = { path: "/tmp/night-2026-07-24.mp4", sizeBytes: 128_000_000 };
     expect(analyzeVoidCameraClip(clip)).toEqual(analyzeVoidCameraClip(clip));
@@ -101,7 +101,7 @@ describe("desk-pet 夜间录像本地分析 v0", () => {
   });
 });
 
-describe("desk-pet 睡眠质量评分", () => {
+describe("desk-pet 环境参考指数", () => {
   const calmSnapshot = {
     capturedAt: new Date().toISOString(),
     source: SENSOR_SOURCE_PLACEHOLDER,
@@ -109,11 +109,11 @@ describe("desk-pet 睡眠质量评分", () => {
     airQuality: { pm25: 10, co2Ppm: 600, humidityPct: 50, label: "优" },
   };
 
-  it("环境舒适且无录像时给出高分", () => {
+  it("环境舒适且无录像时给出高参考指数并说明边界", () => {
     const result = scoreSleepQuality(calmSnapshot);
     expect(result.score).toBe(100);
-    expect(result.grade).toBe("深睡如渊");
-    expect(result.narrative).toContain("导入一段夜间录像");
+    expect(result.grade).toBe("环境舒展");
+    expect(result.narrative).toContain("不是睡眠质量或医疗判断");
   });
 
   it("恶劣环境 + 不安录像会拉低分数但不低于下限", () => {
@@ -126,6 +126,7 @@ describe("desk-pet 睡眠质量评分", () => {
     const result = scoreSleepQuality(harsh, clipReport);
     expect(result.score).toBeLessThan(60);
     expect(result.score).toBeGreaterThanOrEqual(5);
-    expect(result.narrative).toContain("翻身");
+    expect(result.narrative).toContain("演示体动事件");
+    expect(result.narrative).toContain("不是传感器实测");
   });
 });

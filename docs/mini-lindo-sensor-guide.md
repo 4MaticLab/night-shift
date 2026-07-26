@@ -70,15 +70,15 @@ ls /dev/ttyS* /dev/video*
 
 | 板端字段 | 契约位置 | 缺席时 |
 | --- | --- | --- |
-| `temperatureC` | `temperature.valueC` | 估算补齐 + 记入 `degradedFields` |
+| `temperatureC` | `temperature.valueC` | 演示值补齐 + 记入 `degradedFields` |
 | `humidityPct` | `airQuality.humidityPct` | 同上 |
 | `co2Ppm` | `airQuality.co2Ppm` | 同上 |
 | `pm25` | `airQuality.pm25` | 同上 |
 | `tvocPpb` | （暂不消费，仅板端上报） | — |
 
-温度 / CO₂ / 湿度 / PM2.5 四个字段**全部**降级时视为哨站没有任何实测价值，`parseSentrySnapshot` 返回 `null`，本轮切回本地估算引擎。UI 逐字段标注「实测 · 床头哨站 / 估算补齐」。
+温度 / CO₂ / 湿度 / PM2.5 四个字段**全部**降级时视为哨站没有任何实测价值，`parseSentrySnapshot` 返回 `null`，本轮切回有明确标记的演示数据。UI 逐字段标注「实测 · 床头哨站 / 演示值补齐」。
 
-体动一侧：`/api/v1/motion` → `parseSentryMotion` → `motionToClipReport` 映射为与导入录像同形状的 `VoidClipReport`，进入同一条睡眠报告评分管线。
+体动一侧：`/api/v1/motion` → `parseSentryMotion` → `motionToClipReport` 映射为 `VoidClipReport`，进入夜间环境回执。导入录像生成的同形状对象只用于演示界面，不解析画面，也不代表真实体动分析。
 
 ## Mock 数据形状
 
