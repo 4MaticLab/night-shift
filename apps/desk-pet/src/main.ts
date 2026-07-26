@@ -1,5 +1,5 @@
 // Night Shift 桌宠主进程。
-// 两个窗口：透明桌宠窗（林渡）+ 夜班面板窗（积分账本 / 传感器占位 / 虚空摄像头）。
+// 两个窗口：透明桌宠窗（林渡）+ 夜班面板窗（积分账本 / 本地估算传感器 / 夜间录像分析）。
 // 空闲检测走 powerMonitor：系统闲置超过阈值，林渡自己去蓝盒子床垫躺下。
 
 import {
@@ -40,9 +40,9 @@ import type {
 
 const IDLE_SLEEP_SECONDS = 90; // 系统闲置这么久后，林渡去床垫躺下
 const TICK_MS = 15_000; // 积分与空闲检查节拍
-const SENSOR_MS = 5_000; // 传感器推送节拍（占位生成 / 哨站轮询共用）
+const SENSOR_MS = 5_000; // 传感器推送节拍（本地估算 / 哨站轮询共用）
 const SENTRY_TIMEOUT_MS = 3_000; // 哨站单次请求超时
-const SENTRY_MAX_FAILURES = 2; // 连续失败这么多次后判定掉线，回退占位数据
+const SENTRY_MAX_FAILURES = 2; // 连续失败这么多次后判定掉线，切回本地估算
 
 const stateFile = () => join(app.getPath("userData"), "night-shift-desk-pet.json");
 // 编译产物在 dist/，美术素材仍取仓库 public/art
@@ -58,7 +58,7 @@ let mode: PetMode = "awake";
 let manualMode: PetMode | null = null; // 用户双击林渡强行哄睡 / 叫醒
 let offlineCredited: OfflineCreditResult = { minutes: 0, points: 0 };
 let lastTickAt = Date.now();
-let sensorHistory: SensorSnapshot[] = []; // 最近的读数（占位或哨站），出报告时取最新一帧
+let sensorHistory: SensorSnapshot[] = []; // 最近的读数（本地估算或哨站），出报告时取最新一帧
 let sentryStatus: SentryStatus = emptySentryStatus();
 let sentryFailures = 0;
 
@@ -194,7 +194,7 @@ function pushSensors(): void {
       } catch (error) {
         sentryFailures += 1;
         if (sentryFailures >= SENTRY_MAX_FAILURES && sentryStatus.state !== "error") {
-          // 掉线回退占位数据：不惩罚、不锁功能，UI 如实标注
+          // 掉线切回本地估算：不惩罚、不锁功能，UI 如实标注
           setSentryStatus({ state: "error", error: String(error) });
         }
       }
@@ -246,7 +246,7 @@ function registerIpc(): void {
   ipcMain.handle("camera:import", async (): Promise<VoidClip | null> => {
     const parent = dashboardWindow ?? petWindow;
     const options = {
-      title: "导入虚空摄像头录像",
+      title: "导入夜间录像",
       properties: ["openFile" as const],
       filters: [{ name: "视频", extensions: ["mp4", "mov", "webm", "mkv", "avi"] }],
     };

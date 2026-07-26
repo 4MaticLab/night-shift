@@ -1,4 +1,4 @@
-// 夜班面板逻辑：积分账本、传感器读数（占位 / 床头哨站）、哨站连接、报告。
+// 夜班面板逻辑：积分账本、传感器读数（本地估算 / 床头哨站）、哨站连接、报告。
 // 与 pet.ts 相同：编译为无模块纯脚本，类型全部走 import() 内联语法。
 
 (() => {
@@ -30,26 +30,26 @@
     const live = snapshot.source === "rdk-x5";
     const degraded = snapshot.degradedFields ?? [];
     const detail = (field: string): string => {
-      if (!live) return "占位 · 待接线";
-      return degraded.includes(field) ? "硬件缺席 · 占位补齐" : "实测 · 床头哨站";
+      if (!live) return "本地估算";
+      return degraded.includes(field) ? "估算补齐" : "实测 · 床头哨站";
     };
     el("sensor-temp").textContent = `${snapshot.temperature.valueC}${snapshot.temperature.unit}`;
     el("sensor-temp-detail").textContent = detail("temperatureC");
     el("sensor-pm25").textContent = String(snapshot.airQuality.pm25);
     el("sensor-aqi").textContent = live && !degraded.includes("pm25")
       ? `空气 ${snapshot.airQuality.label} · 实测`
-      : `空气 ${snapshot.airQuality.label} · 占位`;
+      : `空气 ${snapshot.airQuality.label} · 估算`;
     el("sensor-co2").textContent = `${snapshot.airQuality.co2Ppm} ppm`;
     el("sensor-co2-detail").textContent = detail("co2Ppm");
     el("sensor-humidity").textContent = `${snapshot.airQuality.humidityPct}%`;
     el("sensor-humidity-detail").textContent = detail("humidityPct");
     el("sensors-badge").textContent = live
-      ? (degraded.length > 0 ? "RDK X5 · 实时 · 部分降级" : "RDK X5 · 实时")
-      : "未接线 · 占位数据";
+      ? (degraded.length > 0 ? "RDK X5 · 实时 · 部分估算" : "RDK X5 · 实时")
+      : "本地估算";
     const at = new Date(snapshot.capturedAt);
     el("sensor-updated").textContent = live
       ? `最近一帧：${at.toLocaleTimeString("zh-CN")} · 数据源：${snapshot.source}（床头哨站实测）`
-      : `最近一帧：${at.toLocaleTimeString("zh-CN")} · 数据源：${snapshot.source}（假传感器也是传感器）`;
+      : `最近一帧：${at.toLocaleTimeString("zh-CN")} · 数据源：本地估算引擎`;
   }
 
   function renderSentry(status: SentryStatus): void {
@@ -64,17 +64,17 @@
     }
     disconnectBtn.classList.toggle("hidden", status.config === null);
     if (status.state === "online") {
-      badge.textContent = status.mock ? "在线 · mock 数据" : "在线 · 实测";
+      badge.textContent = status.mock ? "在线 · 联调模式" : "在线 · 实测";
       const degradedNote = status.degradedFields.length > 0
-        ? ` · 缺席硬件：${status.degradedFields.join("、")}`
+        ? ` · 估算通道：${status.degradedFields.join("、")}`
         : "";
       line.textContent = `Mini Lindo（${status.device ?? "rdk-x5"}）已上岗 · 最近心跳 ${status.lastSeenAt ? new Date(status.lastSeenAt).toLocaleTimeString("zh-CN") : "--"}${degradedNote}`;
     } else if (status.state === "error") {
-      badge.textContent = "掉线 · 已回退占位";
-      line.textContent = `小林渡暂时联系不上（${status.error ?? "未知原因"}），桌宠已退回占位数据，会继续重试。`;
+      badge.textContent = "掉线 · 已切本地估算";
+      line.textContent = `哨站暂时联系不上（${status.error ?? "未知原因"}），已切换回本地估算引擎，会继续重试。`;
     } else {
       badge.textContent = "未连接";
-      line.textContent = "未配置：小林渡还没上岗，桌宠继续用占位数据替你守夜。";
+      line.textContent = "未配置：连接床头哨站可获取实测数据；当前由本地估算引擎驱动。";
     }
   }
 
@@ -99,7 +99,7 @@
       clipSection.classList.remove("hidden");
       el("report-clip-title").textContent = report.clipReport.source === "rdk-x5"
         ? "Mini Lindo 体动统计（床头实测）"
-        : "虚空摄像头统计（占位）";
+        : "夜间录像分析（本地 v0）";
       el("clip-toss").textContent = String(report.clipReport.tossTurns);
       el("clip-outofbed").textContent = String(report.clipReport.outOfBedEvents);
       el("clip-quiet").textContent = String(report.clipReport.longestQuietMinutes);

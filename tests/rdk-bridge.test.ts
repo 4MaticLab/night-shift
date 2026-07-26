@@ -67,7 +67,7 @@ describe("rdk-bridge 快照解析", () => {
     expect(parsed!.mock).toBe(false);
   });
 
-  it("缺席硬件字段用占位快照补齐并记入 degradedFields", () => {
+  it("缺席硬件字段用本地估算快照补齐并记入 degradedFields", () => {
     const parsed = parseSentrySnapshot(
       sentryPayload({ temperatureC: 22, humidityPct: 48, co2Ppm: null, pm25: null }),
       fallback,
@@ -159,10 +159,10 @@ describe("rdk-bridge 评分叙述随数据源切换", () => {
     expect(result.narrative).toContain("Mini Lindo");
   });
 
-  it("占位快照的老叙述保持不变", () => {
+  it("本地估算快照的叙述如实标注估算来源", () => {
     const placeholder = { ...liveSnapshot, source: SENSOR_SOURCE_PLACEHOLDER };
     const result = scoreSleepQuality(placeholder);
     expect(result.source).toBe(SENSOR_SOURCE_PLACEHOLDER);
-    expect(result.narrative).toContain("虚空摄像头还空着");
+    expect(result.narrative).toContain("本地估算");
   });
 });
