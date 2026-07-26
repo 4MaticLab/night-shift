@@ -80,8 +80,8 @@ export function EvidenceLoupe({ src, alt, caption, className, zoom = 2.2, lensSi
             width: `${lensSize}px`,
             height: `${lensSize}px`,
             backgroundImage: `url("${src}")`,
-            backgroundSize: `${geo.backgroundSize}%`,
-            backgroundPosition: `${geo.backgroundX}% ${geo.backgroundY}%`,
+            backgroundSize: `${geo.backgroundWidth}px ${geo.backgroundHeight}px`,
+            backgroundPosition: `${geo.backgroundLeft}px ${geo.backgroundTop}px`,
           }}
         />
       )}

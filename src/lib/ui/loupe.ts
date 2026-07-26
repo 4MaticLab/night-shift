@@ -18,12 +18,14 @@ export interface LoupeGeometry {
   lensLeft: number;
   /** Top offset of the lens box relative to the framed image, in pixels. */
   lensTop: number;
-  /** Horizontal background-position for the magnified image, in percent. */
-  backgroundX: number;
-  /** Vertical background-position for the magnified image, in percent. */
-  backgroundY: number;
-  /** Background-size width for the magnified image, in percent of the lens. */
-  backgroundSize: number;
+  /** background-position-x for the magnified image, in pixels (≤ 0). */
+  backgroundLeft: number;
+  /** background-position-y for the magnified image, in pixels (≤ 0). */
+  backgroundTop: number;
+  /** background-size width in pixels: rendered frame width × zoom. */
+  backgroundWidth: number;
+  /** background-size height in pixels: rendered frame height × zoom. */
+  backgroundHeight: number;
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -36,9 +38,12 @@ function clamp(value: number, min: number, max: number): number {
 /**
  * Derive the circular loupe geometry for a pointer hovering a framed image.
  *
- * The lens is centred on the pointer but kept fully inside the frame, and the
- * magnified background is positioned so the point under the pointer stays under
- * the lens centre. Pure and deterministic so it can be unit tested without DOM.
+ * The lens is centred on the pointer but kept fully inside the frame. The
+ * background is the frame rendered at zoom × its on-screen size and offset in
+ * pixels so the image point under the pointer stays under the pointer inside
+ * the lens — sizing against the lens box instead would shrink the image
+ * whenever the frame renders wider than lensSize × zoom (issue #152).
+ * Pure and deterministic so it can be unit tested without DOM.
  */
 export function computeLoupe(input: LoupeInput): LoupeGeometry {
   const width = Math.max(1, input.width);
@@ -53,14 +58,15 @@ export function computeLoupe(input: LoupeInput): LoupeGeometry {
   const lensLeft = clamp(px - half, 0, Math.max(0, width - lensSize));
   const lensTop = clamp(py - half, 0, Math.max(0, height - lensSize));
 
-  const ratioX = clamp(px / width, 0, 1);
-  const ratioY = clamp(py / height, 0, 1);
+  const backgroundWidth = width * zoom;
+  const backgroundHeight = height * zoom;
 
   return {
     lensLeft,
     lensTop,
-    backgroundX: ratioX * 100,
-    backgroundY: ratioY * 100,
-    backgroundSize: zoom * 100,
+    backgroundLeft: clamp((px - lensLeft) - px * zoom, Math.min(0, lensSize - backgroundWidth), 0),
+    backgroundTop: clamp((py - lensTop) - py * zoom, Math.min(0, lensSize - backgroundHeight), 0),
+    backgroundWidth,
+    backgroundHeight,
   };
 }
