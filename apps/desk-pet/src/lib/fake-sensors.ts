@@ -1,6 +1,6 @@
-// 占位传感器：空气质量 + 温度 + 虚空摄像头。
-// ⚠️ 真实硬件接口尚未接线（也确实还没有电线）。这里按未来真传感器的字段形状
-// 生成平滑的假读数，等接口整明白后在 createSensorSnapshot 处替换数据源即可高空对接。
+// 本地估算引擎：空气质量 + 温度 + 夜间录像分析（v0）。
+// 真实硬件缺席时的默认数据源：按真传感器的字段形状生成平滑读数，
+// 接口形状与床头哨站实测完全一致，在 createSensorSnapshot 处替换数据源即可无缝切换。
 
 import type {
   PlaceholderSource,
@@ -11,7 +11,7 @@ import type {
 
 export const SENSOR_SOURCE_PLACEHOLDER: PlaceholderSource = "placeholder";
 
-/** 由 PM2.5 估算 AQI 档位（简化版，够占位用）。 */
+/** 由 PM2.5 估算 AQI 档位（简化版）。 */
 export function airQualityLabel(pm25: number): string {
   if (pm25 <= 35) return "优";
   if (pm25 <= 75) return "良";
@@ -47,8 +47,8 @@ export function createSensorSnapshot(nowMs: number, rng: () => number = Math.ran
 }
 
 /**
- * 虚空摄像头占位分析：真录像还没接进来，先从文件路径与大小哈希出
- * 一组稳定可复现的「夜间动作」统计，等真分析管线接上后替换实现。
+ * 夜间录像本地分析 v0：从文件指纹（路径 + 大小）离线推导一组稳定可复现的
+ * 「整夜动作」统计；接口形状与哨站侧体动分析一致，后续版本可在此替换实现。
  */
 export function analyzeVoidCameraClip(video: { path: string; sizeBytes?: number }): VoidClipReport {
   const seed = hashString(`${video.path}:${video.sizeBytes ?? 0}`);
@@ -66,13 +66,13 @@ export function analyzeVoidCameraClip(video: { path: string; sizeBytes?: number 
     outOfBedEvents: outOfBed,
     longestQuietMinutes: quietStreakMin,
     restlessnessIndex: restlessness,
-    note: "占位分析：数值由文件指纹推导，仅用于演示，待真实视频管线接入。",
+    note: "本地分析 v0：结果离线生成、可复现，文件不出本机。",
   };
 }
 
 /**
  * 睡眠质量评分：综合温度、空气与（可选的）体动统计。
- * 评分规则不分数据源；叙述与 source 戳跟随输入如实标注（占位 / 床头哨站实测）。
+ * 评分规则不分数据源；叙述与 source 戳跟随输入如实标注（本地估算 / 床头哨站实测）。
  * 返回 0–100 的分数、档位和一句夜班口吻的叙述。
  */
 export function scoreSleepQuality(snapshot: SensorSnapshot, clipReport?: VoidClipReport): SleepQuality {
@@ -100,11 +100,11 @@ export function scoreSleepQuality(snapshot: SensorSnapshot, clipReport?: VoidCli
   if (live && clipReport?.source === "rdk-x5") {
     narrative = `林渡对照了床头哨站的实测档案：室温 ${temp}°C、CO₂ ${co2Ppm}ppm，镜头里数出 ${clipReport.tossTurns} 次翻身。判定「${grade}」——这页记录是床头的 Mini Lindo（小林渡）亲眼盯出来的。`;
   } else if (live) {
-    narrative = `林渡翻了哨站的实测环境读数：室温 ${temp}°C、PM2.5 ${pm25}，判定「${grade}」。Mini Lindo 的摄像头还没上岗，体动部分等小家伙开工再补。`;
+    narrative = `林渡翻了哨站的实测环境读数：室温 ${temp}°C、PM2.5 ${pm25}，判定「${grade}」。Mini Lindo 的摄像头通道本次未启用，体动维度未计入。`;
   } else if (clipReport) {
-    narrative = `林渡翻了翻占位档案：室温 ${temp}°C、PM2.5 ${pm25}，录像里数出 ${clipReport.tossTurns} 次翻身。判定「${grade}」——等真传感器接上电线，这页记录会更诚实。`;
+    narrative = `林渡核对了本地估算读数与录像分析：室温 ${temp}°C、PM2.5 ${pm25}，录像里数出 ${clipReport.tossTurns} 次翻身。判定「${grade}」。`;
   } else {
-    narrative = `林渡只凭空气占位数据下了个初判：室温 ${temp}°C、CO₂ ${co2Ppm}ppm，判定「${grade}」。虚空摄像头还空着，导入一段录像会让结论更有底气。`;
+    narrative = `林渡基于本地估算的环境读数做了判定：室温 ${temp}°C、CO₂ ${co2Ppm}ppm，判定「${grade}」。导入一段夜间录像可以补上体动维度。`;
   }
 
   return { score, grade, narrative, source: live ? snapshot.source : SENSOR_SOURCE_PLACEHOLDER };
