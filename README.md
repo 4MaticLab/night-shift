@@ -1,4 +1,4 @@
-# ShiftX · Night Shift
+# ShiftX
 🎉 **AdventureX 2026**
 
 - 🥇 Amazon Quick × First Prize
