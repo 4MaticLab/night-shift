@@ -8,9 +8,14 @@
 
 你睡着以后，他开始工作。
 
-- 在 Night Shift 中，玩家扮演侦探林渡的助手：玩家入睡时，林渡继续探索案件；清醒时，玩家整理证据、分析推理，并定下今晚的调查方向。
-- 配套开源原型 **Mini Lindo** 包含桌宠、RDK X5 床头环境哨站与 Home Assistant 空间桥，让现实空间以可选、克制的方式回应夜班。
-- ShiftX 旨在为「休息」带来更多趣味。产品定位见 [产品概览](docs/product-overview.md)，设计见 [北极星](docs/north-star.md)。
+在 Night Shift 中，玩家扮演侦探林渡
+- 玩家入睡时，林渡继续探索案件
+- 清醒时，玩家整理证据、分析推理，并定下今晚的调查方向。
+
+配套开源原型 **Mini Lindo**自动监听睡眠数据并调整睡眠环境：[mini-lindo-sensor](https://github.com/4MaticLab/night-shift/blob/main/docs/mini-lindo-sensor-guide.md)
+- 包含桌宠、RDK X5 床头环境与 Home Assistant 空间桥，让现实空间可以回应夜班。
+- 收藏品 Mint：[collection](https://www.shiftx.top/game/collection)
+- NFT 测试网合约：`0x4016a9165f655618055c8bbd2f992FB20895288C`
 
 欢迎大家来伦敦当侦探并睡个好觉~！
 
@@ -19,8 +24,9 @@
 
 - 维多利亚风格与 COC 结合
 - 引入工业设备的立体模型
-- 玩家可以将游戏中的藏品放于 Injective 区块链上。
+- 玩家可以将游戏中的藏品放于 Injective 区块链上
 - 视觉规则与生成提示词见 [美术方向](docs/art-direction.md)。
+- ShiftX 旨在为「休息」带来更多趣味。产品定位见 [概览](docs/product-overview.md)，设计见 [北极星](docs/north-star.md)。
 
 ## 硬件
 
