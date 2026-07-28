@@ -113,6 +113,7 @@ ShiftX 的初版开发由 Agent 持续运行 12 小时自动完成，并在后�
 - 视觉规则见 [美术方向](docs/art-direction.md)，主视觉与生成提示词见 `docs/art-prompts/`。
 
 Hackathon roadshow：
+
 <img src="src/png/give.jpg" alt="AdventureX 2026 现场纪念快照" width="70%" />
 
 
