@@ -15595,7 +15595,7 @@ blockquote {
    ============================================================ */
 
 .report-wrap.newspaper {
-  padding: clamp(26px, 5vw, 64px) clamp(10px, 3vw, 40px) 110px;
+  padding: calc(var(--chrome-clearance) + clamp(12px, 2vw, 28px)) clamp(10px, 3vw, 40px) 110px;
   background:
     radial-gradient(120% 90% at 50% 0%, #16223b 0, #101827 46%, #0a101d 100%);
 }
